@@ -43,6 +43,7 @@ test("MatchesScreenView renders contextual CTA for editable pending matches", ()
       items: [buildMatchSummary()],
       onFilterSelect: () => undefined,
       onOpenMatch: () => undefined,
+      onOpenQuickPredict: () => undefined,
       onRetry: () => undefined
     })
   );
@@ -67,6 +68,7 @@ test("MatchesScreenView renders saved editable CTA and prediction summary", () =
       ],
       onFilterSelect: () => undefined,
       onOpenMatch: () => undefined,
+      onOpenQuickPredict: () => undefined,
       onRetry: () => undefined
     })
   );
@@ -84,9 +86,10 @@ test("MatchesScreenView renders empty state when filter has no results", () => {
       items: [],
       onFilterSelect: () => undefined,
       onOpenMatch: () => undefined,
+      onOpenQuickPredict: () => undefined,
       onRetry: () => undefined
     })
   );
 
-  assert.match(html, /No hay partidos para este filtro/);
+  assert.match(html, /No encontramos cruces para este filtro/);
 });

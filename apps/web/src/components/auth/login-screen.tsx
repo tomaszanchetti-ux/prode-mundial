@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { APP_ROUTES, SUPPORT_LINKS } from "@prode/shared";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Card } from "@prode/ui";
+import { Button, Card, colors, radii, spacing, typography } from "@prode/ui";
 import { useAuth } from "./auth-provider";
 
 export function resolveNextRoute(next: string | null, profileCompleted: boolean | undefined) {
@@ -55,77 +55,160 @@ export function LoginScreenView({
   const helperTone = resolveHelperTone(helperMessage && !helperMessage.includes("Te enviamos") ? helperMessage : null, helperMessage);
 
   return (
-    <main style={{ maxWidth: 520, margin: "0 auto", padding: "40px 20px 56px", display: "grid", gap: 16 }}>
-      <Card>
-        <h1 style={{ marginTop: 0 }}>Entrar para jugar</h1>
-        <p style={{ marginBottom: 12 }}>
-          Inicia con Google o recibe un magic link para entrar directo al área autenticada del MVP.
-        </p>
+    <main style={{ maxWidth: 1080, margin: "0 auto", padding: "24px 16px 56px", display: "grid", gap: spacing[16] }}>
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: spacing[12] }}>
+        <div style={{ display: "grid", gap: 4 }}>
+          <strong style={{ fontSize: 20, lineHeight: 1, color: colors.textPrimary, letterSpacing: "-0.02em" }}>Prode Mundial</strong>
+          <span style={{ ...typography.small, color: colors.textMuted }}>Vuelve rapido al proximo partido</span>
+        </div>
+        <Link href="/" style={{ color: colors.textSecondary, textDecoration: "none", fontWeight: 600 }}>
+          Volver
+        </Link>
+      </header>
 
-        {!isConfigured ? (
-          <p style={{ margin: 0, color: "#8a1c1c" }}>
-            Firebase no está configurado todavía en este entorno. Completa las variables `NEXT_PUBLIC_FIREBASE_*`.
-          </p>
-        ) : null}
+      <section style={{ display: "grid", gap: spacing[16], gridTemplateColumns: "1.1fr 0.9fr" }}>
+        <Card
+          elevated
+          style={{
+            gap: spacing[16],
+            padding: spacing[24],
+            background:
+              "radial-gradient(circle at top right, rgba(47, 107, 255, 0.18), transparent 30%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(7, 17, 31, 0.98) 100%)"
+          }}
+        >
+          <span style={{ ...typography.small, color: colors.primary500 }}>ENTRA Y JUEGA</span>
+          <div style={{ display: "grid", gap: spacing[12] }}>
+            <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>Tu proximo partido te esta esperando</h1>
+            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 520 }}>
+              Entra con Google o por magic link, guarda tu prediccion en segundos y vuelve a seguir tus puntos y tus ligas.
+            </p>
+          </div>
 
-        <div style={{ display: "grid", gap: 12 }}>
-          <button
-            type="button"
-            onClick={onGoogleLogin}
-            disabled={!isConfigured || isSubmitting}
-            style={{ padding: "14px 16px", borderRadius: 999, border: 0, background: "#102a13", color: "#f6f5ef" }}
-          >
-            {isSubmitting ? "Conectando..." : "Continuar con Google"}
-          </button>
-
-          <form onSubmit={onSendMagicLink} style={{ display: "grid", gap: 12 }}>
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => onEmailChange(event.target.value)}
-              placeholder="tu@email.com"
-              required
-              style={{ padding: 12, borderRadius: 12, border: "1px solid #c9cfbf" }}
-            />
-            <button
-              type="submit"
-              disabled={!isConfigured || isSubmitting}
-              style={{ padding: "14px 16px", borderRadius: 999, border: "1px solid #c9cfbf", background: "#fffdf7" }}
-            >
-              {isSubmitting ? "Enviando..." : "Enviar magic link"}
-            </button>
-          </form>
-
-          {isEmailLink ? (
-            <button
-              type="button"
-              onClick={onCompleteMagicLink}
-              disabled={!isConfigured || isSubmitting}
+          <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))" }}>
+            <div
               style={{
-                padding: "14px 16px",
-                borderRadius: 16,
-                border: "1px dashed #335c3d",
-                background: "#eef5e6",
-                color: "#102a13",
-                fontWeight: 700
+                padding: spacing[16],
+                borderRadius: radii.lg,
+                background: "rgba(255, 255, 255, 0.04)",
+                border: `1px solid ${colors.border}`
               }}
             >
-              Completar ingreso con este magic link
-            </button>
+              <span style={{ ...typography.small, color: colors.textMuted }}>1</span>
+              <p style={{ margin: "8px 0 0", color: colors.textPrimary, fontWeight: 600 }}>Entras</p>
+              <p style={{ margin: "6px 0 0", color: colors.textSecondary, fontSize: 14, lineHeight: 1.4 }}>Con Google o desde tu email.</p>
+            </div>
+            <div
+              style={{
+                padding: spacing[16],
+                borderRadius: radii.lg,
+                background: "rgba(255, 255, 255, 0.04)",
+                border: `1px solid ${colors.border}`
+              }}
+            >
+              <span style={{ ...typography.small, color: colors.textMuted }}>2</span>
+              <p style={{ margin: "8px 0 0", color: colors.textPrimary, fontWeight: 600 }}>Predices</p>
+              <p style={{ margin: "6px 0 0", color: colors.textSecondary, fontSize: 14, lineHeight: 1.4 }}>Siempre hasta el kickoff exacto.</p>
+            </div>
+            <div
+              style={{
+                padding: spacing[16],
+                borderRadius: radii.lg,
+                background: "rgba(255, 255, 255, 0.04)",
+                border: `1px solid ${colors.border}`
+              }}
+            >
+              <span style={{ ...typography.small, color: colors.textMuted }}>3</span>
+              <p style={{ margin: "8px 0 0", color: colors.textPrimary, fontWeight: 600 }}>Compites</p>
+              <p style={{ margin: "6px 0 0", color: colors.textSecondary, fontSize: 14, lineHeight: 1.4 }}>Tus ligas concentran toda la tension.</p>
+            </div>
+          </div>
+        </Card>
+
+        <Card elevated style={{ gap: spacing[16], padding: spacing[24] }}>
+          <div style={{ display: "grid", gap: spacing[8] }}>
+            <span style={{ ...typography.small, color: colors.textMuted }}>ACCESO</span>
+            <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Entra para seguir jugando</h2>
+            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+              Elige la forma mas rapida para volver a tu home de partidos y ligas.
+            </p>
+          </div>
+
+          {!isConfigured ? (
+            <div
+              style={{
+                padding: spacing[16],
+                borderRadius: radii.md,
+                background: "rgba(220, 38, 38, 0.08)",
+                border: "1px solid rgba(220, 38, 38, 0.18)",
+                color: "#F5B4B4",
+                fontSize: 14,
+                lineHeight: 1.45
+              }}
+            >
+              Firebase no está configurado todavía en este entorno. Completa las variables `NEXT_PUBLIC_FIREBASE_*`.
+            </div>
           ) : null}
-        </div>
 
-        {helperMessage ? <p style={{ marginBottom: 0, color: helperTone === "success" ? "#335c3d" : "#8a1c1c" }}>{helperMessage}</p> : null}
-      </Card>
+          <div style={{ display: "grid", gap: spacing[12] }}>
+            <Button onClick={onGoogleLogin} disabled={!isConfigured || isSubmitting}>
+              {isSubmitting ? "Conectando..." : "Continuar con Google"}
+            </Button>
 
-      <Card>
-        <p style={{ marginTop: 0, marginBottom: 8 }}>Tu sesión se persiste al refrescar y el backend valida el bearer token Firebase.</p>
-        <p style={{ margin: 0, color: "#5f6657" }}>Si tu perfil sigue incompleto después del login, te llevamos directo a `/profile`.</p>
-      </Card>
+            <form onSubmit={onSendMagicLink} style={{ display: "grid", gap: spacing[12] }}>
+              <label style={{ display: "grid", gap: spacing[8] }}>
+                <span style={{ ...typography.small, color: colors.textSecondary }}>Tu email</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => onEmailChange(event.target.value)}
+                  placeholder="tu@email.com"
+                  required
+                  style={{
+                    minHeight: 52,
+                    borderRadius: radii.md,
+                    border: `1px solid ${colors.border}`,
+                    background: colors.bgMuted,
+                    color: colors.textPrimary,
+                    padding: "0 14px",
+                    fontSize: 16,
+                    outline: "none"
+                  }}
+                />
+              </label>
+              <Button type="submit" variant="secondary" disabled={!isConfigured || isSubmitting}>
+                {isSubmitting ? "Enviando..." : "Enviar magic link"}
+              </Button>
+            </form>
+
+            {isEmailLink ? (
+              <Button variant="ghost" onClick={onCompleteMagicLink} disabled={!isConfigured || isSubmitting}>
+                Completar ingreso con este magic link
+              </Button>
+            ) : null}
+          </div>
+
+          {helperMessage ? (
+            <div
+              style={{
+                padding: 14,
+                borderRadius: radii.md,
+                background: helperTone === "success" ? "rgba(34, 197, 94, 0.1)" : "rgba(220, 38, 38, 0.08)",
+                border:
+                  helperTone === "success" ? "1px solid rgba(34, 197, 94, 0.18)" : "1px solid rgba(220, 38, 38, 0.18)",
+                color: helperTone === "success" ? "#9BE5B6" : "#F5B4B4",
+                fontSize: 14,
+                lineHeight: 1.45
+              }}
+            >
+              {helperMessage}
+            </div>
+          ) : null}
+        </Card>
+      </section>
 
       <footer style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
         {SUPPORT_LINKS.map((link) => (
-          <Link key={link.href} href={link.href} style={{ color: "#335c3d", fontWeight: 600 }}>
+          <Link key={link.href} href={link.href} style={{ color: colors.textSecondary, fontWeight: 600, textDecoration: "none" }}>
             {link.label}
           </Link>
         ))}

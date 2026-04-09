@@ -1,20 +1,24 @@
 import type { CSSProperties } from "react";
 
 export const colors = {
-  primary500: "#D94A39",
-  primary700: "#9F2C28",
-  success500: "#3BAA6A",
-  error500: "#D1495B",
-  warning500: "#C8A85D",
-  bgMain: "#07131F",
-  bgSurface: "#0D1B2A",
-  bgElevated: "#14263A",
-  border: "#22384C",
-  borderStrong: "#36546D",
-  textPrimary: "#F7F1E8",
-  textSecondary: "#B8C7D6",
-  textMuted: "#8FA4B7",
-  overlay: "rgba(3, 10, 18, 0.82)"
+  primary500: "#2F6BFF",
+  primary600: "#2557D6",
+  primarySoft: "rgba(47, 107, 255, 0.16)",
+  success500: "#22C55E",
+  error500: "#DC2626",
+  warning500: "#F59E0B",
+  gold500: "#E7C66A",
+  goldSoft: "rgba(231, 198, 106, 0.16)",
+  bgMain: "#07111F",
+  bgSurface: "#0E1A2B",
+  bgElevated: "#101D31",
+  bgMuted: "#12243C",
+  border: "rgba(148, 163, 184, 0.18)",
+  borderStrong: "rgba(148, 163, 184, 0.3)",
+  textPrimary: "#F8FAFC",
+  textSecondary: "#B6C2D1",
+  textMuted: "#8FA0B5",
+  overlay: "rgba(2, 8, 18, 0.78)"
 } as const;
 
 export const spacing = {
@@ -29,43 +33,47 @@ export const spacing = {
 
 export const radii = {
   sm: 6,
-  md: 10,
-  lg: 14,
+  md: 14,
+  lg: 20,
   xl: 24,
   pill: 999
 } as const;
 
 export const typography = {
   h1: {
-    fontSize: 24,
+    fontSize: 34,
     fontWeight: 700,
-    lineHeight: 1.15
+    lineHeight: 1.05,
+    letterSpacing: "-0.03em"
   },
   h2: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 600,
-    lineHeight: 1.2
+    lineHeight: 1.1,
+    letterSpacing: "-0.02em"
   },
   h3: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 600,
-    lineHeight: 1.25
+    lineHeight: 1.15,
+    letterSpacing: "-0.02em"
   },
   body: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 400,
-    lineHeight: 1.45
+    lineHeight: 1.5
   },
   small: {
     fontSize: 12,
-    fontWeight: 400,
-    lineHeight: 1.4
+    fontWeight: 600,
+    lineHeight: 1.35,
+    letterSpacing: "0.06em"
   }
 } as const;
 
 export const shadows = {
-  card: "0 22px 54px rgba(1, 8, 16, 0.34)",
-  modal: "0 36px 88px rgba(1, 8, 16, 0.48)"
+  card: "0 18px 48px rgba(2, 8, 18, 0.28)",
+  modal: "0 36px 88px rgba(2, 8, 18, 0.42)"
 } as const;
 
 export const uiTheme = {
@@ -81,7 +89,7 @@ export const appBackgroundStyle: CSSProperties = {
   minHeight: "100vh",
   fontFamily: "Inter, system-ui, sans-serif",
   background:
-    "radial-gradient(circle at top left, rgba(201, 82, 56, 0.24), transparent 24%), radial-gradient(circle at top right, rgba(200, 168, 93, 0.18), transparent 22%), linear-gradient(180deg, #07131f 0%, #0c1c2d 44%, #08131d 100%)",
+    "radial-gradient(circle at top left, rgba(47, 107, 255, 0.18), transparent 26%), radial-gradient(circle at top right, rgba(231, 198, 106, 0.08), transparent 18%), linear-gradient(180deg, #07111F 0%, #091526 42%, #07101B 100%)",
   color: colors.textPrimary
 };
 

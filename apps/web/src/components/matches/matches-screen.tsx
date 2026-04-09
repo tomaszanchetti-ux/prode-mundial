@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { ListMatchesQuery, MatchStage, MatchSummary } from "@prode/shared";
 import { Button, Card, MatchCard, colors, radii, spacing, typography } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
+import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getMatches } from "@/lib/api/client";
 
 type FilterChip = {
@@ -21,18 +22,20 @@ type MatchesScreenViewProps = {
   items: MatchSummary[];
   onFilterSelect: (key: string) => void;
   onOpenMatch: (matchId: string) => void;
+  onOpenQuickPredict: (matchId: string) => void;
   onRetry: () => void;
 };
 
 const filterChips: FilterChip[] = [
-  { key: "all", label: "Todos", query: {} },
   { key: "today", label: "Hoy", query: { filter: "today" } },
+  { key: "pending", label: "Pendientes", query: { filter: "upcoming" } },
   { key: "upcoming", label: "Proximos", query: { filter: "upcoming" } },
   { key: "group", label: "Grupos", query: { stage: "group" } },
   { key: "R32", label: "Octavos", query: { stage: "R32" } },
   { key: "QF", label: "Cuartos", query: { stage: "QF" } },
   { key: "SF", label: "Semis", query: { stage: "SF" } },
-  { key: "FINAL", label: "Final", query: { stage: "FINAL" } }
+  { key: "FINAL", label: "Final", query: { stage: "FINAL" } },
+  { key: "all", label: "Todos", query: {} }
 ];
 
 function toLocalKickoffLabel(iso: string) {
@@ -90,7 +93,7 @@ function toStatusLabel(match: MatchSummary) {
   }
 
   if (!match.isEditable) {
-    return "Bloqueado";
+    return "Cerrado";
   }
 
   if (match.predictionStatus === "saved_editable") {
@@ -102,34 +105,62 @@ function toStatusLabel(match: MatchSummary) {
 
 function summarizeActiveFilter(query: ListMatchesQuery) {
   if (query.filter === "today") {
-    return "Partidos que juegan hoy.";
+    return "Tus partidos de hoy, listos para resolver rapido.";
   }
 
   if (query.filter === "upcoming") {
-    return "Partidos abiertos que vienen en el calendario.";
+    return "Los siguientes cruces abiertos para predecir o editar.";
   }
 
   if (query.stage === "group") {
-    return "Vista enfocada en fase de grupos.";
+    return "Todo lo que sigue vivo en fase de grupos.";
   }
 
   if (query.stage === "R32") {
-    return "Cruces de octavos listos para escanear.";
+    return "Cruces directos listos para escanear.";
   }
 
   if (query.stage === "QF") {
-    return "Partidos de cuartos de final.";
+    return "Cuartos con foco total en cada llave.";
   }
 
   if (query.stage === "SF") {
-    return "Semifinales del torneo.";
+    return "Semifinales para ajustar lo importante.";
   }
 
   if (query.stage === "FINAL") {
-    return "La definición del Mundial.";
+    return "La definicion del torneo en una sola vista.";
   }
 
-  return "Todos los partidos disponibles para tu usuario.";
+  return "Todos tus partidos disponibles en una sola pasada.";
+}
+
+function toPredictionCopy(match: MatchSummary) {
+  if (match.predictionStatus === "scored") {
+    return match.userPredictionSummary ? `Tu prediccion: ${match.userPredictionSummary}` : "Partido puntuado";
+  }
+
+  if (!match.userPredictionSummary) {
+    return "Aun no predijiste este partido";
+  }
+
+  return `Tu prediccion: ${match.userPredictionSummary}`;
+}
+
+function toResultCopy(match: MatchSummary) {
+  if (match.predictionStatus === "scored") {
+    return "Abre el detalle para ver resultado y puntos.";
+  }
+
+  if (!match.isEditable) {
+    return "Prediccion cerrada. Solo queda seguir el partido.";
+  }
+
+  return `Deadline exacto: ${toLocalKickoffLabel(match.deadlineAt)}`;
+}
+
+function pickQuickMatch(matches: MatchSummary[]) {
+  return matches.find((match) => match.isEditable && match.predictionStatus === "empty") ?? matches.find((match) => match.isEditable) ?? null;
 }
 
 export function MatchesScreenView({
@@ -139,38 +170,44 @@ export function MatchesScreenView({
   items,
   onFilterSelect,
   onOpenMatch,
+  onOpenQuickPredict,
   onRetry
 }: MatchesScreenViewProps) {
   const activeFilter = filterChips.find((chip) => chip.key === activeFilterKey) ?? filterChips[0];
+  const quickMatch = pickQuickMatch(items);
 
   return (
-    <div style={{ display: "grid", gap: spacing[20] }}>
-      <Card
-        elevated
-        style={{
-          gap: spacing[16],
-          background:
-            "linear-gradient(135deg, rgba(20, 38, 58, 0.96) 0%, rgba(11, 24, 37, 0.98) 56%, rgba(159, 44, 40, 0.3) 100%)"
-        }}
-      >
+    <div style={{ display: "grid", gap: spacing[16] }}>
+      <div style={{ display: "grid", gap: spacing[12] }}>
         <div style={{ display: "grid", gap: spacing[8] }}>
-          <span
-            style={{
-              ...typography.small,
-              color: colors.warning500,
-              textTransform: "uppercase",
-              letterSpacing: "0.12em"
-            }}
-          >
-            Matchday Center
-          </span>
           <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>Partidos</h1>
-          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 720 }}>
+          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 560 }}>
             {summarizeActiveFilter(activeFilter.query)}
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: spacing[8], overflowX: "auto", paddingBottom: 4 }}>
+        {quickMatch ? (
+          <Card
+            elevated
+            style={{
+              gap: spacing[12],
+              padding: spacing[16],
+              background:
+                "radial-gradient(circle at top right, rgba(47, 107, 255, 0.16), transparent 28%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
+            }}
+          >
+            <span style={{ ...typography.small, color: colors.primary500 }}>TU PROXIMO PENDIENTE</span>
+            <strong style={{ fontSize: 22, lineHeight: 1.1, color: colors.textPrimary }}>
+              {quickMatch.homeTeam.name} vs {quickMatch.awayTeam.name}
+            </strong>
+            <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{toLocalKickoffLabel(quickMatch.kickoffAt)}</span>
+            <Button onClick={() => onOpenQuickPredict(quickMatch.matchId)}>
+              {quickMatch.userPredictionSummary ? "Editar prediccion" : "Predecir ahora"}
+            </Button>
+          </Card>
+        ) : null}
+
+        <div style={{ display: "flex", gap: spacing[8], overflowX: "auto", paddingBottom: 2 }}>
           {filterChips.map((chip) => {
             const isActive = chip.key === activeFilter.key;
 
@@ -180,13 +217,13 @@ export function MatchesScreenView({
                 type="button"
                 onClick={() => onFilterSelect(chip.key)}
                 style={{
-                  minHeight: 38,
+                  minHeight: 34,
                   borderRadius: radii.pill,
-                  border: `1px solid ${isActive ? "rgba(200, 168, 93, 0.36)" : colors.border}`,
-                  background: isActive ? "rgba(200, 168, 93, 0.14)" : "rgba(7, 19, 31, 0.72)",
-                  color: isActive ? "#F3D998" : colors.textSecondary,
-                  padding: "0 14px",
-                  fontSize: typography.small.fontSize,
+                  border: isActive ? "1px solid rgba(47, 107, 255, 0.26)" : `1px solid ${colors.border}`,
+                  background: isActive ? colors.primarySoft : "rgba(255, 255, 255, 0.02)",
+                  color: isActive ? colors.textPrimary : colors.textSecondary,
+                  padding: "0 12px",
+                  fontSize: 13,
                   fontWeight: 600,
                   whiteSpace: "nowrap",
                   cursor: "pointer"
@@ -197,12 +234,12 @@ export function MatchesScreenView({
             );
           })}
         </div>
-      </Card>
+      </div>
 
       {errorMessage ? (
-        <Card elevated style={{ gap: spacing[8], borderColor: "rgba(209, 73, 91, 0.4)" }}>
-          <strong style={{ ...typography.body, color: colors.textPrimary }}>No pudimos cargar los partidos</strong>
-          <p style={{ ...typography.body, margin: 0, color: "#F2B1BA" }}>{errorMessage}</p>
+        <Card elevated style={{ gap: spacing[8], borderColor: "rgba(220, 38, 38, 0.24)" }}>
+          <strong style={{ fontSize: 16, color: colors.textPrimary }}>No pudimos cargar los partidos</strong>
+          <p style={{ ...typography.body, margin: 0, color: "#F5B4B4" }}>{errorMessage}</p>
           <Button variant="secondary" onClick={onRetry}>
             Reintentar
           </Button>
@@ -210,13 +247,13 @@ export function MatchesScreenView({
       ) : null}
 
       {isLoading ? (
-        <section style={{ display: "grid", gap: spacing[16] }}>
+        <section style={{ display: "grid", gap: 14 }}>
           {Array.from({ length: 3 }).map((_, index) => (
-            <Card key={index} elevated style={{ minHeight: 188, opacity: 0.72 }}>
+            <Card key={index} elevated style={{ minHeight: 176, opacity: 0.72 }}>
               <div style={{ display: "grid", gap: spacing[12] }}>
-                <div style={{ width: 96, height: 10, borderRadius: radii.pill, background: "rgba(143, 164, 183, 0.18)" }} />
-                <div style={{ width: "58%", height: 14, borderRadius: radii.pill, background: "rgba(143, 164, 183, 0.16)" }} />
-                <div style={{ width: "100%", height: 80, borderRadius: radii.md, background: "rgba(7, 19, 31, 0.7)" }} />
+                <div style={{ width: 88, height: 10, borderRadius: radii.pill, background: "rgba(148, 163, 184, 0.16)" }} />
+                <div style={{ width: "54%", height: 12, borderRadius: radii.pill, background: "rgba(148, 163, 184, 0.16)" }} />
+                <div style={{ width: "100%", height: 84, borderRadius: radii.md, background: "rgba(255, 255, 255, 0.03)" }} />
               </div>
             </Card>
           ))}
@@ -225,25 +262,16 @@ export function MatchesScreenView({
 
       {!isLoading && !errorMessage && items.length === 0 ? (
         <Card elevated style={{ gap: spacing[8], textAlign: "center", justifyItems: "center", padding: spacing[24] }}>
-          <span
-            style={{
-              ...typography.small,
-              color: colors.warning500,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em"
-            }}
-          >
-            Sin resultados
-          </span>
-          <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>No hay partidos para este filtro</h2>
+          <span style={{ ...typography.small, color: colors.textMuted }}>SIN PARTIDOS</span>
+          <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>No encontramos cruces para este filtro</h2>
           <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 420 }}>
-            Cambiá de vista para seguir encontrando pendientes o revisar otras fases del torneo.
+            Cambia de vista para seguir avanzando o revisar otra fase del torneo.
           </p>
         </Card>
       ) : null}
 
       {!isLoading && items.length > 0 ? (
-        <section style={{ display: "grid", gap: spacing[16] }}>
+        <section style={{ display: "grid", gap: 14 }}>
           {items.map((match) => (
             <MatchCard
               key={match.matchId}
@@ -258,7 +286,8 @@ export function MatchesScreenView({
               }}
               kickoffLabel={toLocalKickoffLabel(match.kickoffAt)}
               onAction={() => onOpenMatch(match.matchId)}
-              predictionSummary={match.userPredictionSummary ?? undefined}
+              predictionSummary={toPredictionCopy(match)}
+              resultSummary={toResultCopy(match)}
               stageLabel={toStageLabel(match.stage, match.groupId)}
               status={toCardTone(match)}
               statusLabel={toStatusLabel(match)}
@@ -273,11 +302,13 @@ export function MatchesScreenView({
 export function MatchesScreen() {
   const router = useRouter();
   const { status, user } = useAuth();
-  const [activeFilterKey, setActiveFilterKey] = useState<string>("all");
+  const [activeFilterKey, setActiveFilterKey] = useState<string>("pending");
   const [items, setItems] = useState<MatchSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
+  const [dismissedCycle, setDismissedCycle] = useState(false);
 
   const activeFilter = useMemo(() => filterChips.find((chip) => chip.key === activeFilterKey) ?? filterChips[0], [activeFilterKey]);
 
@@ -330,15 +361,48 @@ export function MatchesScreen() {
     };
   }, [activeFilter, reloadKey, status, user]);
 
+  const quickMatch = useMemo(() => pickQuickMatch(items), [items]);
+
+  useEffect(() => {
+    if (isLoading || dismissedCycle || activeMatchId || !quickMatch) {
+      return;
+    }
+
+    setActiveMatchId(quickMatch.matchId);
+  }, [activeMatchId, dismissedCycle, isLoading, quickMatch]);
+
   return (
-    <MatchesScreenView
-      activeFilterKey={activeFilterKey}
-      errorMessage={errorMessage}
-      isLoading={isLoading}
-      items={items}
-      onFilterSelect={setActiveFilterKey}
-      onOpenMatch={(matchId) => router.push(`/matches/${matchId}`)}
-      onRetry={() => setReloadKey((current) => current + 1)}
-    />
+    <>
+      <MatchesScreenView
+        activeFilterKey={activeFilterKey}
+        errorMessage={errorMessage}
+        isLoading={isLoading}
+        items={items}
+        onFilterSelect={(nextKey) => {
+          setDismissedCycle(false);
+          setActiveFilterKey(nextKey);
+        }}
+        onOpenMatch={(matchId) => router.push(`/matches/${matchId}`)}
+        onOpenQuickPredict={(matchId) => {
+          setDismissedCycle(false);
+          setActiveMatchId(matchId);
+        }}
+        onRetry={() => setReloadKey((current) => current + 1)}
+      />
+
+      <QuickPredictionModal
+        matchId={activeMatchId}
+        isOpen={activeMatchId !== null}
+        onClose={() => {
+          setActiveMatchId(null);
+          setDismissedCycle(true);
+        }}
+        onSaved={() => {
+          setActiveMatchId(null);
+          setDismissedCycle(false);
+          setReloadKey((current) => current + 1);
+        }}
+      />
+    </>
   );
 }

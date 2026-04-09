@@ -1,9 +1,17 @@
 import Link from "next/link";
 import { DEFAULT_PUBLIC_BOOTSTRAP, SUPPORT_LINKS } from "@prode/shared";
-import { Card } from "@prode/ui";
+import { Card, colors, radii, spacing, typography } from "@prode/ui";
 import { getPublicBootstrap } from "@/lib/api/client";
 
 export const dynamic = "force-dynamic";
+
+const publicPageStyle = {
+  maxWidth: 1120,
+  margin: "0 auto",
+  padding: "24px 16px 56px",
+  display: "grid",
+  gap: 18
+} as const;
 
 export default async function LandingPage() {
   const bootstrap = await getPublicBootstrap().catch((error) => {
@@ -18,38 +26,111 @@ export default async function LandingPage() {
   });
 
   return (
-    <main style={{ maxWidth: 960, margin: "0 auto", padding: "40px 20px 56px", display: "grid", gap: 20 }}>
+    <main style={publicPageStyle}>
+      <header
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          padding: "6px 2px"
+        }}
+      >
+        <div style={{ display: "grid", gap: 4 }}>
+          <strong style={{ fontSize: 20, lineHeight: 1, color: colors.textPrimary, letterSpacing: "-0.02em" }}>Prode Mundial</strong>
+          <span style={{ ...typography.small, color: colors.textMuted }}>Predice rapido. Compite mejor.</span>
+        </div>
+        <Link
+          href="/login"
+          style={{
+            minHeight: 44,
+            padding: "0 16px",
+            borderRadius: radii.pill,
+            display: "inline-flex",
+            alignItems: "center",
+            textDecoration: "none",
+            background: colors.primary500,
+            color: colors.textPrimary,
+            fontWeight: 700,
+            boxShadow: "0 10px 24px rgba(47, 107, 255, 0.24)"
+          }}
+        >
+          Entrar
+        </Link>
+      </header>
+
       <section
         style={{
           display: "grid",
-          gap: 18,
-          padding: 28,
+          gap: spacing[16],
+          padding: spacing[24],
           borderRadius: 28,
-          background: "linear-gradient(135deg, #102a13 0%, #1d4d2c 100%)",
-          color: "#f6f5ef",
-          boxShadow: "0 24px 64px rgba(16, 42, 19, 0.18)"
+          background:
+            "radial-gradient(circle at top right, rgba(47, 107, 255, 0.2), transparent 30%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(7, 17, 31, 0.98) 100%)",
+          border: `1px solid ${colors.border}`,
+          boxShadow: "0 26px 68px rgba(2, 8, 18, 0.3)"
         }}
       >
-        <div style={{ display: "grid", gap: 10 }}>
-          <span style={{ letterSpacing: "0.08em", textTransform: "uppercase", fontSize: 12 }}>
-            Mobile-first. League-first.
-          </span>
-          <h1 style={{ margin: 0, fontSize: "clamp(2.4rem, 7vw, 4.5rem)", lineHeight: 0.95 }}>
+        <div style={{ display: "grid", gap: spacing[12] }}>
+          <span style={{ ...typography.small, color: colors.primary500 }}>MUNDIAL 2026</span>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "clamp(3rem, 9vw, 5.8rem)",
+              lineHeight: 0.92,
+              letterSpacing: "-0.05em",
+              color: colors.textPrimary,
+              maxWidth: 760
+            }}
+          >
             {bootstrap.productName}
           </h1>
-          <p style={{ margin: 0, maxWidth: 620, fontSize: 20, lineHeight: 1.4 }}>{bootstrap.tagline}</p>
+          <p style={{ margin: 0, maxWidth: 620, fontSize: 20, lineHeight: 1.45, color: colors.textSecondary }}>{bootstrap.tagline}</p>
         </div>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+        <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
+          <div
+            style={{
+              padding: spacing[16],
+              borderRadius: radii.lg,
+              background: "rgba(255, 255, 255, 0.04)",
+              border: `1px solid ${colors.border}`
+            }}
+          >
+            <span style={{ ...typography.small, color: colors.textMuted }}>LOOP</span>
+            <p style={{ margin: "8px 0 0", fontSize: 18, lineHeight: 1.3, color: colors.textPrimary, fontWeight: 600 }}>
+              Entra, predice tu proximo partido y vuelve por puntos.
+            </p>
+          </div>
+          <div
+            style={{
+              padding: spacing[16],
+              borderRadius: radii.lg,
+              background: "rgba(255, 255, 255, 0.04)",
+              border: `1px solid ${colors.border}`
+            }}
+          >
+            <span style={{ ...typography.small, color: colors.textMuted }}>COMPETENCIA</span>
+            <p style={{ margin: "8px 0 0", fontSize: 18, lineHeight: 1.3, color: colors.textPrimary, fontWeight: 600 }}>
+              Todo gira alrededor de tus ligas, no de un ranking global.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
           <Link
             href="/login"
             style={{
-              padding: "14px 20px",
-              borderRadius: 999,
-              background: "#ffd166",
-              color: "#102a13",
+              minHeight: 52,
+              padding: "0 18px",
+              borderRadius: 16,
+              display: "inline-flex",
+              alignItems: "center",
               textDecoration: "none",
-              fontWeight: 700
+              background: colors.primary500,
+              color: colors.textPrimary,
+              fontWeight: 700,
+              boxShadow: "0 10px 24px rgba(47, 107, 255, 0.24)"
             }}
           >
             Jugar ahora
@@ -57,11 +138,15 @@ export default async function LandingPage() {
           <Link
             href="/login"
             style={{
-              padding: "14px 20px",
-              borderRadius: 999,
-              border: "1px solid rgba(246, 245, 239, 0.4)",
-              color: "#f6f5ef",
+              minHeight: 52,
+              padding: "0 18px",
+              borderRadius: 16,
+              display: "inline-flex",
+              alignItems: "center",
               textDecoration: "none",
+              background: "rgba(255, 255, 255, 0.04)",
+              color: colors.textPrimary,
+              border: `1px solid ${colors.border}`,
               fontWeight: 700
             }}
           >
@@ -69,15 +154,25 @@ export default async function LandingPage() {
           </Link>
         </div>
 
-        <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
+        <div
+          style={{
+            display: "grid",
+            gap: 10,
+            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))"
+          }}
+        >
           {bootstrap.features.map((feature) => (
             <div
               key={feature}
               style={{
-                padding: 16,
-                borderRadius: 18,
-                background: "rgba(246, 245, 239, 0.08)",
-                border: "1px solid rgba(246, 245, 239, 0.1)"
+                padding: spacing[16],
+                borderRadius: radii.lg,
+                background: "rgba(255, 255, 255, 0.03)",
+                border: `1px solid ${colors.border}`,
+                color: colors.textPrimary,
+                fontSize: 15,
+                lineHeight: 1.35,
+                fontWeight: 600
               }}
             >
               {feature}
@@ -86,36 +181,29 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
-        <Card>
-          <h2 style={{ marginTop: 0 }}>Cómo funciona</h2>
-          <ol style={{ margin: 0, paddingLeft: 20, display: "grid", gap: 10 }}>
-            <li>Predice partidos en segundos.</li>
-            <li>Suma puntos cada día.</li>
-            <li>Compite dentro de tus ligas privadas.</li>
-          </ol>
+      <section style={{ display: "grid", gap: spacing[16], gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+        <Card elevated style={{ gap: 10 }}>
+          <span style={{ ...typography.small, color: colors.textMuted }}>COMO SE JUEGA</span>
+          <p style={{ margin: 0, fontSize: 18, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>Predice en segundos</p>
+          <p style={{ margin: 0, color: colors.textSecondary }}>Eliges marcador, guardas y sigues. Sin pantallas pesadas ni vueltas raras.</p>
         </Card>
 
-        <Card>
-          <h2 style={{ marginTop: 0 }}>Auth del MVP</h2>
-          <p style={{ marginBottom: 8 }}>Métodos previstos por producto:</p>
-          <ul style={{ margin: 0, paddingLeft: 18 }}>
-            <li>Google: {bootstrap.authProviders.google ? "habilitado en contrato" : "apagado"}</li>
-            <li>Magic link: {bootstrap.authProviders.magicLink ? "habilitado en contrato" : "apagado"}</li>
-          </ul>
+        <Card elevated style={{ gap: 10 }}>
+          <span style={{ ...typography.small, color: colors.textMuted }}>COMO SUMAS</span>
+          <p style={{ margin: 0, fontSize: 18, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>Puntos claros post partido</p>
+          <p style={{ margin: 0, color: colors.textSecondary }}>El backend resuelve estados, resultados y scoring para que siempre veas lo importante.</p>
         </Card>
 
-        <Card>
-          <h2 style={{ marginTop: 0 }}>Reglas rápidas</h2>
-          <p style={{ margin: 0 }}>
-            Competencia por ligas, deadlines al kickoff exacto y backend como source of truth para puntos y estados.
-          </p>
+        <Card elevated style={{ gap: 10 }}>
+          <span style={{ ...typography.small, color: colors.textMuted }}>COMO COMPITES</span>
+          <p style={{ margin: 0, fontSize: 18, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>Tus ligas son el centro</p>
+          <p style={{ margin: 0, color: colors.textSecondary }}>Invitas gente, sigues posiciones y vuelves cada dia con una razon concreta para jugar.</p>
         </Card>
       </section>
 
-      <footer style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+      <footer style={{ display: "flex", flexWrap: "wrap", gap: 12, padding: "4px 2px" }}>
         {SUPPORT_LINKS.map((link) => (
-          <Link key={link.href} href={link.href} style={{ color: "#335c3d", fontWeight: 600 }}>
+          <Link key={link.href} href={link.href} style={{ color: colors.textSecondary, fontWeight: 600, textDecoration: "none" }}>
             {link.label}
           </Link>
         ))}

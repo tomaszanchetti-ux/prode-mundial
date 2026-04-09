@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MAIN_TABS } from "@prode/shared";
-import { Card, colors, radii, typography } from "@prode/ui";
+import { Card, colors, radii } from "@prode/ui";
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -13,12 +13,14 @@ export function BottomNav() {
       as="nav"
       style={{
         position: "sticky",
-        bottom: 0,
+        bottom: 12,
         display: "grid",
         gridTemplateColumns: `repeat(${MAIN_TABS.length}, minmax(0, 1fr))`,
-        gap: 8,
-        padding: 12,
-        backdropFilter: "blur(12px)"
+        gap: 6,
+        padding: 8,
+        borderRadius: 999,
+        background: "rgba(14, 26, 43, 0.88)",
+        backdropFilter: "blur(16px)"
       }}
     >
       {MAIN_TABS.map((tab) => {
@@ -31,12 +33,13 @@ export function BottomNav() {
             style={{
               textDecoration: "none",
               textAlign: "center",
-              padding: "10px 8px",
-              borderRadius: radii.md,
+              padding: "10px 6px",
+              borderRadius: radii.pill,
               color: isActive ? colors.textPrimary : colors.textSecondary,
-              background: isActive ? "rgba(201, 168, 93, 0.16)" : "transparent",
-              border: isActive ? `1px solid rgba(201, 168, 93, 0.3)` : "1px solid transparent",
-              ...typography.body,
+              background: isActive ? colors.primarySoft : "transparent",
+              border: isActive ? "1px solid rgba(47, 107, 255, 0.22)" : "1px solid transparent",
+              fontSize: 13,
+              lineHeight: 1.2,
               fontWeight: isActive ? 700 : 500
             }}
           >

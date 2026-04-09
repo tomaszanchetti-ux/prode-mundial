@@ -64,8 +64,8 @@ test("MatchDetailScreenView renders qualifier selector only on knockout draw", (
     })
   );
 
-  assert.match(html, /¿Quién clasifica\?/);
-  assert.match(html, /Si predices empate, debes elegir quién clasifica\./);
+  assert.match(html, /Quien clasifica/);
+  assert.match(html, /Si eliges empate, marca quien clasifica\./);
 });
 
 test("MatchDetailScreenView renders save success toast", () => {
@@ -123,8 +123,8 @@ test("MatchDetailScreenView renders locked state copy and disables editing inten
     })
   );
 
-  assert.match(html, /Este partido ya está bloqueado\./);
-  assert.match(html, /Bloqueado/);
+  assert.match(html, /Cerrado/);
+  assert.match(html, /Guardar prediccion/);
 });
 
 test("MatchDetailScreenView renders retry save UI on actionable error", () => {

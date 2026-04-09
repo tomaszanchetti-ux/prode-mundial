@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import type { UpdateProfileInput } from "@prode/shared";
 import { SUPPORT_LINKS } from "@prode/shared";
 import Link from "next/link";
-import { Card } from "@prode/ui";
+import { Button, Card, colors, radii, spacing, typography } from "@prode/ui";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { updateMyProfile } from "@/lib/api/client";
@@ -55,7 +55,7 @@ export function ProfileScreen() {
 
     try {
       if (!user) {
-        throw new Error("No encontramos una sesión activa.");
+        throw new Error("No encontramos una sesion activa.");
       }
 
       const token = await user.getIdToken();
@@ -74,108 +74,156 @@ export function ProfileScreen() {
   }
 
   async function handleLogout() {
-    setStatus("Cerrando sesión...");
+    setStatus("Cerrando sesion...");
 
     try {
       await logout();
       router.replace("/login");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "No se pudo cerrar la sesión.");
+      setStatus(error instanceof Error ? error.message : "No se pudo cerrar la sesion.");
     }
   }
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
-      <Card>
-        <h1 style={{ marginTop: 0 }}>Perfil</h1>
-        <p style={{ marginBottom: 8 }}>
-          Completa tu nombre visible y deja lista tu cuenta para entrar al loop autenticado del Prode.
+    <div style={{ display: "grid", gap: spacing[16] }}>
+      <Card
+        elevated
+        style={{
+          gap: spacing[12],
+          padding: spacing[24],
+          background:
+            "radial-gradient(circle at top right, rgba(47, 107, 255, 0.16), transparent 28%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
+        }}
+      >
+        <span style={{ ...typography.small, color: colors.primary500 }}>PERFIL</span>
+        <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>
+          {profile?.profileCompleted ? "Tu cuenta ya esta lista" : "Completa tu cuenta para empezar"}
+        </h1>
+        <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 620 }}>
+          Tu nombre visible es la forma en que apareces en ligas, posiciones y resultados. Ajustalo una vez y sigue con el juego.
         </p>
-        <p style={{ margin: 0, color: "#5f6657" }}>{status}</p>
+        <div
+          style={{
+            padding: 14,
+            borderRadius: radii.md,
+            background: "rgba(255, 255, 255, 0.04)",
+            border: `1px solid ${colors.border}`,
+            color: colors.textSecondary,
+            fontSize: 14,
+            lineHeight: 1.45
+          }}
+        >
+          {status}
+        </div>
       </Card>
 
-      <Card>
-        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 14 }}>
-          <label style={{ display: "grid", gap: 6 }}>
-            <span>Nombre visible</span>
-            <input
-              name="displayName"
-              value={formState.displayName}
-              onChange={handleChange}
-              minLength={2}
-              maxLength={50}
-              required
-              style={{ padding: 12, borderRadius: 12, border: "1px solid #c9cfbf" }}
-            />
-          </label>
+      <section style={{ display: "grid", gap: spacing[16], gridTemplateColumns: "1fr 0.9fr" }}>
+        <Card elevated style={{ gap: spacing[16], padding: spacing[20] }}>
+          <div style={{ display: "grid", gap: spacing[8] }}>
+            <span style={{ ...typography.small, color: colors.textMuted }}>DATOS</span>
+            <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>Tu identidad dentro del Prode</h2>
+          </div>
 
-          <label style={{ display: "grid", gap: 6 }}>
-            <span>País opcional</span>
-            <input
-              name="country"
-              value={formState.country}
-              onChange={handleChange}
-              maxLength={2}
-              placeholder="ES"
-              style={{ padding: 12, borderRadius: 12, border: "1px solid #c9cfbf" }}
-            />
-          </label>
+          <form onSubmit={handleSubmit} style={{ display: "grid", gap: 14 }}>
+            <label style={{ display: "grid", gap: spacing[8] }}>
+              <span style={{ ...typography.small, color: colors.textSecondary }}>Nombre visible</span>
+              <input
+                name="displayName"
+                value={formState.displayName}
+                onChange={handleChange}
+                minLength={2}
+                maxLength={50}
+                required
+                style={{
+                  minHeight: 52,
+                  borderRadius: radii.md,
+                  border: `1px solid ${colors.border}`,
+                  background: colors.bgMuted,
+                  color: colors.textPrimary,
+                  padding: "0 14px",
+                  fontSize: 16,
+                  outline: "none"
+                }}
+              />
+            </label>
 
-          <button
-            type="submit"
-            disabled={isSaving}
-            style={{
-              padding: "12px 16px",
-              borderRadius: 999,
-              border: 0,
-              background: "#102a13",
-              color: "#f6f5ef",
-              fontWeight: 700
-            }}
-          >
-            {isSaving ? "Guardando..." : "Guardar y continuar"}
-          </button>
-        </form>
-      </Card>
+            <label style={{ display: "grid", gap: spacing[8] }}>
+              <span style={{ ...typography.small, color: colors.textSecondary }}>Pais opcional</span>
+              <input
+                name="country"
+                value={formState.country}
+                onChange={handleChange}
+                maxLength={2}
+                placeholder="ES"
+                style={{
+                  minHeight: 52,
+                  borderRadius: radii.md,
+                  border: `1px solid ${colors.border}`,
+                  background: colors.bgMuted,
+                  color: colors.textPrimary,
+                  padding: "0 14px",
+                  fontSize: 16,
+                  outline: "none",
+                  textTransform: "uppercase"
+                }}
+              />
+            </label>
 
-      {profile ? (
-        <Card>
-          <h2 style={{ marginTop: 0 }}>Resumen actual</h2>
-          <ul style={{ paddingLeft: 18, marginBottom: 0 }}>
-            <li>Email: {profile.email}</li>
-            <li>Foto: {profile.photoUrl ? "Importada desde tu proveedor auth" : "Sin foto todavía"}</li>
-            <li>Total puntos: {profile.totalPoints}</li>
-            <li>Puntos macro: {profile.macroPoints}</li>
-            <li>Aciertos exactos: {profile.exactHits}</li>
-            <li>Signos correctos: {profile.correctSigns}</li>
-            <li>Ligas: {profile.leaguesCount}</li>
-          </ul>
+            <Button type="submit" disabled={isSaving}>
+              {isSaving ? "Guardando..." : "Guardar y continuar"}
+            </Button>
+          </form>
         </Card>
-      ) : null}
 
-      <Card>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
+        <div style={{ display: "grid", gap: spacing[16] }}>
+          {profile ? (
+            <Card elevated style={{ gap: spacing[12], padding: spacing[20] }}>
+              <span style={{ ...typography.small, color: colors.textMuted }}>RESUMEN</span>
+              <div style={{ display: "grid", gap: 10 }}>
+                <p style={{ margin: 0, color: colors.textPrimary, fontWeight: 600 }}>{profile.displayName}</p>
+                <p style={{ margin: 0, color: colors.textSecondary, fontSize: 14, lineHeight: 1.4 }}>{profile.email}</p>
+              </div>
+              <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+                <div>
+                  <span style={{ ...typography.small, color: colors.textMuted }}>PUNTOS</span>
+                  <p style={{ margin: "6px 0 0", color: colors.textPrimary, fontSize: 24, fontWeight: 700 }}>{profile.totalPoints}</p>
+                </div>
+                <div>
+                  <span style={{ ...typography.small, color: colors.textMuted }}>LIGAS</span>
+                  <p style={{ margin: "6px 0 0", color: colors.textPrimary, fontSize: 24, fontWeight: 700 }}>{profile.leaguesCount}</p>
+                </div>
+                <div>
+                  <span style={{ ...typography.small, color: colors.textMuted }}>EXACTOS</span>
+                  <p style={{ margin: "6px 0 0", color: colors.textPrimary, fontSize: 24, fontWeight: 700 }}>{profile.exactHits}</p>
+                </div>
+                <div>
+                  <span style={{ ...typography.small, color: colors.textMuted }}>SIGNOS</span>
+                  <p style={{ margin: "6px 0 0", color: colors.textPrimary, fontSize: 24, fontWeight: 700 }}>{profile.correctSigns}</p>
+                </div>
+              </div>
+            </Card>
+          ) : null}
+
+          <Card elevated style={{ gap: spacing[12], padding: spacing[20] }}>
+            <span style={{ ...typography.small, color: colors.textMuted }}>CUENTA</span>
+            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+              Si cambias de dispositivo o vuelves mas tarde, tu sesion y tu perfil siguen listos para retomar rapido.
+            </p>
+            <Button variant="secondary" onClick={handleLogout}>
+              Cerrar sesion
+            </Button>
+          </Card>
+        </div>
+      </section>
+
+      <Card style={{ gap: spacing[12], padding: spacing[16] }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
           {SUPPORT_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} style={{ color: "#335c3d", fontWeight: 600 }}>
+            <Link key={link.href} href={link.href} style={{ color: colors.textSecondary, fontWeight: 600, textDecoration: "none" }}>
               {link.label}
             </Link>
           ))}
         </div>
-
-        <button
-          type="button"
-          onClick={handleLogout}
-          style={{
-            padding: "12px 16px",
-            borderRadius: 999,
-            border: "1px solid #c9cfbf",
-            background: "#fffdf7",
-            color: "#102a13",
-            fontWeight: 700
-          }}
-        >
-          Cerrar sesión
-        </button>
       </Card>
     </div>
   );

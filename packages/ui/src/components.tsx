@@ -19,6 +19,8 @@ export type TeamDisplayProps = {
   flagUrl?: string | null;
   teamName: string;
   align?: "start" | "center";
+  size?: "sm" | "md" | "lg";
+  weight?: 500 | 600 | 700;
 };
 
 export type ButtonProps = PropsWithChildren<
@@ -48,6 +50,7 @@ export type MatchCardProps = {
   kickoffLabel: string;
   onAction?: () => void;
   predictionSummary?: string;
+  resultSummary?: string;
   stageLabel: string;
   status: MatchCardStatus;
   statusLabel?: string;
@@ -85,17 +88,18 @@ export type PredictionModalProps = {
 
 const buttonToneStyles: Record<ButtonVariant, CSSProperties> = {
   primary: {
-    background: `linear-gradient(135deg, ${colors.primary500} 0%, ${colors.primary700} 100%)`,
+    background: colors.primary500,
     color: colors.textPrimary,
-    border: "none"
+    border: "none",
+    boxShadow: "0 10px 24px rgba(47, 107, 255, 0.24)"
   },
   secondary: {
-    background: colors.bgElevated,
+    background: colors.bgMuted,
     color: colors.textPrimary,
     border: `1px solid ${colors.borderStrong}`
   },
   ghost: {
-    background: "transparent",
+    background: "rgba(255, 255, 255, 0.02)",
     color: colors.textSecondary,
     border: `1px solid ${colors.border}`
   }
@@ -103,24 +107,24 @@ const buttonToneStyles: Record<ButtonVariant, CSSProperties> = {
 
 const statusToneStyles: Record<StatusTone, CSSProperties> = {
   editable: {
-    background: "rgba(201, 168, 93, 0.16)",
-    color: "#F3D998",
-    border: "1px solid rgba(201, 168, 93, 0.28)"
+    background: colors.primarySoft,
+    color: "#AFC4FF",
+    border: "1px solid rgba(47, 107, 255, 0.28)"
   },
   locked: {
-    background: "rgba(143, 164, 183, 0.14)",
-    color: "#D4DFE8",
-    border: "1px solid rgba(143, 164, 183, 0.22)"
+    background: "rgba(148, 163, 184, 0.12)",
+    color: "#D5DDE7",
+    border: "1px solid rgba(148, 163, 184, 0.2)"
   },
   live: {
-    background: "rgba(217, 74, 57, 0.16)",
-    color: "#F5A492",
-    border: "1px solid rgba(217, 74, 57, 0.28)"
+    background: "rgba(245, 158, 11, 0.14)",
+    color: "#F7C15A",
+    border: "1px solid rgba(245, 158, 11, 0.24)"
   },
   scored: {
-    background: "rgba(59, 170, 106, 0.16)",
-    color: "#9EE0B8",
-    border: "1px solid rgba(59, 170, 106, 0.26)"
+    background: "rgba(34, 197, 94, 0.14)",
+    color: "#9BE5B6",
+    border: "1px solid rgba(34, 197, 94, 0.24)"
   }
 };
 
@@ -129,50 +133,86 @@ const cardBaseStyle: CSSProperties = {
   display: "grid",
   gap: spacing[16],
   padding: spacing[20],
-  backdropFilter: "blur(10px)"
+  backdropFilter: "blur(14px)"
 };
 
 const eyebrowStyle: CSSProperties = {
   ...typography.small,
   color: colors.textMuted,
-  textTransform: "uppercase",
-  letterSpacing: "0.08em"
+  textTransform: "uppercase"
 };
 
-const inputBaseStyle: CSSProperties = {
+const scoreBoxStyle: CSSProperties = {
   width: "100%",
-  minHeight: 52,
-  borderRadius: radii.md,
-  border: `1px solid ${colors.borderStrong}`,
-  background: colors.bgMain,
+  minHeight: 104,
+  borderRadius: radii.lg,
+  border: `1px solid ${colors.border}`,
+  background: "linear-gradient(180deg, rgba(8, 18, 33, 0.98) 0%, rgba(14, 26, 43, 0.98) 100%)",
   color: colors.textPrimary,
-  padding: "0 14px",
-  fontSize: 22,
-  fontWeight: 700,
-  textAlign: "center"
+  display: "grid",
+  justifyItems: "center",
+  gap: spacing[8],
+  padding: `${spacing[16]}px ${spacing[12]}px`
 };
 
 function getFlagFallback(teamName: string) {
-  return teamName.trim().slice(0, 2).toUpperCase();
+  return teamName
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0] ?? "")
+    .join("")
+    .toUpperCase();
 }
 
-function renderInput(
+function getTeamStyles(size: TeamDisplayProps["size"] = "md") {
+  if (size === "lg") {
+    return {
+      flagSize: 34,
+      fontSize: 18
+    };
+  }
+
+  if (size === "sm") {
+    return {
+      flagSize: 22,
+      fontSize: 14
+    };
+  }
+
+  return {
+    flagSize: 28,
+    fontSize: 16
+  };
+}
+
+function renderScoreInput(
   label: string,
   value: string,
   disabled: boolean | undefined,
-  onChange: ((value: string) => void) | undefined,
-  inputProps?: Partial<InputHTMLAttributes<HTMLInputElement>>
+  onChange: ((value: string) => void) | undefined
 ) {
   return (
-    <label style={{ display: "grid", gap: spacing[8] }}>
-      <span style={{ ...typography.small, color: colors.textSecondary }}>{label}</span>
+    <label style={scoreBoxStyle}>
+      <span style={{ ...typography.small, color: colors.textMuted }}>{label}</span>
       <input
-        {...inputProps}
         value={value}
         disabled={disabled}
         inputMode="numeric"
         pattern="[0-9]*"
-        style={{ ...inputBaseStyle, opacity: disabled ? 0.7 : 1 }}
+        style={{
+          width: 76,
+          height: 76,
+          borderRadius: radii.md,
+          border: `1px solid ${colors.borderStrong}`,
+          background: colors.bgMuted,
+          color: colors.textPrimary,
+          fontSize: 40,
+          fontWeight: 700,
+          textAlign: "center",
+          outline: "none",
+          opacity: disabled ? 0.7 : 1
+        }}
         onChange={(event) => onChange?.(event.target.value.replace(/\D+/g, ""))}
       />
     </label>
@@ -189,7 +229,7 @@ export function Card<T extends ElementType = "div">({ as, children, elevated = f
         ...cardBaseStyle,
         boxShadow: elevated ? shadows.card : undefined,
         background: elevated
-          ? `linear-gradient(180deg, rgba(20, 38, 58, 0.96) 0%, rgba(13, 27, 42, 0.96) 100%)`
+          ? "linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(14, 26, 43, 0.98) 100%)"
           : surfaceStyle.background,
         ...style
       }}
@@ -215,15 +255,15 @@ export function Button({
       {...props}
       disabled={isDisabled}
       style={{
-        minHeight: 48,
-        padding: "0 16px",
-        borderRadius: radii.md,
+        minHeight: 52,
+        padding: "0 18px",
+        borderRadius: 16,
         cursor: isDisabled ? "not-allowed" : "pointer",
         fontSize: typography.body.fontSize,
         fontWeight: 600,
         width: fullWidth ? "100%" : undefined,
         opacity: isDisabled ? 0.6 : 1,
-        transition: "transform 160ms ease, opacity 160ms ease, background 160ms ease, border-color 160ms ease",
+        transition: "transform 140ms ease, opacity 140ms ease, background 140ms ease, border-color 140ms ease",
         ...buttonToneStyles[variant],
         ...style
       }}
@@ -245,8 +285,8 @@ export function StatusTag({ status, label }: StatusTagProps) {
         minHeight: 28,
         padding: "0 10px",
         borderRadius: radii.pill,
-        fontWeight: 600,
-        textTransform: "capitalize",
+        fontWeight: 700,
+        letterSpacing: "0.04em",
         ...statusToneStyles[status]
       }}
     >
@@ -255,8 +295,9 @@ export function StatusTag({ status, label }: StatusTagProps) {
   );
 }
 
-export function TeamDisplay({ align = "start", flagUrl, teamName }: TeamDisplayProps) {
+export function TeamDisplay({ align = "start", flagUrl, teamName, size = "md", weight = 600 }: TeamDisplayProps) {
   const fallback = getFlagFallback(teamName);
+  const teamStyles = getTeamStyles(size);
 
   return (
     <div
@@ -271,22 +312,27 @@ export function TeamDisplay({ align = "start", flagUrl, teamName }: TeamDisplayP
         <img
           src={flagUrl}
           alt=""
-          width={28}
-          height={28}
-          style={{ borderRadius: radii.pill, objectFit: "cover", border: `1px solid ${colors.borderStrong}` }}
+          width={teamStyles.flagSize}
+          height={teamStyles.flagSize}
+          style={{
+            borderRadius: radii.pill,
+            objectFit: "cover",
+            border: `1px solid ${colors.borderStrong}`,
+            boxShadow: "0 6px 16px rgba(2, 8, 18, 0.22)"
+          }}
         />
       ) : (
         <span
           aria-hidden="true"
           style={{
-            width: 28,
-            height: 28,
+            width: teamStyles.flagSize,
+            height: teamStyles.flagSize,
             borderRadius: radii.pill,
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            background: colors.bgElevated,
-            color: colors.textSecondary,
+            background: "linear-gradient(180deg, rgba(47, 107, 255, 0.22) 0%, rgba(16, 29, 49, 1) 100%)",
+            color: colors.textPrimary,
             border: `1px solid ${colors.borderStrong}`,
             fontSize: 10,
             fontWeight: 700
@@ -295,7 +341,7 @@ export function TeamDisplay({ align = "start", flagUrl, teamName }: TeamDisplayP
           {fallback}
         </span>
       )}
-      <span style={{ ...typography.body, color: colors.textPrimary, fontWeight: 600, letterSpacing: "-0.01em" }}>{teamName}</span>
+      <span style={{ fontSize: teamStyles.fontSize, lineHeight: 1.2, color: colors.textPrimary, fontWeight: weight }}>{teamName}</span>
     </div>
   );
 }
@@ -307,52 +353,46 @@ export function MatchCard({
   kickoffLabel,
   onAction,
   predictionSummary,
+  resultSummary,
   stageLabel,
   status,
   statusLabel
 }: MatchCardProps) {
   return (
-    <Card elevated style={{ gap: spacing[20] }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], flexWrap: "wrap" }}>
-        <div style={{ display: "grid", gap: spacing[8] }}>
+    <Card elevated style={{ gap: spacing[16], padding: spacing[16] }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
+        <div style={{ display: "grid", gap: 6 }}>
           <span style={eyebrowStyle}>{stageLabel}</span>
-          <span style={{ ...typography.small, color: colors.textSecondary }}>{kickoffLabel}</span>
+          <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>{kickoffLabel}</span>
         </div>
         <StatusTag status={status} label={statusLabel} />
       </div>
 
-      <div style={{ display: "grid", gap: spacing[12] }}>
-        <TeamDisplay {...homeTeam} />
-        <TeamDisplay {...awayTeam} />
+      <div style={{ display: "grid", gap: 10 }}>
+        <TeamDisplay {...homeTeam} size="lg" weight={700} />
+        <span style={{ ...typography.small, color: colors.textMuted, paddingLeft: 46 }}>VS</span>
+        <TeamDisplay {...awayTeam} size="lg" weight={700} />
       </div>
 
       <div
         style={{
           display: "grid",
-          gap: spacing[12],
-          gridTemplateColumns: "minmax(0, 1fr)",
-          alignItems: "start"
+          gap: 10,
+          padding: 14,
+          borderRadius: radii.md,
+          background: "rgba(255, 255, 255, 0.03)",
+          border: `1px solid ${colors.border}`
         }}
       >
-        <div
-          style={{
-            padding: spacing[16],
-            borderRadius: radii.md,
-            background: "linear-gradient(180deg, rgba(7, 19, 31, 0.82) 0%, rgba(10, 24, 38, 0.9) 100%)",
-            border: `1px solid ${colors.border}`,
-            boxShadow: "inset 0 1px 0 rgba(247, 241, 232, 0.04)"
-          }}
-        >
-          <p style={{ ...typography.small, color: colors.textMuted, margin: 0 }}>Tu prediccion</p>
-          <p style={{ ...typography.body, color: colors.textPrimary, margin: "6px 0 0" }}>
-            {predictionSummary ?? "Todavia no guardaste una prediccion para este partido."}
-          </p>
-        </div>
-
-        <Button variant={status === "editable" ? "primary" : "secondary"} fullWidth onClick={onAction}>
-          {ctaLabel}
-        </Button>
+        <p style={{ margin: 0, fontSize: 15, lineHeight: 1.45, color: colors.textPrimary, fontWeight: 600 }}>
+          {predictionSummary ?? "Aun no predijiste este partido"}
+        </p>
+        {resultSummary ? <p style={{ margin: 0, fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{resultSummary}</p> : null}
       </div>
+
+      <Button variant={status === "locked" ? "secondary" : "primary"} fullWidth onClick={onAction}>
+        {ctaLabel}
+      </Button>
     </Card>
   );
 }
@@ -375,38 +415,62 @@ export function ScoreInput({
 
   return (
     <div style={{ display: "grid", gap: spacing[16] }}>
-      <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-        {renderInput(homeLabel, homeValue, disabled, onHomeChange)}
-        {renderInput(awayLabel, awayValue, disabled, onAwayChange)}
+      <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "minmax(0, 1fr) auto minmax(0, 1fr)", alignItems: "center" }}>
+        {renderScoreInput(homeLabel, homeValue, disabled, onHomeChange)}
+        <div
+          aria-hidden="true"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: radii.pill,
+            display: "grid",
+            placeItems: "center",
+            color: colors.textMuted,
+            background: "rgba(255, 255, 255, 0.04)",
+            border: `1px solid ${colors.border}`
+          }}
+        >
+          -
+        </div>
+        {renderScoreInput(awayLabel, awayValue, disabled, onAwayChange)}
       </div>
 
       {showClassifier ? (
-        <label style={{ display: "grid", gap: spacing[8] }}>
+        <div style={{ display: "grid", gap: spacing[8] }}>
           <span style={{ ...typography.small, color: colors.textSecondary }}>{classifierLabel}</span>
-          <select
-            value={classifierValue}
-            disabled={disabled}
-            style={{
-              minHeight: 48,
-              borderRadius: radii.md,
-              border: `1px solid ${colors.borderStrong}`,
-              background: colors.bgMain,
-              color: colors.textPrimary,
-              padding: "0 14px"
-            }}
-            onChange={(event) => onClassifierChange?.(event.target.value)}
-          >
-            <option value="">Seleccionar</option>
-            {classifierOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+          <div style={{ display: "grid", gap: spacing[8] }}>
+            {classifierOptions.map((option) => {
+              const isActive = option.value === classifierValue;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  disabled={disabled}
+                  style={{
+                    minHeight: 50,
+                    borderRadius: radii.md,
+                    border: isActive ? "1px solid rgba(47, 107, 255, 0.4)" : `1px solid ${colors.border}`,
+                    background: isActive ? colors.primarySoft : "rgba(255, 255, 255, 0.03)",
+                    color: colors.textPrimary,
+                    textAlign: "left",
+                    padding: "0 14px",
+                    fontSize: 15,
+                    fontWeight: 600,
+                    cursor: disabled ? "not-allowed" : "pointer",
+                    opacity: disabled ? 0.7 : 1
+                  }}
+                  onClick={() => onClassifierChange?.(option.value)}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       ) : null}
 
-      {error ? <p style={{ ...typography.small, color: "#FCA5A5", margin: 0 }}>{error}</p> : null}
+      {error ? <p style={{ margin: 0, fontSize: 13, lineHeight: 1.4, color: "#FCA5A5" }}>{error}</p> : null}
     </div>
   );
 }
@@ -423,7 +487,7 @@ export function PredictionModal({
   saveLabel = "Guardar prediccion",
   saving = false,
   stageLabel,
-  title = "Completa tu prediccion"
+  title = "Tu proximo partido"
 }: PredictionModalProps) {
   if (!isOpen) {
     return null;
@@ -436,35 +500,51 @@ export function PredictionModal({
       style={{
         position: "fixed",
         inset: 0,
-        padding: spacing[16],
+        padding: spacing[12],
         background: colors.overlay,
         display: "flex",
         alignItems: "flex-end",
         justifyContent: "center",
+        backdropFilter: "blur(10px)",
         zIndex: 50
       }}
     >
       <div
         style={{
-          width: "min(100%, 520px)",
+          width: "min(100%, 560px)",
           ...cardBaseStyle,
+          gap: spacing[20],
           boxShadow: shadows.modal,
           borderTopLeftRadius: radii.xl,
           borderTopRightRadius: radii.xl,
-          background:
-            "linear-gradient(180deg, rgba(20, 38, 58, 0.98) 0%, rgba(10, 24, 38, 0.98) 100%), radial-gradient(circle at top right, rgba(201, 168, 93, 0.12), transparent 30%)"
+          borderBottomLeftRadius: radii.lg,
+          borderBottomRightRadius: radii.lg,
+          background: "linear-gradient(180deg, rgba(16, 29, 49, 0.99) 0%, rgba(10, 21, 35, 0.99) 100%)"
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "flex-start" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
           <div style={{ display: "grid", gap: spacing[8] }}>
             <span style={eyebrowStyle}>{stageLabel}</span>
             <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>{title}</h2>
-            <p style={{ ...typography.small, color: colors.textSecondary, margin: 0 }}>{kickoffLabel}</p>
+            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{kickoffLabel}</p>
           </div>
           {onClose ? (
-            <Button variant="ghost" onClick={onClose}>
-              Cerrar
-            </Button>
+            <button
+              type="button"
+              aria-label="Cerrar"
+              onClick={onClose}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: radii.pill,
+                border: `1px solid ${colors.border}`,
+                background: "rgba(255, 255, 255, 0.03)",
+                color: colors.textSecondary,
+                cursor: "pointer"
+              }}
+            >
+              X
+            </button>
           ) : null}
         </div>
 
@@ -473,25 +553,26 @@ export function PredictionModal({
             display: "grid",
             gap: spacing[12],
             padding: spacing[16],
-            borderRadius: radii.md,
-            background: colors.bgMain,
+            borderRadius: radii.lg,
+            background: "linear-gradient(180deg, rgba(7, 17, 31, 1) 0%, rgba(13, 25, 43, 1) 100%)",
             border: `1px solid ${colors.border}`
           }}
         >
-          <TeamDisplay {...homeTeam} />
-          <TeamDisplay {...awayTeam} />
+          <TeamDisplay {...homeTeam} align="center" size="lg" weight={700} />
+          <div style={{ textAlign: "center", color: colors.textMuted, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
+          <TeamDisplay {...awayTeam} align="center" size="lg" weight={700} />
         </div>
 
-        {helperText ? <p style={{ ...typography.body, color: colors.textSecondary, margin: 0 }}>{helperText}</p> : null}
+        {helperText ? <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>{helperText}</p> : null}
 
         {children}
 
-        <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-          <Button variant="secondary" onClick={onClose}>
-            Mas tarde
-          </Button>
-          <Button onClick={onSubmit} loading={saving}>
+        <div style={{ display: "grid", gap: 10 }}>
+          <Button fullWidth onClick={onSubmit} loading={saving}>
             {saveLabel}
+          </Button>
+          <Button variant="ghost" fullWidth onClick={onClose}>
+            Mas tarde
           </Button>
         </div>
       </div>

@@ -50,6 +50,7 @@ test("LoginScreenView renders the expected auth actions and helper message", () 
   assert.match(html, /Enviar magic link/);
   assert.match(html, /Completar ingreso con este magic link/);
   assert.match(html, /Te enviamos un magic link/);
+  assert.match(html, /Tu proximo partido te esta esperando/);
 });
 
 test("LoginScreenView warns when Firebase is not configured", () => {

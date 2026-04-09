@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MatchDetail, SaveMatchPredictionInput } from "@prode/shared";
-import { Button, Card, ScoreInput, colors, radii, spacing, typography } from "@prode/ui";
+import { Button, Card, ScoreInput, StatusTag, TeamDisplay, colors, radii, spacing, typography } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
 
@@ -74,44 +74,68 @@ function toKickoffLabel(iso: string) {
   }).format(new Date(iso));
 }
 
-function toStatusCopy(detail: MatchDetail) {
+function toStatusLabel(detail: MatchDetail) {
   if (detail.predictionStatus === "scored") {
-    return "Predicción puntuadа";
+    return "Puntuado";
+  }
+
+  if (detail.status === "live") {
+    return "En vivo";
   }
 
   if (!detail.isEditable) {
-    return "Este partido ya está bloqueado.";
+    return "Cerrado";
   }
 
-  return "Puedes editar hasta el inicio del partido.";
+  if (detail.userPrediction) {
+    return "Guardado";
+  }
+
+  return "Pendiente";
+}
+
+function toStatusTone(detail: MatchDetail) {
+  if (detail.predictionStatus === "scored") {
+    return "scored" as const;
+  }
+
+  if (detail.status === "live") {
+    return "live" as const;
+  }
+
+  if (!detail.isEditable) {
+    return "locked" as const;
+  }
+
+  return "editable" as const;
 }
 
 function toHelperText(detail: MatchDetail, formState: FormState) {
   if (detail.requiresQualifierIfDraw && formState.homeScorePred !== "" && formState.homeScorePred === formState.awayScorePred) {
-    return "Si predices empate, debes elegir quién clasifica.";
+    return "Si eliges empate, marca quien clasifica.";
   }
 
-  return "Guardado explícito. No hacemos autoguardado silencioso en el MVP.";
+  return "Toca guardar para confirmar.";
 }
 
 function toErrorMessage(error: unknown) {
   if (error instanceof ApiClientError) {
     if (error.code === "MATCH_LOCKED") {
-      return "Este partido ya está bloqueado.";
+      return "Este partido ya esta bloqueado.";
     }
 
     if (error.code === "INVALID_SCORE") {
-      return "Introduce un marcador válido.";
+      return "Ingresa un marcador valido.";
     }
 
     if (error.code === "INVALID_KNOCKOUT_CLASSIFIER") {
-      return "Si predices empate, debes elegir quién clasifica.";
+      return "Si eliges empate, tienes que marcar quien clasifica.";
     }
 
     return error.message;
   }
 
-  return error instanceof Error ? error.message : "No pudimos guardar tu predicción. Inténtalo otra vez.";
+  return error instanceof Error ? error.message : "No pudimos guardar tu prediccion. Intentalo de nuevo.";
 }
 
 function toLoadErrorMessage(error: unknown) {
@@ -158,9 +182,9 @@ export function MatchDetailScreenView({
 
   if (isLoading) {
     return (
-      <div style={{ display: "grid", gap: spacing[16] }}>
+      <div style={{ display: "grid", gap: 14 }}>
         <Card elevated style={{ minHeight: 180 }} />
-        <Card elevated style={{ minHeight: 260 }} />
+        <Card elevated style={{ minHeight: 320 }} />
       </div>
     );
   }
@@ -170,14 +194,14 @@ export function MatchDetailScreenView({
       <Card elevated style={{ gap: spacing[12] }}>
         <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Partido no disponible</h1>
         <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
-          {loadErrorMessage ?? "No encontramos el detalle de este partido o todavía no pudimos cargarlo."}
+          {loadErrorMessage ?? "No encontramos el detalle de este partido o todavia no pudimos cargarlo."}
         </p>
         <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
           <Button variant="secondary" onClick={onRetryLoad}>
             Reintentar
           </Button>
           <Button variant="ghost" onClick={onBackToMatches}>
-            Volver a partidos
+            Volver
           </Button>
         </div>
       </Card>
@@ -185,7 +209,7 @@ export function MatchDetailScreenView({
   }
 
   return (
-    <div style={{ display: "grid", gap: spacing[16] }}>
+    <div style={{ display: "grid", gap: 14 }}>
       {saveNotice ? (
         <div
           style={{
@@ -195,10 +219,11 @@ export function MatchDetailScreenView({
             justifySelf: "center",
             padding: "12px 16px",
             borderRadius: radii.pill,
-            background: saveNotice.tone === "success" ? "rgba(59, 170, 106, 0.16)" : "rgba(209, 73, 91, 0.16)",
-            color: saveNotice.tone === "success" ? "#9EE0B8" : "#F2B1BA",
-            border: saveNotice.tone === "success" ? "1px solid rgba(59, 170, 106, 0.24)" : "1px solid rgba(209, 73, 91, 0.24)",
-            ...typography.body,
+            background: saveNotice.tone === "success" ? "rgba(34, 197, 94, 0.16)" : "rgba(220, 38, 38, 0.14)",
+            color: saveNotice.tone === "success" ? "#9BE5B6" : "#F5B4B4",
+            border: saveNotice.tone === "success" ? "1px solid rgba(34, 197, 94, 0.24)" : "1px solid rgba(220, 38, 38, 0.22)",
+            fontSize: 14,
+            lineHeight: 1.35,
             fontWeight: 600
           }}
         >
@@ -206,70 +231,63 @@ export function MatchDetailScreenView({
         </div>
       ) : null}
 
-      <Card elevated style={{ gap: spacing[12] }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
-          <div style={{ display: "grid", gap: spacing[8] }}>
-            <Link href="/matches" style={{ ...typography.small, color: colors.warning500, textDecoration: "none" }}>
-              Volver a partidos
-            </Link>
-            <span style={{ ...typography.small, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.1em" }}>
-              {toStageLabel(detail)}
-            </span>
-            <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>
-              {detail.homeTeam.name} vs {detail.awayTeam.name}
-            </h1>
-            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{toKickoffLabel(detail.kickoffAt)}</p>
+      <Card elevated style={{ gap: 14, padding: 18 }}>
+        <div style={{ display: "grid", gap: spacing[8] }}>
+          <Link href="/matches" style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary, textDecoration: "none" }}>
+            Volver a partidos
+          </Link>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "flex-start" }}>
+            <span style={{ ...typography.small, color: colors.textMuted }}>{toStageLabel(detail)}</span>
+            <StatusTag status={toStatusTone(detail)} label={toStatusLabel(detail)} />
           </div>
+        </div>
 
-          <div
-            style={{
-              padding: "10px 12px",
-              borderRadius: radii.md,
-              background: detail.isEditable ? "rgba(200, 168, 93, 0.14)" : "rgba(143, 164, 183, 0.14)",
-              border: `1px solid ${detail.isEditable ? "rgba(200, 168, 93, 0.3)" : "rgba(143, 164, 183, 0.2)"}`,
-              color: detail.isEditable ? "#F3D998" : colors.textSecondary,
-              ...typography.small,
-              fontWeight: 700
-            }}
-          >
-            {detail.ctaLabel}
-          </div>
+        <div style={{ display: "grid", gap: 10 }}>
+          <TeamDisplay teamName={detail.homeTeam.name} flagUrl={detail.homeTeam.flagUrl} size="lg" weight={700} />
+          <div style={{ paddingLeft: 46, fontSize: 12, color: colors.textMuted, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
+          <TeamDisplay teamName={detail.awayTeam.name} flagUrl={detail.awayTeam.flagUrl} size="lg" weight={700} />
+        </div>
+
+        <div style={{ display: "grid", gap: 6 }}>
+          <span style={{ fontSize: 15, lineHeight: 1.4, color: colors.textPrimary, fontWeight: 600 }}>{toKickoffLabel(detail.kickoffAt)}</span>
+          <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
+            Deadline: {toKickoffLabel(detail.deadlineAt)}
+          </span>
         </div>
 
         <div
           style={{
             display: "grid",
             gap: spacing[8],
-            padding: spacing[16],
+            padding: 14,
             borderRadius: radii.md,
-            background: "linear-gradient(180deg, rgba(7, 19, 31, 0.78) 0%, rgba(10, 24, 38, 0.9) 100%)",
+            background: "rgba(255, 255, 255, 0.03)",
             border: `1px solid ${colors.border}`
           }}
         >
-          <p style={{ ...typography.body, margin: 0, color: colors.textPrimary, fontWeight: 600 }}>{toStatusCopy(detail)}</p>
-          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
-            Deadline exacto: {toKickoffLabel(detail.deadlineAt)}
-          </p>
-          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
-            Scoring: exacto {detail.scoringRules.exact90Points} pts, signo {detail.scoringRules.correctOutcome90Points} pts,
-            clasificado {detail.scoringRules.correctQualifierPoints} pts.
-          </p>
+          <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary }}>Editable hasta kickoff</span>
+          <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+            Exacto: {detail.scoringRules.exact90Points} pts
+          </span>
+          <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+            Signo: {detail.scoringRules.correctOutcome90Points} pts · Clasificado: {detail.scoringRules.correctQualifierPoints} pts
+          </span>
         </div>
       </Card>
 
-      <Card elevated style={{ gap: spacing[16] }}>
+      <Card elevated style={{ gap: spacing[16], padding: spacing[16] }}>
         {saveNotice?.tone === "error" ? (
           <div
             style={{
               display: "grid",
               gap: spacing[12],
-              padding: spacing[16],
+              padding: 14,
               borderRadius: radii.md,
-              background: "rgba(209, 73, 91, 0.08)",
-              border: "1px solid rgba(209, 73, 91, 0.18)"
+              background: "rgba(220, 38, 38, 0.08)",
+              border: "1px solid rgba(220, 38, 38, 0.18)"
             }}
           >
-            <p style={{ ...typography.body, margin: 0, color: "#F2B1BA" }}>{saveNotice.message}</p>
+            <p style={{ ...typography.body, margin: 0, color: "#F5B4B4" }}>{saveNotice.message}</p>
             <Button variant="secondary" onClick={onSave} disabled={isSaving}>
               Reintentar guardado
             </Button>
@@ -279,7 +297,7 @@ export function MatchDetailScreenView({
         <ScoreInput
           awayLabel={detail.awayTeam.name}
           awayValue={formState.awayScorePred}
-          classifierLabel="¿Quién clasifica?"
+          classifierLabel="Quien clasifica"
           classifierOptions={qualifierOptions}
           classifierValue={formState.predictedQualifierTeamId}
           disabled={!detail.isEditable || isSaving}
@@ -299,22 +317,22 @@ export function MatchDetailScreenView({
           loading={isSaving}
           onClick={onSave}
         >
-          Guardar prediccion
+          {detail.userPrediction ? "Actualizar prediccion" : "Guardar prediccion"}
         </Button>
       </Card>
 
       {detail.officialResult || detail.userPrediction ? (
-        <Card elevated style={{ gap: spacing[12] }}>
+        <Card elevated style={{ gap: spacing[12], padding: spacing[16] }}>
           <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>Resultado y puntos</h2>
 
           {detail.userPrediction ? (
             <div style={{ display: "grid", gap: spacing[8] }}>
               <p style={{ ...typography.body, margin: 0, color: colors.textPrimary }}>
-                Tu predicción: {detail.userPrediction.homeScorePred}-{detail.userPrediction.awayScorePred}
-                {detail.userPrediction.predictedQualifierTeamId ? ` (${detail.userPrediction.predictedQualifierTeamId})` : ""}
+                Tu prediccion: {detail.userPrediction.homeScorePred}-{detail.userPrediction.awayScorePred}
               </p>
               <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
-                Estado: {detail.userPrediction.status} {detail.userPrediction.pointsAwarded !== null ? `· ${detail.userPrediction.pointsAwarded} pts` : ""}
+                Estado: {detail.userPrediction.status}
+                {detail.userPrediction.pointsAwarded !== null ? ` · ${detail.userPrediction.pointsAwarded} pts` : ""}
               </p>
               {detail.userPrediction.scoringBreakdown ? (
                 <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
@@ -404,7 +422,7 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
 
     const timeoutId = window.setTimeout(() => {
       setSaveNotice(null);
-    }, 2400);
+    }, 2200);
 
     return () => window.clearTimeout(timeoutId);
   }, [saveNotice]);
@@ -435,7 +453,7 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
       setFormState(toFormState(nextDetail));
       setSaveNotice({
         tone: "success",
-        message: "Predicción guardada."
+        message: "Prediccion guardada."
       });
     } catch (error) {
       setSaveNotice({

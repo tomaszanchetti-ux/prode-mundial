@@ -1,12 +1,14 @@
-import { Card } from "@prode/ui";
+import { Button, Card, colors, spacing, typography } from "@prode/ui";
 
 export default function LeaguesPage() {
   return (
-    <Card>
-      <h1 style={{ marginTop: 0 }}>Ligas</h1>
-      <p style={{ marginBottom: 0 }}>
-        Base de navegación para creación, join flow y detalle de liga. Epic 4 completará membresía y standings.
+    <Card elevated style={{ gap: spacing[12] }}>
+      <span style={{ ...typography.small, color: colors.textMuted }}>LIGAS</span>
+      <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Tu espacio para competir con amigos</h1>
+      <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+        Aqui vas a poder entrar, crear y seguir tus ligas con una vista mucho mas competitiva.
       </p>
+      <Button>Crear liga</Button>
     </Card>
   );
 }
