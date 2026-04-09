@@ -89,7 +89,10 @@ Avance adicional de `Epic 1`:
     - `origin/epic/epic-1-foundation-auth-shell`
     - `origin/main`
   - commit base estable actual: `c6aa2a1`
-  - working tree con cambios de codigo de arranque para `Epic 2 / CARD 0`
+  - avance actual de `Epic 2` ya consolidado en commits locales:
+    - `62ec4dc` -> `feat: start epic 2 ui foundation`
+    - `1fa38ab` -> `feat: add shared match contracts`
+  - working tree limpio al cierre de la sesion
 
 ## Avance inicial de Epic 2
 
@@ -198,13 +201,13 @@ Validaciones ejecutadas para este avance:
 
 # Próximo foco recomendado
 
-Con `CARD 0` ya iniciada, el siguiente foco natural dentro de `Epic 2` es bajar el contrato compartido y el modelo de estados del flujo de partidos.
+Con `CARD 0` y `CARD 1` ya cerradas, el siguiente foco natural dentro de `Epic 2` es empezar a darle datos y backend real al flujo de partidos.
 
 Orden recomendado:
 
-1. cerrar y commitear el avance de `CARD 0`
-2. usar `CARD 1` ya cerrada como base para `CARD 2` y `CARD 3`
-3. seguir con seed de teams/groups/matches y luego repositorios/use-cases/endpoints del flujo real
+1. arrancar `CARD 2 — Base Data Seeding for Teams, Groups & Matches`
+2. seguir con `CARD 3 — Matches Repository & Query Layer`
+3. luego implementar `CARD 4`, `CARD 5` y `CARD 6` sobre la base shared ya cerrada
 
 ---
 
