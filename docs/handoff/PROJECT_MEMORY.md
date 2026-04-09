@@ -56,6 +56,7 @@ Validaciones ejecutadas:
 - typecheck global OK también luego del cierre pendiente de `Epic 1`
 - build global OK también luego del fallback controlado en landing pública
 - test global OK con casos reales agregados en `web` y `api`
+- `Epic 2 / CARD 0` ya iniciada sobre branch dedicada con base visual dark-first en `packages/ui`
 
 Avance adicional de `Epic 1`:
 
@@ -82,13 +83,43 @@ Avance adicional de `Epic 1`:
     - login view render base
     - rechazo `401` de API sin bearer / token inválido
 - estado Git actual:
-  - branch activa: `main`
+  - branch activa: `epic/epic-2-fixtures-match-predictions`
   - auth real ya validada localmente sobre Firebase del proyecto `prode-mundial-4e419`
   - `Epic 1` quedó cerrada y publicada en:
     - `origin/epic/epic-1-foundation-auth-shell`
     - `origin/main`
   - commit base estable actual: `c6aa2a1`
-  - working tree con cambios documentales locales de integración del design system y ajuste de planning para `Epic 2`
+  - working tree con cambios de codigo de arranque para `Epic 2 / CARD 0`
+
+## Avance inicial de Epic 2
+
+- se creo la branch `epic/epic-2-fixtures-match-predictions` desde `main`
+- `packages/ui` ahora expone:
+  - tokens compartidos de color, spacing, radios, tipografia y superficies
+  - `Button`
+  - `Card`
+  - `StatusTag`
+  - `TeamDisplay`
+  - `MatchCard`
+  - `ScoreInput`
+  - `PredictionModal`
+- `apps/web` ya consume la nueva base visual en:
+  - layout raiz dark-first
+  - shell autenticado
+  - `BottomNav`
+  - `Home`
+  - `Matches`
+- `/matches` ya dejo de ser un placeholder simple y ahora funciona como demo visual de `CARD 0` con:
+  - estados `editable`, `locked` y `scored`
+  - CTAs contextuales
+  - ejemplo visible de `PredictionModal`
+  - ejemplo visible de `ScoreInput` con selector de clasificado para knockout
+
+Validaciones ejecutadas para este avance:
+
+- `./pnpm --filter @prode/ui typecheck`
+- `./pnpm --filter @prode/ui build`
+- `./pnpm --filter @prode/web typecheck`
 
 ## Tooling relevante
 
@@ -129,13 +160,13 @@ Avance adicional de `Epic 1`:
 
 # Próximo foco recomendado
 
-Con `Epic 1` ya cerrada y `main` creada como nueva base estable, el siguiente foco natural es `Epic 2`.
+Con `CARD 0` ya iniciada, el siguiente foco natural dentro de `Epic 2` es bajar el contrato compartido y el modelo de estados del flujo de partidos.
 
 Orden recomendado:
 
-1. abrir branch de `Epic 2` desde `main`
-2. arrancar por la base de UI/tokens/componentes en `packages/ui` según `docs/product/DESIGN_SYSTEM.md`
-3. seguir con contratos compartidos, fixtures, detalle y predicciones match-level
+1. cerrar y commitear el avance de `CARD 0`
+2. implementar `CARD 1 — Shared Domain Contracts for Matches & Predictions`
+3. seguir con backend de fixtures/detalle/prediccion y luego conectar la UI ya preparada
 
 ---
 

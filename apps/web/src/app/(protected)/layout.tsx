@@ -1,28 +1,21 @@
 import type { ReactNode } from "react";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { Card, colors, typography } from "@prode/ui";
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
   return (
     <AuthGuard>
-      <main style={{ maxWidth: 960, margin: "0 auto", padding: "24px 20px 40px", display: "grid", gap: 20 }}>
-        <header
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "16px 18px",
-            borderRadius: 24,
-            background: "rgba(255, 255, 255, 0.72)",
-            border: "1px solid #d8ddcf"
-          }}
-        >
-          <div>
-            <strong>Prode Mundial</strong>
-            <p style={{ margin: "4px 0 0", color: "#5f6657" }}>Shell autenticado base para Epic 1.</p>
+      <main style={{ maxWidth: 1120, margin: "0 auto", padding: "24px 20px 40px", display: "grid", gap: 20 }}>
+        <Card elevated style={{ gridTemplateColumns: "minmax(0, 1fr) auto", alignItems: "center", gap: 16 }}>
+          <div style={{ display: "grid", gap: 6 }}>
+            <strong style={{ ...typography.h3, color: colors.textPrimary }}>Prode Mundial</strong>
+            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+              Shell autenticado dark-first para el loop diario del MVP.
+            </p>
           </div>
-          <span style={{ fontSize: 14, color: "#5f6657" }}>Sesión protegida</span>
-        </header>
+          <span style={{ ...typography.small, color: colors.textSecondary }}>Sesion protegida</span>
+        </Card>
 
         <section>{children}</section>
         <BottomNav />
