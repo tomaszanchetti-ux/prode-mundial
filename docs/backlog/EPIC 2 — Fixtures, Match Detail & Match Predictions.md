@@ -327,9 +327,11 @@ Dejar disponible un dataset mínimo y consistente para poder desarrollar fixture
 * seed de partidos  
 * mezcla mínima de:  
   * fase de grupos  
+  * dieciseisavos  
   * octavos  
   * cuartos  
   * semifinal  
+  * partido por el tercer puesto  
   * final  
 * variantes de estado:  
   * `scheduled`  
@@ -466,7 +468,7 @@ Crear handler `GET /api/v1/matches`.
 
 Soportar query params definidos:
 
-* `stage=group|R16|QF|SF|FINAL`  
+* `stage=group|R32|R16|QF|SF|BRONZE|FINAL`  
 * `filter=all|today|upcoming|pending|scored|finished`  
 * `cursor`  
 * `limit`

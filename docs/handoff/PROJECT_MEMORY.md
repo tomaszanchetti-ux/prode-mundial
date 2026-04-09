@@ -92,7 +92,8 @@ Avance adicional de `Epic 1`:
   - avance actual de `Epic 2` ya consolidado en commits locales:
     - `62ec4dc` -> `feat: start epic 2 ui foundation`
     - `1fa38ab` -> `feat: add shared match contracts`
-  - working tree limpio al cierre de la sesion
+    - `e99ea09` -> `docs: close epic 2 session handoff`
+  - working tree con avance local material sobre `CARD 2` a `CARD 7` antes del siguiente commit de cierre
 
 ## Avance inicial de Epic 2
 
@@ -162,6 +163,173 @@ Validaciones ejecutadas para este avance:
 - `./pnpm --filter @prode/shared build`
 - `./pnpm --filter @prode/web typecheck`
 
+## Alineacion al fixture real FIFA 2026
+
+- el proyecto ya no asume el formato viejo de 32 selecciones
+- contratos y documentacion binding ahora contemplan:
+  - 48 equipos
+  - 12 grupos
+  - `R32`
+  - `R16`
+  - `QF`
+  - `SF`
+  - `BRONZE`
+  - `FINAL`
+- la ventana de ajuste macro y sus deadlines se reinterpretaron como:
+  - cierre al kickoff del primer partido knockout
+  - ya no al kickoff del primer partido de octavos
+- `packages/shared` ahora expone `MATCH_STAGES` alineado al fixture real FIFA 2026
+
+## Base oficial para CARD 2
+
+- se agrego fuente oficial reproducible FIFA 2026 en:
+  - `apps/api/src/domains/matches/data/world-cup-2026.ts`
+- se agrego extractor crudo del PDF oficial FIFA en:
+  - `scripts/extract_fifa_world_cup_2026_schedule.py`
+- se agrego normalizador de fixture a dataset seed-ready en:
+  - `scripts/normalize_fifa_world_cup_2026_schedule.py`
+- se genero dataset crudo agrupado por numero oficial de partido:
+  - `apps/api/src/domains/matches/data/world-cup-2026-raw-schedule.json`
+- se genero dataset normalizado inicial de 104 partidos con:
+  - `officialMatchNumber`
+  - `stage`
+  - `groupId`
+  - `homeTeamId` / `awayTeamId` para fase de grupos
+  - `homeSlot` / `awaySlot` para knockout
+  - `kickoffAtEt`
+  - `kickoffAtUtc`
+  - `venueId`
+  - `status`
+  - `isLocked`
+  - `isScored`
+  - archivo:
+    - `apps/api/src/domains/matches/data/world-cup-2026-normalized-matches.json`
+
+Validaciones ejecutadas para esta alineacion:
+
+- `./pnpm --filter @prode/shared build`
+- `./pnpm --filter @prode/api typecheck`
+
+## Cierre de CARD 2
+
+- `apps/api` ya tiene seed reproducible para:
+  - `teams`
+  - `groups`
+  - `matches`
+- se agrego script operativo:
+  - `./pnpm --filter @prode/api seed:wc2026 -- --dry-run`
+  - `./pnpm --filter @prode/api seed:wc2026`
+- el seed:
+  - reutiliza el fixture FIFA 2026 normalizado
+  - persiste metadata util para backend futuro:
+    - `officialMatchNumber`
+    - `venueId`
+    - `homeSlot`
+    - `awaySlot`
+    - `kickoffAtEt`
+  - deja mezcla de estados dev utiles:
+    - `scheduled`
+    - `live`
+    - `finished`
+- documentacion actualizada en:
+  - `README.md`
+  - `apps/api/src/domains/matches/README.md`
+
+Validaciones ejecutadas para este cierre:
+
+- `./pnpm --filter @prode/api typecheck`
+- `./pnpm --filter @prode/api seed:wc2026 -- --dry-run`
+
+## Cierre de CARD 3
+
+- se creo capa backend de lectura desacoplada de HTTP para `matches`
+- nuevos repositorios:
+  - `matchesRepository`
+  - `predictionsRepository`
+  - `teamsRepository`
+- nuevo servicio de query:
+  - `matchesQueryService`
+- nuevas derivaciones backend resueltas server-side:
+  - `isLocked`
+  - `isEditable`
+  - `requiresQualifierIfDraw`
+  - `predictionStatus`
+  - `userPredictionSummary`
+  - `ctaLabel`
+- knockout no resuelto aun se representa con placeholders por slot:
+  - ejemplo: `Por definir (2A)`
+
+Validaciones ejecutadas:
+
+- `./pnpm --filter @prode/api typecheck`
+- `./pnpm --filter @prode/api test`
+
+## Cierre de CARD 4
+
+- `apps/api` ya expone endpoint autenticado:
+  - `GET /api/v1/matches`
+- el endpoint:
+  - valida `stage`
+  - valida `filter`
+  - valida `cursor`
+  - valida `limit`
+  - delega al `matchesQueryService`
+- se agregaron tests de integracion para:
+  - auth
+  - forwarding correcto de query params
+  - `VALIDATION_ERROR` en query invalida
+
+## Cierre de CARD 5
+
+- `apps/api` ya expone endpoint autenticado:
+  - `GET /api/v1/matches/:matchId`
+- el endpoint devuelve:
+  - payload completo de detalle
+  - `requiresQualifierIfDraw`
+  - `officialResult`
+  - `userPrediction`
+  - `scoringRules`
+- se agregaron tests de integracion para:
+  - caso feliz
+  - `MATCH_NOT_FOUND`
+
+## Cierre de CARD 6
+
+- se implemento capa pura de reglas de dominio para predicciones:
+  - `validatePredictionInput`
+  - `assertMatchPredictionEditable`
+  - `assertPredictionOwnership`
+- reglas cubiertas:
+  - score entero y `>= 0`
+  - knockout draw => clasificado obligatorio
+  - clasificado debe pertenecer al partido
+  - si no hay empate, clasificado se limpia a `null`
+  - `now < kickoffAt`
+
+## Cierre de CARD 7
+
+- `predictionsRepository` ya soporta:
+  - `upsertPrediction(userId, matchId, input)`
+- estrategia aplicada:
+  - lookup por `userId + matchId`
+  - update si existe
+  - create si no existe
+- persistencia alineada a modelo con:
+  - `predictionId`
+  - `userId`
+  - `matchId`
+  - `homeScorePred`
+  - `awayScorePred`
+  - `predictedQualifierTeamId`
+  - `predictedWinnerTeamId`
+  - `isLocked`
+  - `isScored`
+  - `pointsAwarded`
+  - `createdAt`
+  - `updatedAt`
+- helper puro agregado para construir y mergear entidad persistida:
+  - `prediction-persistence.ts`
+
 ## Tooling relevante
 
 - Node disponible
@@ -201,13 +369,20 @@ Validaciones ejecutadas para este avance:
 
 # Próximo foco recomendado
 
-Con `CARD 0` y `CARD 1` ya cerradas, el siguiente foco natural dentro de `Epic 2` es empezar a darle datos y backend real al flujo de partidos.
+Con `CARD 2` a `CARD 7` ya cerradas, el siguiente corte natural dentro de `Epic 2` es terminar el loop jugable de guardado de predicciones.
 
 Orden recomendado:
 
-1. arrancar `CARD 2 — Base Data Seeding for Teams, Groups & Matches`
-2. seguir con `CARD 3 — Matches Repository & Query Layer`
-3. luego implementar `CARD 4`, `CARD 5` y `CARD 6` sobre la base shared ya cerrada
+1. implementar `CARD 8 — PUT /api/v1/matches/:matchId/prediction`
+2. reutilizar:
+   - `matchesRepository.getMatchById`
+   - `validatePredictionInput`
+   - `predictionsRepository.upsertPrediction`
+3. validar:
+   - `MATCH_LOCKED`
+   - `INVALID_SCORE`
+   - `INVALID_KNOCKOUT_CLASSIFIER`
+4. luego seguir con `CARD 9 — Match Locking Rules & Derived States`
 
 ---
 

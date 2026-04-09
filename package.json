@@ -9,7 +9,9 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "format": "turbo run format"
+    "format": "turbo run format",
+    "extract:wc2026": "python3 scripts/extract_fifa_world_cup_2026_schedule.py",
+    "normalize:wc2026": "python3 scripts/normalize_fifa_world_cup_2026_schedule.py"
   },
   "devDependencies": {
     "@types/node": "25.5.2",

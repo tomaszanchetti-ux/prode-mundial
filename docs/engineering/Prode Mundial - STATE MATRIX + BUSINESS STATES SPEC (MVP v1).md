@@ -161,7 +161,7 @@ draft → locked → scored
 | ----- | ----- |
 | available | fase grupos terminada |
 | used | usuario ya ajustó |
-| expired | kickoff octavos |
+| expired | kickoff primer partido knockout |
 
 ---
 
@@ -235,7 +235,7 @@ draft → locked → scored
 | ----- | ----- |
 | match | kickoff |
 | macro\_initial | inicio torneo |
-| macro\_adjustment | inicio octavos |
+| macro\_adjustment | inicio primer partido knockout |
 
 ---
 

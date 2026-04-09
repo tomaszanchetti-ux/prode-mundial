@@ -105,6 +105,23 @@ EOF
 - `pnpm typecheck`
 - `pnpm test`
 
+## Seed local de World Cup 2026
+
+Para cerrar `Epic 2 / CARD 2`, la API ya tiene un seed reproducible para `teams`, `groups` y `matches` usando el fixture oficial normalizado de FIFA 2026.
+
+Resumen rápido:
+
+```bash
+pnpm --filter @prode/api seed:wc2026 -- --dry-run
+pnpm --filter @prode/api seed:wc2026
+```
+
+Notas:
+
+- el script requiere las credenciales Firebase ya cargadas en `.env`
+- `--dry-run` imprime el resumen del seed sin escribir en Firestore
+- el seed deja una mezcla útil de estados para desarrollo: partidos `scheduled`, `live` y `finished`
+
 ## Estado actual
 
 Este repo ya cubre una porción funcional de `Epic 1`:

@@ -1,0 +1,2633 @@
+{
+  "source": {
+    "label": "FIFA 2026 official match schedule PDF (Spanish)",
+    "url": "https://digitalhub.fifa.com/asset/00d96870-7dd7-48f9-9549-635a53b1bcc8/FWC26-Match-Schedule_Spanish.pdf",
+    "publishedAt": "2026-04-01T00:00:00Z",
+    "notes": [
+      "The FIFA PDF states that all kickoff times are shown in ET.",
+      "This file is a raw extraction snapshot grouped by official match number.",
+      "Some sightings are partial because the source PDF is a visual poster layout, not a structured table."
+    ]
+  },
+  "matches": [
+    {
+      "officialMatchNumber": 1,
+      "sightings": [
+        {
+          "dateLabel": "11 de junio",
+          "timeEt": "15:00",
+          "venueId": "guadalajara",
+          "venueLabel": "GUADALAJARA",
+          "tokens": [
+            "MEX"
+          ]
+        },
+        {
+          "dateLabel": "11 de junio",
+          "timeEt": "15:00",
+          "venueId": "mexico-city",
+          "venueLabel": "CIUDAD DE M\u00c9XICO",
+          "tokens": [
+            "MEX",
+            "v",
+            "RSA",
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 2,
+      "sightings": [
+        {
+          "dateLabel": "11 de junio",
+          "timeEt": "22:00",
+          "venueId": "los-angeles",
+          "venueLabel": "LOS \u00c1NGELES",
+          "tokens": [
+            "KOR"
+          ]
+        },
+        {
+          "dateLabel": "11 de junio",
+          "timeEt": "22:00",
+          "venueId": "guadalajara",
+          "venueLabel": "GUADALAJARA",
+          "tokens": [
+            "KOR",
+            "v",
+            "CZE",
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 3,
+      "sightings": [
+        {
+          "dateLabel": "11 de junio",
+          "timeEt": "15:00",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "CAN"
+          ]
+        },
+        {
+          "dateLabel": "11 de junio",
+          "timeEt": "15:00",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "CAN",
+            "v",
+            "BIH",
+            "B"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 4,
+      "sightings": [
+        {
+          "dateLabel": "11 de junio",
+          "timeEt": "21:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "USA"
+          ]
+        },
+        {
+          "dateLabel": "11 de junio",
+          "timeEt": "21:00",
+          "venueId": "los-angeles",
+          "venueLabel": "LOS \u00c1NGELES",
+          "tokens": [
+            "USA",
+            "v",
+            "PAR",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 5,
+      "sightings": [
+        {
+          "dateLabel": "12 de junio",
+          "timeEt": "21:00",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "HAI"
+          ]
+        },
+        {
+          "dateLabel": "12 de junio",
+          "timeEt": "21:00",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "HAI",
+            "v",
+            "SCO",
+            "C"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 6,
+      "sightings": [
+        {
+          "dateLabel": "12 de junio",
+          "timeEt": "00:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "AUS",
+            "v",
+            "TUR",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 7,
+      "sightings": [
+        {
+          "dateLabel": "12 de junio",
+          "timeEt": "18:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "BRA"
+          ]
+        },
+        {
+          "dateLabel": "12 de junio",
+          "timeEt": "18:00",
+          "venueId": "new-york-new-jersey",
+          "venueLabel": "NUEVA YORK NUEVA JERSEY",
+          "tokens": [
+            "BRA",
+            "v",
+            "MAR",
+            "C"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 8,
+      "sightings": [
+        {
+          "dateLabel": "12 de junio",
+          "timeEt": "15:00",
+          "venueId": "seattle",
+          "venueLabel": "SEATTLE",
+          "tokens": [
+            "QAT",
+            "v"
+          ]
+        },
+        {
+          "dateLabel": "12 de junio",
+          "timeEt": "15:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "QAT",
+            "v",
+            "SUI",
+            "B"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 9,
+      "sightings": [
+        {
+          "dateLabel": "13 de junio",
+          "timeEt": "19:00",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "CIV"
+          ]
+        },
+        {
+          "dateLabel": "13 de junio",
+          "timeEt": "19:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "CIV",
+            "v",
+            "ECU",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 10,
+      "sightings": [
+        {
+          "dateLabel": "13 de junio",
+          "timeEt": "13:00",
+          "venueId": "monterrey",
+          "venueLabel": "MONTERREY",
+          "tokens": [
+            "GER"
+          ]
+        },
+        {
+          "dateLabel": "13 de junio",
+          "timeEt": "13:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "GER",
+            "v",
+            "CUW",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 11,
+      "sightings": [
+        {
+          "dateLabel": "13 de junio",
+          "timeEt": "16:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "NED"
+          ]
+        },
+        {
+          "dateLabel": "13 de junio",
+          "timeEt": "16:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "NED",
+            "v",
+            "JPN",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 12,
+      "sightings": [
+        {
+          "dateLabel": "13 de junio",
+          "timeEt": "22:00",
+          "venueId": "mexico-city",
+          "venueLabel": "CIUDAD DE M\u00c9XICO",
+          "tokens": [
+            "SWE"
+          ]
+        },
+        {
+          "dateLabel": "13 de junio",
+          "timeEt": "22:00",
+          "venueId": "monterrey",
+          "venueLabel": "MONTERREY",
+          "tokens": [
+            "SWE",
+            "v",
+            "TUN",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 13,
+      "sightings": [
+        {
+          "dateLabel": "14 de junio",
+          "timeEt": "18:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "KSA"
+          ]
+        },
+        {
+          "dateLabel": "14 de junio",
+          "timeEt": "18:00",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "KSA",
+            "v",
+            "URU",
+            "H"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 14,
+      "sightings": [
+        {
+          "dateLabel": "14 de junio",
+          "timeEt": "12:00",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "ESP"
+          ]
+        },
+        {
+          "dateLabel": "14 de junio",
+          "timeEt": "12:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "ESP",
+            "v",
+            "CPV",
+            "H"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 15,
+      "sightings": [
+        {
+          "dateLabel": "14 de junio",
+          "timeEt": "21:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "IRN"
+          ]
+        },
+        {
+          "dateLabel": "14 de junio",
+          "timeEt": "21:00",
+          "venueId": "los-angeles",
+          "venueLabel": "LOS \u00c1NGELES",
+          "tokens": [
+            "IRN",
+            "v",
+            "NZL",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 16,
+      "sightings": [
+        {
+          "dateLabel": "14 de junio",
+          "timeEt": "15:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "BEL"
+          ]
+        },
+        {
+          "dateLabel": "14 de junio",
+          "timeEt": "15:00",
+          "venueId": "seattle",
+          "venueLabel": "SEATTLE",
+          "tokens": [
+            "BEL",
+            "v",
+            "EGY",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 17,
+      "sightings": [
+        {
+          "dateLabel": "15 de junio",
+          "timeEt": "15:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "FRA"
+          ]
+        },
+        {
+          "dateLabel": "15 de junio",
+          "timeEt": "15:00",
+          "venueId": "new-york-new-jersey",
+          "venueLabel": "NUEVA YORK NUEVA JERSEY",
+          "tokens": [
+            "FRA",
+            "v",
+            "SEN",
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 18,
+      "sightings": [
+        {
+          "dateLabel": "15 de junio",
+          "timeEt": "18:00",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "IRQ"
+          ]
+        },
+        {
+          "dateLabel": "15 de junio",
+          "timeEt": "18:00",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "IRQ",
+            "v",
+            "NOR",
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 19,
+      "sightings": [
+        {
+          "dateLabel": "15 de junio",
+          "timeEt": "21:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "ARG"
+          ]
+        },
+        {
+          "dateLabel": "15 de junio",
+          "timeEt": "21:00",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "ARG",
+            "v",
+            "ALG",
+            "J"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 20,
+      "sightings": [
+        {
+          "dateLabel": "15 de junio",
+          "timeEt": "00:00",
+          "venueId": "seattle",
+          "venueLabel": "SEATTLE",
+          "tokens": [
+            "AUT",
+            "v"
+          ]
+        },
+        {
+          "dateLabel": "15 de junio",
+          "timeEt": "00:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "AUT",
+            "v",
+            "JOR",
+            "J"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 21,
+      "sightings": [
+        {
+          "dateLabel": "16 de junio",
+          "timeEt": "19:00",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "GHA"
+          ]
+        },
+        {
+          "dateLabel": "16 de junio",
+          "timeEt": "19:00",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "GHA",
+            "v",
+            "PAN",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 22,
+      "sightings": [
+        {
+          "dateLabel": "16 de junio",
+          "timeEt": "16:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "ENG"
+          ]
+        },
+        {
+          "dateLabel": "16 de junio",
+          "timeEt": "16:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "ENG",
+            "v",
+            "CRO",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 23,
+      "sightings": [
+        {
+          "dateLabel": "16 de junio",
+          "timeEt": "13:00",
+          "venueId": "monterrey",
+          "venueLabel": "MONTERREY",
+          "tokens": [
+            "POR"
+          ]
+        },
+        {
+          "dateLabel": "16 de junio",
+          "timeEt": "13:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "POR",
+            "v",
+            "COD",
+            "K"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 24,
+      "sightings": [
+        {
+          "dateLabel": "16 de junio",
+          "timeEt": "22:00",
+          "venueId": "guadalajara",
+          "venueLabel": "GUADALAJARA",
+          "tokens": [
+            "UZB"
+          ]
+        },
+        {
+          "dateLabel": "16 de junio",
+          "timeEt": "22:00",
+          "venueId": "mexico-city",
+          "venueLabel": "CIUDAD DE M\u00c9XICO",
+          "tokens": [
+            "UZB",
+            "v",
+            "COL",
+            "K"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 25,
+      "sightings": [
+        {
+          "dateLabel": "17 de junio",
+          "timeEt": "12:00",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "CZE"
+          ]
+        },
+        {
+          "dateLabel": "17 de junio",
+          "timeEt": "12:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "CZE",
+            "v",
+            "RSA",
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 26,
+      "sightings": [
+        {
+          "dateLabel": "17 de junio",
+          "timeEt": "15:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "SUI"
+          ]
+        },
+        {
+          "dateLabel": "17 de junio",
+          "timeEt": "15:00",
+          "venueId": "los-angeles",
+          "venueLabel": "LOS \u00c1NGELES",
+          "tokens": [
+            "SUI",
+            "v",
+            "BIH",
+            "B"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 27,
+      "sightings": [
+        {
+          "dateLabel": "17 de junio",
+          "timeEt": "18:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "CAN",
+            "v",
+            "QAT",
+            "B"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 28,
+      "sightings": [
+        {
+          "dateLabel": "17 de junio",
+          "timeEt": "21:00",
+          "venueId": "los-angeles",
+          "venueLabel": "LOS \u00c1NGELES",
+          "tokens": [
+            "MEX"
+          ]
+        },
+        {
+          "dateLabel": "17 de junio",
+          "timeEt": "21:00",
+          "venueId": "guadalajara",
+          "venueLabel": "GUADALAJARA",
+          "tokens": [
+            "MEX",
+            "v",
+            "KOR",
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 29,
+      "sightings": [
+        {
+          "dateLabel": "18 de junio",
+          "timeEt": "20:30",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "BRA"
+          ]
+        },
+        {
+          "dateLabel": "18 de junio",
+          "timeEt": "20:30",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "BRA",
+            "v",
+            "HAI",
+            "C"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 30,
+      "sightings": [
+        {
+          "dateLabel": "18 de junio",
+          "timeEt": "18:00",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "SCO"
+          ]
+        },
+        {
+          "dateLabel": "18 de junio",
+          "timeEt": "18:00",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "SCO",
+            "v",
+            "MAR",
+            "C"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 31,
+      "sightings": [
+        {
+          "dateLabel": "18 de junio",
+          "timeEt": "23:00",
+          "venueId": "seattle",
+          "venueLabel": "SEATTLE",
+          "tokens": [
+            "TUR",
+            "v"
+          ]
+        },
+        {
+          "dateLabel": "18 de junio",
+          "timeEt": "23:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "TUR",
+            "v",
+            "PAR",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 32,
+      "sightings": [
+        {
+          "dateLabel": "18 de junio",
+          "timeEt": "15:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "USA"
+          ]
+        },
+        {
+          "dateLabel": "18 de junio",
+          "timeEt": "15:00",
+          "venueId": "seattle",
+          "venueLabel": "SEATTLE",
+          "tokens": [
+            "USA",
+            "v",
+            "AUS",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 33,
+      "sightings": [
+        {
+          "dateLabel": "19 de junio",
+          "timeEt": "16:00",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "GER"
+          ]
+        },
+        {
+          "dateLabel": "19 de junio",
+          "timeEt": "16:00",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "GER",
+            "v",
+            "CIV",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 34,
+      "sightings": [
+        {
+          "dateLabel": "19 de junio",
+          "timeEt": "20:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "ECU"
+          ]
+        },
+        {
+          "dateLabel": "19 de junio",
+          "timeEt": "20:00",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "ECU",
+            "v",
+            "CUW",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 35,
+      "sightings": [
+        {
+          "dateLabel": "19 de junio",
+          "timeEt": "13:00",
+          "venueId": "monterrey",
+          "venueLabel": "MONTERREY",
+          "tokens": [
+            "NED"
+          ]
+        },
+        {
+          "dateLabel": "19 de junio",
+          "timeEt": "13:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "NED",
+            "v",
+            "SWE",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 36,
+      "sightings": [
+        {
+          "dateLabel": "19 de junio",
+          "timeEt": "00:00",
+          "venueId": "mexico-city",
+          "venueLabel": "CIUDAD DE M\u00c9XICO",
+          "tokens": [
+            "TUN"
+          ]
+        },
+        {
+          "dateLabel": "19 de junio",
+          "timeEt": "00:00",
+          "venueId": "monterrey",
+          "venueLabel": "MONTERREY",
+          "tokens": [
+            "TUN",
+            "v",
+            "JPN",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 37,
+      "sightings": [
+        {
+          "dateLabel": "20 de junio",
+          "timeEt": "18:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "URU"
+          ]
+        },
+        {
+          "dateLabel": "20 de junio",
+          "timeEt": "18:00",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "URU",
+            "v",
+            "CPV",
+            "H"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 38,
+      "sightings": [
+        {
+          "dateLabel": "20 de junio",
+          "timeEt": "12:00",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "ESP"
+          ]
+        },
+        {
+          "dateLabel": "20 de junio",
+          "timeEt": "12:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "ESP",
+            "v",
+            "KSA",
+            "H"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 39,
+      "sightings": [
+        {
+          "dateLabel": "20 de junio",
+          "timeEt": "15:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "BEL"
+          ]
+        },
+        {
+          "dateLabel": "20 de junio",
+          "timeEt": "15:00",
+          "venueId": "los-angeles",
+          "venueLabel": "LOS \u00c1NGELES",
+          "tokens": [
+            "BEL",
+            "v",
+            "IRN",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 40,
+      "sightings": [
+        {
+          "dateLabel": "20 de junio",
+          "timeEt": "21:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "NZL",
+            "v",
+            "EGY",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 41,
+      "sightings": [
+        {
+          "dateLabel": "21 de junio",
+          "timeEt": "20:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "NOR"
+          ]
+        },
+        {
+          "dateLabel": "21 de junio",
+          "timeEt": "20:00",
+          "venueId": "new-york-new-jersey",
+          "venueLabel": "NUEVA YORK NUEVA JERSEY",
+          "tokens": [
+            "NOR",
+            "v",
+            "SEN",
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 42,
+      "sightings": [
+        {
+          "dateLabel": "21 de junio",
+          "timeEt": "17:00",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "FRA"
+          ]
+        },
+        {
+          "dateLabel": "21 de junio",
+          "timeEt": "17:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "FRA",
+            "v",
+            "IRQ",
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 43,
+      "sightings": [
+        {
+          "dateLabel": "21 de junio",
+          "timeEt": "13:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "ARG"
+          ]
+        },
+        {
+          "dateLabel": "21 de junio",
+          "timeEt": "13:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "ARG",
+            "v",
+            "AUT",
+            "J"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 44,
+      "sightings": [
+        {
+          "dateLabel": "21 de junio",
+          "timeEt": "23:00",
+          "venueId": "seattle",
+          "venueLabel": "SEATTLE",
+          "tokens": [
+            "JOR",
+            "v"
+          ]
+        },
+        {
+          "dateLabel": "21 de junio",
+          "timeEt": "23:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "JOR",
+            "v",
+            "ALG",
+            "J"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 45,
+      "sightings": [
+        {
+          "dateLabel": "22 de junio",
+          "timeEt": "16:00",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "ENG"
+          ]
+        },
+        {
+          "dateLabel": "22 de junio",
+          "timeEt": "16:00",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "ENG",
+            "v",
+            "GHA",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 46,
+      "sightings": [
+        {
+          "dateLabel": "22 de junio",
+          "timeEt": "19:00",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "PAN"
+          ]
+        },
+        {
+          "dateLabel": "22 de junio",
+          "timeEt": "19:00",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "PAN",
+            "v",
+            "CRO",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 47,
+      "sightings": [
+        {
+          "dateLabel": "22 de junio",
+          "timeEt": "13:00",
+          "venueId": "monterrey",
+          "venueLabel": "MONTERREY",
+          "tokens": [
+            "POR"
+          ]
+        },
+        {
+          "dateLabel": "22 de junio",
+          "timeEt": "13:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "POR",
+            "v",
+            "UZB",
+            "K"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 48,
+      "sightings": [
+        {
+          "dateLabel": "22 de junio",
+          "timeEt": "22:00",
+          "venueId": "los-angeles",
+          "venueLabel": "LOS \u00c1NGELES",
+          "tokens": [
+            "COL"
+          ]
+        },
+        {
+          "dateLabel": "22 de junio",
+          "timeEt": "22:00",
+          "venueId": "guadalajara",
+          "venueLabel": "GUADALAJARA",
+          "tokens": [
+            "COL",
+            "v",
+            "COD",
+            "K"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 49,
+      "sightings": [
+        {
+          "dateLabel": "23 de junio",
+          "timeEt": "18:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "SCO"
+          ]
+        },
+        {
+          "dateLabel": "23 de junio",
+          "timeEt": "18:00",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "SCO",
+            "v",
+            "BRA",
+            "C"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 50,
+      "sightings": [
+        {
+          "dateLabel": "23 de junio",
+          "timeEt": "18:00",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "MAR"
+          ]
+        },
+        {
+          "dateLabel": "23 de junio",
+          "timeEt": "18:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "MAR",
+            "v",
+            "HAI",
+            "C"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 51,
+      "sightings": [
+        {
+          "dateLabel": "23 de junio",
+          "timeEt": "15:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "SUI",
+            "v",
+            "CAN",
+            "B"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 52,
+      "sightings": [
+        {
+          "dateLabel": "23 de junio",
+          "timeEt": "15:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "BIH"
+          ]
+        },
+        {
+          "dateLabel": "23 de junio",
+          "timeEt": "15:00",
+          "venueId": "seattle",
+          "venueLabel": "SEATTLE",
+          "tokens": [
+            "BIH",
+            "v",
+            "QAT",
+            "B"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 53,
+      "sightings": [
+        {
+          "dateLabel": "23 de junio",
+          "timeEt": "21:00",
+          "venueId": "guadalajara",
+          "venueLabel": "GUADALAJARA",
+          "tokens": [
+            "CZE"
+          ]
+        },
+        {
+          "dateLabel": "23 de junio",
+          "timeEt": "21:00",
+          "venueId": "mexico-city",
+          "venueLabel": "CIUDAD DE M\u00c9XICO",
+          "tokens": [
+            "CZE",
+            "v",
+            "MEX",
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 54,
+      "sightings": [
+        {
+          "dateLabel": "23 de junio",
+          "timeEt": "21:00",
+          "venueId": "mexico-city",
+          "venueLabel": "CIUDAD DE M\u00c9XICO",
+          "tokens": [
+            "RSA"
+          ]
+        },
+        {
+          "dateLabel": "23 de junio",
+          "timeEt": "21:00",
+          "venueId": "monterrey",
+          "venueLabel": "MONTERREY",
+          "tokens": [
+            "RSA",
+            "v",
+            "KOR",
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 55,
+      "sightings": [
+        {
+          "dateLabel": "24 de junio",
+          "timeEt": "16:00",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "CUW"
+          ]
+        },
+        {
+          "dateLabel": "24 de junio",
+          "timeEt": "16:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "CUW",
+            "v",
+            "CIV",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 56,
+      "sightings": [
+        {
+          "dateLabel": "24 de junio",
+          "timeEt": "16:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "ECU"
+          ]
+        },
+        {
+          "dateLabel": "24 de junio",
+          "timeEt": "16:00",
+          "venueId": "new-york-new-jersey",
+          "venueLabel": "NUEVA YORK NUEVA JERSEY",
+          "tokens": [
+            "ECU",
+            "v",
+            "GER",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 57,
+      "sightings": [
+        {
+          "dateLabel": "24 de junio",
+          "timeEt": "19:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "JPN"
+          ]
+        },
+        {
+          "dateLabel": "24 de junio",
+          "timeEt": "19:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "JPN",
+            "v",
+            "SWE",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 58,
+      "sightings": [
+        {
+          "dateLabel": "24 de junio",
+          "timeEt": "19:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "TUN"
+          ]
+        },
+        {
+          "dateLabel": "24 de junio",
+          "timeEt": "19:00",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "TUN",
+            "v",
+            "NED",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 59,
+      "sightings": [
+        {
+          "dateLabel": "24 de junio",
+          "timeEt": "22:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "TUR"
+          ]
+        },
+        {
+          "dateLabel": "24 de junio",
+          "timeEt": "22:00",
+          "venueId": "los-angeles",
+          "venueLabel": "LOS \u00c1NGELES",
+          "tokens": [
+            "TUR",
+            "v",
+            "USA",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 60,
+      "sightings": [
+        {
+          "dateLabel": "24 de junio",
+          "timeEt": "22:00",
+          "venueId": "seattle",
+          "venueLabel": "SEATTLE",
+          "tokens": [
+            "PAR",
+            "v"
+          ]
+        },
+        {
+          "dateLabel": "24 de junio",
+          "timeEt": "22:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "PAR",
+            "v",
+            "AUS",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 61,
+      "sightings": [
+        {
+          "dateLabel": "25 de junio",
+          "timeEt": "15:00",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "NOR"
+          ]
+        },
+        {
+          "dateLabel": "25 de junio",
+          "timeEt": "15:00",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "NOR",
+            "v",
+            "FRA",
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 62,
+      "sightings": [
+        {
+          "dateLabel": "25 de junio",
+          "timeEt": "15:00",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "SEN"
+          ]
+        },
+        {
+          "dateLabel": "25 de junio",
+          "timeEt": "15:00",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "SEN",
+            "v",
+            "IRQ",
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 63,
+      "sightings": [
+        {
+          "dateLabel": "25 de junio",
+          "timeEt": "23:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "EGY"
+          ]
+        },
+        {
+          "dateLabel": "25 de junio",
+          "timeEt": "23:00",
+          "venueId": "seattle",
+          "venueLabel": "SEATTLE",
+          "tokens": [
+            "EGY",
+            "v",
+            "IRN",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 64,
+      "sightings": [
+        {
+          "dateLabel": "25 de junio",
+          "timeEt": "23:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "NZL",
+            "v",
+            "BEL",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 65,
+      "sightings": [
+        {
+          "dateLabel": "25 de junio",
+          "timeEt": "20:00",
+          "venueId": "monterrey",
+          "venueLabel": "MONTERREY",
+          "tokens": [
+            "CPV"
+          ]
+        },
+        {
+          "dateLabel": "25 de junio",
+          "timeEt": "20:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "CPV",
+            "v",
+            "KSA",
+            "H"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 66,
+      "sightings": [
+        {
+          "dateLabel": "25 de junio",
+          "timeEt": "20:00",
+          "venueId": "los-angeles",
+          "venueLabel": "LOS \u00c1NGELES",
+          "tokens": [
+            "URU"
+          ]
+        },
+        {
+          "dateLabel": "25 de junio",
+          "timeEt": "20:00",
+          "venueId": "guadalajara",
+          "venueLabel": "GUADALAJARA",
+          "tokens": [
+            "URU",
+            "v",
+            "ESP",
+            "H"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 67,
+      "sightings": [
+        {
+          "dateLabel": "26 de junio",
+          "timeEt": "17:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "PAN"
+          ]
+        },
+        {
+          "dateLabel": "26 de junio",
+          "timeEt": "17:00",
+          "venueId": "new-york-new-jersey",
+          "venueLabel": "NUEVA YORK NUEVA JERSEY",
+          "tokens": [
+            "PAN",
+            "v",
+            "ENG",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 68,
+      "sightings": [
+        {
+          "dateLabel": "26 de junio",
+          "timeEt": "17:00",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "CRO"
+          ]
+        },
+        {
+          "dateLabel": "26 de junio",
+          "timeEt": "17:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "CRO",
+            "v",
+            "GHA",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 69,
+      "sightings": [
+        {
+          "dateLabel": "26 de junio",
+          "timeEt": "22:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "ALG"
+          ]
+        },
+        {
+          "dateLabel": "26 de junio",
+          "timeEt": "22:00",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "ALG",
+            "v",
+            "AUT",
+            "J"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 70,
+      "sightings": [
+        {
+          "dateLabel": "26 de junio",
+          "timeEt": "22:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "JOR"
+          ]
+        },
+        {
+          "dateLabel": "26 de junio",
+          "timeEt": "22:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "JOR",
+            "v",
+            "ARG",
+            "J"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 71,
+      "sightings": [
+        {
+          "dateLabel": "26 de junio",
+          "timeEt": "19:30",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "COL"
+          ]
+        },
+        {
+          "dateLabel": "26 de junio",
+          "timeEt": "19:30",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "COL",
+            "v",
+            "POR",
+            "K"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 72,
+      "sightings": [
+        {
+          "dateLabel": "26 de junio",
+          "timeEt": "19:30",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "COD"
+          ]
+        },
+        {
+          "dateLabel": "26 de junio",
+          "timeEt": "19:30",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "COD",
+            "v",
+            "UZB",
+            "K"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 73,
+      "sightings": [
+        {
+          "dateLabel": "27 de junio",
+          "timeEt": "15:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "2A"
+          ]
+        },
+        {
+          "dateLabel": "27 de junio",
+          "timeEt": "15:00",
+          "venueId": "los-angeles",
+          "venueLabel": "LOS \u00c1NGELES",
+          "tokens": [
+            "2A",
+            "v",
+            "2B"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 74,
+      "sightings": [
+        {
+          "dateLabel": "28 de junio",
+          "timeEt": "16:30",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "1E"
+          ]
+        },
+        {
+          "dateLabel": "28 de junio",
+          "timeEt": "16:30",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "1E",
+            "v",
+            "3",
+            "ABCDF"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 75,
+      "sightings": [
+        {
+          "dateLabel": "28 de junio",
+          "timeEt": "21:00",
+          "venueId": "mexico-city",
+          "venueLabel": "CIUDAD DE M\u00c9XICO",
+          "tokens": [
+            "1F"
+          ]
+        },
+        {
+          "dateLabel": "28 de junio",
+          "timeEt": "21:00",
+          "venueId": "monterrey",
+          "venueLabel": "MONTERREY",
+          "tokens": [
+            "1F",
+            "v",
+            "2C"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 76,
+      "sightings": [
+        {
+          "dateLabel": "28 de junio",
+          "timeEt": "13:00",
+          "venueId": "monterrey",
+          "venueLabel": "MONTERREY",
+          "tokens": [
+            "1C"
+          ]
+        },
+        {
+          "dateLabel": "28 de junio",
+          "timeEt": "13:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "1C",
+            "v",
+            "2F"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 77,
+      "sightings": [
+        {
+          "dateLabel": "29 de junio",
+          "timeEt": "17:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "1I"
+          ]
+        },
+        {
+          "dateLabel": "29 de junio",
+          "timeEt": "17:00",
+          "venueId": "new-york-new-jersey",
+          "venueLabel": "NUEVA YORK NUEVA JERSEY",
+          "tokens": [
+            "1I",
+            "v",
+            "3",
+            "CDFGH"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 78,
+      "sightings": [
+        {
+          "dateLabel": "29 de junio",
+          "timeEt": "13:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "2E"
+          ]
+        },
+        {
+          "dateLabel": "29 de junio",
+          "timeEt": "13:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "2E",
+            "v",
+            "2I"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 79,
+      "sightings": [
+        {
+          "dateLabel": "29 de junio",
+          "timeEt": "21:00",
+          "venueId": "guadalajara",
+          "venueLabel": "GUADALAJARA",
+          "tokens": [
+            "1A"
+          ]
+        },
+        {
+          "dateLabel": "29 de junio",
+          "timeEt": "21:00",
+          "venueId": "mexico-city",
+          "venueLabel": "CIUDAD DE M\u00c9XICO",
+          "tokens": [
+            "1A",
+            "v",
+            "3",
+            "CEFHI"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 80,
+      "sightings": [
+        {
+          "dateLabel": "30 de junio",
+          "timeEt": "12:00",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "1L"
+          ]
+        },
+        {
+          "dateLabel": "30 de junio",
+          "timeEt": "12:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "1L",
+            "v",
+            "3",
+            "EHIJK"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 81,
+      "sightings": [
+        {
+          "dateLabel": "30 de junio",
+          "timeEt": "20:00",
+          "venueId": "seattle",
+          "venueLabel": "SEATTLE",
+          "tokens": [
+            "1D",
+            "v"
+          ]
+        },
+        {
+          "dateLabel": "30 de junio",
+          "timeEt": "20:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "1D",
+            "v",
+            "3",
+            "BEFIJ"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 82,
+      "sightings": [
+        {
+          "dateLabel": "30 de junio",
+          "timeEt": "16:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "1G"
+          ]
+        },
+        {
+          "dateLabel": "30 de junio",
+          "timeEt": "16:00",
+          "venueId": "seattle",
+          "venueLabel": "SEATTLE",
+          "tokens": [
+            "1G",
+            "v",
+            "3",
+            "AEHIJ"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 83,
+      "sightings": [
+        {
+          "dateLabel": "1 de julio",
+          "timeEt": "19:00",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "2K"
+          ]
+        },
+        {
+          "dateLabel": "1 de julio",
+          "timeEt": "19:00",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "2K",
+            "v",
+            "2L"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 84,
+      "sightings": [
+        {
+          "dateLabel": "1 de julio",
+          "timeEt": "15:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "1H"
+          ]
+        },
+        {
+          "dateLabel": "1 de julio",
+          "timeEt": "15:00",
+          "venueId": "los-angeles",
+          "venueLabel": "LOS \u00c1NGELES",
+          "tokens": [
+            "1H",
+            "v",
+            "2J"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 85,
+      "sightings": [
+        {
+          "dateLabel": "1 de julio",
+          "timeEt": "23:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "1B",
+            "v",
+            "3",
+            "EFGIJ"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 86,
+      "sightings": [
+        {
+          "dateLabel": "2 de julio",
+          "timeEt": "18:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "1J"
+          ]
+        },
+        {
+          "dateLabel": "2 de julio",
+          "timeEt": "18:00",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "1J",
+            "v",
+            "2H"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 87,
+      "sightings": [
+        {
+          "dateLabel": "2 de julio",
+          "timeEt": "21:30",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "1K"
+          ]
+        },
+        {
+          "dateLabel": "2 de julio",
+          "timeEt": "21:30",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "1K",
+            "v",
+            "3",
+            "DEIJL"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 88,
+      "sightings": [
+        {
+          "dateLabel": "2 de julio",
+          "timeEt": "14:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "2D"
+          ]
+        },
+        {
+          "dateLabel": "2 de julio",
+          "timeEt": "14:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "2D",
+            "v",
+            "2G"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 89,
+      "sightings": [
+        {
+          "dateLabel": "3 de julio",
+          "timeEt": "17:00",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "W74"
+          ]
+        },
+        {
+          "dateLabel": "3 de julio",
+          "timeEt": "17:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "W74",
+            "v",
+            "W77"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 90,
+      "sightings": [
+        {
+          "dateLabel": "3 de julio",
+          "timeEt": "13:00",
+          "venueId": "monterrey",
+          "venueLabel": "MONTERREY",
+          "tokens": [
+            "W73"
+          ]
+        },
+        {
+          "dateLabel": "3 de julio",
+          "timeEt": "13:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "W73",
+            "v",
+            "W75"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 91,
+      "sightings": [
+        {
+          "dateLabel": "4 de julio",
+          "timeEt": "16:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": [
+            "W76"
+          ]
+        },
+        {
+          "dateLabel": "4 de julio",
+          "timeEt": "16:00",
+          "venueId": "new-york-new-jersey",
+          "venueLabel": "NUEVA YORK NUEVA JERSEY",
+          "tokens": [
+            "W76",
+            "v",
+            "W78"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 92,
+      "sightings": [
+        {
+          "dateLabel": "4 de julio",
+          "timeEt": "20:00",
+          "venueId": "guadalajara",
+          "venueLabel": "GUADALAJARA",
+          "tokens": [
+            "W79"
+          ]
+        },
+        {
+          "dateLabel": "4 de julio",
+          "timeEt": "20:00",
+          "venueId": "mexico-city",
+          "venueLabel": "CIUDAD DE M\u00c9XICO",
+          "tokens": [
+            "W79",
+            "v",
+            "W80"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 93,
+      "sightings": [
+        {
+          "dateLabel": "5 de julio",
+          "timeEt": "15:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "W83"
+          ]
+        },
+        {
+          "dateLabel": "5 de julio",
+          "timeEt": "15:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "W83",
+            "v",
+            "W84"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 94,
+      "sightings": [
+        {
+          "dateLabel": "5 de julio",
+          "timeEt": "20:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "W81"
+          ]
+        },
+        {
+          "dateLabel": "5 de julio",
+          "timeEt": "20:00",
+          "venueId": "seattle",
+          "venueLabel": "SEATTLE",
+          "tokens": [
+            "W81",
+            "v",
+            "W82"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 95,
+      "sightings": [
+        {
+          "dateLabel": "6 de julio",
+          "timeEt": "12:00",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "W86"
+          ]
+        },
+        {
+          "dateLabel": "6 de julio",
+          "timeEt": "12:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "W86",
+            "v",
+            "W88"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 96,
+      "sightings": [
+        {
+          "dateLabel": "6 de julio",
+          "timeEt": "16:00",
+          "venueId": "vancouver",
+          "venueLabel": "VANCOUVER",
+          "tokens": [
+            "W85",
+            "v",
+            "W87"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 97,
+      "sightings": [
+        {
+          "dateLabel": "8 de julio",
+          "timeEt": "16:00",
+          "venueId": "toronto",
+          "venueLabel": "TORONTO",
+          "tokens": [
+            "W89"
+          ]
+        },
+        {
+          "dateLabel": "8 de julio",
+          "timeEt": "16:00",
+          "venueId": "boston",
+          "venueLabel": "BOSTON",
+          "tokens": [
+            "W89",
+            "v",
+            "W90"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 98,
+      "sightings": [
+        {
+          "dateLabel": "9 de julio",
+          "timeEt": "15:00",
+          "venueId": "san-francisco-bay-area",
+          "venueLabel": "SAN FRANCISCO",
+          "tokens": [
+            "W93"
+          ]
+        },
+        {
+          "dateLabel": "9 de julio",
+          "timeEt": "15:00",
+          "venueId": "los-angeles",
+          "venueLabel": "LOS \u00c1NGELES",
+          "tokens": [
+            "W93",
+            "v",
+            "W94"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 99,
+      "sightings": [
+        {
+          "dateLabel": "10 de julio",
+          "timeEt": "17:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "W91"
+          ]
+        },
+        {
+          "dateLabel": "10 de julio",
+          "timeEt": "17:00",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "W91",
+            "v",
+            "W92"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 100,
+      "sightings": [
+        {
+          "dateLabel": "10 de julio",
+          "timeEt": "21:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "W95"
+          ]
+        },
+        {
+          "dateLabel": "10 de julio",
+          "timeEt": "21:00",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "W95",
+            "v",
+            "W96"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 101,
+      "sightings": [
+        {
+          "dateLabel": "13 de julio",
+          "timeEt": "15:00",
+          "venueId": "houston",
+          "venueLabel": "HOUSTON",
+          "tokens": [
+            "W97"
+          ]
+        },
+        {
+          "dateLabel": "13 de julio",
+          "timeEt": "15:00",
+          "venueId": "dallas",
+          "venueLabel": "DALLAS",
+          "tokens": [
+            "W97",
+            "v",
+            "W98"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 102,
+      "sightings": [
+        {
+          "dateLabel": "14 de julio",
+          "timeEt": "15:00",
+          "venueId": "kansas-city",
+          "venueLabel": "KANSAS CITY",
+          "tokens": [
+            "W99"
+          ]
+        },
+        {
+          "dateLabel": "14 de julio",
+          "timeEt": "15:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "W99",
+            "v",
+            "W100"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 103,
+      "sightings": [
+        {
+          "dateLabel": "17 de julio",
+          "timeEt": "17:00",
+          "venueId": "atlanta",
+          "venueLabel": "ATLANTA",
+          "tokens": [
+            "FINAL"
+          ]
+        },
+        {
+          "dateLabel": "17 de julio",
+          "timeEt": "17:00",
+          "venueId": "miami",
+          "venueLabel": "MIAMI",
+          "tokens": [
+            "FINAL",
+            "DE",
+            "BRONCE"
+          ]
+        }
+      ]
+    },
+    {
+      "officialMatchNumber": 104,
+      "sightings": [
+        {
+          "dateLabel": "18 de julio",
+          "timeEt": "15:00",
+          "venueId": "philadelphia",
+          "venueLabel": "FILADELFIA",
+          "tokens": []
+        },
+        {
+          "dateLabel": "18 de julio",
+          "timeEt": "15:00",
+          "venueId": "new-york-new-jersey",
+          "venueLabel": "NUEVA YORK NUEVA JERSEY",
+          "tokens": [
+            "FINAL"
+          ]
+        }
+      ]
+    }
+  ]
+}

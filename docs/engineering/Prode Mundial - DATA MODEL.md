@@ -322,7 +322,7 @@ Representa cada partido oficial del torneo y su resultado fuente de verdad inter
 {  
   matchId: string
 
-  stage: "group" | "R16" | "QF" | "SF" | "FINAL"  
+  stage: "group" | "R32" | "R16" | "QF" | "SF" | "BRONZE" | "FINAL"  
   groupId: string | null
 
   homeTeamId: string  

@@ -1,4 +1,4 @@
-export const MATCH_STAGES = ["group", "R16", "QF", "SF", "FINAL"] as const;
+export const MATCH_STAGES = ["group", "R32", "R16", "QF", "SF", "BRONZE", "FINAL"] as const;
 
 export const MATCH_STATUSES = ["scheduled", "live", "finished"] as const;
 

@@ -382,7 +382,7 @@ type HomePriorityCard \= {
 
 type HomeMatchCard \= {  
   matchId: string  
-  stage: 'group' | 'R16' | 'QF' | 'SF' | 'FINAL'  
+  stage: 'group' | 'R32' | 'R16' | 'QF' | 'SF' | 'BRONZE' | 'FINAL'  
   groupId: string | null  
   homeTeam: TeamSummary  
   awayTeam: TeamSummary  
@@ -631,7 +631,7 @@ Mostrar `deadlineAt = tournamentKickoffAt` cuando `status` sea:
 
 ### **Ajuste macro**
 
-Mostrar `deadlineAt = firstR16KickoffAt` cuando:
+Mostrar `deadlineAt = firstKnockoutKickoffAt` cuando:
 
 * `adjustmentAvailable = true`
 
