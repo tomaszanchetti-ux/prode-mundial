@@ -51,6 +51,14 @@ Sesión dedicada a avanzar el núcleo pendiente de `Epic 1`:
 - se actualizó `README.md` con el nuevo estado funcional de Epic 1
 - se actualizó `PROJECT_MEMORY.md` para reflejar auth real + Firestore
 
+## Dev / integración local
+
+- se creó `.env` local raíz para API
+- se creó `apps/web/.env.local` para exponer `NEXT_PUBLIC_FIREBASE_*` a Next
+- se corrigió la carga de env en `apps/api` para leer el `.env` raíz antes de inicializar Firebase Admin
+- se agregó CORS explícito para desarrollo local entre `web` y `api`
+- se validó la activación real de Firebase Auth y Firestore sobre el proyecto `prode-mundial-4e419`
+
 ---
 
 # 2. Verificaciones
@@ -58,6 +66,12 @@ Sesión dedicada a avanzar el núcleo pendiente de `Epic 1`:
 - `./pnpm typecheck` OK
 - `./pnpm build` OK
 - `./pnpm test` OK
+- `GET /health` OK en local
+- `GET /api/v1/public/bootstrap` OK en local
+- login real con Firebase OK
+- perfil autenticado ya alcanza backend sin token fake
+- commit realizado: `6c25b39`
+- push realizado a `origin/epic/epic-1-foundation-auth-shell`
 
 ---
 
@@ -69,14 +83,13 @@ La base de `Epic 1` quedó mucho más cerca del flujo demo objetivo:
 - la API ya valida tokens Firebase reales
 - el perfil autenticado ya puede crearse y persistirse en Firestore
 - el shell protegido ya no depende del token local de desarrollo
-
-Todavía falta QA funcional con credenciales Firebase reales para confirmar el recorrido completo Google + magic link en entorno local.
+- el entorno local ya quedó operativo con `web` + `api` y auth real validada
 
 ---
 
 # 4. Pendientes recomendados
 
-1. probar login Google y magic link con proyecto Firebase real
-2. cubrir errores UX específicos del auth flow
-3. agregar tests mínimos de login/guard/API unauthorized
-4. documentar setup Firebase paso a paso para otro developer
+1. cubrir errores UX específicos del auth flow
+2. agregar tests mínimos de login/guard/API unauthorized
+3. documentar setup Firebase paso a paso para otro developer
+4. decidir si el bootstrap público local debe tolerar mejor caída de API para DX

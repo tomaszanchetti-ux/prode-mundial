@@ -60,6 +60,8 @@ Avance adicional de `Epic 1`:
 - validación uniforme de payloads y envelope estándar reutilizable
 - validación real de Firebase ID token en API vía `firebase-admin`
 - persistencia de perfiles autenticados en Firestore sobre colección `users`
+- carga explícita de `.env` raíz en API y `.env.local` en web para desarrollo local real
+- CORS local resuelto para `http://localhost:3000 -> http://localhost:4000`
 - `apps/web` ya muestra:
   - landing pública alineada al sitemap
   - pantalla `/login` conectada a Google + magic link
@@ -69,8 +71,9 @@ Avance adicional de `Epic 1`:
   - pantalla de perfil conectada a sesión Firebase real con logout
 - estado Git actual:
   - branch activa: `epic/epic-1-foundation-auth-shell`
-  - commit inicial publicado en remoto
-  - working tree con cambios locales de continuación sobre Epic 1
+  - auth real ya validada localmente sobre Firebase del proyecto `prode-mundial-4e419`
+  - último commit publicado en remoto: `6c25b39`
+  - working tree limpio al cierre de WS3
 
 ## Tooling relevante
 
@@ -112,10 +115,10 @@ Avance adicional de `Epic 1`:
 
 Seguir con `EPIC 1`:
 
-1. probar el flujo end-to-end con credenciales Firebase reales
-2. endurecer manejo de errores UX para popup cancelado, link expirado y token inválido
-3. agregar tests mínimos de auth guard, login render y rechazo de API sin token
-4. documentar setup Firebase en README y helpers de desarrollo
+1. endurecer manejo de errores UX para popup cancelado, link expirado y token inválido
+2. agregar tests mínimos de auth guard, login render y rechazo de API sin token
+3. documentar setup Firebase paso a paso y helpers de desarrollo sin exponer secretos
+4. revisar si conviene mantener bootstrap público dependiente de API en local o agregar fallback de DX
 5. conectar `/home` al endpoint real cuando exista
 
 ---
