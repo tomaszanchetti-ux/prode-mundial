@@ -62,6 +62,7 @@ La fuente de verdad funcional y técnica parte de:
 4. `docs/engineering/03. Prode Mundial - API Specification (Endpoints + Contracts + Payloads).md`
 5. `docs/engineering/Prode Mundial - STATE MATRIX + BUSINESS STATES SPEC (MVP v1).md`
 6. `docs/engineering/Prode Mundial - BACKEND EXECUTION MODEL (Jobs + Scoring + Orchestration) — MVP v1.md`
+7. `docs/product/DESIGN_SYSTEM.md` para cualquier decisión visual, de componentes o interacción UI
 
 Los demás docs desarrollan o aterrizan esas decisiones.
 
@@ -131,6 +132,14 @@ Para cada tarea:
 4. exponer contrato
 5. conectar UI
 6. cubrir con tests mínimos útiles
+
+## 2.3 Regla adicional para frontend/UI
+
+Antes de tocar pantallas o componentes visuales:
+
+1. leer `docs/product/DESIGN_SYSTEM.md`
+2. validar si ya existe primitive o componente en `packages/ui`
+3. evitar crear estilos o componentes fuera del sistema salvo transición explícita
 
 ## 2.4 Flujo Git obligatorio
 

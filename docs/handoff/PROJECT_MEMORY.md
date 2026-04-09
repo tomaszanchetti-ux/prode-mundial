@@ -32,6 +32,7 @@ El corpus quedó alineado para implementación con estas decisiones rectoras:
 - backend como source of truth
 - contracts-first
 - scoring batch/event-driven
+- design system UI oficial ya incorporado al repo como guía binding para frontend y `packages/ui`
 
 ## Estado técnico
 
@@ -81,10 +82,13 @@ Avance adicional de `Epic 1`:
     - login view render base
     - rechazo `401` de API sin bearer / token inválido
 - estado Git actual:
-  - branch activa: `epic/epic-1-foundation-auth-shell`
+  - branch activa: `main`
   - auth real ya validada localmente sobre Firebase del proyecto `prode-mundial-4e419`
-  - último commit publicado en remoto: `6c25b39`
-  - working tree con cambios locales de cierre de `Epic 1` en esta sesión
+  - `Epic 1` quedó cerrada y publicada en:
+    - `origin/epic/epic-1-foundation-auth-shell`
+    - `origin/main`
+  - commit base estable actual: `c6aa2a1`
+  - working tree con cambios documentales locales de integración del design system y ajuste de planning para `Epic 2`
 
 ## Tooling relevante
 
@@ -125,13 +129,13 @@ Avance adicional de `Epic 1`:
 
 # Próximo foco recomendado
 
-Si la validación final local queda OK, `Epic 1` queda esencialmente lista para cierre funcional.
+Con `Epic 1` ya cerrada y `main` creada como nueva base estable, el siguiente foco natural es `Epic 2`.
 
-Siguiente foco natural:
+Orden recomendado:
 
-1. confirmar contra la DoD si falta algún detalle menor de CI o seeds de desarrollo
-2. preparar arranque de `Epic 2` sobre fixtures, match detail y predicciones
-3. conectar `/home` al endpoint real cuando exista en épicas posteriores
+1. abrir branch de `Epic 2` desde `main`
+2. arrancar por la base de UI/tokens/componentes en `packages/ui` según `docs/product/DESIGN_SYSTEM.md`
+3. seguir con contratos compartidos, fixtures, detalle y predicciones match-level
 
 ---
 
