@@ -28,6 +28,8 @@ export type MatchSummary = {
   status: MatchStatus;
   deadlineAt: string;
   isLocked: boolean;
+  isFinished: boolean;
+  isScored: boolean;
   predictionStatus: PredictionStatus;
   userPredictionSummary: UserPredictionSummary;
   isEditable: boolean;

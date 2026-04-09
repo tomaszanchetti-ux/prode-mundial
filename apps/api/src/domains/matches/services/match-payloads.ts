@@ -1,4 +1,12 @@
-import { MATCH_SCORING_RULES, type MatchDetail, type MatchStatus, type MatchSummary, type TeamRef, type UserMatchPrediction } from "@prode/shared";
+import {
+  MATCH_SCORING_RULES,
+  type MatchDetail,
+  type MatchStatus,
+  type MatchSummary,
+  type SaveMatchPredictionResponse,
+  type TeamRef,
+  type UserMatchPrediction
+} from "@prode/shared";
 import type {
   DerivedMatchViewState,
   ResolvedMatchTeams,
@@ -6,18 +14,11 @@ import type {
   StoredPrediction,
   StoredTeam
 } from "../types";
+import { deriveMatchState } from "./match-state";
 
 const CURSOR_SEPARATOR = "::";
 
-function normalizeMatchStatus(status: StoredMatch["status"]): MatchStatus {
-  return status === "corrected" ? "finished" : status;
-}
-
-function toDateValue(timestamp: string) {
-  return new Date(timestamp).getTime();
-}
-
-function resolvePredictedQualifierTeamId(prediction: StoredPrediction | null) {
+export function resolvePredictedQualifierTeamId(prediction: StoredPrediction | null) {
   if (!prediction) {
     return null;
   }
@@ -89,53 +90,37 @@ export function resolveMatchTeams(match: StoredMatch, teamsById: Map<string, Sto
 }
 
 export function deriveMatchViewState(match: StoredMatch, prediction: StoredPrediction | null, now = new Date()): DerivedMatchViewState {
-  const publicStatus = normalizeMatchStatus(match.status);
-  const isLocked = match.isLocked || publicStatus !== "scheduled" || toDateValue(match.kickoffAt) <= now.getTime();
-  const isEditable = !isLocked && publicStatus === "scheduled";
+  const derivedState = deriveMatchState(match, prediction, now);
   const requiresQualifierIfDraw = match.stage !== "group";
   const qualifier = resolvePredictedQualifierTeamId(prediction);
   const userPredictionSummary = formatPredictionSummary(prediction);
-
-  let predictionStatus: DerivedMatchViewState["predictionStatus"] = "empty";
-
-  if (prediction) {
-    if (prediction.isScored || (match.isScored && prediction.pointsAwarded >= 0)) {
-      predictionStatus = "scored";
-    } else if (isEditable) {
-      predictionStatus = "saved_editable";
-    } else {
-      predictionStatus = "locked_unscored";
-    }
-  }
-
-  if (publicStatus !== "scheduled" && !prediction && publicStatus !== "finished") {
-    predictionStatus = "void";
-  }
-
   let ctaLabel = "Predecir";
 
-  if (predictionStatus === "saved_editable") {
+  if (derivedState.predictionStatus === "saved_editable") {
     ctaLabel = "Editar prediccion";
-  } else if (predictionStatus === "scored") {
+  } else if (derivedState.predictionStatus === "scored") {
     ctaLabel = "Ver puntos";
-  } else if (predictionStatus === "locked_unscored") {
-    ctaLabel = publicStatus === "finished" ? "Ver resultado" : "Bloqueado";
-  } else if (predictionStatus === "void") {
+  } else if (derivedState.predictionStatus === "locked_unscored") {
+    ctaLabel = derivedState.publicStatus === "finished" ? "Ver resultado" : "Bloqueado";
+  } else if (derivedState.predictionStatus === "void") {
     ctaLabel = "Ver resultado";
-  } else if (!isEditable) {
-    ctaLabel = publicStatus === "finished" ? "Ver resultado" : "Bloqueado";
+  } else if (!derivedState.isEditable) {
+    ctaLabel = derivedState.publicStatus === "finished" ? "Ver resultado" : "Bloqueado";
   }
 
-  if (requiresQualifierIfDraw && prediction && prediction.homeScorePred === prediction.awayScorePred && !qualifier && isEditable) {
+  if (
+    requiresQualifierIfDraw &&
+    prediction &&
+    prediction.homeScorePred === prediction.awayScorePred &&
+    !qualifier &&
+    derivedState.isEditable
+  ) {
     ctaLabel = "Editar prediccion";
   }
 
   return {
-    publicStatus,
-    isLocked,
-    isEditable,
+    ...derivedState,
     requiresQualifierIfDraw,
-    predictionStatus,
     userPredictionSummary,
     ctaLabel
   };
@@ -192,6 +177,8 @@ export function toMatchSummary(
     status: state.publicStatus,
     deadlineAt: match.kickoffAt,
     isLocked: state.isLocked,
+    isFinished: state.isFinished,
+    isScored: state.isScored,
     predictionStatus: state.predictionStatus,
     userPredictionSummary: state.userPredictionSummary,
     isEditable: state.isEditable,
@@ -223,6 +210,25 @@ export function toMatchDetail(
     officialResult,
     userPrediction: toUserMatchPrediction(match, prediction, now),
     scoringRules: MATCH_SCORING_RULES
+  };
+}
+
+export function toSaveMatchPredictionResponse(
+  match: StoredMatch,
+  prediction: StoredPrediction,
+  now = new Date()
+): SaveMatchPredictionResponse {
+  const state = deriveMatchViewState(match, prediction, now);
+
+  return {
+    predictionId: prediction.predictionId,
+    matchId: prediction.matchId,
+    status: state.predictionStatus,
+    isEditable: state.isEditable,
+    homeScorePred: prediction.homeScorePred,
+    awayScorePred: prediction.awayScorePred,
+    predictedQualifierTeamId: resolvePredictedQualifierTeamId(prediction),
+    savedAt: prediction.updatedAt
   };
 }
 

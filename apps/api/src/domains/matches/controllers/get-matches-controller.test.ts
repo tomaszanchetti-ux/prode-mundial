@@ -67,6 +67,8 @@ test("GET /api/v1/matches returns envelope with validated query forwarded to ser
           status: "scheduled",
           deadlineAt: "2026-06-27T19:00:00Z",
           isLocked: false,
+          isFinished: false,
+          isScored: false,
           predictionStatus: "empty",
           userPredictionSummary: null,
           isEditable: true,

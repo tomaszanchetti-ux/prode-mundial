@@ -27,6 +27,8 @@ export const matchSummarySchema = z.object({
   status: matchStatusSchema,
   deadlineAt: isoTimestampSchema,
   isLocked: z.boolean(),
+  isFinished: z.boolean(),
+  isScored: z.boolean(),
   predictionStatus: predictionStatusSchema,
   userPredictionSummary: z.string().min(1).nullable(),
   isEditable: z.boolean(),

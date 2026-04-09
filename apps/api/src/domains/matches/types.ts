@@ -8,6 +8,7 @@ import type {
   TeamRef,
   UserMatchPrediction
 } from "@prode/shared";
+import type { MatchFunctionalState, PredictionLifecycleState } from "./services/match-state";
 
 export type StoredMatchStatus = MatchStatus | "corrected";
 
@@ -93,8 +94,12 @@ export type MatchDetailView = {
 
 export type DerivedMatchViewState = {
   publicStatus: MatchStatus;
+  matchState: MatchFunctionalState;
+  predictionLifecycleState: PredictionLifecycleState | null;
   isLocked: boolean;
   isEditable: boolean;
+  isFinished: boolean;
+  isScored: boolean;
   requiresQualifierIfDraw: boolean;
   predictionStatus: PredictionStatus;
   userPredictionSummary: string | null;

@@ -60,6 +60,8 @@ test("GET /api/v1/matches/:matchId returns match detail envelope", async () => {
       status: "scheduled",
       deadlineAt: "2026-06-27T19:00:00Z",
       isLocked: false,
+      isFinished: false,
+      isScored: false,
       predictionStatus: "empty",
       userPredictionSummary: null,
       isEditable: true,

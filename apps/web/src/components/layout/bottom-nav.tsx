@@ -22,7 +22,7 @@ export function BottomNav() {
       }}
     >
       {MAIN_TABS.map((tab) => {
-        const isActive = pathname === tab.href;
+        const isActive = tab.href === "/matches" ? pathname === tab.href || pathname.startsWith("/matches/") : pathname === tab.href;
 
         return (
           <Link
@@ -34,8 +34,8 @@ export function BottomNav() {
               padding: "10px 8px",
               borderRadius: radii.md,
               color: isActive ? colors.textPrimary : colors.textSecondary,
-              background: isActive ? "rgba(59, 130, 246, 0.16)" : "transparent",
-              border: isActive ? `1px solid rgba(59, 130, 246, 0.32)` : "1px solid transparent",
+              background: isActive ? "rgba(201, 168, 93, 0.16)" : "transparent",
+              border: isActive ? `1px solid rgba(201, 168, 93, 0.3)` : "1px solid transparent",
               ...typography.body,
               fontWeight: isActive ? 700 : 500
             }}

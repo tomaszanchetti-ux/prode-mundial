@@ -1,20 +1,20 @@
 import type { CSSProperties } from "react";
 
 export const colors = {
-  primary500: "#3B82F6",
-  primary700: "#1D4ED8",
-  success500: "#16A34A",
-  error500: "#DC2626",
-  warning500: "#F59E0B",
-  bgMain: "#0F172A",
-  bgSurface: "#111827",
-  bgElevated: "#182235",
-  border: "#1F2937",
-  borderStrong: "#334155",
-  textPrimary: "#F9FAFB",
-  textSecondary: "#9CA3AF",
-  textMuted: "#94A3B8",
-  overlay: "rgba(15, 23, 42, 0.82)"
+  primary500: "#D94A39",
+  primary700: "#9F2C28",
+  success500: "#3BAA6A",
+  error500: "#D1495B",
+  warning500: "#C8A85D",
+  bgMain: "#07131F",
+  bgSurface: "#0D1B2A",
+  bgElevated: "#14263A",
+  border: "#22384C",
+  borderStrong: "#36546D",
+  textPrimary: "#F7F1E8",
+  textSecondary: "#B8C7D6",
+  textMuted: "#8FA4B7",
+  overlay: "rgba(3, 10, 18, 0.82)"
 } as const;
 
 export const spacing = {
@@ -64,8 +64,8 @@ export const typography = {
 } as const;
 
 export const shadows = {
-  card: "0 20px 40px rgba(2, 6, 23, 0.24)",
-  modal: "0 32px 72px rgba(2, 6, 23, 0.42)"
+  card: "0 22px 54px rgba(1, 8, 16, 0.34)",
+  modal: "0 36px 88px rgba(1, 8, 16, 0.48)"
 } as const;
 
 export const uiTheme = {
@@ -81,7 +81,7 @@ export const appBackgroundStyle: CSSProperties = {
   minHeight: "100vh",
   fontFamily: "Inter, system-ui, sans-serif",
   background:
-    "radial-gradient(circle at top, rgba(59, 130, 246, 0.16), transparent 28%), linear-gradient(180deg, #0f172a 0%, #111827 52%, #0b1220 100%)",
+    "radial-gradient(circle at top left, rgba(201, 82, 56, 0.24), transparent 24%), radial-gradient(circle at top right, rgba(200, 168, 93, 0.18), transparent 22%), linear-gradient(180deg, #07131f 0%, #0c1c2d 44%, #08131d 100%)",
   color: colors.textPrimary
 };
 

@@ -1,3 +1,4 @@
+import React from "react";
 import type {
   ButtonHTMLAttributes,
   CSSProperties,
@@ -102,24 +103,24 @@ const buttonToneStyles: Record<ButtonVariant, CSSProperties> = {
 
 const statusToneStyles: Record<StatusTone, CSSProperties> = {
   editable: {
-    background: "rgba(59, 130, 246, 0.16)",
-    color: "#93C5FD",
-    border: "1px solid rgba(59, 130, 246, 0.32)"
+    background: "rgba(201, 168, 93, 0.16)",
+    color: "#F3D998",
+    border: "1px solid rgba(201, 168, 93, 0.28)"
   },
   locked: {
-    background: "rgba(148, 163, 184, 0.14)",
-    color: "#CBD5E1",
-    border: "1px solid rgba(148, 163, 184, 0.24)"
+    background: "rgba(143, 164, 183, 0.14)",
+    color: "#D4DFE8",
+    border: "1px solid rgba(143, 164, 183, 0.22)"
   },
   live: {
-    background: "rgba(245, 158, 11, 0.16)",
-    color: "#FCD34D",
-    border: "1px solid rgba(245, 158, 11, 0.26)"
+    background: "rgba(217, 74, 57, 0.16)",
+    color: "#F5A492",
+    border: "1px solid rgba(217, 74, 57, 0.28)"
   },
   scored: {
-    background: "rgba(22, 163, 74, 0.16)",
-    color: "#86EFAC",
-    border: "1px solid rgba(22, 163, 74, 0.26)"
+    background: "rgba(59, 170, 106, 0.16)",
+    color: "#9EE0B8",
+    border: "1px solid rgba(59, 170, 106, 0.26)"
   }
 };
 
@@ -127,7 +128,8 @@ const cardBaseStyle: CSSProperties = {
   ...surfaceStyle,
   display: "grid",
   gap: spacing[16],
-  padding: spacing[20]
+  padding: spacing[20],
+  backdropFilter: "blur(10px)"
 };
 
 const eyebrowStyle: CSSProperties = {
@@ -186,6 +188,9 @@ export function Card<T extends ElementType = "div">({ as, children, elevated = f
       style={{
         ...cardBaseStyle,
         boxShadow: elevated ? shadows.card : undefined,
+        background: elevated
+          ? `linear-gradient(180deg, rgba(20, 38, 58, 0.96) 0%, rgba(13, 27, 42, 0.96) 100%)`
+          : surfaceStyle.background,
         ...style
       }}
     >
@@ -218,7 +223,7 @@ export function Button({
         fontWeight: 600,
         width: fullWidth ? "100%" : undefined,
         opacity: isDisabled ? 0.6 : 1,
-        transition: "transform 160ms ease, opacity 160ms ease, background 160ms ease",
+        transition: "transform 160ms ease, opacity 160ms ease, background 160ms ease, border-color 160ms ease",
         ...buttonToneStyles[variant],
         ...style
       }}
@@ -290,7 +295,7 @@ export function TeamDisplay({ align = "start", flagUrl, teamName }: TeamDisplayP
           {fallback}
         </span>
       )}
-      <span style={{ ...typography.body, color: colors.textPrimary, fontWeight: 600 }}>{teamName}</span>
+      <span style={{ ...typography.body, color: colors.textPrimary, fontWeight: 600, letterSpacing: "-0.01em" }}>{teamName}</span>
     </div>
   );
 }
@@ -333,8 +338,9 @@ export function MatchCard({
           style={{
             padding: spacing[16],
             borderRadius: radii.md,
-            background: colors.bgMain,
-            border: `1px solid ${colors.border}`
+            background: "linear-gradient(180deg, rgba(7, 19, 31, 0.82) 0%, rgba(10, 24, 38, 0.9) 100%)",
+            border: `1px solid ${colors.border}`,
+            boxShadow: "inset 0 1px 0 rgba(247, 241, 232, 0.04)"
           }}
         >
           <p style={{ ...typography.small, color: colors.textMuted, margin: 0 }}>Tu prediccion</p>
@@ -444,7 +450,9 @@ export function PredictionModal({
           ...cardBaseStyle,
           boxShadow: shadows.modal,
           borderTopLeftRadius: radii.xl,
-          borderTopRightRadius: radii.xl
+          borderTopRightRadius: radii.xl,
+          background:
+            "linear-gradient(180deg, rgba(20, 38, 58, 0.98) 0%, rgba(10, 24, 38, 0.98) 100%), radial-gradient(circle at top right, rgba(201, 168, 93, 0.12), transparent 30%)"
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "flex-start" }}>

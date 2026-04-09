@@ -51,6 +51,7 @@ test("deriveMatchViewState marks editable saved predictions correctly", () => {
   );
 
   assert.equal(state.isEditable, true);
+  assert.equal(state.matchState, "EDITABLE");
   assert.equal(state.predictionStatus, "saved_editable");
   assert.equal(state.ctaLabel, "Editar prediccion");
 });
@@ -74,6 +75,8 @@ test("toMatchSummary resolves knockout placeholders from bracket slots", () => {
   assert.equal(summary.homeTeam.teamId, "slot:2A");
   assert.equal(summary.homeTeam.name, "Por definir (2A)");
   assert.equal(summary.awayTeam.teamId, "slot:2B");
+  assert.equal(summary.isFinished, false);
+  assert.equal(summary.isScored, false);
 });
 
 test("applyMatchesCursor skips rows up to the provided cursor", () => {
