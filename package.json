@@ -4,12 +4,15 @@
   "version": "0.1.0",
   "packageManager": "pnpm@10.18.3",
   "scripts": {
+    "dev:setup": "pnpm --filter @prode/api ensure:wc2026 && pnpm dev",
     "dev": "turbo run dev --parallel --filter=@prode/web --filter=@prode/api",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "format": "turbo run format"
+    "format": "turbo run format",
+    "extract:wc2026": "python3 scripts/extract_fifa_world_cup_2026_schedule.py",
+    "normalize:wc2026": "python3 scripts/normalize_fifa_world_cup_2026_schedule.py"
   },
   "devDependencies": {
     "@types/node": "25.5.2",

@@ -220,7 +220,7 @@ La épica se considera terminada solo si:
 * existe endpoint autenticado `PUT /api/v1/macro-picks`  
 * existe endpoint autenticado `POST /api/v1/macro-picks/adjustment`  
 * `GET /macro-picks` devuelve estado UX-ready sin cálculos client-side  
-* el frontend permite completar los 8 grupos  
+* el frontend permite completar los 12 grupos  
 * el frontend permite elegir 2 finalistas  
 * el frontend permite elegir 1 campeón  
 * el backend rechaza duplicados 1°/2° dentro del mismo grupo  
@@ -555,7 +555,7 @@ Implementar `validateAllGroupPicks(groupPicks, groupsCatalog)`.
 
 Reglas:
 
-* deben existir los 8 grupos esperados para submit completo  
+* deben existir los 12 grupos esperados para submit completo  
 * no se aceptan groupIds desconocidos  
 * no se aceptan equipos fuera del grupo correspondiente
 
@@ -637,7 +637,7 @@ Implementar helper `computeMacroCompletion(...)`.
 Reglas:
 
 * `groupsCompleted` \= cantidad de grupos con 1° y 2° válidos  
-* `groupsTotal` \= 8  
+* `groupsTotal` \= 12  
 * `hasFinalists`  
 * `hasChampion`  
 * `percent` consistente y estable
@@ -652,14 +652,14 @@ Regla:
 
 #### **Task 5.4**
 
-Implementar helper `isAdjustmentWindowOpen(now, firstR16KickoffAt, allGroupsClosed)`.
+Implementar helper `isAdjustmentWindowOpen(now, firstKnockoutKickoffAt, allGroupsClosed)`.
 
 Regla:
 
 * adjustment disponible solo si:  
   * hubo picks iniciales válidos antes del cierre  
   * la fase de grupos ya cerró  
-  * `now < firstR16KickoffAt`  
+  * `now < firstKnockoutKickoffAt`  
   * no fue usado antes
 
 #### **Task 5.5**
@@ -887,7 +887,7 @@ Definir cómo el backend conoce los hitos temporales necesarios para la ventana 
 
 * kickoff del torneo  
 * cierre de grupos  
-* kickoff del primer partido de octavos  
+* kickoff del primer partido knockout  
 * derivación consistente en UTC
 
 ### **Tareas**
@@ -900,9 +900,9 @@ Definir helper para `tournamentKickoffAt`:
 
 #### **Task 9.2**
 
-Definir helper para `firstR16KickoffAt`:
+Definir helper para `firstKnockoutKickoffAt`:
 
-* primer partido con `stage = "R16"`
+* primer partido con `stage !== "group"`
 
 #### **Task 9.3**
 
@@ -959,7 +959,7 @@ Detectar cierre de grupos y elegibilidad de ajuste.
 
 #### **Task 10.4**
 
-Detectar cierre de octavos kickoff y bloquear posibilidad de ajuste.
+Detectar cierre del primer kickoff knockout y bloquear posibilidad de ajuste.
 
 #### **Task 10.5**
 

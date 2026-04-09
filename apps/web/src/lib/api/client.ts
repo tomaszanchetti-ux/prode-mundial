@@ -1,5 +1,21 @@
-import type { ApiResponse, PublicBootstrap, UpdateProfileInput, UserProfile } from "@prode/shared";
-import { publicBootstrapSchema, userProfileSchema } from "@prode/shared";
+import type {
+  ApiResponse,
+  ListMatchesQuery,
+  ListMatchesResponse,
+  MatchDetail,
+  PublicBootstrap,
+  SaveMatchPredictionInput,
+  SaveMatchPredictionResponse,
+  UpdateProfileInput,
+  UserProfile
+} from "@prode/shared";
+import {
+  listMatchesResponseSchema,
+  matchDetailSchema,
+  publicBootstrapSchema,
+  saveMatchPredictionResponseSchema,
+  userProfileSchema
+} from "@prode/shared";
 import { webConfig } from "@/config/app";
 
 export class ApiClientError extends Error {
@@ -87,4 +103,70 @@ export async function updateMyProfile(token: string, input: UpdateProfileInput):
   }
 
   return userProfileSchema.parse(await parseJson<UserProfile>(response));
+}
+
+export async function getMatches(token: string, query: ListMatchesQuery = {}): Promise<ListMatchesResponse> {
+  const params = new URLSearchParams();
+
+  if (query.stage) {
+    params.set("stage", query.stage);
+  }
+
+  if (query.filter) {
+    params.set("filter", query.filter);
+  }
+
+  if (query.cursor) {
+    params.set("cursor", query.cursor);
+  }
+
+  if (typeof query.limit === "number") {
+    params.set("limit", String(query.limit));
+  }
+
+  const url = `${webConfig.apiBaseUrl}/api/v1/matches${params.size > 0 ? `?${params.toString()}` : ""}`;
+  const response = await fetch(url, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load matches (${response.status}).`);
+  }
+
+  return listMatchesResponseSchema.parse(await parseJson<ListMatchesResponse>(response));
+}
+
+export async function getMatchDetail(token: string, matchId: string): Promise<MatchDetail> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/matches/${matchId}`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load match detail (${response.status}).`);
+  }
+
+  return matchDetailSchema.parse(await parseJson<MatchDetail>(response));
+}
+
+export async function saveMatchPrediction(
+  token: string,
+  matchId: string,
+  input: SaveMatchPredictionInput
+): Promise<SaveMatchPredictionResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/matches/${matchId}/prediction`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(input)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to save prediction (${response.status}).`);
+  }
+
+  return saveMatchPredictionResponseSchema.parse(await parseJson<SaveMatchPredictionResponse>(response));
 }
