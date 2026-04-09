@@ -1,0 +1,15 @@
+{
+  "name": "@prode/admin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/index.js",
+    "build": "node src/index.js",
+    "lint": "echo \"Admin lint pending\"",
+    "typecheck": "echo \"Admin typecheck pending\"",
+    "test": "node --test",
+    "format": "echo \"No formatter configured for @prode/admin yet\""
+  }
+}
+

@@ -1,0 +1,14 @@
+{
+  "name": "@prode/testing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo \"No build step for @prode/testing\"",
+    "lint": "echo \"No lint step for @prode/testing yet\"",
+    "typecheck": "echo \"No typecheck step for @prode/testing yet\"",
+    "test": "node --test",
+    "format": "echo \"No formatter configured for @prode/testing yet\""
+  }
+}
+

@@ -1,0 +1,22 @@
+{
+  "name": "prode-mundial",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.18.3",
+  "scripts": {
+    "dev": "turbo run dev --parallel --filter=@prode/web --filter=@prode/api",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "turbo run format"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "pnpm": "10.18.3",
+    "turbo": "2.9.5",
+    "typescript": "6.0.2"
+  }
+}
