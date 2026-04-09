@@ -161,13 +161,55 @@ Avance adicional de `Epic 1`:
   - partido editable sin predicción
   - si no existe, siguiente editable con predicción guardada
 
+## Cambio funcional reciente sobre predicción
+
+- se cerró una nueva regla operativa de producto para mejorar retorno y frecuencia de visitas
+- las predicciones ya NO quedan abiertas desde cualquier momento previo al partido
+- nueva regla:
+  - la ventana abre solo 5 horas antes del kickoff
+  - durante esa ventana el usuario puede crear y editar libremente
+  - al llegar el kickoff, se bloquea como antes
+- esta regla ya quedó bajada a:
+  - backend de estados derivados
+  - validación de escritura de predicción
+  - contratos compartidos
+  - UI de `home`, `matches` y `match detail`
+
+## Estado actual de apertura de ventana
+
+- `packages/shared` ahora expone:
+  - `MATCH_PREDICTION_WINDOW_HOURS = 5`
+- `MatchSummary` / `MatchDetail` ahora incluyen:
+  - `predictionOpensAt`
+- backend:
+  - `isEditable` solo pasa a `true` cuando `now >= predictionOpensAt`
+  - antes de eso el partido queda en estado de espera de ventana
+- escritura:
+  - `PUT /api/v1/matches/:matchId/prediction` rechaza fuera de la ventana con `MATCH_LOCKED`
+
+## UX actual asociada a la ventana
+
+- auto-popup:
+  - solo abre si el próximo partido ya está dentro de la ventana de predicción
+- `home`:
+  - si no hay partido editable aún, muestra cuál es la próxima predicción que abre
+  - muestra cuándo abre y cuánto falta
+- `matches`:
+  - también expone el próximo partido cuya ventana va a abrir
+- `match detail`:
+  - comunica explícitamente si el partido todavía está en `Abre pronto`
+  - muestra la hora de apertura de la predicción
+
 ## Validaciones recientes
 
 - `corepack pnpm --filter @prode/ui typecheck`
 - `corepack pnpm --filter @prode/web typecheck`
 - `corepack pnpm --filter @prode/web test`
+- `corepack pnpm --filter @prode/shared build`
+- `corepack pnpm --filter @prode/api typecheck`
+- `corepack pnpm --filter @prode/api test`
 
-Todas OK al cierre de la iteración UX/UI.
+Todas OK al cierre de la iteración UX/UI + ventana de predicción.
 
 ## Próximo foco recomendado
 
@@ -177,6 +219,173 @@ Todas OK al cierre de la iteración UX/UI.
   - revisar microinteracciones / motion fina
   - QA responsive manual en mobile real
   - decidir si el auto-open del modal también debe dispararse inmediatamente post-login
+
+Recomendación actual:
+
+- pasar a `Epic 3`
+- la base visual ya está suficientemente madura
+- el loop de predicción también ya fue endurecido con la regla de ventana de 5 horas
+
+## Workflow operativo de datos locales
+
+Se cerró una decisión operativa importante para las siguientes sesiones:
+
+- durante desarrollo del core competitivo se trabaja con dos capas de datos
+- estas capas pueden convivir temporalmente en el mismo proyecto Firebase local
+
+### Capa 1 — Base real del torneo
+
+Debe representar la estructura estable del Mundial:
+
+- `teams`
+- `groups`
+- `matches`
+
+Esta base puede sembrarse con el fixture normalizado oficial y mantenerse relativamente estable para DX.
+
+### Capa 2 — Demo competitiva temporal
+
+Debe representar un escenario controlado para probar engagement y competencia:
+
+- `leagues`
+- `leagueMembers`
+- `leagueStandings`
+- usuarios demo
+- predicciones demo
+- partidos demo y/o scoring demo
+
+Su objetivo no es representar la fuente real, sino permitir validación rápida y repetible de:
+
+- ligas
+- resultados
+- scoring
+- puntos
+- rankings
+- estados de UI
+
+### Regla de ejecución acordada
+
+- la demo competitiva NO debe correr automáticamente en cada `pnpm dev`
+- la demo competitiva sí debe poder sembrarse explícitamente cuando haga falta
+- la base real y la demo pueden convivir temporalmente
+- más adelante debe existir una forma explícita de resetear solo la capa demo
+
+### Script actual disponible
+
+Ya existe:
+
+- `pnpm --filter @prode/api seed:competition-demo`
+- `pnpm --filter @prode/api reset:competition-demo`
+- `pnpm --filter @prode/api fresh:competition-demo`
+
+Este script actualmente:
+
+- toma como usuario ancla uno real existente en `users` si lo encuentra
+- si no existe, crea un usuario demo base
+- crea ligas demo
+- crea memberships demo
+- crea partidos demo desacoplados del fixture principal
+- crea predicciones demo
+- ejecuta scoring demo
+- recalcula `users` y `leagueStandings`
+
+Capacidades actuales del flujo demo:
+
+- `reset:competition-demo` limpia solo la capa demo
+- `fresh:competition-demo` reconstruye el escenario completo en un paso
+- si la demo quedó montada sobre un usuario real existente, el reset recompone sus aggregates y `leaguesCount`
+- el comando raíz `pnpm dev:demo` deja el entorno listo con demo fresca y luego levanta web + api
+
+### Uso recomendado para sesiones próximas
+
+Flujo sugerido:
+
+1. asegurar base del torneo con `dev:setup` / `ensure:wc2026`
+2. correr `fresh:competition-demo` cuando se quiera probar loop competitivo desde cero
+3. validar manualmente UI + backend
+4. usar `reset:competition-demo` o `fresh:competition-demo` cuando se quiera rehacer el escenario
+
+### Decisión sobre testing con resultados reales
+
+También quedó definido que el testeo con fuente real de resultados ocurrirá en una etapa separada.
+
+No se debe mezclar todavía:
+
+- testing del producto y sus reglas internas
+- testing de integración con una fuente externa
+
+Secuencia prevista:
+
+1. endurecer primero el producto con demo data controlada
+2. implementar luego la capa de ingestión real
+3. probar esa ingestión primero con `dry-run`
+4. recién después persistir resultados reales sobre pocos partidos
+5. verificar scoring y standings con supervisión manual
+
+Comandos objetivo a futuro para esa etapa:
+
+- `fetch:results --dry-run`
+- `fetch:results`
+- `score:match <matchId>`
+- `rebuild:standings`
+
+Esta decisión debe considerarse vigente salvo que una sesión futura la cambie explícitamente.
+
+## Estado actual post primer corte competitivo
+
+Quedó implementado un primer cierre funcional de `Epic 3`:
+
+- `packages/shared` ya expone contratos para:
+  - `points`
+  - `leagues`
+  - `standings`
+- `apps/api` ya expone:
+  - `GET /api/v1/points`
+  - `GET /api/v1/leagues`
+  - `GET /api/v1/leagues/:leagueId/standings`
+- ya existe:
+  - scoring engine puro match-level
+  - recomputo de aggregates de usuario
+  - materialización de standings por liga
+
+## Estado actual de la Web competitiva
+
+- `/rankings` ya dejó de ser placeholder
+- `/leagues` ya dejó de ser placeholder
+- ambas vistas consumen datos reales del backend
+- la UI actual sigue siendo mínima / MVP, pero ya valida:
+  - puntos
+  - standings
+  - lectura de ligas
+
+## Estado actual del workflow demo
+
+Scripts disponibles:
+
+- `pnpm --filter @prode/api seed:competition-demo`
+- `pnpm --filter @prode/api reset:competition-demo`
+- `pnpm --filter @prode/api fresh:competition-demo`
+- `pnpm dev:demo`
+
+Comportamiento validado:
+
+- `fresh:competition-demo` resetea y vuelve a sembrar en un solo paso
+- si la demo se montó sobre un usuario real existente, el reset recompone:
+  - `totalPoints`
+  - `exactHits`
+  - `correctSigns`
+  - `leaguesCount`
+
+## Foco recomendado actualizado
+
+La siguiente épica recomendada ya no es seguir ampliando infra de demo, sino pasar a producto:
+
+- entrar a `Epic 4 — Leagues, Invite Flow, Membership & League Detail`
+- aprovechar la demo competitiva ya operativa para validar:
+  - create league
+  - join flow
+  - detalle de liga
+  - salto a standings
 
 ## Avance inicial de Epic 2
 
