@@ -121,6 +121,44 @@ Validaciones ejecutadas para este avance:
 - `./pnpm --filter @prode/ui build`
 - `./pnpm --filter @prode/web typecheck`
 
+## Avance de CARD 1
+
+- `packages/shared` ya define contratos publicos de matches y predictions en:
+  - `constants/matches`
+  - `contracts/matches`
+  - `schemas/matches`
+- se agregaron y exportaron:
+  - `MatchStage`
+  - `MatchStatus`
+  - `PredictionStatus`
+  - `TeamRef`
+  - `MatchSummary`
+  - `MatchDetail`
+  - `UserMatchPrediction`
+  - `ListMatchesQuery`
+  - `ListMatchesResponse`
+  - `SaveMatchPredictionInput`
+  - `SaveMatchPredictionResponse`
+- se agregaron schemas compartidos para:
+  - query de listado
+  - summary de partido
+  - detail de partido
+  - payload de guardado
+  - respuesta de guardado
+  - variante contextual para knockout con empate
+- `ApiErrorCode` ya incluye errores publicos de `Epic 2`:
+  - `MATCH_LOCKED`
+  - `MATCH_NOT_FOUND`
+  - `MATCH_NOT_EDITABLE`
+  - `INVALID_SCORE`
+  - `INVALID_KNOCKOUT_CLASSIFIER`
+
+Validaciones ejecutadas para este avance:
+
+- `./pnpm --filter @prode/shared typecheck`
+- `./pnpm --filter @prode/shared build`
+- `./pnpm --filter @prode/web typecheck`
+
 ## Tooling relevante
 
 - Node disponible
@@ -165,8 +203,8 @@ Con `CARD 0` ya iniciada, el siguiente foco natural dentro de `Epic 2` es bajar 
 Orden recomendado:
 
 1. cerrar y commitear el avance de `CARD 0`
-2. implementar `CARD 1 — Shared Domain Contracts for Matches & Predictions`
-3. seguir con backend de fixtures/detalle/prediccion y luego conectar la UI ya preparada
+2. usar `CARD 1` ya cerrada como base para `CARD 2` y `CARD 3`
+3. seguir con seed de teams/groups/matches y luego repositorios/use-cases/endpoints del flujo real
 
 ---
 
