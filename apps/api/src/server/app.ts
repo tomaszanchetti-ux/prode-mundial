@@ -8,7 +8,19 @@ import { errorHandler } from "./middleware/error-handler";
 
 export function createApp() {
   const app = express();
+  const allowedOrigin = process.env.NEXT_PUBLIC_WEB_URL ?? "http://localhost:3000";
 
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", allowedOrigin);
+    res.header("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    if (req.method === "OPTIONS") {
+      return res.status(204).end();
+    }
+
+    next();
+  });
   app.use(express.json());
 
   app.get("/health", getHealthController);

@@ -5,7 +5,7 @@ import { getMe } from "../use-cases/get-me";
 
 type AuthenticatedRequest = Request & { auth: AuthContext };
 
-export function getMeController(req: Request, res: Response) {
-  const profile = getMe((req as AuthenticatedRequest).auth);
+export async function getMeController(req: Request, res: Response) {
+  const profile = await getMe((req as AuthenticatedRequest).auth);
   res.json(ok(profile));
 }

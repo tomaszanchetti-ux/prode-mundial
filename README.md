@@ -43,6 +43,12 @@ pnpm dev
 
 ## Estado actual
 
-Este repo contiene el skeleton técnico de `Epic 1`.
-Auth real, Firebase wiring productivo, persistencia y flujos funcionales todavía están pendientes.
+Este repo ya cubre una porción funcional de `Epic 1`:
 
+- landing pública conectada al bootstrap real
+- login con wiring Firebase client listo para Google + magic link
+- validación backend de Firebase ID token
+- bootstrap de perfil autenticado sobre Firestore
+- shell protegido con guards y redirect a completar perfil
+
+Para probar el flujo end-to-end todavía hace falta cargar credenciales Firebase válidas en `.env`.

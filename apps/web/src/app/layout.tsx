@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AuthProvider } from "@/components/auth/auth-provider";
 
 const bodyStyle = {
   margin: 0,
@@ -12,7 +13,9 @@ const bodyStyle = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
-      <body style={bodyStyle}>{children}</body>
+      <body style={bodyStyle}>
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

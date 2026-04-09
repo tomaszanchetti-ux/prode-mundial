@@ -7,8 +7,8 @@ import { updateMe } from "../use-cases/update-me";
 
 type AuthenticatedRequest = Request & { auth: AuthContext };
 
-export function patchMeController(req: Request, res: Response) {
+export async function patchMeController(req: Request, res: Response) {
   const input = parseBody(updateProfileInputSchema, req.body);
-  const profile = updateMe((req as AuthenticatedRequest).auth, input);
+  const profile = await updateMe((req as AuthenticatedRequest).auth, input);
   res.json(ok(profile));
 }

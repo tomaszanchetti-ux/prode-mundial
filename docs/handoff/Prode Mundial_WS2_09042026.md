@@ -53,6 +53,9 @@ Sesión dedicada a continuar `Epic 1` sobre el skeleton inicial:
 - `./pnpm typecheck` OK
 - `./pnpm build` OK
 - `./pnpm test` OK
+- branch creada: `epic/epic-1-foundation-auth-shell`
+- commit realizado: `feat: bootstrap epic 1 foundation slice`
+- push realizado a `origin/epic/epic-1-foundation-auth-shell`
 
 Nota:
 
@@ -67,6 +70,7 @@ El proyecto ya no está solo en skeleton:
 - la base de contratos de `Epic 1` quedó más cercana al canon
 - existe una API mínima usable para bootstrap público y perfil autenticado
 - la web ya tiene una landing pública defendible y un shell autenticado navegable
+- la sesión ya quedó respaldada en GitHub sobre la branch de la épica
 
 Todavía no hay auth real ni persistencia productiva.
 
@@ -99,6 +103,7 @@ Recomendación:
 2. usar la base nueva de `/api/v1/me` para bootstrap real del usuario
 3. conectar login real con Google y dejar magic link scaffolded o implementado según credenciales disponibles
 4. cerrar guards y redirects de rutas protegidas
+5. seguir trabajando sobre la misma branch de épica hasta completar QA de `Epic 1`
 
 ---
 
@@ -106,4 +111,7 @@ Recomendación:
 
 - el bearer auth actual en API es temporal y solo sirve para desarrollo local
 - `/profile` usa `NEXT_PUBLIC_DEV_SESSION_TOKEN` con fallback a `dev-user`
-- el repo sigue sin commits base; `git status` muestra todo como no trackeado
+- a partir de esta sesión se adopta flujo sin PRs:
+  - branch por épica
+  - commit + push por sesión
+  - merge a `main` solo después de QA al cerrar la épica
