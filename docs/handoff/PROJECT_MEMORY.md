@@ -47,6 +47,16 @@ Se creó el bootstrap inicial del monorepo:
 - `packages/config`
 - `packages/testing`
 
+Actualización relevante post `Epic 2`:
+
+- se cerró una iteración fuerte de UX/UI sobre la app web del MVP ya montada sobre la base funcional existente
+- el rediseño NO cambió reglas de producto ni contratos críticos; reordenó jerarquía visual, copy y velocidad de acción
+- la experiencia ahora prioriza explícitamente:
+  - próximo partido pendiente
+  - acción rápida desde `home`
+  - modal de predicción como camino rápido
+  - navegación y tono visual más cercanos a producto deportivo que a shell técnica
+
 Validaciones ejecutadas:
 
 - install OK
@@ -83,17 +93,90 @@ Avance adicional de `Epic 1`:
     - login view render base
     - rechazo `401` de API sin bearer / token inválido
 - estado Git actual:
-  - branch activa: `epic/epic-2-fixtures-match-predictions`
+  - branch activa al cierre actual: `main`
   - auth real ya validada localmente sobre Firebase del proyecto `prode-mundial-4e419`
   - `Epic 1` quedó cerrada y publicada en:
     - `origin/epic/epic-1-foundation-auth-shell`
     - `origin/main`
   - commit base estable actual: `c6aa2a1`
-  - avance actual de `Epic 2` ya consolidado en commits locales:
+  - arranque de `Epic 2` consolidado originalmente en commits:
     - `62ec4dc` -> `feat: start epic 2 ui foundation`
     - `1fa38ab` -> `feat: add shared match contracts`
     - `e99ea09` -> `docs: close epic 2 session handoff`
-  - working tree con avance local material sobre `CARD 2` a `CARD 7` antes del siguiente commit de cierre
+  - cierre de `Epic 2` ya publicado en:
+    - `2477e0d` -> `feat: close epic 2 core matches flow`
+    - `2bbefe0` -> `chore: automate local world cup bootstrap`
+    - `e2cf220` -> `merge: close epic 2 core matches flow`
+  - iteración UX/UI publicada luego en:
+    - `a28b925` -> `feat: redesign core ux and ui flows`
+  - working tree actual:
+    - cambios locales solo en handoff / memoria de sesión hasta cerrar documentación
+
+## Iteración UX/UI cerrada sobre Web
+
+- `packages/ui` fue re-trabajado para alinear el sistema visual a un dark sports feel más claro y deseable
+- cambios principales en sistema visual:
+  - `primary` azul
+  - rojo reservado para error / alerta real
+  - superficies menos pesadas
+  - mejor jerarquía tipográfica
+  - pills y CTAs más consistentes
+- componentes compartidos refinados:
+  - `Button`
+  - `Card`
+  - `StatusTag`
+  - `TeamDisplay`
+  - `MatchCard`
+  - `ScoreInput`
+  - `PredictionModal`
+
+## Estado actual de la Web
+
+- shell autenticado ya no comunica staging / MVP interno
+- `BottomNav` ya fue refinada y `Rankings` pasó a leerse como `Posiciones`
+- `Home` ya fue transformada en pantalla de acción:
+  - hero corto
+  - priority card del próximo partido
+  - resumen de actividad
+  - acceso rápido a modal de predicción
+- `Matches` ya fue rejerarquizada:
+  - header más compacto
+  - filtros más claros
+  - cards más deportivas y escaneables
+  - quick prediction disponible desde la lista
+- `Match Detail` ya fue rediseñada:
+  - header más liviano
+  - bloque compacto de scoring / deadline
+  - score selector más protagonista
+- `Landing` y `Login` ya quedaron alineadas al nuevo tono visual
+- `Profile`, `Rules`, `Terms` y `Privacy` ya no muestran copy técnico / placeholder de implementación
+
+## Comportamientos UX nuevos ya vivos
+
+- `home` abre el modal del próximo partido editable cuando corresponde
+- `matches` también puede abrir el quick flow del próximo pendiente
+- existe componente reusable:
+  - `apps/web/src/components/matches/quick-prediction-modal.tsx`
+- la lógica actual prioriza:
+  - partido editable sin predicción
+  - si no existe, siguiente editable con predicción guardada
+
+## Validaciones recientes
+
+- `corepack pnpm --filter @prode/ui typecheck`
+- `corepack pnpm --filter @prode/web typecheck`
+- `corepack pnpm --filter @prode/web test`
+
+Todas OK al cierre de la iteración UX/UI.
+
+## Próximo foco recomendado
+
+- si el objetivo vuelve a core funcional:
+  - entrar a `Epic 3 — Scoring, Points & League Standings`
+- si se quiere una pasada final de polish frontend:
+  - revisar microinteracciones / motion fina
+  - QA responsive manual en mobile real
+  - decidir si el auto-open del modal también debe dispararse inmediatamente post-login
 
 ## Avance inicial de Epic 2
 
@@ -330,6 +413,97 @@ Validaciones ejecutadas:
 - helper puro agregado para construir y mergear entidad persistida:
   - `prediction-persistence.ts`
 
+## Cierre de CARD 8 a CARD 10
+
+- `apps/api` ya expone endpoint autenticado:
+  - `PUT /api/v1/matches/:matchId/prediction`
+- el endpoint:
+  - busca partido
+  - valida payload match-level
+  - aplica reglas de kickoff / knockout
+  - hace upsert idempotente
+  - devuelve `SaveMatchPredictionResponse`
+- se agrego capa explícita de estado derivado para matches y predictions:
+  - `match-state.ts`
+  - `matchState`
+  - `predictionLifecycleState`
+  - `isEditable`
+  - `isLocked`
+  - `isFinished`
+  - `isScored`
+- `packages/shared` y payloads publicos ya exponen:
+  - `isFinished`
+  - `isScored`
+- `apps/jobs` ya tiene job operativo mínimo para:
+  - `Match Lock Enforcement`
+  - lock de partidos vencidos
+  - lock de predicciones asociadas
+
+Validaciones ejecutadas:
+
+- `corepack pnpm --filter @prode/api typecheck`
+- `corepack pnpm --filter @prode/api test`
+- `corepack pnpm --filter @prode/jobs typecheck`
+- `corepack pnpm --filter @prode/jobs build`
+- `corepack pnpm --filter @prode/jobs test`
+
+## Cierre de CARD 11 a CARD 14
+
+- `packages/ui` ya recibió refresh visual dark-first más alineado al tono del Mundial:
+  - azul noche / petróleo
+  - rojo cálido como primario
+  - dorado suave como acento
+  - verde reservado a success
+- `/matches` ya dejó de ser demo estática y ahora consume backend real:
+  - `GET /api/v1/matches`
+  - filtros por fase / estado
+  - loading / empty / error state
+  - CTA contextual backend-driven
+- se agregó ruta dinámica:
+  - `/matches/[matchId]`
+- el detalle de partido ya soporta:
+  - `GET /api/v1/matches/:matchId`
+  - `PUT /api/v1/matches/:matchId/prediction`
+  - selector condicional de clasificado
+  - feedback de guardado
+  - retry simple
+  - estado bloqueado
+  - bloque de resultado / puntos
+- `apps/web` ya tiene tests UI mínimos para:
+  - listado de partidos
+  - CTA contextual
+  - empty state
+  - selector de clasificado
+  - toast de guardado
+  - retry de guardado
+  - estado bloqueado
+
+Validaciones ejecutadas:
+
+- `corepack pnpm --filter @prode/ui build`
+- `corepack pnpm --filter @prode/web typecheck`
+- `corepack pnpm --filter @prode/web test`
+- `corepack pnpm --filter @prode/api test`
+
+## DX local / bootstrap de datos
+
+- se agregó flujo idempotente para asegurar datos base del torneo en local:
+  - `./pnpm --filter @prode/api ensure:wc2026`
+- el script:
+  - verifica si existen `teams`, `groups` y `matches`
+  - ejecuta seed solo si faltan
+  - hace `skip` si Firestore ya está poblado
+- se agregó comando raíz:
+  - `pnpm dev:setup`
+- flujo recomendado actual para desarrollo:
+  1. `corepack enable`
+  2. `corepack prepare pnpm@10.18.3 --activate`
+  3. `pnpm install`
+  4. `pnpm dev:setup`
+- criterio operativo acordado:
+  - local: asegurar bootstrap automáticamente antes del arranque
+  - producción: bootstrap inicial controlado del torneo, no autoseed silencioso en runtime
+
 ## Tooling relevante
 
 - Node disponible
@@ -369,20 +543,17 @@ Validaciones ejecutadas:
 
 # Próximo foco recomendado
 
-Con `CARD 2` a `CARD 7` ya cerradas, el siguiente corte natural dentro de `Epic 2` es terminar el loop jugable de guardado de predicciones.
+`Epic 2` quedó cerrada, mergeada a `main` y validada manualmente en entorno local con backend real y Firestore poblado.
+
+El siguiente corte natural del proyecto es entrar a `Epic 3 — Scoring, Points & League Standings`.
 
 Orden recomendado:
 
-1. implementar `CARD 8 — PUT /api/v1/matches/:matchId/prediction`
-2. reutilizar:
-   - `matchesRepository.getMatchById`
-   - `validatePredictionInput`
-   - `predictionsRepository.upsertPrediction`
-3. validar:
-   - `MATCH_LOCKED`
-   - `INVALID_SCORE`
-   - `INVALID_KNOCKOUT_CLASSIFIER`
-4. luego seguir con `CARD 9 — Match Locking Rules & Derived States`
+1. definir el primer slice ejecutable de scoring match-level
+2. puntuar predicciones sobre partidos `finished` y `isScored = false`
+3. persistir `pointsAwarded` + `scoringBreakdown`
+4. actualizar acumulados de usuario
+5. recién después entrar a standings de ligas
 
 ---
 
