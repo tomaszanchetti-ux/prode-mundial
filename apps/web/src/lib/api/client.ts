@@ -2,6 +2,18 @@ import type { ApiResponse, PublicBootstrap, UpdateProfileInput, UserProfile } fr
 import { publicBootstrapSchema, userProfileSchema } from "@prode/shared";
 import { webConfig } from "@/config/app";
 
+export class ApiClientError extends Error {
+  readonly status: number;
+  readonly code: string | null;
+
+  constructor(message: string, options: { status: number; code?: string | null }) {
+    super(message);
+    this.name = "ApiClientError";
+    this.status = options.status;
+    this.code = options.code ?? null;
+  }
+}
+
 async function parseJson<T>(response: Response): Promise<T> {
   const payload = (await response.json()) as ApiResponse<T>;
 
@@ -18,13 +30,30 @@ function withBearer(token: string) {
   };
 }
 
+async function buildApiError(response: Response, fallbackMessage: string) {
+  const payload = await response.json().catch(() => null);
+  const code =
+    payload && typeof payload === "object" && "error" in payload && payload.error && typeof payload.error === "object" && "code" in payload.error
+      ? String(payload.error.code)
+      : null;
+  const message =
+    payload && typeof payload === "object" && "error" in payload && payload.error && typeof payload.error === "object" && "message" in payload.error
+      ? String(payload.error.message)
+      : fallbackMessage;
+
+  return new ApiClientError(message, {
+    status: response.status,
+    code
+  });
+}
+
 export async function getPublicBootstrap(): Promise<PublicBootstrap> {
   const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/public/bootstrap`, {
     cache: "no-store"
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to load bootstrap (${response.status}).`);
+    throw await buildApiError(response, `Failed to load bootstrap (${response.status}).`);
   }
 
   return publicBootstrapSchema.parse(await parseJson<PublicBootstrap>(response));
@@ -37,12 +66,7 @@ export async function getMyProfile(token: string): Promise<UserProfile> {
   });
 
   if (!response.ok) {
-    const payload = await response.json().catch(() => null);
-    const message =
-      payload && typeof payload === "object" && "error" in payload && payload.error && typeof payload.error === "object" && "message" in payload.error
-        ? String(payload.error.message)
-        : `Failed to load profile (${response.status}).`;
-    throw new Error(message);
+    throw await buildApiError(response, `Failed to load profile (${response.status}).`);
   }
 
   return userProfileSchema.parse(await parseJson<UserProfile>(response));
@@ -59,12 +83,7 @@ export async function updateMyProfile(token: string, input: UpdateProfileInput):
   });
 
   if (!response.ok) {
-    const payload = await response.json().catch(() => null);
-    const message =
-      payload && typeof payload === "object" && "error" in payload && payload.error && typeof payload.error === "object" && "message" in payload.error
-        ? String(payload.error.message)
-        : `Failed to update profile (${response.status}).`;
-    throw new Error(message);
+    throw await buildApiError(response, `Failed to update profile (${response.status}).`);
   }
 
   return userProfileSchema.parse(await parseJson<UserProfile>(response));

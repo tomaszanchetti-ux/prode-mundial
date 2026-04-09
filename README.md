@@ -33,6 +33,70 @@ pnpm install
 pnpm dev
 ```
 
+## Setup Firebase local
+
+Para probar el flujo real de `Epic 1` hace falta configurar Firebase tanto para API como para web.
+
+### 1. Variables de entorno raíz
+
+Usa `.env.example` como base y crea un `.env` en la raíz:
+
+```bash
+cp .env.example .env
+```
+
+Completa estas variables con una service account válida de Firebase:
+
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY`
+
+Notas:
+
+- `FIREBASE_PRIVATE_KEY` debe conservar los saltos de línea escapados como `\n`
+- `NEXT_PUBLIC_WEB_URL` debe apuntar a `http://localhost:3000`
+- `NEXT_PUBLIC_API_URL` debe apuntar a `http://localhost:4000`
+
+### 2. Variables públicas para Next.js
+
+La web necesita exponer `NEXT_PUBLIC_FIREBASE_*` en `apps/web/.env.local`.
+
+```bash
+cat <<'EOF' > apps/web/.env.local
+NEXT_PUBLIC_APP_NAME=Prode Mundial
+NEXT_PUBLIC_WEB_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_FIREBASE_API_KEY=replace-me
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=replace-me
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=replace-me
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=replace-me
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=replace-me
+NEXT_PUBLIC_FIREBASE_APP_ID=replace-me
+EOF
+```
+
+### 3. Configuración en Firebase Console
+
+- habilitar `Google` en Authentication > Sign-in method
+- habilitar `Email link` en Authentication > Sign-in method
+- agregar `http://localhost:3000` a los dominios autorizados
+- verificar que Firestore esté creado y accesible para el proyecto
+
+### 4. Flujo de prueba recomendado
+
+1. levantar `pnpm dev`
+2. abrir [http://localhost:3000](http://localhost:3000)
+3. entrar por Google o pedir un magic link
+4. verificar redirect a `/profile` si el usuario no completó perfil
+5. completar nombre visible y confirmar llegada a `/home`
+
+## Troubleshooting auth
+
+- Si Google no abre popup: el navegador probablemente está bloqueando popups.
+- Si el magic link no completa: pedir uno nuevo y usar el mismo email con el que se envió.
+- Si la landing pública abre pero la API local no está arriba: la web ahora usa un fallback con el bootstrap por defecto para no bloquear DX.
+- Si la API devuelve `401` luego de haber iniciado sesión: normalmente significa token vencido o inválido; cerrar sesión y volver a entrar resuelve el caso.
+
 ## Scripts
 
 - `pnpm dev`
@@ -51,4 +115,8 @@ Este repo ya cubre una porción funcional de `Epic 1`:
 - bootstrap de perfil autenticado sobre Firestore
 - shell protegido con guards y redirect a completar perfil
 
-Para probar el flujo end-to-end todavía hace falta cargar credenciales Firebase válidas en `.env`.
+Últimos cierres de `Epic 1`:
+
+- manejo UX más robusto para popup cancelado, link expirado y sesión inválida
+- tests mínimos reales para auth guard, login view y `401` en API
+- fallback de DX en landing pública cuando la API local no responde

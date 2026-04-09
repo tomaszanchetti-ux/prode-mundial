@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -8,12 +9,129 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Card } from "@prode/ui";
 import { useAuth } from "./auth-provider";
 
-function resolveNextRoute(next: string | null, profileCompleted: boolean | undefined) {
+export function resolveNextRoute(next: string | null, profileCompleted: boolean | undefined) {
   if (profileCompleted === false) {
     return APP_ROUTES.profile;
   }
 
   return next && next.startsWith("/") ? next : APP_ROUTES.home;
+}
+
+type LoginScreenViewProps = {
+  email: string;
+  helperMessage: string | null;
+  isConfigured: boolean;
+  isEmailLink: boolean;
+  isSubmitting: boolean;
+  onCompleteMagicLink: () => void;
+  onEmailChange: (value: string) => void;
+  onGoogleLogin: () => void;
+  onSendMagicLink: (event: FormEvent<HTMLFormElement>) => void;
+};
+
+export function resolveHelperTone(errorMessage: string | null, localMessage: string | null) {
+  if (errorMessage) {
+    return "error";
+  }
+
+  if (localMessage?.includes("Te enviamos")) {
+    return "success";
+  }
+
+  return localMessage ? "error" : null;
+}
+
+export function LoginScreenView({
+  email,
+  helperMessage,
+  isConfigured,
+  isEmailLink,
+  isSubmitting,
+  onCompleteMagicLink,
+  onEmailChange,
+  onGoogleLogin,
+  onSendMagicLink
+}: LoginScreenViewProps) {
+  const helperTone = resolveHelperTone(helperMessage && !helperMessage.includes("Te enviamos") ? helperMessage : null, helperMessage);
+
+  return (
+    <main style={{ maxWidth: 520, margin: "0 auto", padding: "40px 20px 56px", display: "grid", gap: 16 }}>
+      <Card>
+        <h1 style={{ marginTop: 0 }}>Entrar para jugar</h1>
+        <p style={{ marginBottom: 12 }}>
+          Inicia con Google o recibe un magic link para entrar directo al área autenticada del MVP.
+        </p>
+
+        {!isConfigured ? (
+          <p style={{ margin: 0, color: "#8a1c1c" }}>
+            Firebase no está configurado todavía en este entorno. Completa las variables `NEXT_PUBLIC_FIREBASE_*`.
+          </p>
+        ) : null}
+
+        <div style={{ display: "grid", gap: 12 }}>
+          <button
+            type="button"
+            onClick={onGoogleLogin}
+            disabled={!isConfigured || isSubmitting}
+            style={{ padding: "14px 16px", borderRadius: 999, border: 0, background: "#102a13", color: "#f6f5ef" }}
+          >
+            {isSubmitting ? "Conectando..." : "Continuar con Google"}
+          </button>
+
+          <form onSubmit={onSendMagicLink} style={{ display: "grid", gap: 12 }}>
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => onEmailChange(event.target.value)}
+              placeholder="tu@email.com"
+              required
+              style={{ padding: 12, borderRadius: 12, border: "1px solid #c9cfbf" }}
+            />
+            <button
+              type="submit"
+              disabled={!isConfigured || isSubmitting}
+              style={{ padding: "14px 16px", borderRadius: 999, border: "1px solid #c9cfbf", background: "#fffdf7" }}
+            >
+              {isSubmitting ? "Enviando..." : "Enviar magic link"}
+            </button>
+          </form>
+
+          {isEmailLink ? (
+            <button
+              type="button"
+              onClick={onCompleteMagicLink}
+              disabled={!isConfigured || isSubmitting}
+              style={{
+                padding: "14px 16px",
+                borderRadius: 16,
+                border: "1px dashed #335c3d",
+                background: "#eef5e6",
+                color: "#102a13",
+                fontWeight: 700
+              }}
+            >
+              Completar ingreso con este magic link
+            </button>
+          ) : null}
+        </div>
+
+        {helperMessage ? <p style={{ marginBottom: 0, color: helperTone === "success" ? "#335c3d" : "#8a1c1c" }}>{helperMessage}</p> : null}
+      </Card>
+
+      <Card>
+        <p style={{ marginTop: 0, marginBottom: 8 }}>Tu sesión se persiste al refrescar y el backend valida el bearer token Firebase.</p>
+        <p style={{ margin: 0, color: "#5f6657" }}>Si tu perfil sigue incompleto después del login, te llevamos directo a `/profile`.</p>
+      </Card>
+
+      <footer style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+        {SUPPORT_LINKS.map((link) => (
+          <Link key={link.href} href={link.href} style={{ color: "#335c3d", fontWeight: 600 }}>
+            {link.label}
+          </Link>
+        ))}
+      </footer>
+    </main>
+  );
 }
 
 export function LoginScreen() {
@@ -75,84 +193,17 @@ export function LoginScreen() {
     }
   }
 
-  const helperMessage = errorMessage ?? localMessage;
-
   return (
-    <main style={{ maxWidth: 520, margin: "0 auto", padding: "40px 20px 56px", display: "grid", gap: 16 }}>
-      <Card>
-        <h1 style={{ marginTop: 0 }}>Entrar para jugar</h1>
-        <p style={{ marginBottom: 12 }}>
-          Inicia con Google o recibe un magic link para entrar directo al área autenticada del MVP.
-        </p>
-
-        {!isConfigured ? (
-          <p style={{ margin: 0, color: "#8a1c1c" }}>
-            Firebase no está configurado todavía en este entorno. Completa las variables `NEXT_PUBLIC_FIREBASE_*`.
-          </p>
-        ) : null}
-
-        <div style={{ display: "grid", gap: 12 }}>
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            disabled={!isConfigured || isSubmitting}
-            style={{ padding: "14px 16px", borderRadius: 999, border: 0, background: "#102a13", color: "#f6f5ef" }}
-          >
-            {isSubmitting ? "Conectando..." : "Continuar con Google"}
-          </button>
-
-          <form onSubmit={handleSendMagicLink} style={{ display: "grid", gap: 12 }}>
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="tu@email.com"
-              required
-              style={{ padding: 12, borderRadius: 12, border: "1px solid #c9cfbf" }}
-            />
-            <button
-              type="submit"
-              disabled={!isConfigured || isSubmitting}
-              style={{ padding: "14px 16px", borderRadius: 999, border: "1px solid #c9cfbf", background: "#fffdf7" }}
-            >
-              {isSubmitting ? "Enviando..." : "Enviar magic link"}
-            </button>
-          </form>
-
-          {isEmailLink ? (
-            <button
-              type="button"
-              onClick={handleCompleteMagicLink}
-              disabled={!isConfigured || isSubmitting}
-              style={{
-                padding: "14px 16px",
-                borderRadius: 16,
-                border: "1px dashed #335c3d",
-                background: "#eef5e6",
-                color: "#102a13",
-                fontWeight: 700
-              }}
-            >
-              Completar ingreso con este magic link
-            </button>
-          ) : null}
-        </div>
-
-        {helperMessage ? <p style={{ marginBottom: 0, color: helperMessage.includes("Te enviamos") ? "#335c3d" : "#8a1c1c" }}>{helperMessage}</p> : null}
-      </Card>
-
-      <Card>
-        <p style={{ marginTop: 0, marginBottom: 8 }}>Tu sesión se persiste al refrescar y el backend valida el bearer token Firebase.</p>
-        <p style={{ margin: 0, color: "#5f6657" }}>Si tu perfil sigue incompleto después del login, te llevamos directo a `/profile`.</p>
-      </Card>
-
-      <footer style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-        {SUPPORT_LINKS.map((link) => (
-          <Link key={link.href} href={link.href} style={{ color: "#335c3d", fontWeight: 600 }}>
-            {link.label}
-          </Link>
-        ))}
-      </footer>
-    </main>
+    <LoginScreenView
+      email={email}
+      helperMessage={errorMessage ?? localMessage}
+      isConfigured={isConfigured}
+      isEmailLink={isEmailLink}
+      isSubmitting={isSubmitting}
+      onCompleteMagicLink={handleCompleteMagicLink}
+      onEmailChange={setEmail}
+      onGoogleLogin={handleGoogleLogin}
+      onSendMagicLink={handleSendMagicLink}
+    />
   );
 }

@@ -52,6 +52,9 @@ Validaciones ejecutadas:
 - typecheck OK
 - build OK
 - test OK
+- typecheck global OK también luego del cierre pendiente de `Epic 1`
+- build global OK también luego del fallback controlado en landing pública
+- test global OK con casos reales agregados en `web` y `api`
 
 Avance adicional de `Epic 1`:
 
@@ -69,17 +72,26 @@ Avance adicional de `Epic 1`:
   - guards de sesión cliente con redirect a `/login`
   - redirect de perfil incompleto hacia `/profile`
   - pantalla de perfil conectada a sesión Firebase real con logout
+- endurecimiento final de `Epic 1`:
+  - mensajes UX más claros para popup cancelado, popup bloqueado, magic link inválido/expirado y sesión inválida
+  - expiración/invalidez de token `401` ya fuerza retorno limpio a estado no autenticado
+  - landing pública con fallback local a `DEFAULT_PUBLIC_BOOTSTRAP` si la API no responde
+  - tests mínimos reales agregados para:
+    - auth guard decision logic
+    - login view render base
+    - rechazo `401` de API sin bearer / token inválido
 - estado Git actual:
   - branch activa: `epic/epic-1-foundation-auth-shell`
   - auth real ya validada localmente sobre Firebase del proyecto `prode-mundial-4e419`
   - último commit publicado en remoto: `6c25b39`
-  - working tree limpio al cierre de WS3
+  - working tree con cambios locales de cierre de `Epic 1` en esta sesión
 
 ## Tooling relevante
 
 - Node disponible
 - `pnpm` usable vía `corepack pnpm`
 - existe wrapper local `./pnpm` para compatibilidad con `turbo`
+- `tsx` agregado en raíz para ejecutar tests `ts/tsx` reales en `web` y `api`
 
 ---
 
@@ -113,13 +125,13 @@ Avance adicional de `Epic 1`:
 
 # Próximo foco recomendado
 
-Seguir con `EPIC 1`:
+Si la validación final local queda OK, `Epic 1` queda esencialmente lista para cierre funcional.
 
-1. endurecer manejo de errores UX para popup cancelado, link expirado y token inválido
-2. agregar tests mínimos de auth guard, login render y rechazo de API sin token
-3. documentar setup Firebase paso a paso y helpers de desarrollo sin exponer secretos
-4. revisar si conviene mantener bootstrap público dependiente de API en local o agregar fallback de DX
-5. conectar `/home` al endpoint real cuando exista
+Siguiente foco natural:
+
+1. confirmar contra la DoD si falta algún detalle menor de CI o seeds de desarrollo
+2. preparar arranque de `Epic 2` sobre fixtures, match detail y predicciones
+3. conectar `/home` al endpoint real cuando exista en épicas posteriores
 
 ---
 

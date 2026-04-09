@@ -6,25 +6,32 @@ import { APP_ROUTES } from "@prode/shared";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "./auth-provider";
 
+export function resolveAuthGuardRedirect(status: string, pathname: string | null, profileCompleted?: boolean) {
+  if (status === "unauthenticated") {
+    const next = pathname ? `?next=${encodeURIComponent(pathname)}` : "";
+    return `${APP_ROUTES.login}${next}`;
+  }
+
+  if (status === "authenticated" && profileCompleted === false && pathname !== APP_ROUTES.profile) {
+    return APP_ROUTES.profile;
+  }
+
+  return null;
+}
+
 export function AuthGuard({ children }: PropsWithChildren) {
   const router = useRouter();
   const pathname = usePathname();
   const { profile, status } = useAuth();
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      const next = pathname ? `?next=${encodeURIComponent(pathname)}` : "";
-      router.replace(`${APP_ROUTES.login}${next}`);
+    const redirectTarget = resolveAuthGuardRedirect(status, pathname, profile?.profileCompleted);
+
+    if (!redirectTarget || (status === "authenticated" && !profile)) {
       return;
     }
 
-    if (status !== "authenticated" || !profile) {
-      return;
-    }
-
-    if (!profile.profileCompleted && pathname !== APP_ROUTES.profile) {
-      router.replace(APP_ROUTES.profile);
-    }
+    router.replace(redirectTarget);
   }, [pathname, profile, router, status]);
 
   if (status === "loading" || status === "idle") {

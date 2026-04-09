@@ -1,10 +1,21 @@
 import Link from "next/link";
-import { SUPPORT_LINKS } from "@prode/shared";
+import { DEFAULT_PUBLIC_BOOTSTRAP, SUPPORT_LINKS } from "@prode/shared";
 import { Card } from "@prode/ui";
 import { getPublicBootstrap } from "@/lib/api/client";
 
+export const dynamic = "force-dynamic";
+
 export default async function LandingPage() {
-  const bootstrap = await getPublicBootstrap();
+  const bootstrap = await getPublicBootstrap().catch((error) => {
+    const isDynamicServerUsage =
+      error && typeof error === "object" && "digest" in error && error.digest === "DYNAMIC_SERVER_USAGE";
+
+    if (!isDynamicServerUsage) {
+      console.error("Falling back to default public bootstrap.", error);
+    }
+
+    return DEFAULT_PUBLIC_BOOTSTRAP;
+  });
 
   return (
     <main style={{ maxWidth: 960, margin: "0 auto", padding: "40px 20px 56px", display: "grid", gap: 20 }}>
