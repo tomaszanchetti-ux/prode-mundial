@@ -30,8 +30,10 @@ Bootstrap inicial del monorepo para el MVP de Prode Mundial.
 corepack enable
 corepack prepare pnpm@10.18.3 --activate
 pnpm install
-pnpm dev
+pnpm dev:setup
 ```
+
+`pnpm dev:setup` asegura primero la base de `teams`, `groups` y `matches` en Firestore si el proyecto está vacío y después levanta web + api en paralelo.
 
 ## Setup Firebase local
 
@@ -99,6 +101,7 @@ EOF
 
 ## Scripts
 
+- `pnpm dev:setup`
 - `pnpm dev`
 - `pnpm build`
 - `pnpm lint`
@@ -112,12 +115,14 @@ Para cerrar `Epic 2 / CARD 2`, la API ya tiene un seed reproducible para `teams`
 Resumen rápido:
 
 ```bash
+pnpm --filter @prode/api ensure:wc2026
 pnpm --filter @prode/api seed:wc2026 -- --dry-run
 pnpm --filter @prode/api seed:wc2026
 ```
 
 Notas:
 
+- `ensure:wc2026` verifica si faltan `teams`, `groups` o `matches` y solo entonces ejecuta el seed real
 - el script requiere las credenciales Firebase ya cargadas en `.env`
 - `--dry-run` imprime el resumen del seed sin escribir en Firestore
 - el seed deja una mezcla útil de estados para desarrollo: partidos `scheduled`, `live` y `finished`

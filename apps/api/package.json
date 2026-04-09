@@ -10,7 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --import tsx --test src/**/*.test.ts",
     "format": "echo \"No formatter configured for @prode/api yet\"",
-    "seed:wc2026": "tsx src/domains/matches/scripts/seed-world-cup-2026.ts"
+    "seed:wc2026": "tsx src/domains/matches/scripts/seed-world-cup-2026.ts",
+    "ensure:wc2026": "tsx src/domains/matches/scripts/ensure-world-cup-2026-base-data.ts"
   },
   "dependencies": {
     "@prode/shared": "workspace:*",
