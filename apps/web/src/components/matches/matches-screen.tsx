@@ -50,6 +50,28 @@ function toLocalKickoffLabel(iso: string) {
   }).format(date);
 }
 
+function toCountdownLabel(targetIso: string, now = new Date()) {
+  const diffMs = new Date(targetIso).getTime() - now.getTime();
+
+  if (diffMs <= 0) {
+    return "Disponible ahora";
+  }
+
+  const totalMinutes = Math.ceil(diffMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours <= 0) {
+    return `Abre en ${minutes}m`;
+  }
+
+  if (minutes === 0) {
+    return `Abre en ${hours}h`;
+  }
+
+  return `Abre en ${hours}h ${minutes}m`;
+}
+
 function toStageLabel(stage: MatchStage, groupId: string | null) {
   if (stage === "group" && groupId) {
     return `Grupo ${groupId}`;
@@ -152,6 +174,10 @@ function toResultCopy(match: MatchSummary) {
     return "Abre el detalle para ver resultado y puntos.";
   }
 
+  if (!match.isEditable && match.status === "scheduled" && new Date(match.predictionOpensAt).getTime() > Date.now()) {
+    return `Disponible desde ${toLocalKickoffLabel(match.predictionOpensAt)}.`;
+  }
+
   if (!match.isEditable) {
     return "Prediccion cerrada. Solo queda seguir el partido.";
   }
@@ -161,6 +187,17 @@ function toResultCopy(match: MatchSummary) {
 
 function pickQuickMatch(matches: MatchSummary[]) {
   return matches.find((match) => match.isEditable && match.predictionStatus === "empty") ?? matches.find((match) => match.isEditable) ?? null;
+}
+
+function pickNextOpeningMatch(matches: MatchSummary[], now = new Date()) {
+  return (
+    matches.find(
+      (match) =>
+        !match.isEditable &&
+        match.status === "scheduled" &&
+        new Date(match.predictionOpensAt).getTime() > now.getTime()
+    ) ?? null
+  );
 }
 
 export function MatchesScreenView({
@@ -175,6 +212,7 @@ export function MatchesScreenView({
 }: MatchesScreenViewProps) {
   const activeFilter = filterChips.find((chip) => chip.key === activeFilterKey) ?? filterChips[0];
   const quickMatch = pickQuickMatch(items);
+  const nextOpeningMatch = pickNextOpeningMatch(items);
 
   return (
     <div style={{ display: "grid", gap: spacing[16] }}>
@@ -203,6 +241,29 @@ export function MatchesScreenView({
             <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{toLocalKickoffLabel(quickMatch.kickoffAt)}</span>
             <Button onClick={() => onOpenQuickPredict(quickMatch.matchId)}>
               {quickMatch.userPredictionSummary ? "Editar prediccion" : "Predecir ahora"}
+            </Button>
+          </Card>
+        ) : null}
+
+        {!quickMatch && nextOpeningMatch ? (
+          <Card
+            elevated
+            style={{
+              gap: spacing[12],
+              padding: spacing[16],
+              background:
+                "radial-gradient(circle at top right, rgba(231, 198, 106, 0.12), transparent 28%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
+            }}
+          >
+            <span style={{ ...typography.small, color: colors.gold500 }}>PROXIMA VENTANA</span>
+            <strong style={{ fontSize: 22, lineHeight: 1.1, color: colors.textPrimary }}>
+              {nextOpeningMatch.homeTeam.name} vs {nextOpeningMatch.awayTeam.name}
+            </strong>
+            <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
+              Abre {toLocalKickoffLabel(nextOpeningMatch.predictionOpensAt)} · {toCountdownLabel(nextOpeningMatch.predictionOpensAt)}
+            </span>
+            <Button variant="secondary" onClick={() => onOpenMatch(nextOpeningMatch.matchId)}>
+              Ver detalle
             </Button>
           </Card>
         ) : null}

@@ -21,6 +21,7 @@ function buildMatchDetail(overrides: Partial<MatchDetail> = {}): MatchDetail {
       flagUrl: null
     },
     kickoffAt: "2026-06-27T19:00:00Z",
+    predictionOpensAt: "2026-06-27T14:00:00.000Z",
     status: "scheduled",
     deadlineAt: "2026-06-27T19:00:00Z",
     isLocked: false,
@@ -123,7 +124,7 @@ test("MatchDetailScreenView renders locked state copy and disables editing inten
     })
   );
 
-  assert.match(html, /Cerrado/);
+  assert.match(html, /Abre pronto/);
   assert.match(html, /Guardar prediccion/);
 });
 

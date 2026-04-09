@@ -1,7 +1,9 @@
+import { MATCH_PREDICTION_WINDOW_HOURS } from "@prode/shared";
 import type { MatchStatus, PredictionStatus } from "@prode/shared";
 import type { StoredMatch, StoredPrediction } from "../types";
 
 export type MatchFunctionalState =
+  | "SCHEDULED_WAITING_WINDOW"
   | "EDITABLE"
   | "LOCKED_PENDING"
   | "LIVE_LOCKED"
@@ -33,9 +35,19 @@ function hasReachedKickoff(match: StoredMatch, now: Date) {
   return toDateValue(match.kickoffAt) <= now.getTime();
 }
 
+export function getPredictionOpensAt(match: StoredMatch) {
+  const kickoffAt = toDateValue(match.kickoffAt);
+  return new Date(kickoffAt - MATCH_PREDICTION_WINDOW_HOURS * 60 * 60 * 1000);
+}
+
+function hasReachedPredictionWindow(match: StoredMatch, now: Date) {
+  return getPredictionOpensAt(match).getTime() <= now.getTime();
+}
+
 export function deriveMatchFunctionalState(match: StoredMatch, now = new Date()): MatchFunctionalState {
   const publicStatus = normalizeMatchStatus(match.status);
   const kickoffReached = hasReachedKickoff(match, now);
+  const predictionWindowReached = hasReachedPredictionWindow(match, now);
 
   if (publicStatus === "finished") {
     return match.isScored ? "SCORED" : "FINISHED_PENDING_SCORING";
@@ -43,6 +55,10 @@ export function deriveMatchFunctionalState(match: StoredMatch, now = new Date())
 
   if (publicStatus === "live") {
     return "LIVE_LOCKED";
+  }
+
+  if (!predictionWindowReached && !kickoffReached && !match.isLocked) {
+    return "SCHEDULED_WAITING_WINDOW";
   }
 
   if (!kickoffReached && !match.isLocked) {

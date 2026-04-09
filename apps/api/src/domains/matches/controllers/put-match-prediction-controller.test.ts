@@ -42,6 +42,7 @@ function buildUrl(pathname: string) {
 }
 
 test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and returns envelope", async () => {
+  const kickoffAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
   const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
     uid: "usr_1",
     email: "tomas@example.com",
@@ -58,7 +59,7 @@ test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and retu
       awayTeamId: "ned",
       homeSlot: null,
       awaySlot: null,
-      kickoffAt: "2099-06-27T19:00:00Z",
+      kickoffAt,
       status: "scheduled",
       homeScore90: null,
       awayScore90: null,
@@ -235,6 +236,7 @@ test("PUT /api/v1/matches/:matchId/prediction returns MATCH_LOCKED when domain r
 });
 
 test("PUT /api/v1/matches/:matchId/prediction returns INVALID_KNOCKOUT_CLASSIFIER on draw without qualifier", async () => {
+  const kickoffAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
   const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
     uid: "usr_1",
     email: "tomas@example.com",
@@ -248,7 +250,7 @@ test("PUT /api/v1/matches/:matchId/prediction returns INVALID_KNOCKOUT_CLASSIFIE
     awayTeamId: "ned",
     homeSlot: null,
     awaySlot: null,
-    kickoffAt: "2099-06-27T19:00:00Z",
+    kickoffAt,
     status: "scheduled",
     homeScore90: null,
     awayScore90: null,

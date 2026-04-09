@@ -56,7 +56,7 @@ test("validatePredictionInput sanitizes group predictions and drops redundant qu
       awayScorePred: 1,
       predictedQualifierTeamId: "ARG"
     },
-    new Date("2026-06-10T00:00:00Z")
+    new Date("2026-06-11T15:00:00Z")
   );
 
   assert.deepEqual(result, {
@@ -75,7 +75,7 @@ test("validatePredictionInput requires qualifier on knockout draws", () => {
           homeScorePred: 1,
           awayScorePred: 1
         },
-        new Date("2026-06-10T00:00:00Z")
+        new Date("2026-06-11T15:00:00Z")
       ),
     (error: unknown) =>
       error instanceof ApiError &&
@@ -93,7 +93,7 @@ test("validatePredictionInput rejects qualifier that does not belong to the matc
           awayScorePred: 1,
           predictedQualifierTeamId: "MEX"
         },
-        new Date("2026-06-10T00:00:00Z")
+        new Date("2026-06-11T15:00:00Z")
       ),
     (error: unknown) =>
       error instanceof ApiError &&
@@ -109,7 +109,7 @@ test("validatePredictionInput clears qualifier on knockout non-draw predictions"
       awayScorePred: 1,
       predictedQualifierTeamId: "ARG"
     },
-    new Date("2026-06-10T00:00:00Z")
+    new Date("2026-06-11T15:00:00Z")
   );
 
   assert.deepEqual(result, {
@@ -128,7 +128,7 @@ test("validatePredictionInput rejects invalid score payloads with INVALID_SCORE"
           homeScorePred: 1.5,
           awayScorePred: 0
         },
-        new Date("2026-06-10T00:00:00Z")
+        new Date("2026-06-11T15:00:00Z")
       ),
     (error: unknown) =>
       error instanceof ApiError &&
@@ -138,7 +138,16 @@ test("validatePredictionInput rejects invalid score payloads with INVALID_SCORE"
 
 test("assertMatchPredictionEditable rejects locked matches", () => {
   assert.throws(
-    () => assertMatchPredictionEditable(buildMatch({ isLocked: true }), new Date("2026-06-10T00:00:00Z")),
+    () => assertMatchPredictionEditable(buildMatch({ isLocked: true }), new Date("2026-06-11T15:00:00Z")),
+    (error: unknown) =>
+      error instanceof ApiError &&
+      error.code === "MATCH_LOCKED"
+  );
+});
+
+test("assertMatchPredictionEditable rejects matches before the 5 hour prediction window opens", () => {
+  assert.throws(
+    () => assertMatchPredictionEditable(buildMatch(), new Date("2026-06-11T12:30:00Z")),
     (error: unknown) =>
       error instanceof ApiError &&
       error.code === "MATCH_LOCKED"

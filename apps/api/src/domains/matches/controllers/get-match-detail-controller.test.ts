@@ -57,6 +57,7 @@ test("GET /api/v1/matches/:matchId returns match detail envelope", async () => {
       homeTeam: { teamId: "slot:2A", name: "Por definir (2A)", flagUrl: null },
       awayTeam: { teamId: "slot:2B", name: "Por definir (2B)", flagUrl: null },
       kickoffAt: "2026-06-27T19:00:00Z",
+      predictionOpensAt: "2026-06-27T14:00:00.000Z",
       status: "scheduled",
       deadlineAt: "2026-06-27T19:00:00Z",
       isLocked: false,

@@ -45,7 +45,11 @@ function buildPrediction(overrides: Partial<StoredPrediction> = {}): StoredPredi
 }
 
 test("deriveMatchFunctionalState returns EDITABLE before kickoff for scheduled unlocked match", () => {
-  assert.equal(deriveMatchFunctionalState(buildMatch(), new Date("2026-06-10T12:00:00Z")), "EDITABLE");
+  assert.equal(deriveMatchFunctionalState(buildMatch(), new Date("2026-06-11T15:00:00Z")), "EDITABLE");
+});
+
+test("deriveMatchFunctionalState returns SCHEDULED_WAITING_WINDOW before prediction window opens", () => {
+  assert.equal(deriveMatchFunctionalState(buildMatch(), new Date("2026-06-11T12:30:00Z")), "SCHEDULED_WAITING_WINDOW");
 });
 
 test("deriveMatchFunctionalState returns LOCKED_PENDING once scheduled match reaches kickoff", () => {
@@ -78,7 +82,7 @@ test("deriveMatchFunctionalState returns SCORED for finished scored matches", ()
 
 test("derivePredictionLifecycleState returns draft for editable saved prediction", () => {
   assert.equal(
-    derivePredictionLifecycleState(buildMatch(), buildPrediction(), new Date("2026-06-10T12:00:00Z")),
+    derivePredictionLifecycleState(buildMatch(), buildPrediction(), new Date("2026-06-11T15:00:00Z")),
     "draft"
   );
 });

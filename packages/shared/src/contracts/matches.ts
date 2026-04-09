@@ -25,6 +25,7 @@ export type MatchSummary = {
   homeTeam: TeamRef;
   awayTeam: TeamRef;
   kickoffAt: string;
+  predictionOpensAt: string;
   status: MatchStatus;
   deadlineAt: string;
   isLocked: boolean;

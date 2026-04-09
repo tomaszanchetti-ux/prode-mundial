@@ -74,6 +74,10 @@ function toKickoffLabel(iso: string) {
   }).format(new Date(iso));
 }
 
+function predictionWindowNotOpen(detail: MatchDetail) {
+  return detail.status === "scheduled" && !detail.isEditable && new Date(detail.predictionOpensAt).getTime() > Date.now();
+}
+
 function toStatusLabel(detail: MatchDetail) {
   if (detail.predictionStatus === "scored") {
     return "Puntuado";
@@ -84,6 +88,10 @@ function toStatusLabel(detail: MatchDetail) {
   }
 
   if (!detail.isEditable) {
+    if (predictionWindowNotOpen(detail)) {
+      return "Abre pronto";
+    }
+
     return "Cerrado";
   }
 
@@ -111,6 +119,10 @@ function toStatusTone(detail: MatchDetail) {
 }
 
 function toHelperText(detail: MatchDetail, formState: FormState) {
+  if (predictionWindowNotOpen(detail)) {
+    return `La prediccion abre ${toKickoffLabel(detail.predictionOpensAt)}.`;
+  }
+
   if (detail.requiresQualifierIfDraw && formState.homeScorePred !== "" && formState.homeScorePred === formState.awayScorePred) {
     return "Si eliges empate, marca quien clasifica.";
   }
@@ -253,6 +265,11 @@ export function MatchDetailScreenView({
           <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
             Deadline: {toKickoffLabel(detail.deadlineAt)}
           </span>
+          {predictionWindowNotOpen(detail) ? (
+            <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
+              Apertura: {toKickoffLabel(detail.predictionOpensAt)}
+            </span>
+          ) : null}
         </div>
 
         <div
@@ -265,7 +282,9 @@ export function MatchDetailScreenView({
             border: `1px solid ${colors.border}`
           }}
         >
-          <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary }}>Editable hasta kickoff</span>
+          <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary }}>
+            {predictionWindowNotOpen(detail) ? "Prediccion disponible desde la apertura" : "Editable hasta kickoff"}
+          </span>
           <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
             Exacto: {detail.scoringRules.exact90Points} pts
           </span>

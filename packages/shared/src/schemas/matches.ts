@@ -24,6 +24,7 @@ export const matchSummarySchema = z.object({
   homeTeam: teamRefSchema,
   awayTeam: teamRefSchema,
   kickoffAt: isoTimestampSchema,
+  predictionOpensAt: isoTimestampSchema,
   status: matchStatusSchema,
   deadlineAt: isoTimestampSchema,
   isLocked: z.boolean(),

@@ -21,6 +21,7 @@ function buildMatchSummary(overrides: Partial<MatchSummary> = {}): MatchSummary 
       flagUrl: null
     },
     kickoffAt: "2026-06-11T19:00:00Z",
+    predictionOpensAt: "2026-06-11T14:00:00.000Z",
     status: "scheduled",
     deadlineAt: "2026-06-11T19:00:00Z",
     isLocked: false,

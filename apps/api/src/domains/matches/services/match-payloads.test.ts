@@ -47,7 +47,7 @@ test("deriveMatchViewState marks editable saved predictions correctly", () => {
   const state = deriveMatchViewState(
     buildMatch(),
     buildPrediction(),
-    new Date("2026-06-10T00:00:00Z")
+    new Date("2026-06-11T15:00:00Z")
   );
 
   assert.equal(state.isEditable, true);
@@ -56,12 +56,25 @@ test("deriveMatchViewState marks editable saved predictions correctly", () => {
   assert.equal(state.ctaLabel, "Editar prediccion");
 });
 
+test("deriveMatchViewState marks scheduled matches as available soon before the prediction window", () => {
+  const state = deriveMatchViewState(
+    buildMatch(),
+    null,
+    new Date("2026-06-11T12:30:00Z")
+  );
+
+  assert.equal(state.isEditable, false);
+  assert.equal(state.matchState, "SCHEDULED_WAITING_WINDOW");
+  assert.equal(state.ctaLabel, "Disponible pronto");
+});
+
 test("toMatchSummary resolves knockout placeholders from bracket slots", () => {
   const summary = toMatchSummary(
     buildMatch({
       matchId: "m_073",
       stage: "R32",
       groupId: null,
+      kickoffAt: "2026-06-27T19:00:00Z",
       homeTeamId: null,
       awayTeamId: null,
       homeSlot: "2A",
@@ -77,6 +90,7 @@ test("toMatchSummary resolves knockout placeholders from bracket slots", () => {
   assert.equal(summary.awayTeam.teamId, "slot:2B");
   assert.equal(summary.isFinished, false);
   assert.equal(summary.isScored, false);
+  assert.equal(summary.predictionOpensAt, "2026-06-27T14:00:00.000Z");
 });
 
 test("applyMatchesCursor skips rows up to the provided cursor", () => {

@@ -35,8 +35,41 @@ function toKickoffLabel(iso: string) {
   }).format(new Date(iso));
 }
 
+function toCountdownLabel(targetIso: string, now = new Date()) {
+  const diffMs = new Date(targetIso).getTime() - now.getTime();
+
+  if (diffMs <= 0) {
+    return "Disponible ahora";
+  }
+
+  const totalMinutes = Math.ceil(diffMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours <= 0) {
+    return `Abre en ${minutes}m`;
+  }
+
+  if (minutes === 0) {
+    return `Abre en ${hours}h`;
+  }
+
+  return `Abre en ${hours}h ${minutes}m`;
+}
+
 function pickPriorityMatch(matches: MatchSummary[]) {
   return matches.find((match) => match.isEditable && match.predictionStatus === "empty") ?? matches.find((match) => match.isEditable) ?? null;
+}
+
+function pickNextOpeningMatch(matches: MatchSummary[], now = new Date()) {
+  return (
+    matches.find(
+      (match) =>
+        !match.isEditable &&
+        match.status === "scheduled" &&
+        new Date(match.predictionOpensAt).getTime() > now.getTime()
+    ) ?? null
+  );
 }
 
 export function HomeScreen() {
@@ -100,6 +133,7 @@ export function HomeScreen() {
   );
   const scoredMatches = useMemo(() => items.filter((match) => match.predictionStatus === "scored"), [items]);
   const priorityMatch = useMemo(() => pickPriorityMatch(items), [items]);
+  const nextOpeningMatch = useMemo(() => pickNextOpeningMatch(items), [items]);
 
   useEffect(() => {
     if (isLoading || dismissedCycle || activeMatchId || !priorityMatch) {
@@ -124,11 +158,13 @@ export function HomeScreen() {
           <span style={{ ...typography.small, color: colors.textMuted }}>HOY EN PRODE MUNDIAL</span>
           <div style={{ display: "grid", gap: spacing[8] }}>
             <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>
-              {pendingMatches.length > 0 ? `Te faltan ${pendingMatches.length} partidos` : "Ya vas al dia"}
+              {pendingMatches.length > 0 ? `Te faltan ${pendingMatches.length} partidos` : nextOpeningMatch ? "Tu proxima ventana abre pronto" : "Ya vas al dia"}
             </h1>
             <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 560 }}>
               {priorityMatch
                 ? `Tu proximo partido es ${priorityMatch.homeTeam.name} vs ${priorityMatch.awayTeam.name}.`
+                : nextOpeningMatch
+                  ? `La siguiente prediccion se habilita para ${nextOpeningMatch.homeTeam.name} vs ${nextOpeningMatch.awayTeam.name}.`
                 : "No tienes pendientes inmediatos. Aprovecha para revisar resultados y tus ligas."}
             </p>
           </div>
@@ -181,6 +217,48 @@ export function HomeScreen() {
 
             <Button fullWidth onClick={() => setActiveMatchId(priorityMatch.matchId)}>
               {priorityMatch.userPredictionSummary ? "Editar prediccion" : "Predecir ahora"}
+            </Button>
+          </Card>
+        ) : null}
+
+        {!priorityMatch && nextOpeningMatch ? (
+          <Card elevated style={{ gap: spacing[16], padding: spacing[16] }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "flex-start" }}>
+              <div style={{ display: "grid", gap: 6 }}>
+                <span style={{ ...typography.small, color: colors.gold500 }}>PROXIMA PREDICCION</span>
+                <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
+                  {toStageLabel(nextOpeningMatch)} · {toKickoffLabel(nextOpeningMatch.kickoffAt)}
+                </span>
+              </div>
+              <StatusTag status="locked" label={toCountdownLabel(nextOpeningMatch.predictionOpensAt)} />
+            </div>
+
+            <div style={{ display: "grid", gap: spacing[12] }}>
+              <TeamDisplay teamName={nextOpeningMatch.homeTeam.name} flagUrl={nextOpeningMatch.homeTeam.flagUrl} size="lg" weight={700} />
+              <div style={{ paddingLeft: 46, fontSize: 12, color: colors.textMuted, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
+              <TeamDisplay teamName={nextOpeningMatch.awayTeam.name} flagUrl={nextOpeningMatch.awayTeam.flagUrl} size="lg" weight={700} />
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gap: 6,
+                padding: 14,
+                borderRadius: 14,
+                background: "rgba(255, 255, 255, 0.03)",
+                border: `1px solid ${colors.border}`
+              }}
+            >
+              <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>
+                La ventana abre {toKickoffLabel(nextOpeningMatch.predictionOpensAt)}
+              </span>
+              <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+                Luego podras crear o editar tu marcador libremente hasta el kickoff.
+              </span>
+            </div>
+
+            <Button variant="secondary" fullWidth onClick={() => router.push("/matches")}>
+              Ver calendario
             </Button>
           </Card>
         ) : null}
