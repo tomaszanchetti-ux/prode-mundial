@@ -58,6 +58,22 @@ Objetivo:
 - puntos
 - standings por liga
 
+## Epic 3.5
+
+`EPIC 3.5 — Pre-Tournament Mode, Tu Mundial & Marathon Mode.md`
+
+Objetivo:
+
+- reordenar el loop visible antes del Mundial
+- introducir progreso global de grupos
+- habilitar Marathon Mode
+- habilitar `Tu Mundial` con standings proyectados server-driven
+
+Nota de prioridad:
+
+- esta épica entra antes de `Epic 4`
+- `Mundial Real` queda explícitamente fuera de esta fase
+
 ## Epic 4
 
 `EPIC 4 — Leagues, Invite Flow, Membership & League Detail.md`
@@ -128,10 +144,12 @@ Objetivo:
 
 - Epic 1 desbloquea todo lo demás
 - Epic 2 desbloquea Epic 3
+- Epic 3 desbloquea Epic 3.5
+- Epic 3.5 redefine la UX principal pre-torneo y debe cerrarse antes de Epic 4
 - Epic 3 y Epic 4 habilitan la capa competitiva base
 - Epic 5 desbloquea Epic 6
-- Epic 3, 4 y 6 alimentan Epic 7
-- Epic 8 endurece operación del core ya construido
+- Epic 3.5, 4 y 6 alimentan Epic 7
+- Epic 8 endurece operación del core ya construido y prepara el terreno para `Mundial Real`
 - Epic 9 se apoya sobre flows ya vivos
 
 ---

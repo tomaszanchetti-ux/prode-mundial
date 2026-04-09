@@ -34,6 +34,17 @@ El corpus quedó alineado para implementación con estas decisiones rectoras:
 - scoring batch/event-driven
 - design system UI oficial ya incorporado al repo como guía binding para frontend y `packages/ui`
 
+Actualización documental nueva:
+
+- se incorporó una nueva capa de producto para el período pre-torneo
+- esta capa introduce:
+  - `Pre-Tournament Mode`
+  - `Marathon Mode`
+  - `Tu Mundial`
+- se decidió explícitamente que:
+  - esta capa entra antes de `Epic 4`
+  - `Mundial Real` queda diferido a una etapa asociada a ingestión real
+
 ## Estado técnico
 
 Se creó el bootstrap inicial del monorepo:
@@ -211,20 +222,44 @@ Avance adicional de `Epic 1`:
 
 Todas OK al cierre de la iteración UX/UI + ventana de predicción.
 
-## Próximo foco recomendado
+## Estado funcional real al cierre actual
 
-- si el objetivo vuelve a core funcional:
-  - entrar a `Epic 3 — Scoring, Points & League Standings`
-- si se quiere una pasada final de polish frontend:
-  - revisar microinteracciones / motion fina
-  - QA responsive manual en mobile real
-  - decidir si el auto-open del modal también debe dispararse inmediatamente post-login
+- `Epic 1` cerrada
+- `Epic 2` cerrada
+- `Epic 3` con primera capa funcional ya cerrada en repo:
+  - puntos por usuario
+  - standings materializados
+  - `GET /api/v1/points`
+  - `GET /api/v1/leagues`
+  - `GET /api/v1/leagues/:leagueId/standings`
+- `Epic 4` todavía NO iniciada como siguiente bloque de ejecución
 
-Recomendación actual:
+## Nuevo foco recomendado
 
-- pasar a `Epic 3`
-- la base visual ya está suficientemente madura
-- el loop de predicción también ya fue endurecido con la regla de ventana de 5 horas
+Antes de `Epic 4`, el proyecto debe ejecutar una nueva épica intermedia:
+
+- `Epic 3.5 — Pre-Tournament Mode, Tu Mundial & Marathon Mode`
+
+Razón:
+
+- redefine el loop visible principal antes del inicio del Mundial
+- cambia la prioridad de `home`
+- introduce progreso global de grupos
+- introduce el flujo secuencial de completitud
+- introduce `Tu Mundial` como superficie de engagement alto valor
+
+## Orden recomendado actualizado
+
+1. cerrar documentación ejecutable de `Epic 3.5`
+2. implementar `Epic 3.5`
+3. retomar `Epic 4`
+4. dejar `Mundial Real` para una etapa posterior ligada a ingestión real
+
+## Documentos nuevos binding para continuidad
+
+- `docs/product/07. Prode Mundial - Pre-Tournament UX Mode + Dynamic Standings Spec.md`
+- `docs/product/08. Prode Mundial - Tu Mundial, Mundial Real + Marathon Mode UX Spec.md`
+- `docs/backlog/EPIC 3.5 — Pre-Tournament Mode, Tu Mundial & Marathon Mode.md`
 
 ## Workflow operativo de datos locales
 
