@@ -11,7 +11,10 @@
     "test": "node --import tsx --test src/**/*.test.ts",
     "format": "echo \"No formatter configured for @prode/api yet\"",
     "seed:wc2026": "tsx src/domains/matches/scripts/seed-world-cup-2026.ts",
-    "ensure:wc2026": "tsx src/domains/matches/scripts/ensure-world-cup-2026-base-data.ts"
+    "ensure:wc2026": "tsx src/domains/matches/scripts/ensure-world-cup-2026-base-data.ts",
+    "seed:competition-demo": "tsx src/domains/leagues/scripts/seed-competition-demo.ts",
+    "reset:competition-demo": "tsx src/domains/leagues/scripts/reset-competition-demo.ts",
+    "fresh:competition-demo": "tsx src/domains/leagues/scripts/fresh-competition-demo.ts"
   },
   "dependencies": {
     "@prode/shared": "workspace:*",

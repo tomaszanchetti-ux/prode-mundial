@@ -13,6 +13,11 @@ export type ApiErrorCode =
   | "MATCH_LOCKED"
   | "MATCH_NOT_FOUND"
   | "MATCH_NOT_EDITABLE"
+  | "LEAGUE_NOT_FOUND"
+  | "LEAGUE_INACTIVE"
+  | "LEAGUE_CAPACITY_REACHED"
+  | "ALREADY_LEAGUE_MEMBER"
+  | "INVITE_INVALID"
   | "INTERNAL_ERROR";
 
 export type ApiError = {

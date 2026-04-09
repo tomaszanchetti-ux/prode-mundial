@@ -1,8 +1,11 @@
 import type {
   ApiResponse,
+  LeagueStandingsResponse,
+  ListMyLeaguesResponse,
   ListMatchesQuery,
   ListMatchesResponse,
   MatchDetail,
+  PointsResponse,
   PublicBootstrap,
   SaveMatchPredictionInput,
   SaveMatchPredictionResponse,
@@ -10,8 +13,11 @@ import type {
   UserProfile
 } from "@prode/shared";
 import {
+  leagueStandingsResponseSchema,
+  listMyLeaguesResponseSchema,
   listMatchesResponseSchema,
   matchDetailSchema,
+  pointsResponseSchema,
   publicBootstrapSchema,
   saveMatchPredictionResponseSchema,
   userProfileSchema
@@ -86,6 +92,45 @@ export async function getMyProfile(token: string): Promise<UserProfile> {
   }
 
   return userProfileSchema.parse(await parseJson<UserProfile>(response));
+}
+
+export async function getPoints(token: string): Promise<PointsResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/points`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load points (${response.status}).`);
+  }
+
+  return pointsResponseSchema.parse(await parseJson<PointsResponse>(response));
+}
+
+export async function getMyLeagues(token: string): Promise<ListMyLeaguesResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load leagues (${response.status}).`);
+  }
+
+  return listMyLeaguesResponseSchema.parse(await parseJson<ListMyLeaguesResponse>(response));
+}
+
+export async function getLeagueStandings(token: string, leagueId: string): Promise<LeagueStandingsResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues/${leagueId}/standings`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load standings (${response.status}).`);
+  }
+
+  return leagueStandingsResponseSchema.parse(await parseJson<LeagueStandingsResponse>(response));
 }
 
 export async function updateMyProfile(token: string, input: UpdateProfileInput): Promise<UserProfile> {

@@ -6,6 +6,16 @@ import { buildPredictionId, createStoredPrediction, mergeStoredPrediction } from
 const predictionsCollection = firestore.collection("predictions");
 
 export class PredictionsRepository {
+  async listPredictionsByUser(userId: string): Promise<StoredPrediction[]> {
+    const snapshot = await predictionsCollection.where("userId", "==", userId).get();
+    return snapshot.docs.map((doc) => doc.data() as StoredPrediction);
+  }
+
+  async listPredictionsByMatch(matchId: string): Promise<StoredPrediction[]> {
+    const snapshot = await predictionsCollection.where("matchId", "==", matchId).get();
+    return snapshot.docs.map((doc) => doc.data() as StoredPrediction);
+  }
+
   async getPredictionByUserAndMatch(userId: string, matchId: string): Promise<StoredPrediction | null> {
     const snapshot = await predictionsCollection.where("userId", "==", userId).get();
     const prediction = snapshot.docs
@@ -55,6 +65,10 @@ export class PredictionsRepository {
 
     await predictionsCollection.doc(buildPredictionId(userId, matchId)).set(created);
     return created;
+  }
+
+  async upsertStoredPrediction(prediction: StoredPrediction): Promise<void> {
+    await predictionsCollection.doc(prediction.predictionId).set(prediction, { merge: true });
   }
 }
 

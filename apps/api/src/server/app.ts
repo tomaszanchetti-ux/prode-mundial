@@ -1,8 +1,11 @@
 import express from "express";
 import { getHealthController } from "../domains/health/controllers/get-health-controller";
+import { getLeagueStandingsController } from "../domains/leagues/controllers/get-league-standings-controller";
+import { getLeaguesController } from "../domains/leagues/controllers/get-leagues-controller";
 import { getMatchDetailController } from "../domains/matches/controllers/get-match-detail-controller";
 import { getMatchesController } from "../domains/matches/controllers/get-matches-controller";
 import { putMatchPredictionController } from "../domains/matches/controllers/put-match-prediction-controller";
+import { getPointsController } from "../domains/points/controllers/get-points-controller";
 import { getBootstrapController } from "../domains/public/controllers/get-bootstrap-controller";
 import { getMeController } from "../domains/users/controllers/get-me-controller";
 import { patchMeController } from "../domains/users/controllers/patch-me-controller";
@@ -29,6 +32,9 @@ export function createApp() {
   app.get("/health", getHealthController);
   app.get("/api/v1/public/bootstrap", getBootstrapController);
   app.get("/api/v1/me", requireAuth, getMeController);
+  app.get("/api/v1/points", requireAuth, getPointsController);
+  app.get("/api/v1/leagues", requireAuth, getLeaguesController);
+  app.get("/api/v1/leagues/:leagueId/standings", requireAuth, getLeagueStandingsController);
   app.get("/api/v1/matches", requireAuth, getMatchesController);
   app.get("/api/v1/matches/:matchId", requireAuth, getMatchDetailController);
   app.put("/api/v1/matches/:matchId/prediction", requireAuth, putMatchPredictionController);

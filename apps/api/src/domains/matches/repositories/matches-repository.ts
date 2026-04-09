@@ -34,6 +34,10 @@ export class MatchesRepository {
     return snapshot.data() as StoredMatch;
   }
 
+  async upsertMatch(match: StoredMatch): Promise<void> {
+    await matchesCollection.doc(match.matchId).set(match, { merge: true });
+  }
+
   private matchesStageFilter(stage: MatchStage, requestedStage?: MatchStage) {
     return !requestedStage || stage === requestedStage;
   }
