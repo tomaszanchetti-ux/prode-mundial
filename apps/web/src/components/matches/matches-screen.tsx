@@ -8,6 +8,7 @@ import { Button, Card, MatchCard, colors, radii, spacing, typography } from "@pr
 import { useAuth } from "@/components/auth/auth-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getMatches } from "@/lib/api/client";
+import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/editability";
 
 type FilterChip = {
   key: string;
@@ -98,7 +99,7 @@ function toCardTone(match: MatchSummary) {
     return "live" as const;
   }
 
-  if (!match.isEditable) {
+  if (!canEditPrediction(match)) {
     return "locked" as const;
   }
 
@@ -114,7 +115,7 @@ function toStatusLabel(match: MatchSummary) {
     return "En vivo";
   }
 
-  if (!match.isEditable) {
+  if (!canEditPrediction(match)) {
     return "Cerrado";
   }
 
@@ -174,11 +175,11 @@ function toResultCopy(match: MatchSummary) {
     return "Abre el detalle para ver resultado y puntos.";
   }
 
-  if (!match.isEditable && match.status === "scheduled" && new Date(match.predictionOpensAt).getTime() > Date.now()) {
+  if (isPredictionWindowNotOpen(match)) {
     return `Disponible desde ${toLocalKickoffLabel(match.predictionOpensAt)}.`;
   }
 
-  if (!match.isEditable) {
+  if (!canEditPrediction(match)) {
     return "Prediccion cerrada. Solo queda seguir el partido.";
   }
 
@@ -186,14 +187,14 @@ function toResultCopy(match: MatchSummary) {
 }
 
 function pickQuickMatch(matches: MatchSummary[]) {
-  return matches.find((match) => match.isEditable && match.predictionStatus === "empty") ?? matches.find((match) => match.isEditable) ?? null;
+  return matches.find((match) => canEditPrediction(match) && match.predictionStatus === "empty") ?? matches.find((match) => canEditPrediction(match)) ?? null;
 }
 
 function pickNextOpeningMatch(matches: MatchSummary[], now = new Date()) {
   return (
     matches.find(
       (match) =>
-        !match.isEditable &&
+        !canEditPrediction(match) &&
         match.status === "scheduled" &&
         new Date(match.predictionOpensAt).getTime() > now.getTime()
     ) ?? null
@@ -460,7 +461,7 @@ export function MatchesScreen() {
         }}
         onSaved={() => {
           setActiveMatchId(null);
-          setDismissedCycle(false);
+          setDismissedCycle(true);
           setReloadKey((current) => current + 1);
         }}
       />

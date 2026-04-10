@@ -20,6 +20,10 @@ function resolveEditableStart(match: StoredMatch) {
   return getPredictionOpensAt(match).getTime();
 }
 
+function isLabPredictionWindowBypassEnabled() {
+  return process.env.PRODE_ENABLE_LAB_PREDICTIONS === "true";
+}
+
 function isKnockoutMatch(match: StoredMatch) {
   return match.stage !== "group";
 }
@@ -80,7 +84,7 @@ export function assertMatchPredictionEditable(match: StoredMatch, now = new Date
     });
   }
 
-  if (resolveEditableStart(match) > now.getTime()) {
+  if (!isLabPredictionWindowBypassEnabled() && resolveEditableStart(match) > now.getTime()) {
     throw new ApiError(409, "MATCH_LOCKED", "This match prediction window is not open yet.", {
       matchId: match.matchId,
       kickoffAt: match.kickoffAt,

@@ -265,6 +265,20 @@ Turborepo o equivalente simple
 
 No introducir múltiples toolchains para resolver problemas menores.
 
+### **Orden operativo de testing**
+
+La secuencia oficial de validación del proyecto vive en:
+
+`docs/engineering/Prode Mundial - TESTING STRATEGY.md`
+
+Debe respetarse este orden:
+
+1. `Testing 1 - UX/UI`
+2. `Testing 2 - Logica Cerrada`
+3. `Testing 3 - Logica Abierta`
+
+La elección de herramientas o entornos de test no debe romper esa secuencia.
+
 ---
 
 ## **6\. Política de API**

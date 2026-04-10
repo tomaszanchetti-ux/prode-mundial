@@ -14,6 +14,7 @@ Bootstrap inicial del monorepo para el MVP de Prode Mundial.
 
 - `AGENTS.md`
 - `ATOMIC_TASKING_GUIDE.md`
+- `docs/engineering/Prode Mundial - TESTING STRATEGY.md`
 - `docs/product`
 - `docs/engineering`
 - `docs/backlog`
@@ -214,6 +215,27 @@ Importante:
 - no asumir que el entorno local debe regenerarse automáticamente en cada arranque
 - no mezclar cambios de lógica con dependencia obligatoria de datos demo preexistentes
 - cuando haga falta repetir pruebas desde un estado limpio, usar `fresh:competition-demo`
+
+## Estrategia oficial de testing
+
+El proyecto trabaja con un orden obligatorio de validación:
+
+1. `Testing 1 - UX/UI`
+2. `Testing 2 - Logica Cerrada`
+3. `Testing 3 - Logica Abierta`
+
+Resumen práctico:
+
+- `Testing 1`:
+  trabajo local, data dummy y validación muy exhaustiva de UX/UI de punta a punta
+- `Testing 2`:
+  entorno cerrado con lógica real frontend/backend y validación de persistencia, deadlines, scoring y standings
+- `Testing 3`:
+  validación controlada con grupo reducido y primer uso de fuentes externas o casos puente
+
+Referencia binding:
+
+- `docs/engineering/Prode Mundial - TESTING STRATEGY.md`
 
 ## Estrategia futura de ingestión real
 

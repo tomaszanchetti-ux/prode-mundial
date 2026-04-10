@@ -2,6 +2,7 @@ export const APP_ROUTES = {
   landing: "/",
   login: "/login",
   home: "/home",
+  tournament: "/tournament",
   matches: "/matches",
   rankings: "/rankings",
   leagues: "/leagues",

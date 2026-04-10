@@ -7,6 +7,8 @@ import { getMatchesController } from "../domains/matches/controllers/get-matches
 import { putMatchPredictionController } from "../domains/matches/controllers/put-match-prediction-controller";
 import { getPointsController } from "../domains/points/controllers/get-points-controller";
 import { getBootstrapController } from "../domains/public/controllers/get-bootstrap-controller";
+import { getPreTournamentSummaryController } from "../domains/tournament/controllers/get-pre-tournament-summary-controller";
+import { getTuMundialController } from "../domains/tournament/controllers/get-tu-mundial-controller";
 import { getMeController } from "../domains/users/controllers/get-me-controller";
 import { patchMeController } from "../domains/users/controllers/patch-me-controller";
 import { requireAuth } from "./middleware/auth";
@@ -32,6 +34,8 @@ export function createApp() {
   app.get("/health", getHealthController);
   app.get("/api/v1/public/bootstrap", getBootstrapController);
   app.get("/api/v1/me", requireAuth, getMeController);
+  app.get("/api/v1/me/pre-tournament", requireAuth, getPreTournamentSummaryController);
+  app.get("/api/v1/me/tournament", requireAuth, getTuMundialController);
   app.get("/api/v1/points", requireAuth, getPointsController);
   app.get("/api/v1/leagues", requireAuth, getLeaguesController);
   app.get("/api/v1/leagues/:leagueId/standings", requireAuth, getLeagueStandingsController);

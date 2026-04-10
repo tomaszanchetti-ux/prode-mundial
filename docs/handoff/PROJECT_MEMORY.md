@@ -45,6 +45,16 @@ Actualización documental nueva:
   - esta capa entra antes de `Epic 4`
   - `Mundial Real` queda diferido a una etapa asociada a ingestión real
 
+Actualización operativa nueva:
+
+- el proyecto ahora adopta una estrategia oficial de testing en 3 fases
+- el orden quedó cerrado como regla de trabajo:
+  - `Testing 1 - UX/UI`
+  - `Testing 2 - Logica Cerrada`
+  - `Testing 3 - Logica Abierta`
+- esto quedó documentado como referencia binding en:
+  - `docs/engineering/Prode Mundial - TESTING STRATEGY.md`
+
 ## Estado técnico
 
 Se creó el bootstrap inicial del monorepo:
@@ -247,6 +257,75 @@ Razón:
 - introduce progreso global de grupos
 - introduce el flujo secuencial de completitud
 - introduce `Tu Mundial` como superficie de engagement alto valor
+
+## Estado actual de Epic 3.5
+
+La base principal de `Epic 3.5` ya quedó implementada en repo:
+
+- contratos shared de torneo/pre-torneo
+- endpoint `GET /api/v1/me/pre-tournament`
+- endpoint `GET /api/v1/me/tournament`
+- `Home` con modo pre-torneo
+- `Marathon Mode`
+- `Tu Mundial`
+- transición explícita a modo live
+
+También quedó agregada una capa de laboratorio para `Testing 1 - UX/UI`:
+
+- backend:
+  - `PRODE_ENABLE_LAB_PREDICTIONS`
+- frontend:
+  - `NEXT_PUBLIC_ENABLE_LAB_PREDICTIONS`
+
+Objetivo:
+
+- permitir testing local UX/UI sin depender todavía de la ventana real de predicción de 5 horas
+
+## Estado actual de testing
+
+La estrategia binding de testing en 3 fases ya quedó incorporada al proyecto.
+
+Orden obligatorio:
+
+1. `Testing 1 - UX/UI`
+2. `Testing 2 - Lógica Cerrada`
+3. `Testing 3 - Lógica Abierta`
+
+Estado real al cierre actual:
+
+- `Testing 1` iniciado
+- varios bugs de flujo ya corregidos durante la pasada manual
+- queda pendiente revalidar manualmente el flujo:
+  - `Home -> Seguir completando -> Marathon -> guardar -> autoavance`
+
+La limitación actual no es de código crítico confirmado sino de entorno local:
+
+- el `dev` completo con seed/demo está presionando memoria de la máquina durante la pasada manual
+
+## Próximo foco recomendado
+
+La próxima ventana debería:
+
+1. retomar `Testing 1 - UX/UI` desde el flujo de `Home -> Marathon`
+2. cerrar los hallazgos UX/UI restantes de `Epic 3.5`
+3. recién después abrir el frente `Champions` como slice técnico controlado para `Testing 2/3`
+
+## Marco actual de testing
+
+- primero conviene cerrar una fase de testing UX/UI muy exhaustiva en local
+- esta fase puede usar data dummy, seeds controlados y estados preparados para recorrer la app completa modo por modo
+- recién después conviene endurecer la lógica real en un entorno cerrado
+- la siguiente semana ya se considera deseable apuntar a una prueba controlada con Champions League como caso puente de lógica abierta / fetch externo, siempre que las fases previas estén suficientemente maduras
+
+## Implicancia práctica inmediata
+
+`Epic 3.5` debe ejecutarse bajo este criterio:
+
+1. cerrar experiencia de `Pre-Tournament Mode`
+2. cerrar experiencia de `Marathon Mode`
+3. cerrar experiencia de `Tu Mundial`
+4. endurecer luego la lógica final que corresponda
+5. preparar después el frente de validación abierta controlada
 
 ## Orden recomendado actualizado
 

@@ -5,6 +5,7 @@ import type { MatchDetail, SaveMatchPredictionInput } from "@prode/shared";
 import { PredictionModal, ScoreInput } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
+import { canEditPrediction } from "@/lib/matches/editability";
 
 type QuickPredictionModalProps = {
   matchId: string | null;
@@ -145,6 +146,7 @@ export function QuickPredictionModal({ matchId, isOpen, onClose, onSaved }: Quic
       { label: detail.awayTeam.name, value: detail.awayTeam.teamId }
     ];
   }, [detail, formState.awayScorePred, formState.homeScorePred]);
+  const isEditable = detail ? canEditPrediction(detail) : false;
 
   async function handleSave() {
     if (!detail || !user) {
@@ -207,7 +209,7 @@ export function QuickPredictionModal({ matchId, isOpen, onClose, onSaved }: Quic
         classifierLabel="Quien clasifica"
         classifierOptions={classifierOptions}
         classifierValue={formState.predictedQualifierTeamId}
-        disabled={isLoading || isSaving || !detail?.isEditable}
+        disabled={isLoading || isSaving || !isEditable}
         error={errorMessage ?? undefined}
         homeLabel={detail?.homeTeam.name ?? "Local"}
         homeValue={formState.homeScorePred}

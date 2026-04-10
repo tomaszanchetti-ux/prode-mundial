@@ -6,9 +6,11 @@ import type {
   ListMatchesResponse,
   MatchDetail,
   PointsResponse,
+  PreTournamentSummary,
   PublicBootstrap,
   SaveMatchPredictionInput,
   SaveMatchPredictionResponse,
+  TuMundialResponse,
   UpdateProfileInput,
   UserProfile
 } from "@prode/shared";
@@ -18,8 +20,10 @@ import {
   listMatchesResponseSchema,
   matchDetailSchema,
   pointsResponseSchema,
+  preTournamentSummarySchema,
   publicBootstrapSchema,
   saveMatchPredictionResponseSchema,
+  tuMundialResponseSchema,
   userProfileSchema
 } from "@prode/shared";
 import { webConfig } from "@/config/app";
@@ -92,6 +96,32 @@ export async function getMyProfile(token: string): Promise<UserProfile> {
   }
 
   return userProfileSchema.parse(await parseJson<UserProfile>(response));
+}
+
+export async function getPreTournamentSummary(token: string): Promise<PreTournamentSummary> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/me/pre-tournament`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load pre-tournament summary (${response.status}).`);
+  }
+
+  return preTournamentSummarySchema.parse(await parseJson<PreTournamentSummary>(response));
+}
+
+export async function getTuMundial(token: string): Promise<TuMundialResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/me/tournament`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load Tu Mundial (${response.status}).`);
+  }
+
+  return tuMundialResponseSchema.parse(await parseJson<TuMundialResponse>(response));
 }
 
 export async function getPoints(token: string): Promise<PointsResponse> {

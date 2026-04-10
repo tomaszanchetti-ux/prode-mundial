@@ -22,6 +22,7 @@ La documentación de trabajo vive aquí:
 
 - `AGENTS.md`
 - `ATOMIC_TASKING_GUIDE.md`
+- `docs/engineering/Prode Mundial - TESTING STRATEGY.md`
 - `docs/product`
 - `docs/engineering`
 - `docs/backlog`
@@ -63,6 +64,7 @@ La fuente de verdad funcional y técnica parte de:
 5. `docs/engineering/Prode Mundial - STATE MATRIX + BUSINESS STATES SPEC (MVP v1).md`
 6. `docs/engineering/Prode Mundial - BACKEND EXECUTION MODEL (Jobs + Scoring + Orchestration) — MVP v1.md`
 7. `docs/product/DESIGN_SYSTEM.md` para cualquier decisión visual, de componentes o interacción UI
+8. `docs/engineering/Prode Mundial - TESTING STRATEGY.md` para el orden obligatorio de validación y testing
 
 Los demás docs desarrollan o aterrizan esas decisiones.
 
@@ -167,6 +169,24 @@ Si una épica fuera demasiado grande para vivir cómodamente en un solo branch d
 - permitir sub-branches por card solo si agregan claridad real
 - evitar abrir branches por tareas demasiado pequeñas si eso agrega fricción innecesaria
 
+## 2.6 Orden obligatorio de testing
+
+Todo trabajo del proyecto debe respetar el orden definido en:
+
+- `docs/engineering/Prode Mundial - TESTING STRATEGY.md`
+
+Secuencia obligatoria:
+
+1. `Testing 1 - UX/UI`
+2. `Testing 2 - Logica Cerrada`
+3. `Testing 3 - Logica Abierta`
+
+Regla práctica:
+
+- no endurecer validación lógica abierta si la experiencia UX/UI todavía no cerró bien
+- no abrir pruebas externas si la lógica cerrada todavía no está estable
+- cuando exista tensión entre una necesidad de test UX local y una regla final de producción, explicitar primero en qué fase se está trabajando
+
 ---
 
 # 3. Reglas de ejecución
@@ -256,6 +276,7 @@ Este documento se complementa con:
 - `ATOMIC_TASKING_GUIDE.md`
 - `docs/backlog/BACKLOG.md`
 - `docs/product/DESIGN_SYSTEM.md`
+- `docs/engineering/Prode Mundial - TESTING STRATEGY.md`
 
 Si alguno contradice el canon, manda el canon.
 

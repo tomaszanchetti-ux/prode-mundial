@@ -154,6 +154,21 @@ test("assertMatchPredictionEditable rejects matches before the 5 hour prediction
   );
 });
 
+test("assertMatchPredictionEditable allows local lab bypass before the prediction window opens", () => {
+  const previousValue = process.env.PRODE_ENABLE_LAB_PREDICTIONS;
+  process.env.PRODE_ENABLE_LAB_PREDICTIONS = "true";
+
+  try {
+    assert.doesNotThrow(() => assertMatchPredictionEditable(buildMatch(), new Date("2026-06-11T12:30:00Z")));
+  } finally {
+    if (previousValue === undefined) {
+      delete process.env.PRODE_ENABLE_LAB_PREDICTIONS;
+    } else {
+      process.env.PRODE_ENABLE_LAB_PREDICTIONS = previousValue;
+    }
+  }
+});
+
 test("assertPredictionOwnership rejects prediction from another user", () => {
   assert.throws(
     () => assertPredictionOwnership(buildPrediction({ userId: "usr_2" }), "usr_1"),

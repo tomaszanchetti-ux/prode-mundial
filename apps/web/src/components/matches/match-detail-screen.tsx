@@ -8,6 +8,7 @@ import type { MatchDetail, SaveMatchPredictionInput } from "@prode/shared";
 import { Button, Card, ScoreInput, StatusTag, TeamDisplay, colors, radii, spacing, typography } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
+import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/editability";
 
 type MatchDetailScreenProps = {
   matchId: string;
@@ -74,10 +75,6 @@ function toKickoffLabel(iso: string) {
   }).format(new Date(iso));
 }
 
-function predictionWindowNotOpen(detail: MatchDetail) {
-  return detail.status === "scheduled" && !detail.isEditable && new Date(detail.predictionOpensAt).getTime() > Date.now();
-}
-
 function toStatusLabel(detail: MatchDetail) {
   if (detail.predictionStatus === "scored") {
     return "Puntuado";
@@ -87,8 +84,8 @@ function toStatusLabel(detail: MatchDetail) {
     return "En vivo";
   }
 
-  if (!detail.isEditable) {
-    if (predictionWindowNotOpen(detail)) {
+  if (!canEditPrediction(detail)) {
+    if (isPredictionWindowNotOpen(detail)) {
       return "Abre pronto";
     }
 
@@ -111,7 +108,7 @@ function toStatusTone(detail: MatchDetail) {
     return "live" as const;
   }
 
-  if (!detail.isEditable) {
+  if (!canEditPrediction(detail)) {
     return "locked" as const;
   }
 
@@ -119,7 +116,7 @@ function toStatusTone(detail: MatchDetail) {
 }
 
 function toHelperText(detail: MatchDetail, formState: FormState) {
-  if (predictionWindowNotOpen(detail)) {
+  if (isPredictionWindowNotOpen(detail)) {
     return `La prediccion abre ${toKickoffLabel(detail.predictionOpensAt)}.`;
   }
 
@@ -265,7 +262,7 @@ export function MatchDetailScreenView({
           <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
             Deadline: {toKickoffLabel(detail.deadlineAt)}
           </span>
-          {predictionWindowNotOpen(detail) ? (
+          {isPredictionWindowNotOpen(detail) ? (
             <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
               Apertura: {toKickoffLabel(detail.predictionOpensAt)}
             </span>
@@ -283,7 +280,7 @@ export function MatchDetailScreenView({
           }}
         >
           <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary }}>
-            {predictionWindowNotOpen(detail) ? "Prediccion disponible desde la apertura" : "Editable hasta kickoff"}
+            {isPredictionWindowNotOpen(detail) ? "Prediccion disponible desde la apertura" : "Editable hasta kickoff"}
           </span>
           <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
             Exacto: {detail.scoringRules.exact90Points} pts
@@ -319,7 +316,7 @@ export function MatchDetailScreenView({
           classifierLabel="Quien clasifica"
           classifierOptions={qualifierOptions}
           classifierValue={formState.predictedQualifierTeamId}
-          disabled={!detail.isEditable || isSaving}
+          disabled={!canEditPrediction(detail) || isSaving}
           error={saveNotice?.tone === "error" ? saveNotice.message : undefined}
           homeLabel={detail.homeTeam.name}
           homeValue={formState.homeScorePred}
@@ -332,7 +329,7 @@ export function MatchDetailScreenView({
 
         <Button
           fullWidth
-          disabled={!detail.isEditable || formState.homeScorePred === "" || formState.awayScorePred === ""}
+          disabled={!canEditPrediction(detail) || formState.homeScorePred === "" || formState.awayScorePred === ""}
           loading={isSaving}
           onClick={onSave}
         >
