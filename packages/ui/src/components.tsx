@@ -15,6 +15,46 @@ type StatusTone = "editable" | "locked" | "live" | "scored";
 
 export type MatchCardStatus = StatusTone;
 
+export type NextMatchHeroProps = {
+  awayTeam: TeamDisplayProps;
+  ctaLabel: string;
+  eyebrow: string;
+  helperText?: string;
+  homeTeam: TeamDisplayProps;
+  metaLabel: string;
+  onAction?: () => void;
+  onSecondaryAction?: () => void;
+  secondaryCtaLabel?: string;
+  status: MatchCardStatus;
+  statusLabel: string;
+  title: string;
+};
+
+export type ProgressCompactProps = {
+  items: Array<{
+    label: string;
+    value: string;
+    hint: string;
+  }>;
+};
+
+export type AdSlotCardProps = {
+  title?: string;
+  description: string;
+};
+
+export type TeamFlagProps = {
+  flagUrl?: string | null;
+  teamName: string;
+  size?: "sm" | "md" | "lg";
+};
+
+export type TeamIdentityRowProps = TeamFlagProps & {
+  align?: "start" | "center";
+  code?: string | null;
+  weight?: 500 | 600 | 700;
+};
+
 export type TeamDisplayProps = {
   flagUrl?: string | null;
   teamName: string;
@@ -86,6 +126,17 @@ export type PredictionModalProps = {
   title?: string;
 };
 
+function surfaceInsetStyle(): CSSProperties {
+  return {
+    display: "grid",
+    gap: spacing[12],
+    padding: spacing[16],
+    borderRadius: radii.lg,
+    background: "rgba(255, 255, 255, 0.04)",
+    border: `1px solid ${colors.border}`
+  };
+}
+
 const buttonToneStyles: Record<ButtonVariant, CSSProperties> = {
   primary: {
     background: colors.primary500,
@@ -142,19 +193,6 @@ const eyebrowStyle: CSSProperties = {
   textTransform: "uppercase"
 };
 
-const scoreBoxStyle: CSSProperties = {
-  width: "100%",
-  minHeight: 104,
-  borderRadius: radii.lg,
-  border: `1px solid ${colors.border}`,
-  background: "linear-gradient(180deg, rgba(8, 18, 33, 0.98) 0%, rgba(14, 26, 43, 0.98) 100%)",
-  color: colors.textPrimary,
-  display: "grid",
-  justifyItems: "center",
-  gap: spacing[8],
-  padding: `${spacing[16]}px ${spacing[12]}px`
-};
-
 function getFlagFallback(teamName: string) {
   return teamName
     .trim()
@@ -186,36 +224,109 @@ function getTeamStyles(size: TeamDisplayProps["size"] = "md") {
   };
 }
 
+function normalizeScoreValue(value: string) {
+  if (value === "") {
+    return "";
+  }
+
+  const parsed = Number.parseInt(value, 10);
+
+  if (Number.isNaN(parsed) || parsed < 0) {
+    return "";
+  }
+
+  return String(parsed);
+}
+
+function stepScoreValue(value: string, delta: number) {
+  const current = value === "" ? 0 : Number.parseInt(value, 10);
+  const next = Math.max(0, current + delta);
+
+  return String(next);
+}
+
 function renderScoreInput(
   label: string,
   value: string,
   disabled: boolean | undefined,
   onChange: ((value: string) => void) | undefined
 ) {
+  const safeValue = normalizeScoreValue(value);
+
   return (
-    <label style={scoreBoxStyle}>
-      <span style={{ ...typography.small, color: colors.textMuted }}>{label}</span>
-      <input
-        value={value}
+    <div
+      style={{
+        width: "100%",
+        minHeight: 156,
+        borderRadius: radii.lg,
+        border: `1px solid ${colors.border}`,
+        background: "linear-gradient(180deg, rgba(8, 18, 33, 0.98) 0%, rgba(14, 26, 43, 0.98) 100%)",
+        color: colors.textPrimary,
+        display: "grid",
+        justifyItems: "center",
+        gap: spacing[12],
+        padding: `${spacing[16]}px ${spacing[12]}px`
+      }}
+    >
+      <span style={{ ...typography.small, color: colors.textMuted, textAlign: "center" }}>{label}</span>
+      <button
+        type="button"
         disabled={disabled}
-        inputMode="numeric"
-        pattern="[0-9]*"
+        aria-label={`Subir marcador de ${label}`}
+        onClick={() => onChange?.(stepScoreValue(safeValue, 1))}
         style={{
-          width: 76,
-          height: 76,
+          width: 52,
+          height: 40,
           borderRadius: radii.md,
           border: `1px solid ${colors.borderStrong}`,
-          background: colors.bgMuted,
+          background: "rgba(255, 255, 255, 0.04)",
           color: colors.textPrimary,
-          fontSize: 40,
+          fontSize: 24,
           fontWeight: 700,
-          textAlign: "center",
-          outline: "none",
+          cursor: disabled ? "not-allowed" : "pointer",
           opacity: disabled ? 0.7 : 1
         }}
-        onChange={(event) => onChange?.(event.target.value.replace(/\D+/g, ""))}
-      />
-    </label>
+      >
+        +
+      </button>
+      <div
+        aria-live="polite"
+        style={{
+          width: 88,
+          height: 88,
+          borderRadius: 22,
+          border: `1px solid ${colors.borderStrong}`,
+          background: colors.bgMuted,
+          display: "grid",
+          placeItems: "center",
+          fontSize: 42,
+          fontWeight: 700,
+          lineHeight: 1
+        }}
+      >
+        {safeValue === "" ? "0" : safeValue}
+      </div>
+      <button
+        type="button"
+        disabled={disabled}
+        aria-label={`Bajar marcador de ${label}`}
+        onClick={() => onChange?.(stepScoreValue(safeValue, -1))}
+        style={{
+          width: 52,
+          height: 40,
+          borderRadius: radii.md,
+          border: `1px solid ${colors.borderStrong}`,
+          background: "rgba(255, 255, 255, 0.04)",
+          color: colors.textPrimary,
+          fontSize: 24,
+          fontWeight: 700,
+          cursor: disabled ? "not-allowed" : "pointer",
+          opacity: disabled ? 0.7 : 1
+        }}
+      >
+        -
+      </button>
+    </div>
   );
 }
 
@@ -295,19 +406,12 @@ export function StatusTag({ status, label }: StatusTagProps) {
   );
 }
 
-export function TeamDisplay({ align = "start", flagUrl, teamName, size = "md", weight = 600 }: TeamDisplayProps) {
+export function TeamFlag({ flagUrl, teamName, size = "md" }: TeamFlagProps) {
   const fallback = getFlagFallback(teamName);
   const teamStyles = getTeamStyles(size);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: align === "center" ? "center" : "flex-start",
-        gap: spacing[12]
-      }}
-    >
+    <>
       {flagUrl ? (
         <img
           src={flagUrl}
@@ -341,8 +445,129 @@ export function TeamDisplay({ align = "start", flagUrl, teamName, size = "md", w
           {fallback}
         </span>
       )}
-      <span style={{ fontSize: teamStyles.fontSize, lineHeight: 1.2, color: colors.textPrimary, fontWeight: weight }}>{teamName}</span>
+    </>
+  );
+}
+
+export function TeamIdentityRow({
+  align = "start",
+  code,
+  flagUrl,
+  teamName,
+  size = "md",
+  weight = 600
+}: TeamIdentityRowProps) {
+  const teamStyles = getTeamStyles(size);
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: align === "center" ? "center" : "flex-start",
+        gap: 10
+      }}
+    >
+      <TeamFlag flagUrl={flagUrl} teamName={teamName} size={size} />
+      <div style={{ display: "grid", gap: 2 }}>
+        <span style={{ fontSize: teamStyles.fontSize, lineHeight: 1.2, color: colors.textPrimary, fontWeight: weight }}>{teamName}</span>
+        {code ? <span style={{ ...typography.small, color: colors.textMuted }}>{code}</span> : null}
+      </div>
     </div>
+  );
+}
+
+export function TeamDisplay(props: TeamDisplayProps) {
+  return <TeamIdentityRow {...props} />;
+}
+
+export function NextMatchHero({
+  awayTeam,
+  ctaLabel,
+  eyebrow,
+  helperText,
+  homeTeam,
+  metaLabel,
+  onAction,
+  onSecondaryAction,
+  secondaryCtaLabel,
+  status,
+  statusLabel,
+  title
+}: NextMatchHeroProps) {
+  return (
+    <Card
+      elevated
+      style={{
+        gap: spacing[12],
+        padding: spacing[16],
+        background:
+          status === "locked"
+            ? "radial-gradient(circle at top right, rgba(231, 198, 106, 0.12), transparent 28%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
+            : "radial-gradient(circle at top right, rgba(47, 107, 255, 0.16), transparent 28%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "flex-start", flexWrap: "wrap" }}>
+        <div style={{ display: "grid", gap: 4 }}>
+          <span style={{ ...typography.small, color: status === "locked" ? colors.gold500 : colors.primary500 }}>{eyebrow}</span>
+          <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>{title}</h2>
+          <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textSecondary }}>{metaLabel}</span>
+        </div>
+        <StatusTag status={status} label={statusLabel} />
+      </div>
+
+      <div style={{ display: "grid", gap: spacing[12] }}>
+        <TeamIdentityRow {...homeTeam} size="lg" weight={700} />
+        <div style={{ paddingLeft: 44, fontSize: 12, color: colors.textMuted, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
+        <TeamIdentityRow {...awayTeam} size="lg" weight={700} />
+      </div>
+
+      {helperText ? (
+        <div style={surfaceInsetStyle()}>
+          <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>{helperText}</span>
+        </div>
+      ) : null}
+
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <Button fullWidth={!secondaryCtaLabel} onClick={onAction}>
+          {ctaLabel}
+        </Button>
+        {secondaryCtaLabel ? (
+          <Button variant="ghost" onClick={onSecondaryAction}>
+            {secondaryCtaLabel}
+          </Button>
+        ) : null}
+      </div>
+    </Card>
+  );
+}
+
+export function ProgressCompact({ items }: ProgressCompactProps) {
+  return (
+    <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
+      {items.map((item) => (
+        <div key={item.label} style={{ ...surfaceInsetStyle(), gap: 6, padding: 14 }}>
+          <span style={{ ...typography.small, color: colors.textMuted }}>{item.label}</span>
+          <strong style={{ fontSize: 22, lineHeight: 1, color: colors.textPrimary }}>{item.value}</strong>
+          <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>{item.hint}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function AdSlotCard({ description, title = "Publicidad" }: AdSlotCardProps) {
+  return (
+    <Card
+      style={{
+        gap: spacing[8],
+        padding: spacing[16],
+        background: "linear-gradient(180deg, rgba(18, 36, 60, 0.9) 0%, rgba(12, 25, 41, 0.9) 100%)"
+      }}
+    >
+      <span style={{ ...typography.small, color: colors.textMuted }}>{title}</span>
+      <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>{description}</p>
+    </Card>
   );
 }
 
@@ -359,7 +584,7 @@ export function MatchCard({
   statusLabel
 }: MatchCardProps) {
   return (
-    <Card elevated style={{ gap: spacing[16], padding: spacing[16] }}>
+    <Card elevated style={{ gap: spacing[12], padding: spacing[12] }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
         <div style={{ display: "grid", gap: 6 }}>
           <span style={eyebrowStyle}>{stageLabel}</span>
@@ -369,9 +594,8 @@ export function MatchCard({
       </div>
 
       <div style={{ display: "grid", gap: 10 }}>
-        <TeamDisplay {...homeTeam} size="lg" weight={700} />
-        <span style={{ ...typography.small, color: colors.textMuted, paddingLeft: 46 }}>VS</span>
-        <TeamDisplay {...awayTeam} size="lg" weight={700} />
+        <TeamIdentityRow {...homeTeam} size="md" weight={700} />
+        <TeamIdentityRow {...awayTeam} size="md" weight={700} />
       </div>
 
       <div
@@ -390,7 +614,7 @@ export function MatchCard({
         {resultSummary ? <p style={{ margin: 0, fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{resultSummary}</p> : null}
       </div>
 
-      <Button variant={status === "locked" ? "secondary" : "primary"} fullWidth onClick={onAction}>
+      <Button variant={status === "locked" ? "secondary" : "primary"} fullWidth onClick={onAction} style={{ minHeight: 48 }}>
         {ctaLabel}
       </Button>
     </Card>
@@ -420,8 +644,8 @@ export function ScoreInput({
         <div
           aria-hidden="true"
           style={{
-            width: 36,
-            height: 36,
+            width: 40,
+            height: 40,
             borderRadius: radii.pill,
             display: "grid",
             placeItems: "center",
@@ -448,7 +672,7 @@ export function ScoreInput({
                   type="button"
                   disabled={disabled}
                   style={{
-                    minHeight: 50,
+                    minHeight: 52,
                     borderRadius: radii.md,
                     border: isActive ? "1px solid rgba(47, 107, 255, 0.4)" : `1px solid ${colors.border}`,
                     background: isActive ? colors.primarySoft : "rgba(255, 255, 255, 0.03)",
@@ -558,9 +782,9 @@ export function PredictionModal({
             border: `1px solid ${colors.border}`
           }}
         >
-          <TeamDisplay {...homeTeam} align="center" size="lg" weight={700} />
+          <TeamIdentityRow {...homeTeam} align="center" size="lg" weight={700} />
           <div style={{ textAlign: "center", color: colors.textMuted, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
-          <TeamDisplay {...awayTeam} align="center" size="lg" weight={700} />
+          <TeamIdentityRow {...awayTeam} align="center" size="lg" weight={700} />
         </div>
 
         {helperText ? <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>{helperText}</p> : null}

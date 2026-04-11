@@ -10,6 +10,21 @@ No redefine UX.
 
 Su función es convertir el corpus actual en una forma de ejecución segura, predecible y costo-eficiente.
 
+## Contrato operativo adicional: Local Kanban
+
+Este repositorio también trabaja bajo el contrato operativo definido por Local Kanban.
+
+Referencia normativa obligatoria:
+
+- `/Users/tzanchetti/Documents/Codex/local-kanban/skills/local-kanban-agent/SKILL.md`
+
+Importación de reglas:
+
+- Todas las reglas, obligaciones, restricciones, políticas de ejecución y criterios de actualización definidos en `/Users/tzanchetti/Documents/Codex/local-kanban/skills/local-kanban-agent/SKILL.md` quedan importados por referencia y forman parte de este contrato de trabajo sin excepciones.
+- Si este archivo entra en conflicto con esa skill, prevalece la skill de Local Kanban sobre cualquier resumen operativo local, sin invalidar el canon funcional/técnico del proyecto.
+- Ningún agente puede crear o mover historias de `docs/kanban`, ni cerrar trabajo asociado, sin cumplir antes ese contrato.
+- Mantener el Kanban actualizado durante la ejecución real del trabajo es obligatorio, no opcional.
+
 ---
 
 # 0. Base documental del proyecto

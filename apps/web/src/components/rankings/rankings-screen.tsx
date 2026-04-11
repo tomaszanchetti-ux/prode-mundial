@@ -28,13 +28,15 @@ export function RankingsScreenView({
   onSelectLeague,
   onRetry
 }: RankingsScreenViewProps) {
+  const selectedLeague = leagues.find((league) => league.leagueId === selectedLeagueId) ?? null;
+
   return (
     <div style={{ display: "grid", gap: spacing[16] }}>
       <Card elevated style={{ gap: spacing[12] }}>
         <span style={{ ...typography.small, color: colors.textMuted }}>POSICIONES</span>
-        <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Tus puntos y tu lugar en cada liga</h1>
+        <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Tu tabla de posiciones</h1>
         <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
-          Esta vista ya usa datos reales de puntos y standings por liga, sin ranking global.
+          Sigue tu lugar en cada liga, cuánto te falta para alcanzar la punta y cómo vienes sumando.
         </p>
       </Card>
 
@@ -48,7 +50,7 @@ export function RankingsScreenView({
       {points ? (
         <Card elevated style={{ gap: spacing[12] }}>
           <div style={{ display: "grid", gap: 6 }}>
-            <span style={{ ...typography.small, color: colors.primary500 }}>MIS PUNTOS</span>
+            <span style={{ ...typography.small, color: colors.primary500 }}>TU RESUMEN</span>
             <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>{points.totalPoints} pts</h2>
           </div>
 
@@ -59,9 +61,9 @@ export function RankingsScreenView({
           </div>
 
           <div style={{ display: "grid", gap: spacing[8] }}>
-            <span style={{ ...typography.small, color: colors.textMuted }}>ÚLTIMOS PARTIDOS PUNTUADOS</span>
+            <span style={{ ...typography.small, color: colors.textMuted }}>ULTIMOS PUNTOS</span>
             {points.recentMatches.length === 0 ? (
-              <p style={{ fontSize: 14, lineHeight: 1.4, margin: 0, color: colors.textSecondary }}>Todavía no hay puntos recientes para mostrar.</p>
+              <p style={{ fontSize: 14, lineHeight: 1.4, margin: 0, color: colors.textSecondary }}>Todavia no hay puntos recientes para mostrar.</p>
             ) : (
               points.recentMatches.map((entry) => (
                 <div
@@ -91,27 +93,48 @@ export function RankingsScreenView({
 
       <Card elevated style={{ gap: spacing[12] }}>
         <div style={{ display: "grid", gap: 6 }}>
-          <span style={{ ...typography.small, color: colors.gold500 }}>TABLAS DE LIGA</span>
-          <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>Ranking materializado</h2>
+          <span style={{ ...typography.small, color: colors.gold500 }}>TU LIGA</span>
+          <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>Tabla de posiciones</h2>
         </div>
 
-        {isLoading ? <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>Cargando standings...</p> : null}
+        {isLoading ? <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>Cargando tabla...</p> : null}
 
         {!isLoading && leagues.length === 0 ? (
-          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>No hay ligas disponibles para mostrar todavía.</p>
+          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>Todavia no hay ligas disponibles para mostrar.</p>
         ) : null}
 
         {leagues.length > 0 ? (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ display: "grid", gap: spacing[12] }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "center", flexWrap: "wrap" }}>
+              <div style={{ display: "grid", gap: 4 }}>
+                <span style={{ ...typography.small, color: colors.textMuted }}>LIGA ACTIVA</span>
+                <strong style={{ fontSize: 18, lineHeight: 1.2, color: colors.textPrimary }}>
+                  {selectedLeague?.name ?? leagues[0]?.name ?? "Tu liga"}
+                </strong>
+                {selectedLeague ? (
+                  <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+                    {selectedLeague.membersCount}/{selectedLeague.memberLimit} jugadores
+                  </span>
+                ) : null}
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <Button variant="ghost">Invitar amigos</Button>
+                <Button variant="ghost">Crear liga</Button>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {leagues.map((league) => (
               <Button
                 key={league.leagueId}
                 variant={selectedLeagueId === league.leagueId ? "primary" : "ghost"}
+                style={{ minHeight: 40, padding: "0 14px" }}
                 onClick={() => onSelectLeague(league.leagueId)}
               >
                 {league.name}
               </Button>
             ))}
+            </div>
           </div>
         ) : null}
 
@@ -125,16 +148,22 @@ export function RankingsScreenView({
                   gap: 6,
                   padding: spacing[12],
                   borderRadius: 16,
-                  background: entry.isMe ? "rgba(47, 107, 255, 0.14)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${entry.isMe ? colors.primary500 : colors.border}`
+                  background:
+                    entry.isMe
+                      ? "rgba(47, 107, 255, 0.14)"
+                      : entry.position <= 3
+                        ? "rgba(255, 255, 255, 0.05)"
+                        : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${entry.isMe ? colors.primary500 : entry.position <= 3 ? colors.borderStrong : colors.border}`
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "center" }}>
                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    <span style={{ color: colors.textMuted, fontSize: 14, fontWeight: 700 }}>#{entry.position}</span>
-                    <span style={{ color: colors.textPrimary, fontWeight: 600 }}>
+                    <span style={{ color: entry.isMe ? colors.primary500 : colors.textMuted, fontSize: 14, fontWeight: 700 }}>#{entry.position}</span>
+                    <span style={{ color: colors.textPrimary, fontWeight: entry.isMe ? 700 : 600 }}>
                       {entry.displayName}
-                      {entry.isOwner ? " · owner" : ""}
+                      {entry.isOwner ? " · admin" : ""}
+                      {entry.isMe ? " · tu posicion" : ""}
                     </span>
                   </div>
                   <StatusTag status={entry.isMe ? "editable" : "scored"} label={`${entry.totalPoints} pts`} />

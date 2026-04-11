@@ -47,7 +47,7 @@ function buildPreTournamentSummary(overrides: Partial<PreTournamentSummary> = {}
   };
 }
 
-test("HomeScreenView renders pre-tournament progress and Tu Mundial CTA", () => {
+test("HomeScreenView renders pre-tournament next-match hero and follow-up CTAs", () => {
   const html = renderToStaticMarkup(
     createElement(HomeScreenView, {
       profileDisplayName: "Tomas",
@@ -64,10 +64,12 @@ test("HomeScreenView renders pre-tournament progress and Tu Mundial CTA", () => 
     })
   );
 
-  assert.match(html, /PRE-TORNEO/);
-  assert.match(html, /12 \/ 48 partidos/);
+  assert.match(html, /SEGUIS DESDE ACA/);
+  assert.match(html, /Tu proximo pendiente/);
+  assert.match(html, /TU LIGA HOY/);
   assert.match(html, /Seguir completando/);
   assert.match(html, /Ir a Tu Mundial/);
+  assert.match(html, /Invitar amigos/);
 });
 
 test("HomeScreenView keeps live-tournament priority match card when pre-tournament is inactive", () => {
@@ -88,7 +90,7 @@ test("HomeScreenView keeps live-tournament priority match card when pre-tourname
   );
 
   assert.match(html, /HOY EN PRODE MUNDIAL/);
-  assert.match(html, /PROXIMO PARTIDO/);
+  assert.match(html, /TU PROXIMO PENDIENTE/);
   assert.match(html, /Predecir ahora/);
   assert.match(html, /TU MUNDIAL/);
   assert.match(html, /Sigue disponible mientras el torneo ya esta en marcha/);

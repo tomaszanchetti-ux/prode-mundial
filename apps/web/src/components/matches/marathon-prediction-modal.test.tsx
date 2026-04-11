@@ -64,6 +64,7 @@ test("MarathonPredictionModalView renders progress and navigation controls", () 
       helperText: "Guarda y avanzamos automaticamente al siguiente pendiente.",
       isLoading: false,
       isSaving: false,
+      nextSummary: buildMatchSummary({ matchId: "m_002", homeTeam: { teamId: "ESP", name: "España", flagUrl: null }, awayTeam: { teamId: "URU", name: "Uruguay", flagUrl: null } }),
       notice: null,
       onAwayChange: () => undefined,
       onClassifierChange: () => undefined,
@@ -81,6 +82,7 @@ test("MarathonPredictionModalView renders progress and navigation controls", () 
   assert.match(html, /MARATHON MODE/);
   assert.match(html, /13\/48/);
   assert.match(html, /Paso 1 de 4 pendientes/);
-  assert.match(html, /Guardar y avanzar/);
+  assert.match(html, /Guardar y seguir/);
+  assert.match(html, /SIGUE DESPUES/);
   assert.match(html, /Siguiente/);
 });

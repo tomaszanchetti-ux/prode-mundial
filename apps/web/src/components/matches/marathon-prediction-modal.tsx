@@ -5,6 +5,7 @@ import type { MatchDetail, MatchSummary, PreTournamentSummary, SaveMatchPredicti
 import { Button, Card, ScoreInput, StatusTag, TeamDisplay, colors, radii, spacing, typography } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
+import { copyForLocale, formatDateTime, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/editability";
 
 type MarathonPredictionModalProps = {
@@ -36,6 +37,7 @@ export type MarathonPredictionModalViewProps = {
   helperText: string;
   isLoading: boolean;
   isSaving: boolean;
+  nextSummary: MatchSummary | null;
   notice: MarathonNotice | null;
   onAwayChange: (value: string) => void;
   onClassifierChange: (value: string) => void;
@@ -67,13 +69,13 @@ function toStageLabel(summary: MatchSummary | MatchDetail) {
 }
 
 function toKickoffLabel(iso: string) {
-  return new Intl.DateTimeFormat("es-AR", {
+  return formatDateTime("es", iso, {
     weekday: "short",
     day: "numeric",
     month: "short",
     hour: "2-digit",
     minute: "2-digit"
-  }).format(new Date(iso));
+  });
 }
 
 function toFormState(detail: MatchDetail): FormState {
@@ -136,6 +138,7 @@ export function MarathonPredictionModalView({
   helperText,
   isLoading,
   isSaving,
+  nextSummary,
   notice,
   onAwayChange,
   onClassifierChange,
@@ -320,6 +323,27 @@ export function MarathonPredictionModalView({
           onHomeChange={onHomeChange}
         />
 
+        {nextSummary ? (
+          <div
+            style={{
+              display: "grid",
+              gap: spacing[8],
+              padding: spacing[12],
+              borderRadius: radii.md,
+              background: "rgba(255, 255, 255, 0.03)",
+              border: `1px solid ${colors.border}`
+            }}
+          >
+            <span style={{ ...typography.small, color: colors.textMuted }}>SIGUE DESPUES</span>
+            <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>
+              {nextSummary.homeTeam.name} vs {nextSummary.awayTeam.name}
+            </span>
+            <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+              {toKickoffLabel(nextSummary.kickoffAt)}
+            </span>
+          </div>
+        ) : null}
+
         <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
           <Button variant="ghost" onClick={onPrevious} disabled={!canGoPrevious || isSaving}>
             Anterior
@@ -328,7 +352,7 @@ export function MarathonPredictionModalView({
             Siguiente
           </Button>
           <Button onClick={onSave} disabled={!isEditable || isSaving || isLoading} loading={isSaving}>
-            {detail?.userPrediction ? "Guardar y seguir" : "Guardar y avanzar"}
+            {canGoNext ? "Guardar y seguir" : "Guardar prediccion"}
           </Button>
         </div>
       </Card>
@@ -345,6 +369,7 @@ export function MarathonPredictionModal({
   onClose,
   onSaved
 }: MarathonPredictionModalProps) {
+  const { locale } = useLocale();
   const { status, user } = useAuth();
   const [currentMatchId, setCurrentMatchId] = useState<string | null>(initialMatchId);
   const [detail, setDetail] = useState<MatchDetail | null>(null);
@@ -409,6 +434,8 @@ export function MarathonPredictionModal({
   const currentIndex = currentMatchId ? matchIds.indexOf(currentMatchId) : -1;
   const currentSummary = currentMatchId ? matchesById.get(currentMatchId) ?? null : null;
   const summaryForView = currentSummary ?? detail;
+  const nextSummary =
+    currentIndex >= 0 && currentIndex < matchIds.length - 1 ? matchesById.get(matchIds[currentIndex + 1] ?? "") ?? null : null;
   const totalMatches = preTournamentSummary?.totalMatches ?? 0;
   const completedMatches = preTournamentSummary?.completedMatches ?? 0;
   const progressNumerator = Math.min(completedMatches + savedCount + (currentIndex >= 0 ? 1 : 0), totalMatches);
@@ -482,9 +509,10 @@ export function MarathonPredictionModal({
       currentSummary={summaryForView}
       detail={detail}
       formState={formState}
-      helperText={toHelperText(detail, notice)}
+      helperText={locale === "en" ? copyForLocale(locale, toHelperText(detail, notice), notice?.tone === "error" ? notice.message : !detail ? "Loading match..." : isPredictionWindowNotOpen(detail) ? `Prediction opens ${formatDateTime("en", detail.predictionOpensAt, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}. You can keep moving through the marathon in the meantime.` : "Save and we'll move straight to the next pending match.") : toHelperText(detail, notice)}
       isLoading={isLoading}
       isSaving={isSaving}
+      nextSummary={nextSummary}
       notice={notice}
       onAwayChange={(value) => setFormState((current) => ({ ...current, awayScorePred: value }))}
       onClassifierChange={(value) => setFormState((current) => ({ ...current, predictedQualifierTeamId: value }))}

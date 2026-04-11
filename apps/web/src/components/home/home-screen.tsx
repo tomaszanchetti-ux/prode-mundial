@@ -3,45 +3,56 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES, type MatchSummary, type PreTournamentSummary } from "@prode/shared";
-import { Button, Card, StatusTag, TeamDisplay, colors, spacing, typography } from "@prode/ui";
+import { AdSlotCard, Button, Card, NextMatchHero, ProgressCompact, StatusTag, TeamIdentityRow, colors, spacing, typography } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MarathonPredictionModal } from "@/components/matches/marathon-prediction-modal";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getMatches, getPreTournamentSummary } from "@/lib/api/client";
+import { copyForLocale, formatDateTime, type AppLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
 
-function toStageLabel(match: MatchSummary) {
+function toStageLabel(match: MatchSummary, locale: AppLocale) {
   if (match.stage === "group" && match.groupId) {
-    return `Grupo ${match.groupId}`;
+    return copyForLocale(locale, `Grupo ${match.groupId}`, `Group ${match.groupId}`);
   }
 
-  const labels: Record<string, string> = {
-    R32: "Octavos",
-    R16: "R16",
-    QF: "Cuartos",
-    SF: "Semifinal",
-    BRONZE: "Tercer puesto",
-    FINAL: "Final"
+  const labels = {
+    es: {
+      R32: "Octavos",
+      R16: "R16",
+      QF: "Cuartos",
+      SF: "Semifinal",
+      BRONZE: "Tercer puesto",
+      FINAL: "Final"
+    },
+    en: {
+      R32: "Round of 32",
+      R16: "Round of 16",
+      QF: "Quarterfinal",
+      SF: "Semifinal",
+      BRONZE: "Third place",
+      FINAL: "Final"
+    }
   };
 
-  return labels[match.stage] ?? match.stage;
+  return labels[locale][match.stage as keyof (typeof labels)["es"]] ?? match.stage;
 }
 
-function toKickoffLabel(iso: string) {
-  return new Intl.DateTimeFormat("es-AR", {
+function toKickoffLabel(iso: string, locale: AppLocale) {
+  return formatDateTime(locale, iso, {
     weekday: "short",
     day: "numeric",
     month: "short",
     hour: "2-digit",
     minute: "2-digit"
-  }).format(new Date(iso));
+  });
 }
 
-function toCountdownLabel(targetIso: string, now = new Date()) {
+function toCountdownLabel(targetIso: string, locale: AppLocale, now = new Date()) {
   const diffMs = new Date(targetIso).getTime() - now.getTime();
 
   if (diffMs <= 0) {
-    return "Disponible ahora";
+    return copyForLocale(locale, "Disponible ahora", "Available now");
   }
 
   const totalMinutes = Math.ceil(diffMs / 60000);
@@ -49,30 +60,42 @@ function toCountdownLabel(targetIso: string, now = new Date()) {
   const minutes = totalMinutes % 60;
 
   if (hours <= 0) {
-    return `Abre en ${minutes}m`;
+    return copyForLocale(locale, `Abre en ${minutes}m`, `Opens in ${minutes}m`);
   }
 
   if (minutes === 0) {
-    return `Abre en ${hours}h`;
+    return copyForLocale(locale, `Abre en ${hours}h`, `Opens in ${hours}h`);
   }
 
-  return `Abre en ${hours}h ${minutes}m`;
+  return copyForLocale(locale, `Abre en ${hours}h ${minutes}m`, `Opens in ${hours}h ${minutes}m`);
 }
 
-function toCompletionCopy(summary: PreTournamentSummary) {
+function toCompletionCopy(summary: PreTournamentSummary, locale: AppLocale) {
   if (summary.totalMatches === 0) {
-    return "Todavia no cargamos partidos de grupos para completar.";
+    return copyForLocale(locale, "Todavia no cargamos partidos de grupos para completar.", "We still haven't loaded group-stage matches to complete.");
   }
 
   if (summary.completedMatches === 0) {
-    return `Empieza tu Mundial completando los ${summary.totalMatches} partidos de grupos.`;
+    return copyForLocale(locale, `Empieza tu Mundial completando los ${summary.totalMatches} partidos de grupos.`, `Start your World Cup by completing the ${summary.totalMatches} group-stage matches.`);
   }
 
   if (summary.remainingMatches === 0) {
-    return "Ya completaste toda la fase de grupos. Ahora puedes revisar como queda tu Mundial.";
+    return copyForLocale(locale, "Ya completaste toda la fase de grupos. Ahora puedes revisar como queda tu Mundial.", "You've completed the whole group stage. Now you can review how your World Cup looks.");
   }
 
-  return `Ya llevas ${summary.completionPercentage}% y te faltan ${summary.remainingMatches} partidos para cerrar grupos.`;
+  return copyForLocale(locale, `Ya llevas ${summary.completionPercentage}% y te faltan ${summary.remainingMatches} partidos para cerrar grupos.`, `You're already ${summary.completionPercentage}% in and still have ${summary.remainingMatches} matches left to close the groups.`);
+}
+
+function toLeagueSummaryCopy(summary: PreTournamentSummary, locale: AppLocale) {
+  if (summary.remainingMatches === 0) {
+    return copyForLocale(locale, "Ya cerraste grupos. Revisa como queda tu torneo y compártelo.", "You've already closed the groups. Review your tournament and share it.");
+  }
+
+  if (summary.completedMatches === 0) {
+    return copyForLocale(locale, "Cada partido que cargues empieza a darle forma a tu tabla proyectada.", "Every match you complete starts shaping your projected table.");
+  }
+
+  return copyForLocale(locale, `Te quedan ${summary.remainingMatches} partidos para completar tu simulacion y compararla con tus ligas.`, `You still have ${summary.remainingMatches} matches left to complete your simulation and compare it with your leagues.`);
 }
 
 function pickPriorityMatch(matches: MatchSummary[]) {
@@ -127,6 +150,7 @@ export function HomeScreenView({
   onOpenRankings,
   onOpenTournament
 }: HomeScreenViewProps) {
+  const { locale } = useLocale();
   const pendingMatches = useMemo(() => items.filter((match) => canEditPrediction(match)), [items]);
   const savedEditableMatches = useMemo(
     () => items.filter((match) => canEditPrediction(match) && match.predictionStatus === "saved_editable"),
@@ -152,86 +176,73 @@ export function HomeScreenView({
               "radial-gradient(circle at top right, rgba(255, 196, 76, 0.16), transparent 28%), radial-gradient(circle at left center, rgba(47, 107, 255, 0.18), transparent 32%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
           }}
         >
-          <span style={{ ...typography.small, color: colors.textMuted }}>PRE-TORNEO</span>
+          <span style={{ ...typography.small, color: colors.textMuted }}>SEGUIS DESDE ACA</span>
           <div style={{ display: "grid", gap: spacing[8] }}>
             <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>
-              {preTournamentSummary.completedMatches} / {preTournamentSummary.totalMatches} partidos
+              {nextPreTournamentMatch ? copyForLocale(locale, "Tu proximo pendiente", "Your next pending match") : copyForLocale(locale, "Completa tu Mundial", "Complete your World Cup")}
             </h1>
             <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 560 }}>
-              {toCompletionCopy(preTournamentSummary)}
+              {nextPreTournamentMatch
+                ? copyForLocale(locale, `Sigue con ${nextPreTournamentMatch.homeTeam.name} vs ${nextPreTournamentMatch.awayTeam.name} y mantén el ritmo de tu simulacion.`, `Keep going with ${nextPreTournamentMatch.homeTeam.name} vs ${nextPreTournamentMatch.awayTeam.name} and keep the pace of your simulation.`)
+                : toCompletionCopy(preTournamentSummary, locale)}
             </p>
           </div>
 
-          <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
-            <div
-              style={{
-                display: "grid",
-                gap: 4,
-                padding: 14,
-                borderRadius: 14,
-                background: "rgba(255, 255, 255, 0.04)",
-                border: `1px solid ${colors.border}`
-              }}
-            >
-              <span style={{ ...typography.small, color: colors.textMuted }}>PROGRESO GLOBAL</span>
-              <strong style={{ fontSize: 26, lineHeight: 1, color: colors.textPrimary }}>
-                {preTournamentSummary.completionPercentage}%
-              </strong>
-              <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
-                {preTournamentSummary.remainingMatches} pendientes
-              </span>
-            </div>
-            <div
-              style={{
-                display: "grid",
-                gap: 4,
-                padding: 14,
-                borderRadius: 14,
-                background: "rgba(255, 255, 255, 0.04)",
-                border: `1px solid ${colors.border}`
-              }}
-            >
-              <span style={{ ...typography.small, color: colors.textMuted }}>SIGUIENTE PASO</span>
-              <strong style={{ fontSize: 18, lineHeight: 1.2, color: colors.textPrimary }}>
-                {nextPreTournamentMatch ? `${nextPreTournamentMatch.homeTeam.name} vs ${nextPreTournamentMatch.awayTeam.name}` : "Seguir completando"}
-              </strong>
-              <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
-                {nextPreTournamentMatch ? `${toStageLabel(nextPreTournamentMatch)} · ${toKickoffLabel(nextPreTournamentMatch.kickoffAt)}` : "Te llevamos al siguiente pendiente cronologico"}
-              </span>
-            </div>
-          </div>
+          {nextPreTournamentMatch ? (
+            <NextMatchHero
+              awayTeam={{ teamName: nextPreTournamentMatch.awayTeam.name, flagUrl: nextPreTournamentMatch.awayTeam.flagUrl }}
+              ctaLabel={nextPreTournamentMatch.userPredictionSummary ? "Editar prediccion" : "Seguir completando"}
+              eyebrow="TU PROXIMO PENDIENTE"
+              helperText={
+                nextPreTournamentMatch.userPredictionSummary
+                  ? copyForLocale(locale, `Ya guardaste ${nextPreTournamentMatch.userPredictionSummary}. Puedes volver a tocarla antes del kickoff.`, `You already saved ${nextPreTournamentMatch.userPredictionSummary}. You can still adjust it before kickoff.`)
+                  : canEditPrediction(nextPreTournamentMatch)
+                    ? copyForLocale(locale, "Puedes cargar este partido ahora mismo.", "You can fill this match right now.")
+                    : copyForLocale(locale, `La ventana abre ${toKickoffLabel(nextPreTournamentMatch.predictionOpensAt, locale)}.`, `The window opens ${toKickoffLabel(nextPreTournamentMatch.predictionOpensAt, locale)}.`)
+              }
+              homeTeam={{ teamName: nextPreTournamentMatch.homeTeam.name, flagUrl: nextPreTournamentMatch.homeTeam.flagUrl }}
+              metaLabel={`${toStageLabel(nextPreTournamentMatch, locale)} · ${toKickoffLabel(nextPreTournamentMatch.kickoffAt, locale)}`}
+              onAction={() => onOpenMatch(nextPreTournamentMatch.matchId)}
+              onSecondaryAction={onOpenMatches}
+              secondaryCtaLabel={copyForLocale(locale, "Ver calendario", "See schedule")}
+              status={canEditPrediction(nextPreTournamentMatch) ? "editable" : "locked"}
+              statusLabel={canEditPrediction(nextPreTournamentMatch) ? copyForLocale(locale, "Listo para cargar", "Ready to fill") : toCountdownLabel(nextPreTournamentMatch.predictionOpensAt, locale)}
+              title={`${nextPreTournamentMatch.homeTeam.name} vs ${nextPreTournamentMatch.awayTeam.name}`}
+            />
+          ) : null}
+
+          <ProgressCompact
+            items={[
+              {
+                label: "CARGADOS",
+                value: String(preTournamentSummary.completedMatches),
+                hint: `de ${preTournamentSummary.totalMatches}`
+              },
+              {
+                label: "PENDIENTES",
+                value: String(preTournamentSummary.remainingMatches),
+                hint: "todavia por cargar"
+              },
+              {
+                label: "AVANCE",
+                value: `${preTournamentSummary.completionPercentage}%`,
+                hint: "tu progreso global"
+              }
+            ]}
+          />
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <Button onClick={() => (nextPreTournamentMatch ? onOpenMatch(nextPreTournamentMatch.matchId) : onOpenMatches())}>
-              Seguir completando
+              {copyForLocale(locale, "Seguir completando", "Keep going")}
             </Button>
             <Button variant="ghost" onClick={onOpenTournament}>
-              Ir a Tu Mundial
+              {copyForLocale(locale, "Ir a Tu Mundial", "Go to Your World Cup")}
             </Button>
           </div>
         </Card>
 
         {nextPreTournamentMatch ? (
           <Card elevated style={{ gap: spacing[16], padding: spacing[16] }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "flex-start" }}>
-              <div style={{ display: "grid", gap: 6 }}>
-                <span style={{ ...typography.small, color: colors.primary500 }}>SIGUIENTE PENDIENTE</span>
-                <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
-                  {toStageLabel(nextPreTournamentMatch)} · {toKickoffLabel(nextPreTournamentMatch.kickoffAt)}
-                </span>
-              </div>
-              <StatusTag
-                status={canEditPrediction(nextPreTournamentMatch) ? "editable" : "locked"}
-                label={canEditPrediction(nextPreTournamentMatch) ? "Listo para cargar" : toCountdownLabel(nextPreTournamentMatch.predictionOpensAt)}
-              />
-            </div>
-
-            <div style={{ display: "grid", gap: spacing[12] }}>
-              <TeamDisplay teamName={nextPreTournamentMatch.homeTeam.name} flagUrl={nextPreTournamentMatch.homeTeam.flagUrl} size="lg" weight={700} />
-              <div style={{ paddingLeft: 46, fontSize: 12, color: colors.textMuted, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
-              <TeamDisplay teamName={nextPreTournamentMatch.awayTeam.name} flagUrl={nextPreTournamentMatch.awayTeam.flagUrl} size="lg" weight={700} />
-            </div>
-
             <div
               style={{
                 display: "grid",
@@ -244,20 +255,20 @@ export function HomeScreenView({
             >
               <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>
                 {nextPreTournamentMatch.userPredictionSummary
-                  ? `Ya guardaste ${nextPreTournamentMatch.userPredictionSummary}`
+                  ? copyForLocale(locale, `Ya guardaste ${nextPreTournamentMatch.userPredictionSummary}`, `You already saved ${nextPreTournamentMatch.userPredictionSummary}`)
                   : canEditPrediction(nextPreTournamentMatch)
-                    ? "Puedes cargar este partido ahora mismo"
-                    : "Este es tu siguiente partido cronologico para completar"}
+                    ? copyForLocale(locale, "Puedes cargar este partido ahora mismo", "You can fill this match right now")
+                    : copyForLocale(locale, "Este es tu siguiente partido cronologico para completar", "This is your next chronological match to complete")}
               </span>
               <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
                 {canEditPrediction(nextPreTournamentMatch)
-                  ? `Deadline exacto: ${toKickoffLabel(nextPreTournamentMatch.deadlineAt)}`
-                  : `La ventana abre ${toKickoffLabel(nextPreTournamentMatch.predictionOpensAt)}`}
+                  ? copyForLocale(locale, `Deadline exacto: ${toKickoffLabel(nextPreTournamentMatch.deadlineAt, locale)}`, `Exact deadline: ${toKickoffLabel(nextPreTournamentMatch.deadlineAt, locale)}`)
+                  : copyForLocale(locale, `La ventana abre ${toKickoffLabel(nextPreTournamentMatch.predictionOpensAt, locale)}`, `The window opens ${toKickoffLabel(nextPreTournamentMatch.predictionOpensAt, locale)}`)}
               </span>
             </div>
 
             <Button fullWidth onClick={() => onOpenMatch(nextPreTournamentMatch.matchId)}>
-              {nextPreTournamentMatch.userPredictionSummary ? "Editar prediccion" : "Seguir completando"}
+              {nextPreTournamentMatch.userPredictionSummary ? copyForLocale(locale, "Editar prediccion", "Edit prediction") : copyForLocale(locale, "Seguir completando", "Keep going")}
             </Button>
           </Card>
         ) : null}
@@ -283,19 +294,27 @@ export function HomeScreenView({
         <Card elevated style={{ gap: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "center" }}>
             <div style={{ display: "grid", gap: 4 }}>
-              <span style={{ ...typography.small, color: colors.textMuted }}>TU MUNDIAL</span>
-              <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>
-                {profileDisplayName ? `${profileDisplayName}, mira como se acomodan tus grupos` : "Visualiza como queda tu Mundial"}
-              </h2>
+              <span style={{ ...typography.small, color: colors.textMuted }}>TU LIGA HOY</span>
+              <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>{profileDisplayName ? copyForLocale(locale, `${profileDisplayName}, sigue sumando`, `${profileDisplayName}, keep collecting points`) : copyForLocale(locale, "Tu competencia sigue viva", "Your competition is still on")}</h2>
             </div>
-            <Button variant="ghost" onClick={onOpenTournament}>
-              Abrir
+            <Button variant="ghost" onClick={onOpenRankings}>
+              {copyForLocale(locale, "Ver tabla", "See table")}
             </Button>
           </div>
           <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
-            Entra a Tu Mundial para revisar tus grupos proyectados y seguir construyendo tu torneo antes del primer partido.
+            {toLeagueSummaryCopy(preTournamentSummary, locale)}
           </p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <Button variant="ghost" onClick={onOpenLeagues}>
+              {copyForLocale(locale, "Invitar amigos", "Invite friends")}
+            </Button>
+            <Button variant="ghost" onClick={onOpenTournament}>
+              {copyForLocale(locale, "Abrir Tu Mundial", "Open Your World Cup")}
+            </Button>
+          </div>
         </Card>
+
+        <AdSlotCard description={copyForLocale(locale, "Espacio reservado para patrocinio nativo. Va debajo del bloque social para no interrumpir la accion principal.", "Reserved slot for native sponsorship. It sits below the social block so it doesn't interrupt the main action.")} />
 
         {errorMessage ? (
           <Card style={{ gap: spacing[8], padding: spacing[16], borderColor: "rgba(220, 38, 38, 0.26)" }}>
@@ -333,67 +352,46 @@ export function HomeScreenView({
         <span style={{ ...typography.small, color: colors.textMuted }}>HOY EN PRODE MUNDIAL</span>
         <div style={{ display: "grid", gap: spacing[8] }}>
           <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>
-            {pendingMatches.length > 0 ? `Te faltan ${pendingMatches.length} partidos` : nextOpeningMatch ? "Tu proxima ventana abre pronto" : "Ya vas al dia"}
+            {pendingMatches.length > 0 ? copyForLocale(locale, `Te faltan ${pendingMatches.length} partidos`, `You still have ${pendingMatches.length} matches left`) : nextOpeningMatch ? copyForLocale(locale, "Tu proxima ventana abre pronto", "Your next window opens soon") : copyForLocale(locale, "Ya vas al dia", "You're up to date")}
           </h1>
           <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 560 }}>
             {priorityMatch
-              ? `Tu proximo partido es ${priorityMatch.homeTeam.name} vs ${priorityMatch.awayTeam.name}.`
+              ? copyForLocale(locale, `Tu proximo partido es ${priorityMatch.homeTeam.name} vs ${priorityMatch.awayTeam.name}.`, `Your next match is ${priorityMatch.homeTeam.name} vs ${priorityMatch.awayTeam.name}.`)
               : nextOpeningMatch
-                ? `La siguiente prediccion se habilita para ${nextOpeningMatch.homeTeam.name} vs ${nextOpeningMatch.awayTeam.name}.`
-                : "No tienes pendientes inmediatos. Aprovecha para revisar resultados y tus ligas."}
+                ? copyForLocale(locale, `La siguiente prediccion se habilita para ${nextOpeningMatch.homeTeam.name} vs ${nextOpeningMatch.awayTeam.name}.`, `The next prediction window opens for ${nextOpeningMatch.homeTeam.name} vs ${nextOpeningMatch.awayTeam.name}.`)
+                : copyForLocale(locale, "No tienes pendientes inmediatos. Aprovecha para revisar resultados y tus ligas.", "You have no immediate pending matches. Use the time to review results and your leagues.")}
           </p>
         </div>
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <Button onClick={() => (priorityMatch ? onOpenMatch(priorityMatch.matchId) : onOpenMatches())}>
-            {priorityMatch ? "Predecir ahora" : "Ver partidos"}
+            {priorityMatch ? copyForLocale(locale, "Predecir ahora", "Predict now") : copyForLocale(locale, "Ver partidos", "See matches")}
           </Button>
           <Button variant="ghost" onClick={onOpenLeagues}>
-            Ver mis ligas
+            {copyForLocale(locale, "Ver mis ligas", "See my leagues")}
           </Button>
         </div>
       </Card>
 
       {priorityMatch ? (
-        <Card elevated style={{ gap: spacing[16], padding: spacing[16] }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "flex-start" }}>
-            <div style={{ display: "grid", gap: 6 }}>
-              <span style={{ ...typography.small, color: colors.primary500 }}>PROXIMO PARTIDO</span>
-              <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
-                {toStageLabel(priorityMatch)} · {toKickoffLabel(priorityMatch.kickoffAt)}
-              </span>
-            </div>
-            <StatusTag status={canEditPrediction(priorityMatch) ? "editable" : "locked"} label={canEditPrediction(priorityMatch) ? "Pendiente" : "Cerrado"} />
-          </div>
-
-          <div style={{ display: "grid", gap: spacing[12] }}>
-            <TeamDisplay teamName={priorityMatch.homeTeam.name} flagUrl={priorityMatch.homeTeam.flagUrl} size="lg" weight={700} />
-            <div style={{ paddingLeft: 46, fontSize: 12, color: colors.textMuted, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
-            <TeamDisplay teamName={priorityMatch.awayTeam.name} flagUrl={priorityMatch.awayTeam.flagUrl} size="lg" weight={700} />
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gap: 6,
-              padding: 14,
-              borderRadius: 14,
-              background: "rgba(255, 255, 255, 0.03)",
-              border: `1px solid ${colors.border}`
-            }}
-          >
-            <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>
-              {priorityMatch.userPredictionSummary ? `Ya guardaste ${priorityMatch.userPredictionSummary}` : "Aun no predijiste este partido"}
-            </span>
-            <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
-              Deadline exacto: {toKickoffLabel(priorityMatch.deadlineAt)}
-            </span>
-          </div>
-
-          <Button fullWidth onClick={() => onOpenMatch(priorityMatch.matchId)}>
-            {priorityMatch.userPredictionSummary ? "Editar prediccion" : "Predecir ahora"}
-          </Button>
-        </Card>
+        <NextMatchHero
+          awayTeam={{ teamName: priorityMatch.awayTeam.name, flagUrl: priorityMatch.awayTeam.flagUrl }}
+          ctaLabel={priorityMatch.userPredictionSummary ? "Editar prediccion" : "Predecir ahora"}
+          eyebrow="TU PROXIMO PENDIENTE"
+          helperText={
+            priorityMatch.userPredictionSummary
+              ? copyForLocale(locale, `Ya guardaste ${priorityMatch.userPredictionSummary}. Deadline exacto: ${toKickoffLabel(priorityMatch.deadlineAt, locale)}`, `You already saved ${priorityMatch.userPredictionSummary}. Exact deadline: ${toKickoffLabel(priorityMatch.deadlineAt, locale)}`)
+              : copyForLocale(locale, `Aun no predijiste este partido. Deadline exacto: ${toKickoffLabel(priorityMatch.deadlineAt, locale)}`, `You haven't predicted this match yet. Exact deadline: ${toKickoffLabel(priorityMatch.deadlineAt, locale)}`)
+          }
+          homeTeam={{ teamName: priorityMatch.homeTeam.name, flagUrl: priorityMatch.homeTeam.flagUrl }}
+          metaLabel={`${toStageLabel(priorityMatch, locale)} · ${toKickoffLabel(priorityMatch.kickoffAt, locale)}`}
+          onAction={() => onOpenMatch(priorityMatch.matchId)}
+          onSecondaryAction={onOpenMatches}
+          secondaryCtaLabel={copyForLocale(locale, "Mas tarde", "Later")}
+          status={canEditPrediction(priorityMatch) ? "editable" : "locked"}
+          statusLabel={canEditPrediction(priorityMatch) ? copyForLocale(locale, "Pendiente", "Pending") : copyForLocale(locale, "Cerrado", "Locked")}
+          title={`${priorityMatch.homeTeam.name} vs ${priorityMatch.awayTeam.name}`}
+        />
       ) : null}
 
       {!priorityMatch && nextOpeningMatch ? (
@@ -402,16 +400,16 @@ export function HomeScreenView({
             <div style={{ display: "grid", gap: 6 }}>
               <span style={{ ...typography.small, color: colors.gold500 }}>PROXIMA PREDICCION</span>
               <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
-                {toStageLabel(nextOpeningMatch)} · {toKickoffLabel(nextOpeningMatch.kickoffAt)}
+                {toStageLabel(nextOpeningMatch, locale)} · {toKickoffLabel(nextOpeningMatch.kickoffAt, locale)}
               </span>
             </div>
-            <StatusTag status="locked" label={toCountdownLabel(nextOpeningMatch.predictionOpensAt)} />
+            <StatusTag status="locked" label={toCountdownLabel(nextOpeningMatch.predictionOpensAt, locale)} />
           </div>
 
           <div style={{ display: "grid", gap: spacing[12] }}>
-            <TeamDisplay teamName={nextOpeningMatch.homeTeam.name} flagUrl={nextOpeningMatch.homeTeam.flagUrl} size="lg" weight={700} />
+            <TeamIdentityRow teamName={nextOpeningMatch.homeTeam.name} flagUrl={nextOpeningMatch.homeTeam.flagUrl} size="lg" weight={700} />
             <div style={{ paddingLeft: 46, fontSize: 12, color: colors.textMuted, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
-            <TeamDisplay teamName={nextOpeningMatch.awayTeam.name} flagUrl={nextOpeningMatch.awayTeam.flagUrl} size="lg" weight={700} />
+            <TeamIdentityRow teamName={nextOpeningMatch.awayTeam.name} flagUrl={nextOpeningMatch.awayTeam.flagUrl} size="lg" weight={700} />
           </div>
 
           <div
@@ -425,7 +423,7 @@ export function HomeScreenView({
             }}
           >
             <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>
-              La ventana abre {toKickoffLabel(nextOpeningMatch.predictionOpensAt)}
+              {copyForLocale(locale, "La ventana abre", "The window opens")} {toKickoffLabel(nextOpeningMatch.predictionOpensAt, locale)}
             </span>
             <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
               Luego podras crear o editar tu marcador libremente hasta el kickoff.
@@ -459,15 +457,15 @@ export function HomeScreenView({
       <Card elevated style={{ gap: 10 }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "center" }}>
           <div style={{ display: "grid", gap: 4 }}>
-            <span style={{ ...typography.small, color: colors.textMuted }}>TU POSICION</span>
-            <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>{profileDisplayName ?? "Tu perfil"}</h2>
+            <span style={{ ...typography.small, color: colors.textMuted }}>TU LIGA HOY</span>
+            <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>{profileDisplayName ?? "Tu posicion actual"}</h2>
           </div>
           <Button variant="ghost" onClick={onOpenRankings}>
-            Ver posiciones
+            Ver tabla
           </Button>
         </div>
         <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
-          Tus ligas y posiciones van a aparecer aca con prioridad competitiva. Por ahora, este bloque ya queda listo para el nuevo loop visual.
+          Tu contexto competitivo aparece aca para recordarte por que importa seguir prediciendo.
         </p>
       </Card>
 

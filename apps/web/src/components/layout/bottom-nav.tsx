@@ -4,9 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MAIN_TABS } from "@prode/shared";
 import { Card, colors, radii } from "@prode/ui";
+import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { locale } = useLocale();
+  const labels = {
+    home: copyForLocale(locale, "Inicio", "Home"),
+    matches: copyForLocale(locale, "Partidos", "Matches"),
+    rankings: copyForLocale(locale, "Posiciones", "Standings"),
+    leagues: copyForLocale(locale, "Ligas", "Leagues"),
+    profile: copyForLocale(locale, "Perfil", "Profile")
+  } as const;
 
   return (
     <Card
@@ -43,7 +52,7 @@ export function BottomNav() {
               fontWeight: isActive ? 700 : 500
             }}
           >
-            {tab.label}
+            {labels[tab.key]}
           </Link>
         );
       })}

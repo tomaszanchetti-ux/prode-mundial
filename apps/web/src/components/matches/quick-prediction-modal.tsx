@@ -5,6 +5,7 @@ import type { MatchDetail, SaveMatchPredictionInput } from "@prode/shared";
 import { PredictionModal, ScoreInput } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
+import { copyForLocale, formatDateTime, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
 
 type QuickPredictionModalProps = {
@@ -38,13 +39,13 @@ function toStageLabel(detail: MatchDetail) {
 }
 
 function toKickoffLabel(detail: MatchDetail) {
-  const kickoff = new Intl.DateTimeFormat("es-AR", {
+  const kickoff = formatDateTime("es", detail.kickoffAt, {
     weekday: "short",
     day: "numeric",
     month: "short",
     hour: "2-digit",
     minute: "2-digit"
-  }).format(new Date(detail.kickoffAt));
+  });
 
   return `${kickoff} · cierra en kickoff`;
 }
@@ -77,7 +78,32 @@ function toErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "No pudimos guardar tu prediccion.";
 }
 
+function toHelperText(detail: MatchDetail | null, errorMessage: string | null, isLoading: boolean) {
+  if (isLoading) {
+    return "Cargando partido...";
+  }
+
+  if (errorMessage) {
+    return errorMessage;
+  }
+
+  if (!detail) {
+    return "Preparando el siguiente partido.";
+  }
+
+  if (!canEditPrediction(detail)) {
+    return "Esta prediccion ya no se puede editar.";
+  }
+
+  if (detail.userPrediction) {
+    return "Ajusta el marcador y vuelve a guardar cuando quieras.";
+  }
+
+  return "Carga el marcador y guárdalo en un solo paso.";
+}
+
 export function QuickPredictionModal({ matchId, isOpen, onClose, onSaved }: QuickPredictionModalProps) {
+  const { locale } = useLocale();
   const { status, user } = useAuth();
   const [detail, setDetail] = useState<MatchDetail | null>(null);
   const [formState, setFormState] = useState<FormState>({
@@ -183,25 +209,19 @@ export function QuickPredictionModal({ matchId, isOpen, onClose, onSaved }: Quic
         teamName: detail?.awayTeam.name ?? "Visitante",
         flagUrl: detail?.awayTeam.flagUrl
       }}
-      helperText={
-        isLoading
-          ? "Cargando partido..."
-          : errorMessage
-            ? errorMessage
-            : "Toca guardar para confirmar tu prediccion."
-      }
+      helperText={toHelperText(detail, errorMessage, isLoading)}
       homeTeam={{
         teamName: detail?.homeTeam.name ?? "Local",
         flagUrl: detail?.homeTeam.flagUrl
       }}
       isOpen={isOpen}
-      kickoffLabel={detail ? toKickoffLabel(detail) : "Preparando partido"}
+      kickoffLabel={detail ? copyForLocale(locale, toKickoffLabel(detail), formatDateTime("en", detail.kickoffAt, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " · locks at kickoff") : copyForLocale(locale, "Preparando partido", "Preparing match")}
       onClose={onClose}
       onSubmit={handleSave}
-      saveLabel={detail?.userPrediction ? "Actualizar prediccion" : "Guardar prediccion"}
+      saveLabel={detail?.userPrediction ? copyForLocale(locale, "Guardar cambios", "Save changes") : copyForLocale(locale, "Guardar prediccion", "Save prediction")}
       saving={isSaving}
-      stageLabel={detail ? toStageLabel(detail) : "Partido"}
-      title="Predice en segundos"
+      stageLabel={detail ? (locale === "en" && detail.stage === "group" && detail.groupId ? `Group ${detail.groupId}` : toStageLabel(detail)) : copyForLocale(locale, "Partido", "Match")}
+      title={copyForLocale(locale, "Tu proximo pendiente", "Your next pending match")}
     >
       <ScoreInput
         awayLabel={detail?.awayTeam.name ?? "Visitante"}

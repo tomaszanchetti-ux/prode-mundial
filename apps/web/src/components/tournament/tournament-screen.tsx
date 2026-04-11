@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES, type MatchSummary, type PreTournamentSummary, type TuMundialGroupCard, type TuMundialResponse } from "@prode/shared";
-import { Button, Card, StatusTag, TeamDisplay, colors, spacing, typography } from "@prode/ui";
+import { Button, Card, ProgressCompact, StatusTag, TeamDisplay, colors, spacing, typography } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MarathonPredictionModal } from "@/components/matches/marathon-prediction-modal";
 import { ApiClientError, getMatches, getPreTournamentSummary, getTuMundial } from "@/lib/api/client";
@@ -37,24 +37,24 @@ function compareMatchesChronologically(left: MatchSummary, right: MatchSummary) 
 function toGroupState(group: TuMundialGroupCard) {
   if (group.completedMatches === 0) {
     return {
-      label: "Vacio",
+      label: "Pendiente",
       tone: "locked" as const,
-      copy: "Completa mas partidos para ver como se acomoda el grupo."
+      copy: "Todavia no hay suficientes partidos para proyectar la pelea por clasificar."
     };
   }
 
   if (group.isComplete) {
     return {
-      label: "Completo",
+      label: "Cerrado",
       tone: "scored" as const,
-      copy: "Ya puedes ver quienes clasificarian segun tus pronosticos."
+      copy: "Asi quedaria el grupo si el Mundial terminara segun tus pronosticos."
     };
   }
 
   return {
     label: "Parcial",
     tone: "editable" as const,
-    copy: "Todavia faltan resultados para definir posiciones."
+    copy: "La tabla sigue viva: todavia quedan partidos que pueden mover a los clasificados."
   };
 }
 
@@ -66,9 +66,10 @@ function GroupStandingsCard({ group }: GroupStandingsCardProps) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
         <div style={{ display: "grid", gap: 4 }}>
           <span style={{ ...typography.small, color: colors.textMuted }}>{group.groupName}</span>
-          <strong style={{ fontSize: 18, lineHeight: 1.25, color: colors.textPrimary }}>
-            {group.completedMatches} / {group.totalMatches} partidos
-          </strong>
+          <strong style={{ fontSize: 18, lineHeight: 1.25, color: colors.textPrimary }}>Asi va quedando la tabla</strong>
+          <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+            {group.completedMatches} / {group.totalMatches} partidos proyectados
+          </span>
         </div>
         <StatusTag status={state.tone} label={state.label} />
       </div>
@@ -114,7 +115,9 @@ function GroupStandingsCard({ group }: GroupStandingsCardProps) {
             }}
           >
             <div style={{ display: "grid", gap: 4 }}>
-              <span style={{ fontSize: 12, lineHeight: 1.2, color: colors.textMuted }}>{item.position}</span>
+              <span style={{ fontSize: 12, lineHeight: 1.2, color: item.isProjectedQualified ? "#9BE5B6" : colors.textMuted, fontWeight: item.isProjectedQualified ? 700 : 600 }}>
+                #{item.position} {item.isProjectedQualified ? "clasifica" : ""}
+              </span>
               <TeamDisplay teamName={item.teamName} flagUrl={item.flagUrl} size="sm" weight={item.isProjectedQualified ? 700 : 600} />
             </div>
             <span style={{ fontSize: 14, lineHeight: 1.2, color: colors.textPrimary, textAlign: "center" }}>{item.played}</span>
@@ -157,11 +160,11 @@ export function TournamentScreenView({
         <span style={{ ...typography.small, color: colors.textMuted }}>TU MUNDIAL</span>
         <div style={{ display: "grid", gap: spacing[8] }}>
           <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>
-            {profileDisplayName ? `${profileDisplayName}, asi van quedando tus grupos` : "Asi va quedando tu Mundial"}
+            {profileDisplayName ? `${profileDisplayName}, asi se mueve tu Mundial` : "Asi se mueve tu Mundial"}
           </h1>
           <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 620 }}>
             {isPreTournament
-              ? "Mira como se acomodan tus grupos segun las predicciones que ya cargaste. La proyeccion se actualiza grupo por grupo."
+              ? "Cada prediccion empuja la tabla de su grupo. Aqui ves rapido quienes estarian clasificando segun tu simulacion."
               : "Tus grupos proyectados siguen disponibles aunque el producto ya este priorizando el loop diario del torneo en vivo."}
           </p>
         </div>
@@ -176,29 +179,31 @@ export function TournamentScreenView({
         </div>
       </Card>
 
-      <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
-        <Card style={{ gap: spacing[8], padding: spacing[16] }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>COMPLETOS</span>
-          <strong style={{ fontSize: 28, lineHeight: 1, color: colors.textPrimary }}>{completedGroups}</strong>
-          <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>grupos ya cerrados</span>
-        </Card>
-        <Card style={{ gap: spacing[8], padding: spacing[16] }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>EN PROGRESO</span>
-          <strong style={{ fontSize: 28, lineHeight: 1, color: colors.textPrimary }}>{partialGroups}</strong>
-          <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>grupos parciales</span>
-        </Card>
-        <Card style={{ gap: spacing[8], padding: spacing[16] }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>SIN EMPEZAR</span>
-          <strong style={{ fontSize: 28, lineHeight: 1, color: colors.textPrimary }}>{emptyGroups}</strong>
-          <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>grupos vacios</span>
-        </Card>
-      </div>
+      <ProgressCompact
+        items={[
+          {
+            label: "CERRADOS",
+            value: String(completedGroups),
+            hint: "grupos ya definidos"
+          },
+          {
+            label: "EN PELEA",
+            value: String(partialGroups),
+            hint: "grupos todavia vivos"
+          },
+          {
+            label: "PENDIENTES",
+            value: String(emptyGroups),
+            hint: "todavia sin mover"
+          }
+        ]}
+      />
 
       {preTournamentSummary ? (
         <Card elevated style={{ gap: spacing[8], padding: spacing[16] }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "center" }}>
             <div style={{ display: "grid", gap: 4 }}>
-              <span style={{ ...typography.small, color: colors.textMuted }}>PROGRESO GLOBAL</span>
+              <span style={{ ...typography.small, color: colors.textMuted }}>TU AVANCE GLOBAL</span>
               <strong style={{ fontSize: 20, lineHeight: 1.2, color: colors.textPrimary }}>
                 {preTournamentSummary.completedMatches} / {preTournamentSummary.totalMatches} partidos
               </strong>
@@ -208,7 +213,7 @@ export function TournamentScreenView({
           <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>
             {preTournamentSummary.remainingMatches === 0
               ? "Ya completaste toda la fase de grupos."
-              : `Todavia te faltan ${preTournamentSummary.remainingMatches} partidos para cerrar tu simulacion.`}
+              : `Todavia te faltan ${preTournamentSummary.remainingMatches} partidos para cerrar tu simulacion grupo por grupo.`}
           </p>
         </Card>
       ) : null}

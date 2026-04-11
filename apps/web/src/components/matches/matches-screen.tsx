@@ -4,10 +4,11 @@ import React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ListMatchesQuery, MatchStage, MatchSummary } from "@prode/shared";
-import { Button, Card, MatchCard, colors, radii, spacing, typography } from "@prode/ui";
+import { Button, Card, MatchCard, NextMatchHero, colors, radii, spacing, typography } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getMatches } from "@/lib/api/client";
+import { copyForLocale, formatDateTime, type AppLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/editability";
 
 type FilterChip = {
@@ -39,23 +40,37 @@ const filterChips: FilterChip[] = [
   { key: "all", label: "Todos", query: {} }
 ];
 
-function toLocalKickoffLabel(iso: string) {
-  const date = new Date(iso);
+function toFilterLabel(key: string, locale: AppLocale) {
+  const labels = {
+    today: copyForLocale(locale, "Hoy", "Today"),
+    pending: copyForLocale(locale, "Pendientes", "Pending"),
+    upcoming: copyForLocale(locale, "Proximos", "Upcoming"),
+    group: copyForLocale(locale, "Grupos", "Groups"),
+    R32: copyForLocale(locale, "Octavos", "R32"),
+    QF: copyForLocale(locale, "Cuartos", "Quarterfinals"),
+    SF: copyForLocale(locale, "Semis", "Semis"),
+    FINAL: copyForLocale(locale, "Final", "Final"),
+    all: copyForLocale(locale, "Todos", "All")
+  } as const;
 
-  return new Intl.DateTimeFormat("es-AR", {
+  return labels[key as keyof typeof labels] ?? key;
+}
+
+function toLocalKickoffLabel(iso: string, locale: AppLocale) {
+  return formatDateTime(locale, iso, {
     weekday: "short",
     day: "numeric",
     month: "short",
     hour: "2-digit",
     minute: "2-digit"
-  }).format(date);
+  });
 }
 
-function toCountdownLabel(targetIso: string, now = new Date()) {
+function toCountdownLabel(targetIso: string, locale: AppLocale, now = new Date()) {
   const diffMs = new Date(targetIso).getTime() - now.getTime();
 
   if (diffMs <= 0) {
-    return "Disponible ahora";
+    return copyForLocale(locale, "Disponible ahora", "Available now");
   }
 
   const totalMinutes = Math.ceil(diffMs / 60000);
@@ -63,31 +78,41 @@ function toCountdownLabel(targetIso: string, now = new Date()) {
   const minutes = totalMinutes % 60;
 
   if (hours <= 0) {
-    return `Abre en ${minutes}m`;
+    return copyForLocale(locale, `Abre en ${minutes}m`, `Opens in ${minutes}m`);
   }
 
   if (minutes === 0) {
-    return `Abre en ${hours}h`;
+    return copyForLocale(locale, `Abre en ${hours}h`, `Opens in ${hours}h`);
   }
 
-  return `Abre en ${hours}h ${minutes}m`;
+  return copyForLocale(locale, `Abre en ${hours}h ${minutes}m`, `Opens in ${hours}h ${minutes}m`);
 }
 
-function toStageLabel(stage: MatchStage, groupId: string | null) {
+function toStageLabel(stage: MatchStage, groupId: string | null, locale: AppLocale) {
   if (stage === "group" && groupId) {
-    return `Grupo ${groupId}`;
+    return copyForLocale(locale, `Grupo ${groupId}`, `Group ${groupId}`);
   }
 
-  const labels: Record<Exclude<MatchStage, "group">, string> = {
-    R32: "Octavos",
-    R16: "R16",
-    QF: "Cuartos",
-    SF: "Semifinal",
-    BRONZE: "Tercer puesto",
-    FINAL: "Final"
+  const labels = {
+    es: {
+      R32: "Octavos",
+      R16: "R16",
+      QF: "Cuartos",
+      SF: "Semifinal",
+      BRONZE: "Tercer puesto",
+      FINAL: "Final"
+    },
+    en: {
+      R32: "Round of 32",
+      R16: "Round of 16",
+      QF: "Quarterfinal",
+      SF: "Semifinal",
+      BRONZE: "Third place",
+      FINAL: "Final"
+    }
   };
 
-  return labels[stage as Exclude<MatchStage, "group">] ?? stage;
+  return labels[locale][stage as keyof (typeof labels)["es"]] ?? stage;
 }
 
 function toCardTone(match: MatchSummary) {
@@ -126,64 +151,64 @@ function toStatusLabel(match: MatchSummary) {
   return "Pendiente";
 }
 
-function summarizeActiveFilter(query: ListMatchesQuery) {
+function summarizeActiveFilter(query: ListMatchesQuery, locale: AppLocale) {
   if (query.filter === "today") {
-    return "Tus partidos de hoy, listos para resolver rapido.";
+    return copyForLocale(locale, "Tus partidos de hoy, listos para resolver rapido.", "Today's matches, ready to solve quickly.");
   }
 
   if (query.filter === "upcoming") {
-    return "Los siguientes cruces abiertos para predecir o editar.";
+    return copyForLocale(locale, "Los siguientes cruces abiertos para predecir o editar.", "The next open matches to predict or edit.");
   }
 
   if (query.stage === "group") {
-    return "Todo lo que sigue vivo en fase de grupos.";
+    return copyForLocale(locale, "Todo lo que sigue vivo en fase de grupos.", "Everything still alive in the group stage.");
   }
 
   if (query.stage === "R32") {
-    return "Cruces directos listos para escanear.";
+    return copyForLocale(locale, "Cruces directos listos para escanear.", "Direct knockout matchups ready to scan.");
   }
 
   if (query.stage === "QF") {
-    return "Cuartos con foco total en cada llave.";
+    return copyForLocale(locale, "Cuartos con foco total en cada llave.", "Quarterfinals with total focus on every bracket.");
   }
 
   if (query.stage === "SF") {
-    return "Semifinales para ajustar lo importante.";
+    return copyForLocale(locale, "Semifinales para ajustar lo importante.", "Semifinals to fine-tune the important part.");
   }
 
   if (query.stage === "FINAL") {
-    return "La definicion del torneo en una sola vista.";
+    return copyForLocale(locale, "La definicion del torneo en una sola vista.", "The tournament decider in one single view.");
   }
 
-  return "Todos tus partidos disponibles en una sola pasada.";
+  return copyForLocale(locale, "Todos tus partidos disponibles en una sola pasada.", "All your available matches in one pass.");
 }
 
-function toPredictionCopy(match: MatchSummary) {
+function toPredictionCopy(match: MatchSummary, locale: AppLocale) {
   if (match.predictionStatus === "scored") {
-    return match.userPredictionSummary ? `Tu prediccion: ${match.userPredictionSummary}` : "Partido puntuado";
+    return match.userPredictionSummary ? copyForLocale(locale, `Tu prediccion: ${match.userPredictionSummary}`, `Your prediction: ${match.userPredictionSummary}`) : copyForLocale(locale, "Partido puntuado", "Scored match");
   }
 
   if (!match.userPredictionSummary) {
-    return "Aun no predijiste este partido";
+    return copyForLocale(locale, "Aun no predijiste este partido", "You haven't predicted this match yet");
   }
 
-  return `Tu prediccion: ${match.userPredictionSummary}`;
+  return copyForLocale(locale, `Tu prediccion: ${match.userPredictionSummary}`, `Your prediction: ${match.userPredictionSummary}`);
 }
 
-function toResultCopy(match: MatchSummary) {
+function toResultCopy(match: MatchSummary, locale: AppLocale) {
   if (match.predictionStatus === "scored") {
-    return "Abre el detalle para ver resultado y puntos.";
+    return copyForLocale(locale, "Abre el detalle para ver resultado y puntos.", "Open the detail to see the result and points.");
   }
 
   if (isPredictionWindowNotOpen(match)) {
-    return `Disponible desde ${toLocalKickoffLabel(match.predictionOpensAt)}.`;
+    return copyForLocale(locale, `Disponible desde ${toLocalKickoffLabel(match.predictionOpensAt, locale)}.`, `Available from ${toLocalKickoffLabel(match.predictionOpensAt, locale)}.`);
   }
 
   if (!canEditPrediction(match)) {
-    return "Prediccion cerrada. Solo queda seguir el partido.";
+    return copyForLocale(locale, "Prediccion cerrada. Solo queda seguir el partido.", "Prediction locked. Now you can only follow the match.");
   }
 
-  return `Deadline exacto: ${toLocalKickoffLabel(match.deadlineAt)}`;
+  return copyForLocale(locale, `Deadline exacto: ${toLocalKickoffLabel(match.deadlineAt, locale)}`, `Exact deadline: ${toLocalKickoffLabel(match.deadlineAt, locale)}`);
 }
 
 function pickQuickMatch(matches: MatchSummary[]) {
@@ -211,6 +236,7 @@ export function MatchesScreenView({
   onOpenQuickPredict,
   onRetry
 }: MatchesScreenViewProps) {
+  const { locale } = useLocale();
   const activeFilter = filterChips.find((chip) => chip.key === activeFilterKey) ?? filterChips[0];
   const quickMatch = pickQuickMatch(items);
   const nextOpeningMatch = pickNextOpeningMatch(items);
@@ -219,31 +245,29 @@ export function MatchesScreenView({
     <div style={{ display: "grid", gap: spacing[16] }}>
       <div style={{ display: "grid", gap: spacing[12] }}>
         <div style={{ display: "grid", gap: spacing[8] }}>
-          <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>Partidos</h1>
+          <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>{copyForLocale(locale, "Partidos", "Matches")}</h1>
           <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 560 }}>
-            {summarizeActiveFilter(activeFilter.query)}
+            {summarizeActiveFilter(activeFilter.query, locale)}
           </p>
         </div>
 
         {quickMatch ? (
-          <Card
-            elevated
-            style={{
-              gap: spacing[12],
-              padding: spacing[16],
-              background:
-                "radial-gradient(circle at top right, rgba(47, 107, 255, 0.16), transparent 28%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
-            }}
-          >
-            <span style={{ ...typography.small, color: colors.primary500 }}>TU PROXIMO PENDIENTE</span>
-            <strong style={{ fontSize: 22, lineHeight: 1.1, color: colors.textPrimary }}>
-              {quickMatch.homeTeam.name} vs {quickMatch.awayTeam.name}
-            </strong>
-            <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{toLocalKickoffLabel(quickMatch.kickoffAt)}</span>
-            <Button onClick={() => onOpenQuickPredict(quickMatch.matchId)}>
-              {quickMatch.userPredictionSummary ? "Editar prediccion" : "Predecir ahora"}
-            </Button>
-          </Card>
+          <NextMatchHero
+            awayTeam={{ teamName: quickMatch.awayTeam.name, flagUrl: quickMatch.awayTeam.flagUrl }}
+            ctaLabel={quickMatch.userPredictionSummary ? copyForLocale(locale, "Editar prediccion", "Edit prediction") : copyForLocale(locale, "Predecir ahora", "Predict now")}
+            eyebrow={copyForLocale(locale, "TU PROXIMO PENDIENTE", "YOUR NEXT PENDING MATCH")}
+            helperText={
+              quickMatch.userPredictionSummary
+                ? copyForLocale(locale, `Ya dejaste ${quickMatch.userPredictionSummary}. Puedes retocarla antes del kickoff.`, `You already left ${quickMatch.userPredictionSummary}. You can still tweak it before kickoff.`)
+                : copyForLocale(locale, "Entra directo y carga el marcador sin pasar por la lista.", "Jump in and set the score without going through the list.")
+            }
+            homeTeam={{ teamName: quickMatch.homeTeam.name, flagUrl: quickMatch.homeTeam.flagUrl }}
+            metaLabel={`${toStageLabel(quickMatch.stage, quickMatch.groupId, locale)} · ${toLocalKickoffLabel(quickMatch.kickoffAt, locale)}`}
+            onAction={() => onOpenQuickPredict(quickMatch.matchId)}
+            status={toCardTone(quickMatch)}
+            statusLabel={toStatusLabel(quickMatch)}
+            title={`${quickMatch.homeTeam.name} vs ${quickMatch.awayTeam.name}`}
+          />
         ) : null}
 
         {!quickMatch && nextOpeningMatch ? (
@@ -256,20 +280,31 @@ export function MatchesScreenView({
                 "radial-gradient(circle at top right, rgba(231, 198, 106, 0.12), transparent 28%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
             }}
           >
-            <span style={{ ...typography.small, color: colors.gold500 }}>PROXIMA VENTANA</span>
+            <span style={{ ...typography.small, color: colors.gold500 }}>{copyForLocale(locale, "PROXIMA VENTANA", "NEXT WINDOW")}</span>
             <strong style={{ fontSize: 22, lineHeight: 1.1, color: colors.textPrimary }}>
               {nextOpeningMatch.homeTeam.name} vs {nextOpeningMatch.awayTeam.name}
             </strong>
             <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
-              Abre {toLocalKickoffLabel(nextOpeningMatch.predictionOpensAt)} · {toCountdownLabel(nextOpeningMatch.predictionOpensAt)}
+              {copyForLocale(locale, "Abre", "Opens")} {toLocalKickoffLabel(nextOpeningMatch.predictionOpensAt, locale)} · {toCountdownLabel(nextOpeningMatch.predictionOpensAt, locale)}
             </span>
             <Button variant="secondary" onClick={() => onOpenMatch(nextOpeningMatch.matchId)}>
-              Ver detalle
+              {copyForLocale(locale, "Ver detalle", "View detail")}
             </Button>
           </Card>
         ) : null}
 
-        <div style={{ display: "flex", gap: spacing[8], overflowX: "auto", paddingBottom: 2 }}>
+        <div
+          style={{
+            display: "flex",
+            gap: spacing[8],
+            overflowX: "auto",
+            paddingBottom: 2,
+            position: "sticky",
+            top: 0,
+            zIndex: 2,
+            background: "linear-gradient(180deg, rgba(7, 17, 31, 0.98) 0%, rgba(7, 17, 31, 0.92) 100%)"
+          }}
+        >
           {filterChips.map((chip) => {
             const isActive = chip.key === activeFilter.key;
 
@@ -291,7 +326,7 @@ export function MatchesScreenView({
                   cursor: "pointer"
                 }}
               >
-                {chip.label}
+                {toFilterLabel(chip.key, locale)}
               </button>
             );
           })}
@@ -300,10 +335,10 @@ export function MatchesScreenView({
 
       {errorMessage ? (
         <Card elevated style={{ gap: spacing[8], borderColor: "rgba(220, 38, 38, 0.24)" }}>
-          <strong style={{ fontSize: 16, color: colors.textPrimary }}>No pudimos cargar los partidos</strong>
+          <strong style={{ fontSize: 16, color: colors.textPrimary }}>{copyForLocale(locale, "No pudimos cargar los partidos", "We couldn't load the matches")}</strong>
           <p style={{ ...typography.body, margin: 0, color: "#F5B4B4" }}>{errorMessage}</p>
           <Button variant="secondary" onClick={onRetry}>
-            Reintentar
+            {copyForLocale(locale, "Reintentar", "Retry")}
           </Button>
         </Card>
       ) : null}
@@ -324,10 +359,10 @@ export function MatchesScreenView({
 
       {!isLoading && !errorMessage && items.length === 0 ? (
         <Card elevated style={{ gap: spacing[8], textAlign: "center", justifyItems: "center", padding: spacing[24] }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>SIN PARTIDOS</span>
-          <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>No encontramos cruces para este filtro</h2>
+          <span style={{ ...typography.small, color: colors.textMuted }}>{copyForLocale(locale, "SIN PARTIDOS", "NO MATCHES")}</span>
+          <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>{copyForLocale(locale, "No encontramos cruces para este filtro", "We couldn't find matches for this filter")}</h2>
           <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 420 }}>
-            Cambia de vista para seguir avanzando o revisar otra fase del torneo.
+            {copyForLocale(locale, "Cambia de vista para seguir avanzando o revisar otra fase del torneo.", "Switch views to keep going or review another phase of the tournament.")}
           </p>
         </Card>
       ) : null}
@@ -341,16 +376,22 @@ export function MatchesScreenView({
                 teamName: match.awayTeam.name,
                 flagUrl: match.awayTeam.flagUrl
               }}
-              ctaLabel={match.ctaLabel}
+              ctaLabel={
+                match.ctaLabel === "Editar prediccion"
+                  ? copyForLocale(locale, "Editar prediccion", "Edit prediction")
+                  : match.ctaLabel === "Predecir"
+                    ? copyForLocale(locale, "Predecir", "Predict")
+                    : match.ctaLabel
+              }
               homeTeam={{
                 teamName: match.homeTeam.name,
                 flagUrl: match.homeTeam.flagUrl
               }}
-              kickoffLabel={toLocalKickoffLabel(match.kickoffAt)}
+              kickoffLabel={toLocalKickoffLabel(match.kickoffAt, locale)}
               onAction={() => onOpenMatch(match.matchId)}
-              predictionSummary={toPredictionCopy(match)}
-              resultSummary={toResultCopy(match)}
-              stageLabel={toStageLabel(match.stage, match.groupId)}
+              predictionSummary={toPredictionCopy(match, locale)}
+              resultSummary={toResultCopy(match, locale)}
+              stageLabel={toStageLabel(match.stage, match.groupId, locale)}
               status={toCardTone(match)}
               statusLabel={toStatusLabel(match)}
             />

@@ -130,8 +130,52 @@ Avance adicional de `Epic 1`:
     - `e2cf220` -> `merge: close epic 2 core matches flow`
   - iteración UX/UI publicada luego en:
     - `a28b925` -> `feat: redesign core ux and ui flows`
-  - working tree actual:
-    - cambios locales solo en handoff / memoria de sesión hasta cerrar documentación
+- working tree actual:
+  - cambios locales solo en handoff / memoria de sesión hasta cerrar documentación
+
+## Actualización operativa nueva: Local Kanban
+
+- se adoptó `Local Kanban` como sistema operativo agéntico para esta fase del proyecto
+- instalación local activa en:
+  - `/Users/tzanchetti/Documents/Codex/local-kanban`
+- proyecto registrado en:
+  - `/Users/tzanchetti/Documents/Codex/local-kanban/config/projects.json`
+- `AGENTS.md` ya importa el contrato normativo de `Local Kanban`
+- el backlog de ejecución inmediata ya vive también en:
+  - `docs/kanban/epics`
+  - `docs/kanban/stories`
+
+Estado real de esa adopción:
+
+- ya no es una prueba documental
+- fue usado para desglosar, ejecutar y cerrar la iteración UX/UI reciente
+
+## Actualización técnica nueva: base inicial de i18n
+
+- `apps/web` ya tiene una base i18n liviana para `ESP / ENG`
+- se decidió evitar por ahora una librería pesada
+- la base actual incluye:
+  - provider de locale
+  - persistencia local
+  - helper de copy por locale
+  - helper de formateo fecha/hora por locale
+  - toggle visible `ESP / ENG`
+
+Primer slice ya vivo:
+
+- shell autenticado
+- bottom nav
+- `home`
+- `matches`
+- flujo principal de predicción
+
+Pendiente natural:
+
+- extender el mismo patrón a:
+  - `rankings`
+  - `profile`
+  - `tournament`
+  - pantallas públicas / login
 
 ## Iteración UX/UI cerrada sobre Web
 
@@ -171,6 +215,16 @@ Avance adicional de `Epic 1`:
   - score selector más protagonista
 - `Landing` y `Login` ya quedaron alineadas al nuevo tono visual
 - `Profile`, `Rules`, `Terms` y `Privacy` ya no muestran copy técnico / placeholder de implementación
+
+Actualización nueva sobre esta capa:
+
+- `Home` fue reforzada aún más con piezas reusables:
+  - `NextMatchHero`
+  - `ProgressCompact`
+- `Matches` quedó alineada con esa misma gramática visual
+- `Posiciones` ya fue reencuadrada como competencia social cerrada, sin tono técnico
+- `Perfil` ya quedó single-column mobile-first
+- `Tu Mundial` ya comunica mejor estados de grupo y clasificados proyectados
 
 ## Comportamientos UX nuevos ya vivos
 
@@ -231,6 +285,45 @@ Avance adicional de `Epic 1`:
 - `corepack pnpm --filter @prode/api test`
 
 Todas OK al cierre de la iteración UX/UI + ventana de predicción.
+
+Actualización reciente adicional:
+
+- `corepack pnpm --filter @prode/web typecheck`
+- `corepack pnpm --filter @prode/web test`
+
+También OK luego de:
+
+- adopción de `Local Kanban`
+- nueva iteración UX/UI
+- primer slice bilingüe `ESP / ENG`
+
+## Estado actual del Kanban local
+
+Dentro de `EPI-UX-001` quedaron en `done`:
+
+- `STO-UX-001`
+- `STO-UX-002`
+- `STO-UX-003`
+- `STO-UX-004`
+- `STO-UX-005`
+- `STO-UX-006`
+- `STO-UX-007`
+- `STO-UX-008`
+- `STO-UX-010`
+
+Pendiente principal:
+
+- `STO-UX-009`
+  - historia puente para separar lo que es puro polish UI de lo que ya debe entrar como desarrollo real de `Epic 4`
+
+## Próximo foco recomendado
+
+Orden sugerido de continuidad:
+
+1. definir si se hace una segunda fase de i18n
+2. tomar `STO-UX-009`
+3. preparar la migración de `Epic 4+` al esquema `Local Kanban`
+4. abrir ejecución de `Epic 4`
 
 ## Estado funcional real al cierre actual
 
