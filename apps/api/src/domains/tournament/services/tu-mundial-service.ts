@@ -1,4 +1,4 @@
-import type { PredictedGroupStandingRow, TournamentMode, TuMundialGroupCard, TuMundialResponse } from "@prode/shared";
+import { resolveTeamIdentity, type PredictedGroupStandingRow, type TournamentMode, type TuMundialGroupCard, type TuMundialResponse } from "@prode/shared";
 import { matchesRepository } from "../../matches/repositories/matches-repository";
 import { predictionsRepository } from "../../matches/repositories/predictions-repository";
 import { teamsRepository } from "../../matches/repositories/teams-repository";
@@ -9,6 +9,10 @@ import { preTournamentSummaryService } from "./pre-tournament-summary-service";
 type GroupTableAccumulator = {
   teamId: string;
   teamName: string;
+  fifaCode: string | null;
+  iso2: string | null;
+  iso3: string | null;
+  flagAsset: string | null;
   flagUrl: string | null;
   played: number;
   won: number;
@@ -37,10 +41,16 @@ function compareGroupRows(left: GroupTableAccumulator, right: GroupTableAccumula
 }
 
 function buildGroupAccumulator(team: StoredTeam | undefined, teamId: string): GroupTableAccumulator {
+  const identity = resolveTeamIdentity(team?.fifaCode ?? teamId, team?.flagUrl);
+
   return {
     teamId,
     teamName: team?.name ?? teamId,
-    flagUrl: team?.flagUrl ?? null,
+    fifaCode: identity.fifaCode,
+    iso2: identity.iso2,
+    iso3: identity.iso3,
+    flagAsset: identity.flagAsset,
+    flagUrl: identity.flagUrl,
     played: 0,
     won: 0,
     drawn: 0,

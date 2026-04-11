@@ -2,6 +2,7 @@ export * from "./constants/app";
 export * from "./constants/leagues";
 export * from "./constants/matches";
 export * from "./constants/routes";
+export * from "./constants/team-identity";
 export * from "./contracts/bootstrap";
 export * from "./contracts/leagues";
 export * from "./contracts/matches";

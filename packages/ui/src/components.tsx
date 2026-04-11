@@ -44,8 +44,13 @@ export type AdSlotCardProps = {
 };
 
 export type TeamFlagProps = {
+  fifaCode?: string | null;
   flagUrl?: string | null;
-  teamName: string;
+  flagAsset?: string | null;
+  iso2?: string | null;
+  iso3?: string | null;
+  name?: string;
+  teamName?: string;
   size?: "sm" | "md" | "lg";
 };
 
@@ -56,8 +61,13 @@ export type TeamIdentityRowProps = TeamFlagProps & {
 };
 
 export type TeamDisplayProps = {
+  fifaCode?: string | null;
   flagUrl?: string | null;
-  teamName: string;
+  flagAsset?: string | null;
+  iso2?: string | null;
+  iso3?: string | null;
+  name?: string;
+  teamName?: string;
   align?: "start" | "center";
   size?: "sm" | "md" | "lg";
   weight?: 500 | 600 | 700;
@@ -130,29 +140,29 @@ function surfaceInsetStyle(): CSSProperties {
   return {
     display: "grid",
     gap: spacing[12],
-    padding: spacing[16],
-    borderRadius: radii.lg,
-    background: "rgba(255, 255, 255, 0.04)",
-    border: `1px solid ${colors.border}`
+    padding: spacing[14],
+    borderRadius: radii.md,
+    background: `linear-gradient(180deg, ${colors.bgInset} 0%, rgba(255, 255, 255, 0.02) 100%)`,
+    border: `1px solid ${colors.borderSubtle}`
   };
 }
 
 const buttonToneStyles: Record<ButtonVariant, CSSProperties> = {
   primary: {
-    background: colors.primary500,
+    background: `linear-gradient(180deg, ${colors.primary400} 0%, ${colors.primary500} 52%, ${colors.primary600} 100%)`,
     color: colors.textPrimary,
-    border: "none",
-    boxShadow: "0 10px 24px rgba(47, 107, 255, 0.24)"
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    boxShadow: "0 14px 28px rgba(47, 107, 255, 0.24)"
   },
   secondary: {
-    background: colors.bgMuted,
+    background: `linear-gradient(180deg, ${colors.bgInteractive} 0%, ${colors.bgSurface} 100%)`,
     color: colors.textPrimary,
-    border: `1px solid ${colors.borderStrong}`
+    border: `1px solid ${colors.border}`
   },
   ghost: {
-    background: "rgba(255, 255, 255, 0.02)",
+    background: colors.bgInset,
     color: colors.textSecondary,
-    border: `1px solid ${colors.border}`
+    border: `1px solid ${colors.borderSubtle}`
   }
 };
 
@@ -182,9 +192,10 @@ const statusToneStyles: Record<StatusTone, CSSProperties> = {
 const cardBaseStyle: CSSProperties = {
   ...surfaceStyle,
   display: "grid",
-  gap: spacing[16],
-  padding: spacing[20],
-  backdropFilter: "blur(14px)"
+  gap: spacing[14],
+  padding: spacing[18],
+  boxShadow: shadows.soft,
+  backdropFilter: "blur(16px)"
 };
 
 const eyebrowStyle: CSSProperties = {
@@ -192,6 +203,41 @@ const eyebrowStyle: CSSProperties = {
   color: colors.textMuted,
   textTransform: "uppercase"
 };
+
+const missingFlagWarnings = new Set<string>();
+
+export type SectionHeaderProps = {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  action?: ReactNode;
+  align?: "start" | "center";
+};
+
+function resolveTeamName(team: Pick<TeamDisplayProps, "name" | "teamName">) {
+  return team.teamName ?? team.name ?? "Seleccion";
+}
+
+function resolveTeamFlagSrc(team: Pick<TeamDisplayProps, "flagAsset" | "flagUrl">) {
+  return team.flagAsset ?? team.flagUrl ?? null;
+}
+
+function warnMissingFlag(teamName: string, fifaCode?: string | null) {
+  const runtime = globalThis as { process?: { env?: { NODE_ENV?: string } } };
+
+  if (runtime.process?.env?.NODE_ENV === "production") {
+    return;
+  }
+
+  const key = `${fifaCode ?? "unknown"}:${teamName}`;
+
+  if (missingFlagWarnings.has(key)) {
+    return;
+  }
+
+  missingFlagWarnings.add(key);
+  console.warn(`[ui] Missing flag asset for ${teamName}${fifaCode ? ` (${fifaCode})` : ""}.`);
+}
 
 function getFlagFallback(teamName: string) {
   return teamName
@@ -207,20 +253,23 @@ function getTeamStyles(size: TeamDisplayProps["size"] = "md") {
   if (size === "lg") {
     return {
       flagSize: 34,
-      fontSize: 18
+      fontSize: 18,
+      codeSize: 11
     };
   }
 
   if (size === "sm") {
     return {
       flagSize: 22,
-      fontSize: 14
+      fontSize: 14,
+      codeSize: 10
     };
   }
 
   return {
     flagSize: 28,
-    fontSize: 16
+    fontSize: 16,
+    codeSize: 10
   };
 }
 
@@ -257,15 +306,15 @@ function renderScoreInput(
     <div
       style={{
         width: "100%",
-        minHeight: 156,
+        minHeight: 152,
         borderRadius: radii.lg,
-        border: `1px solid ${colors.border}`,
-        background: "linear-gradient(180deg, rgba(8, 18, 33, 0.98) 0%, rgba(14, 26, 43, 0.98) 100%)",
+        border: `1px solid ${colors.borderSubtle}`,
+        background: `linear-gradient(180deg, ${colors.bgCanvas} 0%, ${colors.bgSurface} 100%)`,
         color: colors.textPrimary,
         display: "grid",
         justifyItems: "center",
-        gap: spacing[12],
-        padding: `${spacing[16]}px ${spacing[12]}px`
+        gap: spacing[10],
+        padding: `${spacing[14]}px ${spacing[12]}px`
       }}
     >
       <span style={{ ...typography.small, color: colors.textMuted, textAlign: "center" }}>{label}</span>
@@ -275,13 +324,13 @@ function renderScoreInput(
         aria-label={`Subir marcador de ${label}`}
         onClick={() => onChange?.(stepScoreValue(safeValue, 1))}
         style={{
-          width: 52,
-          height: 40,
+          width: 48,
+          height: 38,
           borderRadius: radii.md,
-          border: `1px solid ${colors.borderStrong}`,
-          background: "rgba(255, 255, 255, 0.04)",
+          border: `1px solid ${colors.border}`,
+          background: colors.bgInset,
           color: colors.textPrimary,
-          fontSize: 24,
+          fontSize: 22,
           fontWeight: 700,
           cursor: disabled ? "not-allowed" : "pointer",
           opacity: disabled ? 0.7 : 1
@@ -292,15 +341,15 @@ function renderScoreInput(
       <div
         aria-live="polite"
         style={{
-          width: 88,
-          height: 88,
-          borderRadius: 22,
-          border: `1px solid ${colors.borderStrong}`,
-          background: colors.bgMuted,
+          width: 84,
+          height: 84,
+          borderRadius: 20,
+          border: `1px solid ${colors.border}`,
+          background: `linear-gradient(180deg, ${colors.bgInteractive} 0%, ${colors.bgMuted} 100%)`,
           display: "grid",
           placeItems: "center",
-          fontSize: 42,
-          fontWeight: 700,
+          fontSize: 40,
+          fontWeight: 800,
           lineHeight: 1
         }}
       >
@@ -312,13 +361,13 @@ function renderScoreInput(
         aria-label={`Bajar marcador de ${label}`}
         onClick={() => onChange?.(stepScoreValue(safeValue, -1))}
         style={{
-          width: 52,
-          height: 40,
+          width: 48,
+          height: 38,
           borderRadius: radii.md,
-          border: `1px solid ${colors.borderStrong}`,
-          background: "rgba(255, 255, 255, 0.04)",
+          border: `1px solid ${colors.border}`,
+          background: colors.bgInset,
           color: colors.textPrimary,
-          fontSize: 24,
+          fontSize: 22,
           fontWeight: 700,
           cursor: disabled ? "not-allowed" : "pointer",
           opacity: disabled ? 0.7 : 1
@@ -340,13 +389,36 @@ export function Card<T extends ElementType = "div">({ as, children, elevated = f
         ...cardBaseStyle,
         boxShadow: elevated ? shadows.card : undefined,
         background: elevated
-          ? "linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(14, 26, 43, 0.98) 100%)"
+          ? `linear-gradient(180deg, ${colors.bgElevated} 0%, ${colors.bgSurface} 100%)`
           : surfaceStyle.background,
         ...style
       }}
     >
       {children}
     </Component>
+  );
+}
+
+export function SectionHeader({ action, align = "start", description, eyebrow, title }: SectionHeaderProps) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: align === "center" ? "center" : "flex-end",
+        gap: spacing[12],
+        flexWrap: "wrap"
+      }}
+    >
+      <div style={{ display: "grid", gap: spacing[8], textAlign: align }}>
+        {eyebrow ? <span style={eyebrowStyle}>{eyebrow}</span> : null}
+        <div style={{ display: "grid", gap: 6 }}>
+          <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>{title}</h2>
+          {description ? <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{description}</p> : null}
+        </div>
+      </div>
+      {action ? <div>{action}</div> : null}
+    </div>
   );
 }
 
@@ -366,15 +438,17 @@ export function Button({
       {...props}
       disabled={isDisabled}
       style={{
-        minHeight: 52,
-        padding: "0 18px",
-        borderRadius: 16,
+        minHeight: 48,
+        padding: "0 16px",
+        borderRadius: radii.lg,
         cursor: isDisabled ? "not-allowed" : "pointer",
         fontSize: typography.body.fontSize,
-        fontWeight: 600,
+        lineHeight: 1,
+        fontWeight: 700,
+        letterSpacing: "-0.01em",
         width: fullWidth ? "100%" : undefined,
         opacity: isDisabled ? 0.6 : 1,
-        transition: "transform 140ms ease, opacity 140ms ease, background 140ms ease, border-color 140ms ease",
+        transition: "transform 140ms ease, opacity 140ms ease, background 140ms ease, border-color 140ms ease, box-shadow 140ms ease",
         ...buttonToneStyles[variant],
         ...style
       }}
@@ -393,11 +467,11 @@ export function StatusTag({ status, label }: StatusTagProps) {
         alignItems: "center",
         justifyContent: "center",
         width: "fit-content",
-        minHeight: 28,
-        padding: "0 10px",
+        minHeight: 26,
+        padding: "0 11px",
         borderRadius: radii.pill,
         fontWeight: 700,
-        letterSpacing: "0.04em",
+        letterSpacing: "0.06em",
         ...statusToneStyles[status]
       }}
     >
@@ -406,23 +480,29 @@ export function StatusTag({ status, label }: StatusTagProps) {
   );
 }
 
-export function TeamFlag({ flagUrl, teamName, size = "md" }: TeamFlagProps) {
-  const fallback = getFlagFallback(teamName);
+export function TeamFlag({ fifaCode, flagAsset, flagUrl, name, teamName, size = "md" }: TeamFlagProps) {
+  const resolvedTeamName = resolveTeamName({ name, teamName });
+  const fallback = getFlagFallback(resolvedTeamName);
   const teamStyles = getTeamStyles(size);
+  const flagSrc = resolveTeamFlagSrc({ flagAsset: flagAsset ?? null, flagUrl: flagUrl ?? null });
+
+  if (!flagSrc) {
+    warnMissingFlag(resolvedTeamName, fifaCode);
+  }
 
   return (
     <>
-      {flagUrl ? (
+      {flagSrc ? (
         <img
-          src={flagUrl}
+          src={flagSrc}
           alt=""
           width={teamStyles.flagSize}
           height={teamStyles.flagSize}
           style={{
             borderRadius: radii.pill,
             objectFit: "cover",
-            border: `1px solid ${colors.borderStrong}`,
-            boxShadow: "0 6px 16px rgba(2, 8, 18, 0.22)"
+            border: `1px solid ${colors.border}`,
+            boxShadow: "0 8px 18px rgba(2, 8, 18, 0.2)"
           }}
         />
       ) : (
@@ -435,9 +515,9 @@ export function TeamFlag({ flagUrl, teamName, size = "md" }: TeamFlagProps) {
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "linear-gradient(180deg, rgba(47, 107, 255, 0.22) 0%, rgba(16, 29, 49, 1) 100%)",
+            background: `linear-gradient(180deg, ${colors.primarySurface} 0%, ${colors.bgElevated} 100%)`,
             color: colors.textPrimary,
-            border: `1px solid ${colors.borderStrong}`,
+            border: `1px solid ${colors.border}`,
             fontSize: 10,
             fontWeight: 700
           }}
@@ -452,12 +532,16 @@ export function TeamFlag({ flagUrl, teamName, size = "md" }: TeamFlagProps) {
 export function TeamIdentityRow({
   align = "start",
   code,
+  fifaCode,
+  flagAsset,
   flagUrl,
+  name,
   teamName,
   size = "md",
   weight = 600
 }: TeamIdentityRowProps) {
   const teamStyles = getTeamStyles(size);
+  const resolvedTeamName = resolveTeamName({ name, teamName });
 
   return (
     <div
@@ -468,10 +552,10 @@ export function TeamIdentityRow({
         gap: 10
       }}
     >
-      <TeamFlag flagUrl={flagUrl} teamName={teamName} size={size} />
+      <TeamFlag fifaCode={fifaCode} flagAsset={flagAsset} flagUrl={flagUrl} name={name} teamName={teamName} size={size} />
       <div style={{ display: "grid", gap: 2 }}>
-        <span style={{ fontSize: teamStyles.fontSize, lineHeight: 1.2, color: colors.textPrimary, fontWeight: weight }}>{teamName}</span>
-        {code ? <span style={{ ...typography.small, color: colors.textMuted }}>{code}</span> : null}
+        <span style={{ fontSize: teamStyles.fontSize, lineHeight: 1.2, color: colors.textPrimary, fontWeight: weight }}>{resolvedTeamName}</span>
+        {code ? <span style={{ ...typography.small, color: colors.textFaint, fontSize: teamStyles.codeSize }}>{code}</span> : null}
       </div>
     </div>
   );
@@ -503,15 +587,15 @@ export function NextMatchHero({
         padding: spacing[16],
         background:
           status === "locked"
-            ? "radial-gradient(circle at top right, rgba(231, 198, 106, 0.12), transparent 28%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
-            : "radial-gradient(circle at top right, rgba(47, 107, 255, 0.16), transparent 28%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
+            ? `radial-gradient(circle at top right, rgba(231, 198, 106, 0.12), transparent 28%), linear-gradient(180deg, ${colors.bgElevated} 0%, ${colors.bgCanvas} 100%)`
+            : `radial-gradient(circle at top right, rgba(47, 107, 255, 0.16), transparent 28%), linear-gradient(180deg, ${colors.bgElevated} 0%, ${colors.bgCanvas} 100%)`
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "flex-start", flexWrap: "wrap" }}>
         <div style={{ display: "grid", gap: 4 }}>
           <span style={{ ...typography.small, color: status === "locked" ? colors.gold500 : colors.primary500 }}>{eyebrow}</span>
           <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>{title}</h2>
-          <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textSecondary }}>{metaLabel}</span>
+          <span style={{ ...typography.body, color: colors.textSecondary }}>{metaLabel}</span>
         </div>
         <StatusTag status={status} label={statusLabel} />
       </div>
@@ -524,7 +608,7 @@ export function NextMatchHero({
 
       {helperText ? (
         <div style={surfaceInsetStyle()}>
-          <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>{helperText}</span>
+          <span style={{ ...typography.body, color: colors.textPrimary, fontWeight: 600 }}>{helperText}</span>
         </div>
       ) : null}
 
@@ -544,11 +628,11 @@ export function NextMatchHero({
 
 export function ProgressCompact({ items }: ProgressCompactProps) {
   return (
-    <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
+    <div style={{ display: "grid", gap: spacing[10], gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
       {items.map((item) => (
-        <div key={item.label} style={{ ...surfaceInsetStyle(), gap: 6, padding: 14 }}>
+        <div key={item.label} style={{ ...surfaceInsetStyle(), gap: 6, padding: spacing[14] }}>
           <span style={{ ...typography.small, color: colors.textMuted }}>{item.label}</span>
-          <strong style={{ fontSize: 22, lineHeight: 1, color: colors.textPrimary }}>{item.value}</strong>
+          <strong style={{ fontSize: 24, lineHeight: 1, color: colors.textPrimary }}>{item.value}</strong>
           <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>{item.hint}</span>
         </div>
       ))}
@@ -562,11 +646,11 @@ export function AdSlotCard({ description, title = "Publicidad" }: AdSlotCardProp
       style={{
         gap: spacing[8],
         padding: spacing[16],
-        background: "linear-gradient(180deg, rgba(18, 36, 60, 0.9) 0%, rgba(12, 25, 41, 0.9) 100%)"
+        background: `linear-gradient(180deg, ${colors.bgInteractive} 0%, ${colors.bgSurface} 100%)`
       }}
     >
       <span style={{ ...typography.small, color: colors.textMuted }}>{title}</span>
-      <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>{description}</p>
+      <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{description}</p>
     </Card>
   );
 }
@@ -584,7 +668,7 @@ export function MatchCard({
   statusLabel
 }: MatchCardProps) {
   return (
-    <Card elevated style={{ gap: spacing[12], padding: spacing[12] }}>
+    <Card elevated style={{ gap: spacing[12], padding: spacing[14] }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
         <div style={{ display: "grid", gap: 6 }}>
           <span style={eyebrowStyle}>{stageLabel}</span>
@@ -601,14 +685,14 @@ export function MatchCard({
       <div
         style={{
           display: "grid",
-          gap: 10,
-          padding: 14,
+          gap: spacing[8],
+          padding: spacing[14],
           borderRadius: radii.md,
-          background: "rgba(255, 255, 255, 0.03)",
-          border: `1px solid ${colors.border}`
+          background: colors.bgInset,
+          border: `1px solid ${colors.borderSubtle}`
         }}
       >
-        <p style={{ margin: 0, fontSize: 15, lineHeight: 1.45, color: colors.textPrimary, fontWeight: 600 }}>
+        <p style={{ ...typography.body, margin: 0, color: colors.textPrimary, fontWeight: 600 }}>
           {predictionSummary ?? "Aun no predijiste este partido"}
         </p>
         {resultSummary ? <p style={{ margin: 0, fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{resultSummary}</p> : null}
@@ -644,14 +728,14 @@ export function ScoreInput({
         <div
           aria-hidden="true"
           style={{
-            width: 40,
-            height: 40,
+            width: 36,
+            height: 36,
             borderRadius: radii.pill,
             display: "grid",
             placeItems: "center",
             color: colors.textMuted,
-            background: "rgba(255, 255, 255, 0.04)",
-            border: `1px solid ${colors.border}`
+            background: colors.bgInset,
+            border: `1px solid ${colors.borderSubtle}`
           }}
         >
           -
@@ -672,14 +756,14 @@ export function ScoreInput({
                   type="button"
                   disabled={disabled}
                   style={{
-                    minHeight: 52,
+                    minHeight: 48,
                     borderRadius: radii.md,
                     border: isActive ? "1px solid rgba(47, 107, 255, 0.4)" : `1px solid ${colors.border}`,
-                    background: isActive ? colors.primarySoft : "rgba(255, 255, 255, 0.03)",
+                    background: isActive ? colors.primarySoft : colors.bgInset,
                     color: colors.textPrimary,
                     textAlign: "left",
                     padding: "0 14px",
-                    fontSize: 15,
+                    fontSize: typography.body.fontSize,
                     fontWeight: 600,
                     cursor: disabled ? "not-allowed" : "pointer",
                     opacity: disabled ? 0.7 : 1
@@ -743,7 +827,7 @@ export function PredictionModal({
           borderTopRightRadius: radii.xl,
           borderBottomLeftRadius: radii.lg,
           borderBottomRightRadius: radii.lg,
-          background: "linear-gradient(180deg, rgba(16, 29, 49, 0.99) 0%, rgba(10, 21, 35, 0.99) 100%)"
+          background: `linear-gradient(180deg, ${colors.bgElevated} 0%, ${colors.bgCanvas} 100%)`
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
@@ -761,8 +845,8 @@ export function PredictionModal({
                 width: 40,
                 height: 40,
                 borderRadius: radii.pill,
-                border: `1px solid ${colors.border}`,
-                background: "rgba(255, 255, 255, 0.03)",
+                border: `1px solid ${colors.borderSubtle}`,
+                background: colors.bgInset,
                 color: colors.textSecondary,
                 cursor: "pointer"
               }}
@@ -778,8 +862,8 @@ export function PredictionModal({
             gap: spacing[12],
             padding: spacing[16],
             borderRadius: radii.lg,
-            background: "linear-gradient(180deg, rgba(7, 17, 31, 1) 0%, rgba(13, 25, 43, 1) 100%)",
-            border: `1px solid ${colors.border}`
+            background: `linear-gradient(180deg, ${colors.bgCanvas} 0%, ${colors.bgSurface} 100%)`,
+            border: `1px solid ${colors.borderSubtle}`
           }}
         >
           <TeamIdentityRow {...homeTeam} align="center" size="lg" weight={700} />
@@ -787,7 +871,7 @@ export function PredictionModal({
           <TeamIdentityRow {...awayTeam} align="center" size="lg" weight={700} />
         </div>
 
-        {helperText ? <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>{helperText}</p> : null}
+        {helperText ? <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{helperText}</p> : null}
 
         {children}
 

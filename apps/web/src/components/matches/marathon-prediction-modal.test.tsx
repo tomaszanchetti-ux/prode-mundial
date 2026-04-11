@@ -2,24 +2,28 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { MatchDetail, MatchSummary } from "@prode/shared";
+import type { MatchDetail, MatchSummary, TeamRef } from "@prode/shared";
 import { MarathonPredictionModalView } from "./marathon-prediction-modal";
+
+function buildTeamRef(teamId: string, name: string): TeamRef {
+  return {
+    teamId,
+    name,
+    fifaCode: teamId,
+    iso2: null,
+    iso3: null,
+    flagAsset: "/flags/mock.svg",
+    flagUrl: null
+  };
+}
 
 function buildMatchSummary(overrides: Partial<MatchSummary> = {}): MatchSummary {
   return {
     matchId: "m_001",
     stage: "group",
     groupId: "A",
-    homeTeam: {
-      teamId: "ARG",
-      name: "Argentina",
-      flagUrl: null
-    },
-    awayTeam: {
-      teamId: "BRA",
-      name: "Brasil",
-      flagUrl: null
-    },
+    homeTeam: buildTeamRef("ARG", "Argentina"),
+    awayTeam: buildTeamRef("BRA", "Brasil"),
     kickoffAt: "2026-06-11T19:00:00Z",
     predictionOpensAt: "2026-06-11T14:00:00.000Z",
     status: "scheduled",
@@ -64,7 +68,11 @@ test("MarathonPredictionModalView renders progress and navigation controls", () 
       helperText: "Guarda y avanzamos automaticamente al siguiente pendiente.",
       isLoading: false,
       isSaving: false,
-      nextSummary: buildMatchSummary({ matchId: "m_002", homeTeam: { teamId: "ESP", name: "España", flagUrl: null }, awayTeam: { teamId: "URU", name: "Uruguay", flagUrl: null } }),
+      nextSummary: buildMatchSummary({
+        matchId: "m_002",
+        homeTeam: buildTeamRef("ESP", "España"),
+        awayTeam: buildTeamRef("URU", "Uruguay")
+      }),
       notice: null,
       onAwayChange: () => undefined,
       onClassifierChange: () => undefined,

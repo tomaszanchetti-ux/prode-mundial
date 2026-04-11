@@ -283,9 +283,23 @@ export function MarathonPredictionModalView({
             border: `1px solid ${colors.border}`
           }}
         >
-          <TeamDisplay teamName={currentSummary.homeTeam.name} flagUrl={currentSummary.homeTeam.flagUrl} size="lg" weight={700} />
+          <TeamDisplay
+            teamName={currentSummary.homeTeam.name}
+            fifaCode={currentSummary.homeTeam.fifaCode}
+            flagAsset={currentSummary.homeTeam.flagAsset}
+            flagUrl={currentSummary.homeTeam.flagUrl}
+            size="lg"
+            weight={700}
+          />
           <span style={{ ...typography.small, color: colors.textMuted, paddingLeft: 46 }}>VS</span>
-          <TeamDisplay teamName={currentSummary.awayTeam.name} flagUrl={currentSummary.awayTeam.flagUrl} size="lg" weight={700} />
+          <TeamDisplay
+            teamName={currentSummary.awayTeam.name}
+            fifaCode={currentSummary.awayTeam.fifaCode}
+            flagAsset={currentSummary.awayTeam.flagAsset}
+            flagUrl={currentSummary.awayTeam.flagUrl}
+            size="lg"
+            weight={700}
+          />
         </div>
 
         {notice ? (

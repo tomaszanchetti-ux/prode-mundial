@@ -15,12 +15,38 @@ export type WorldCup2026Venue = {
 export type WorldCup2026Team = {
   teamId: string;
   fifaCode: string;
+  iso2: string | null;
+  iso3: string | null;
+  flagAsset: string | null;
   name: string;
   shortName: string;
   flagUrl: string | null;
   groupId: string;
   isActive: boolean;
 };
+
+function buildWorldCupTeam(
+  teamId: string,
+  fifaCode: string,
+  name: string,
+  shortName: string,
+  groupId: string
+): WorldCup2026Team {
+  const identity = getTeamIdentityByFifaCode(fifaCode);
+
+  return {
+    teamId,
+    fifaCode,
+    iso2: identity?.iso2 ?? null,
+    iso3: identity?.iso3 ?? null,
+    flagAsset: identity?.flagAsset ?? null,
+    name,
+    shortName,
+    flagUrl: null,
+    groupId,
+    isActive: true
+  };
+}
 
 export type WorldCup2026Group = {
   groupId: string;
@@ -98,54 +124,54 @@ export const WORLD_CUP_2026_VENUES: readonly WorldCup2026Venue[] = [
 ] as const;
 
 export const WORLD_CUP_2026_TEAMS: readonly WorldCup2026Team[] = [
-  { teamId: "MEX", fifaCode: "MEX", name: "Mexico", shortName: "Mexico", flagUrl: null, groupId: "A", isActive: true },
-  { teamId: "RSA", fifaCode: "RSA", name: "South Africa", shortName: "South Africa", flagUrl: null, groupId: "A", isActive: true },
-  { teamId: "KOR", fifaCode: "KOR", name: "Korea Republic", shortName: "Korea", flagUrl: null, groupId: "A", isActive: true },
-  { teamId: "CZE", fifaCode: "CZE", name: "Czechia", shortName: "Czechia", flagUrl: null, groupId: "A", isActive: true },
-  { teamId: "CAN", fifaCode: "CAN", name: "Canada", shortName: "Canada", flagUrl: null, groupId: "B", isActive: true },
-  { teamId: "BIH", fifaCode: "BIH", name: "Bosnia and Herzegovina", shortName: "Bosnia", flagUrl: null, groupId: "B", isActive: true },
-  { teamId: "QAT", fifaCode: "QAT", name: "Qatar", shortName: "Qatar", flagUrl: null, groupId: "B", isActive: true },
-  { teamId: "SUI", fifaCode: "SUI", name: "Switzerland", shortName: "Switzerland", flagUrl: null, groupId: "B", isActive: true },
-  { teamId: "BRA", fifaCode: "BRA", name: "Brazil", shortName: "Brazil", flagUrl: null, groupId: "C", isActive: true },
-  { teamId: "MAR", fifaCode: "MAR", name: "Morocco", shortName: "Morocco", flagUrl: null, groupId: "C", isActive: true },
-  { teamId: "HAI", fifaCode: "HAI", name: "Haiti", shortName: "Haiti", flagUrl: null, groupId: "C", isActive: true },
-  { teamId: "SCO", fifaCode: "SCO", name: "Scotland", shortName: "Scotland", flagUrl: null, groupId: "C", isActive: true },
-  { teamId: "USA", fifaCode: "USA", name: "United States", shortName: "USA", flagUrl: null, groupId: "D", isActive: true },
-  { teamId: "PAR", fifaCode: "PAR", name: "Paraguay", shortName: "Paraguay", flagUrl: null, groupId: "D", isActive: true },
-  { teamId: "AUS", fifaCode: "AUS", name: "Australia", shortName: "Australia", flagUrl: null, groupId: "D", isActive: true },
-  { teamId: "TUR", fifaCode: "TUR", name: "Turkey", shortName: "Turkey", flagUrl: null, groupId: "D", isActive: true },
-  { teamId: "GER", fifaCode: "GER", name: "Germany", shortName: "Germany", flagUrl: null, groupId: "E", isActive: true },
-  { teamId: "CUW", fifaCode: "CUW", name: "Curacao", shortName: "Curacao", flagUrl: null, groupId: "E", isActive: true },
-  { teamId: "CIV", fifaCode: "CIV", name: "Cote d'Ivoire", shortName: "Cote d'Ivoire", flagUrl: null, groupId: "E", isActive: true },
-  { teamId: "ECU", fifaCode: "ECU", name: "Ecuador", shortName: "Ecuador", flagUrl: null, groupId: "E", isActive: true },
-  { teamId: "NED", fifaCode: "NED", name: "Netherlands", shortName: "Netherlands", flagUrl: null, groupId: "F", isActive: true },
-  { teamId: "JPN", fifaCode: "JPN", name: "Japan", shortName: "Japan", flagUrl: null, groupId: "F", isActive: true },
-  { teamId: "SWE", fifaCode: "SWE", name: "Sweden", shortName: "Sweden", flagUrl: null, groupId: "F", isActive: true },
-  { teamId: "TUN", fifaCode: "TUN", name: "Tunisia", shortName: "Tunisia", flagUrl: null, groupId: "F", isActive: true },
-  { teamId: "BEL", fifaCode: "BEL", name: "Belgium", shortName: "Belgium", flagUrl: null, groupId: "G", isActive: true },
-  { teamId: "EGY", fifaCode: "EGY", name: "Egypt", shortName: "Egypt", flagUrl: null, groupId: "G", isActive: true },
-  { teamId: "IRN", fifaCode: "IRN", name: "IR Iran", shortName: "Iran", flagUrl: null, groupId: "G", isActive: true },
-  { teamId: "NZL", fifaCode: "NZL", name: "New Zealand", shortName: "New Zealand", flagUrl: null, groupId: "G", isActive: true },
-  { teamId: "ESP", fifaCode: "ESP", name: "Spain", shortName: "Spain", flagUrl: null, groupId: "H", isActive: true },
-  { teamId: "CPV", fifaCode: "CPV", name: "Cape Verde", shortName: "Cape Verde", flagUrl: null, groupId: "H", isActive: true },
-  { teamId: "KSA", fifaCode: "KSA", name: "Saudi Arabia", shortName: "Saudi Arabia", flagUrl: null, groupId: "H", isActive: true },
-  { teamId: "URU", fifaCode: "URU", name: "Uruguay", shortName: "Uruguay", flagUrl: null, groupId: "H", isActive: true },
-  { teamId: "FRA", fifaCode: "FRA", name: "France", shortName: "France", flagUrl: null, groupId: "I", isActive: true },
-  { teamId: "SEN", fifaCode: "SEN", name: "Senegal", shortName: "Senegal", flagUrl: null, groupId: "I", isActive: true },
-  { teamId: "IRQ", fifaCode: "IRQ", name: "Iraq", shortName: "Iraq", flagUrl: null, groupId: "I", isActive: true },
-  { teamId: "NOR", fifaCode: "NOR", name: "Norway", shortName: "Norway", flagUrl: null, groupId: "I", isActive: true },
-  { teamId: "ARG", fifaCode: "ARG", name: "Argentina", shortName: "Argentina", flagUrl: null, groupId: "J", isActive: true },
-  { teamId: "ALG", fifaCode: "ALG", name: "Algeria", shortName: "Algeria", flagUrl: null, groupId: "J", isActive: true },
-  { teamId: "AUT", fifaCode: "AUT", name: "Austria", shortName: "Austria", flagUrl: null, groupId: "J", isActive: true },
-  { teamId: "JOR", fifaCode: "JOR", name: "Jordan", shortName: "Jordan", flagUrl: null, groupId: "J", isActive: true },
-  { teamId: "POR", fifaCode: "POR", name: "Portugal", shortName: "Portugal", flagUrl: null, groupId: "K", isActive: true },
-  { teamId: "COD", fifaCode: "COD", name: "DR Congo", shortName: "DR Congo", flagUrl: null, groupId: "K", isActive: true },
-  { teamId: "UZB", fifaCode: "UZB", name: "Uzbekistan", shortName: "Uzbekistan", flagUrl: null, groupId: "K", isActive: true },
-  { teamId: "COL", fifaCode: "COL", name: "Colombia", shortName: "Colombia", flagUrl: null, groupId: "K", isActive: true },
-  { teamId: "ENG", fifaCode: "ENG", name: "England", shortName: "England", flagUrl: null, groupId: "L", isActive: true },
-  { teamId: "CRO", fifaCode: "CRO", name: "Croatia", shortName: "Croatia", flagUrl: null, groupId: "L", isActive: true },
-  { teamId: "GHA", fifaCode: "GHA", name: "Ghana", shortName: "Ghana", flagUrl: null, groupId: "L", isActive: true },
-  { teamId: "PAN", fifaCode: "PAN", name: "Panama", shortName: "Panama", flagUrl: null, groupId: "L", isActive: true }
+  buildWorldCupTeam("MEX", "MEX", "Mexico", "Mexico", "A"),
+  buildWorldCupTeam("RSA", "RSA", "South Africa", "South Africa", "A"),
+  buildWorldCupTeam("KOR", "KOR", "Korea Republic", "Korea", "A"),
+  buildWorldCupTeam("CZE", "CZE", "Czechia", "Czechia", "A"),
+  buildWorldCupTeam("CAN", "CAN", "Canada", "Canada", "B"),
+  buildWorldCupTeam("BIH", "BIH", "Bosnia and Herzegovina", "Bosnia", "B"),
+  buildWorldCupTeam("QAT", "QAT", "Qatar", "Qatar", "B"),
+  buildWorldCupTeam("SUI", "SUI", "Switzerland", "Switzerland", "B"),
+  buildWorldCupTeam("BRA", "BRA", "Brazil", "Brazil", "C"),
+  buildWorldCupTeam("MAR", "MAR", "Morocco", "Morocco", "C"),
+  buildWorldCupTeam("HAI", "HAI", "Haiti", "Haiti", "C"),
+  buildWorldCupTeam("SCO", "SCO", "Scotland", "Scotland", "C"),
+  buildWorldCupTeam("USA", "USA", "United States", "USA", "D"),
+  buildWorldCupTeam("PAR", "PAR", "Paraguay", "Paraguay", "D"),
+  buildWorldCupTeam("AUS", "AUS", "Australia", "Australia", "D"),
+  buildWorldCupTeam("TUR", "TUR", "Turkey", "Turkey", "D"),
+  buildWorldCupTeam("GER", "GER", "Germany", "Germany", "E"),
+  buildWorldCupTeam("CUW", "CUW", "Curacao", "Curacao", "E"),
+  buildWorldCupTeam("CIV", "CIV", "Cote d'Ivoire", "Cote d'Ivoire", "E"),
+  buildWorldCupTeam("ECU", "ECU", "Ecuador", "Ecuador", "E"),
+  buildWorldCupTeam("NED", "NED", "Netherlands", "Netherlands", "F"),
+  buildWorldCupTeam("JPN", "JPN", "Japan", "Japan", "F"),
+  buildWorldCupTeam("SWE", "SWE", "Sweden", "Sweden", "F"),
+  buildWorldCupTeam("TUN", "TUN", "Tunisia", "Tunisia", "F"),
+  buildWorldCupTeam("BEL", "BEL", "Belgium", "Belgium", "G"),
+  buildWorldCupTeam("EGY", "EGY", "Egypt", "Egypt", "G"),
+  buildWorldCupTeam("IRN", "IRN", "IR Iran", "Iran", "G"),
+  buildWorldCupTeam("NZL", "NZL", "New Zealand", "New Zealand", "G"),
+  buildWorldCupTeam("ESP", "ESP", "Spain", "Spain", "H"),
+  buildWorldCupTeam("CPV", "CPV", "Cape Verde", "Cape Verde", "H"),
+  buildWorldCupTeam("KSA", "KSA", "Saudi Arabia", "Saudi Arabia", "H"),
+  buildWorldCupTeam("URU", "URU", "Uruguay", "Uruguay", "H"),
+  buildWorldCupTeam("FRA", "FRA", "France", "France", "I"),
+  buildWorldCupTeam("SEN", "SEN", "Senegal", "Senegal", "I"),
+  buildWorldCupTeam("IRQ", "IRQ", "Iraq", "Iraq", "I"),
+  buildWorldCupTeam("NOR", "NOR", "Norway", "Norway", "I"),
+  buildWorldCupTeam("ARG", "ARG", "Argentina", "Argentina", "J"),
+  buildWorldCupTeam("ALG", "ALG", "Algeria", "Algeria", "J"),
+  buildWorldCupTeam("AUT", "AUT", "Austria", "Austria", "J"),
+  buildWorldCupTeam("JOR", "JOR", "Jordan", "Jordan", "J"),
+  buildWorldCupTeam("POR", "POR", "Portugal", "Portugal", "K"),
+  buildWorldCupTeam("COD", "COD", "DR Congo", "DR Congo", "K"),
+  buildWorldCupTeam("UZB", "UZB", "Uzbekistan", "Uzbekistan", "K"),
+  buildWorldCupTeam("COL", "COL", "Colombia", "Colombia", "K"),
+  buildWorldCupTeam("ENG", "ENG", "England", "England", "L"),
+  buildWorldCupTeam("CRO", "CRO", "Croatia", "Croatia", "L"),
+  buildWorldCupTeam("GHA", "GHA", "Ghana", "Ghana", "L"),
+  buildWorldCupTeam("PAN", "PAN", "Panama", "Panama", "L")
 ] as const;
 
 export const WORLD_CUP_2026_GROUPS: readonly WorldCup2026Group[] = [
@@ -162,3 +188,4 @@ export const WORLD_CUP_2026_GROUPS: readonly WorldCup2026Group[] = [
   { groupId: "K", name: "K", teamIds: ["POR", "COD", "UZB", "COL"], isClosed: false },
   { groupId: "L", name: "L", teamIds: ["ENG", "CRO", "GHA", "PAN"], isClosed: false }
 ] as const;
+import { getTeamIdentityByFifaCode } from "@prode/shared";

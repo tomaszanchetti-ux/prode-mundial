@@ -10,11 +10,18 @@ export type MatchListFilter = (typeof MATCH_LIST_FILTERS)[number];
 
 export type MatchPredictionErrorCode = (typeof MATCH_PREDICTION_ERROR_CODES)[number];
 
+export type TeamIdentity = {
+  fifaCode: string | null;
+  iso2: string | null;
+  iso3: string | null;
+  flagAsset: string | null;
+  flagUrl: string | null;
+};
+
 export type TeamRef = {
   teamId: string;
   name: string;
-  flagUrl: string | null;
-};
+} & TeamIdentity;
 
 export type UserPredictionSummary = string | null;
 

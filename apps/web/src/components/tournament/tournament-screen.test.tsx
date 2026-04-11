@@ -2,8 +2,30 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { PreTournamentSummary, TuMundialGroupCard } from "@prode/shared";
+import type { PreTournamentSummary, PredictedGroupStandingRow, TuMundialGroupCard } from "@prode/shared";
 import { TournamentScreenView } from "./tournament-screen";
+
+function buildProjectedRow(teamId: string, teamName: string, points: number, position: number): PredictedGroupStandingRow {
+  return {
+    teamId,
+    teamName,
+    fifaCode: teamId,
+    iso2: null,
+    iso3: null,
+    flagAsset: "/flags/mock.svg",
+    flagUrl: null,
+    played: 2,
+    won: position === 1 ? 2 : 1,
+    drawn: 0,
+    lost: position === 1 ? 0 : 1,
+    goalsFor: position === 1 ? 4 : 2,
+    goalsAgainst: position === 1 ? 1 : 3,
+    goalDifference: position === 1 ? 3 : -1,
+    points,
+    position,
+    isProjectedQualified: true
+  };
+}
 
 function buildPreTournamentSummary(overrides: Partial<PreTournamentSummary> = {}): PreTournamentSummary {
   return {
@@ -25,36 +47,8 @@ function buildGroup(overrides: Partial<TuMundialGroupCard> = {}): TuMundialGroup
     totalMatches: 6,
     isComplete: false,
     items: [
-      {
-        teamId: "MEX",
-        teamName: "Mexico",
-        flagUrl: null,
-        played: 2,
-        won: 2,
-        drawn: 0,
-        lost: 0,
-        goalsFor: 4,
-        goalsAgainst: 1,
-        goalDifference: 3,
-        points: 6,
-        position: 1,
-        isProjectedQualified: true
-      },
-      {
-        teamId: "RSA",
-        teamName: "South Africa",
-        flagUrl: null,
-        played: 2,
-        won: 1,
-        drawn: 0,
-        lost: 1,
-        goalsFor: 2,
-        goalsAgainst: 3,
-        goalDifference: -1,
-        points: 3,
-        position: 2,
-        isProjectedQualified: true
-      }
+      buildProjectedRow("MEX", "Mexico", 6, 1),
+      buildProjectedRow("RSA", "South Africa", 3, 2)
     ],
     ...overrides
   };

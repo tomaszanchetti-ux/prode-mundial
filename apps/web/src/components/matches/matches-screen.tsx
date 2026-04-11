@@ -253,7 +253,12 @@ export function MatchesScreenView({
 
         {quickMatch ? (
           <NextMatchHero
-            awayTeam={{ teamName: quickMatch.awayTeam.name, flagUrl: quickMatch.awayTeam.flagUrl }}
+            awayTeam={{
+              teamName: quickMatch.awayTeam.name,
+              fifaCode: quickMatch.awayTeam.fifaCode,
+              flagAsset: quickMatch.awayTeam.flagAsset,
+              flagUrl: quickMatch.awayTeam.flagUrl
+            }}
             ctaLabel={quickMatch.userPredictionSummary ? copyForLocale(locale, "Editar prediccion", "Edit prediction") : copyForLocale(locale, "Predecir ahora", "Predict now")}
             eyebrow={copyForLocale(locale, "TU PROXIMO PENDIENTE", "YOUR NEXT PENDING MATCH")}
             helperText={
@@ -261,7 +266,12 @@ export function MatchesScreenView({
                 ? copyForLocale(locale, `Ya dejaste ${quickMatch.userPredictionSummary}. Puedes retocarla antes del kickoff.`, `You already left ${quickMatch.userPredictionSummary}. You can still tweak it before kickoff.`)
                 : copyForLocale(locale, "Entra directo y carga el marcador sin pasar por la lista.", "Jump in and set the score without going through the list.")
             }
-            homeTeam={{ teamName: quickMatch.homeTeam.name, flagUrl: quickMatch.homeTeam.flagUrl }}
+            homeTeam={{
+              teamName: quickMatch.homeTeam.name,
+              fifaCode: quickMatch.homeTeam.fifaCode,
+              flagAsset: quickMatch.homeTeam.flagAsset,
+              flagUrl: quickMatch.homeTeam.flagUrl
+            }}
             metaLabel={`${toStageLabel(quickMatch.stage, quickMatch.groupId, locale)} · ${toLocalKickoffLabel(quickMatch.kickoffAt, locale)}`}
             onAction={() => onOpenQuickPredict(quickMatch.matchId)}
             status={toCardTone(quickMatch)}
@@ -374,6 +384,8 @@ export function MatchesScreenView({
               key={match.matchId}
               awayTeam={{
                 teamName: match.awayTeam.name,
+                fifaCode: match.awayTeam.fifaCode,
+                flagAsset: match.awayTeam.flagAsset,
                 flagUrl: match.awayTeam.flagUrl
               }}
               ctaLabel={
@@ -385,6 +397,8 @@ export function MatchesScreenView({
               }
               homeTeam={{
                 teamName: match.homeTeam.name,
+                fifaCode: match.homeTeam.fifaCode,
+                flagAsset: match.homeTeam.flagAsset,
                 flagUrl: match.homeTeam.flagUrl
               }}
               kickoffLabel={toLocalKickoffLabel(match.kickoffAt, locale)}

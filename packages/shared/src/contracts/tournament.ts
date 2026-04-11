@@ -1,3 +1,5 @@
+import type { TeamIdentity } from "./matches";
+
 export type TournamentMode = "pre_tournament" | "live_tournament";
 
 export type PreTournamentSummary = {
@@ -12,7 +14,6 @@ export type PreTournamentSummary = {
 export type PredictedGroupStandingRow = {
   teamId: string;
   teamName: string;
-  flagUrl: string | null;
   played: number;
   won: number;
   drawn: number;
@@ -23,7 +24,7 @@ export type PredictedGroupStandingRow = {
   points: number;
   position: number;
   isProjectedQualified: boolean;
-};
+} & TeamIdentity;
 
 export type TuMundialGroupCard = {
   groupId: string;

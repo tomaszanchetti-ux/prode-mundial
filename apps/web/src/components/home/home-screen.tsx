@@ -190,7 +190,12 @@ export function HomeScreenView({
 
           {nextPreTournamentMatch ? (
             <NextMatchHero
-              awayTeam={{ teamName: nextPreTournamentMatch.awayTeam.name, flagUrl: nextPreTournamentMatch.awayTeam.flagUrl }}
+              awayTeam={{
+                teamName: nextPreTournamentMatch.awayTeam.name,
+                fifaCode: nextPreTournamentMatch.awayTeam.fifaCode,
+                flagAsset: nextPreTournamentMatch.awayTeam.flagAsset,
+                flagUrl: nextPreTournamentMatch.awayTeam.flagUrl
+              }}
               ctaLabel={nextPreTournamentMatch.userPredictionSummary ? "Editar prediccion" : "Seguir completando"}
               eyebrow="TU PROXIMO PENDIENTE"
               helperText={
@@ -200,7 +205,12 @@ export function HomeScreenView({
                     ? copyForLocale(locale, "Puedes cargar este partido ahora mismo.", "You can fill this match right now.")
                     : copyForLocale(locale, `La ventana abre ${toKickoffLabel(nextPreTournamentMatch.predictionOpensAt, locale)}.`, `The window opens ${toKickoffLabel(nextPreTournamentMatch.predictionOpensAt, locale)}.`)
               }
-              homeTeam={{ teamName: nextPreTournamentMatch.homeTeam.name, flagUrl: nextPreTournamentMatch.homeTeam.flagUrl }}
+              homeTeam={{
+                teamName: nextPreTournamentMatch.homeTeam.name,
+                fifaCode: nextPreTournamentMatch.homeTeam.fifaCode,
+                flagAsset: nextPreTournamentMatch.homeTeam.flagAsset,
+                flagUrl: nextPreTournamentMatch.homeTeam.flagUrl
+              }}
               metaLabel={`${toStageLabel(nextPreTournamentMatch, locale)} · ${toKickoffLabel(nextPreTournamentMatch.kickoffAt, locale)}`}
               onAction={() => onOpenMatch(nextPreTournamentMatch.matchId)}
               onSecondaryAction={onOpenMatches}
@@ -375,7 +385,12 @@ export function HomeScreenView({
 
       {priorityMatch ? (
         <NextMatchHero
-          awayTeam={{ teamName: priorityMatch.awayTeam.name, flagUrl: priorityMatch.awayTeam.flagUrl }}
+          awayTeam={{
+            teamName: priorityMatch.awayTeam.name,
+            fifaCode: priorityMatch.awayTeam.fifaCode,
+            flagAsset: priorityMatch.awayTeam.flagAsset,
+            flagUrl: priorityMatch.awayTeam.flagUrl
+          }}
           ctaLabel={priorityMatch.userPredictionSummary ? "Editar prediccion" : "Predecir ahora"}
           eyebrow="TU PROXIMO PENDIENTE"
           helperText={
@@ -383,7 +398,12 @@ export function HomeScreenView({
               ? copyForLocale(locale, `Ya guardaste ${priorityMatch.userPredictionSummary}. Deadline exacto: ${toKickoffLabel(priorityMatch.deadlineAt, locale)}`, `You already saved ${priorityMatch.userPredictionSummary}. Exact deadline: ${toKickoffLabel(priorityMatch.deadlineAt, locale)}`)
               : copyForLocale(locale, `Aun no predijiste este partido. Deadline exacto: ${toKickoffLabel(priorityMatch.deadlineAt, locale)}`, `You haven't predicted this match yet. Exact deadline: ${toKickoffLabel(priorityMatch.deadlineAt, locale)}`)
           }
-          homeTeam={{ teamName: priorityMatch.homeTeam.name, flagUrl: priorityMatch.homeTeam.flagUrl }}
+          homeTeam={{
+            teamName: priorityMatch.homeTeam.name,
+            fifaCode: priorityMatch.homeTeam.fifaCode,
+            flagAsset: priorityMatch.homeTeam.flagAsset,
+            flagUrl: priorityMatch.homeTeam.flagUrl
+          }}
           metaLabel={`${toStageLabel(priorityMatch, locale)} · ${toKickoffLabel(priorityMatch.kickoffAt, locale)}`}
           onAction={() => onOpenMatch(priorityMatch.matchId)}
           onSecondaryAction={onOpenMatches}
@@ -407,9 +427,23 @@ export function HomeScreenView({
           </div>
 
           <div style={{ display: "grid", gap: spacing[12] }}>
-            <TeamIdentityRow teamName={nextOpeningMatch.homeTeam.name} flagUrl={nextOpeningMatch.homeTeam.flagUrl} size="lg" weight={700} />
+            <TeamIdentityRow
+              teamName={nextOpeningMatch.homeTeam.name}
+              fifaCode={nextOpeningMatch.homeTeam.fifaCode}
+              flagAsset={nextOpeningMatch.homeTeam.flagAsset}
+              flagUrl={nextOpeningMatch.homeTeam.flagUrl}
+              size="lg"
+              weight={700}
+            />
             <div style={{ paddingLeft: 46, fontSize: 12, color: colors.textMuted, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
-            <TeamIdentityRow teamName={nextOpeningMatch.awayTeam.name} flagUrl={nextOpeningMatch.awayTeam.flagUrl} size="lg" weight={700} />
+            <TeamIdentityRow
+              teamName={nextOpeningMatch.awayTeam.name}
+              fifaCode={nextOpeningMatch.awayTeam.fifaCode}
+              flagAsset={nextOpeningMatch.awayTeam.flagAsset}
+              flagUrl={nextOpeningMatch.awayTeam.flagUrl}
+              size="lg"
+              weight={700}
+            />
           </div>
 
           <div

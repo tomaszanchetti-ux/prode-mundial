@@ -6,6 +6,10 @@ const isoTimestampSchema = z.string().min(1);
 export const teamRefSchema = z.object({
   teamId: z.string().min(1),
   name: z.string().min(1),
+  fifaCode: z.string().min(1).nullable(),
+  iso2: z.string().min(1).nullable(),
+  iso3: z.string().min(1).nullable(),
+  flagAsset: z.string().min(1).nullable(),
   flagUrl: z.string().min(1).nullable()
 });
 

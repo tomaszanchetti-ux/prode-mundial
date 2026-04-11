@@ -64,6 +64,9 @@ function buildTeam(teamId: string, name: string, groupId = "A"): StoredTeam {
   return {
     teamId,
     fifaCode: teamId,
+    iso2: null,
+    iso3: null,
+    flagAsset: null,
     name,
     shortName: name,
     flagUrl: null,

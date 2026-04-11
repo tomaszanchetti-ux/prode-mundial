@@ -118,7 +118,14 @@ function GroupStandingsCard({ group }: GroupStandingsCardProps) {
               <span style={{ fontSize: 12, lineHeight: 1.2, color: item.isProjectedQualified ? "#9BE5B6" : colors.textMuted, fontWeight: item.isProjectedQualified ? 700 : 600 }}>
                 #{item.position} {item.isProjectedQualified ? "clasifica" : ""}
               </span>
-              <TeamDisplay teamName={item.teamName} flagUrl={item.flagUrl} size="sm" weight={item.isProjectedQualified ? 700 : 600} />
+              <TeamDisplay
+                teamName={item.teamName}
+                fifaCode={item.fifaCode}
+                flagAsset={item.flagAsset}
+                flagUrl={item.flagUrl}
+                size="sm"
+                weight={item.isProjectedQualified ? 700 : 600}
+              />
             </div>
             <span style={{ fontSize: 14, lineHeight: 1.2, color: colors.textPrimary, textAlign: "center" }}>{item.played}</span>
             <span style={{ fontSize: 14, lineHeight: 1.2, color: colors.textPrimary, textAlign: "center" }}>{item.goalDifference}</span>

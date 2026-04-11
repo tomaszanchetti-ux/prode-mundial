@@ -218,6 +218,111 @@ Pendiente natural:
 
 Actualización nueva sobre esta capa:
 
+## Actualizacion operativa nueva: V3 ya arrancada en codigo
+
+Durante la sesión actual se ejecutaron y validaron las dos primeras historias de `EPI-UX-002`:
+
+- `STO-UX-011`
+  - recalibración real de tokens visuales, superficies, spacing y jerarquía base en `packages/ui`
+- `STO-UX-012`
+  - sistema robusto de identidad de selecciones con soporte de datos y assets locales
+
+Resultado concreto de esa ejecución:
+
+- `packages/ui` ya tiene una base V3 más consistente:
+  - niveles visuales más claros
+  - menor ruido de bordes / wrappers
+  - CTA más nítidas
+  - mejor densidad vertical
+- la identidad de equipos ya no depende primariamente de monogramas
+- `packages/shared` y `apps/api` ya exponen identidad estable por selección con:
+  - `fifaCode`
+  - `iso2`
+  - `iso3`
+  - `flagAsset`
+  - `flagUrl`
+- `apps/web` ya consume esa identidad en:
+  - `home`
+  - `matches`
+  - `match detail`
+  - `quick prediction`
+  - `marathon mode`
+  - `tournament`
+- se versionaron assets locales de banderas en:
+  - `apps/web/public/flags`
+
+Validación ejecutada para este bloque:
+
+- `typecheck` global OK
+- `test` global OK
+
+Próximo foco operativo ya definido:
+
+- `STO-UX-013`
+  - adelgazar `header`
+  - limpiar `bottom nav`
+  - reordenar jerarquía global de CTA
+
+Estado Git real al cierre esperado de esta sesión:
+
+- branch de trabajo activa:
+  - `codex/epic-3-5-testing-closeout`
+- esta rama ya no está solo en cierre documental:
+  - ahora contiene arranque real de implementación V3
+
+## Actualizacion operativa nueva: UX/UI Elevation V3 antes de Epic 4
+
+Luego de una nueva review de producto sobre la app ya construida, se decidió abrir una segunda pasada UX/UI fuerte antes de iniciar la implementación funcional de `Epic 4`.
+
+La decisión quedó cerrada así:
+
+- `Epic 4` sigue siendo el próximo bloque funcional grande
+- pero no se arranca todavía con create/join/detail real de ligas
+- primero se ejecuta una nueva épica de elevación visual y de producto:
+  - `docs/kanban/epics/EPI-UX-002.md`
+- esta épica toma como source doc el review:
+  - `/Users/tzanchetti/Documents/NewCo - Proyectos/Prode Mundial/PRODE MUNDIAL — UX_UI ITERATION V3.md`
+
+Objetivo de esta fase:
+
+- pasar de una app MVP usable a una app más consumible
+- reforzar la sensación de producto deportivo premium
+- consolidar componentes compartidos reales
+- limpiar navegación, copy, estados y densidad visual
+- resolver el sistema de banderas de forma robusta
+
+Orden de trabajo acordado antes de `Epic 4`:
+
+1. `STO-UX-011`
+   - recalibrar tokens, superficies, spacing y jerarquía base
+2. `STO-UX-012`
+   - resolver flags + identity system con soporte de datos/back
+3. `STO-UX-013`
+   - aligerar header, bottom nav y jerarquía global de CTA
+4. `STO-UX-014`
+   - rediseñar `Home` V3 con hero protagonista
+5. `STO-UX-015`
+   - elevar el flujo de predicción y score picker
+6. `STO-UX-016`
+   - compactar fixtures y redefinir estados
+7. `STO-UX-017`
+   - pulir standings / ligas sin invadir el alcance funcional de `Epic 4`
+8. `STO-UX-018`
+   - cerrar V3 con empty/loading, copy cleanup y QA visual global
+
+Regla operativa importante:
+
+- dentro de esta fase, el único refuerzo de backend/datos explícitamente aceptado es el de banderas / identidad de equipos
+- no usar esta épica para colar create league, join league o detalle de liga real
+- la frontera con `Epic 4` debe mantenerse explícita en docs y en UI
+
+Resultado esperado al cierre de esta fase:
+
+- base visual más sólida
+- momentos críticos de producto más pulidos
+- sistema compartido más consistente
+- app más lista para abrir `Epic 4` sin arrastrar deuda visual fuerte
+
 - `Home` fue reforzada aún más con piezas reusables:
   - `NextMatchHero`
   - `ProgressCompact`

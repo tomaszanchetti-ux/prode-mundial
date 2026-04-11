@@ -10,6 +10,9 @@ import { firestore } from "../../../server/firebase/firebase-admin";
 type TeamSeed = {
   teamId: string;
   fifaCode: string;
+  iso2: string | null;
+  iso3: string | null;
+  flagAsset: string | null;
   name: string;
   shortName: string;
   flagUrl: string | null;

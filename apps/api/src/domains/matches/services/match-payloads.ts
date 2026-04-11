@@ -4,6 +4,7 @@ import {
   type MatchStatus,
   type MatchSummary,
   type SaveMatchPredictionResponse,
+  resolveTeamIdentity,
   type TeamRef,
   type UserMatchPrediction
 } from "@prode/shared";
@@ -46,14 +47,14 @@ function buildSlotTeamRef(slot: string | null | undefined, fallbackKey: string):
     return {
       teamId: `slot:${slot}`,
       name: `Por definir (${slot})`,
-      flagUrl: null
+      ...resolveTeamIdentity(null)
     };
   }
 
   return {
     teamId: `tbd:${fallbackKey}`,
     name: "Por definir",
-    flagUrl: null
+    ...resolveTeamIdentity(null)
   };
 }
 
@@ -64,14 +65,14 @@ function buildKnownTeamRef(teamId: string, teamsById: Map<string, StoredTeam>): 
     return {
       teamId,
       name: teamId,
-      flagUrl: null
+      ...resolveTeamIdentity(teamId)
     };
   }
 
   return {
     teamId: team.teamId,
     name: team.name,
-    flagUrl: team.flagUrl
+    ...resolveTeamIdentity(team.fifaCode, team.flagUrl)
   };
 }
 

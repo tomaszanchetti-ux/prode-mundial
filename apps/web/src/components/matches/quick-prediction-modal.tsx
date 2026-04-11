@@ -207,11 +207,15 @@ export function QuickPredictionModal({ matchId, isOpen, onClose, onSaved }: Quic
     <PredictionModal
       awayTeam={{
         teamName: detail?.awayTeam.name ?? "Visitante",
+        fifaCode: detail?.awayTeam.fifaCode ?? null,
+        flagAsset: detail?.awayTeam.flagAsset ?? null,
         flagUrl: detail?.awayTeam.flagUrl
       }}
       helperText={toHelperText(detail, errorMessage, isLoading)}
       homeTeam={{
         teamName: detail?.homeTeam.name ?? "Local",
+        fifaCode: detail?.homeTeam.fifaCode ?? null,
+        flagAsset: detail?.homeTeam.flagAsset ?? null,
         flagUrl: detail?.homeTeam.flagUrl
       }}
       isOpen={isOpen}

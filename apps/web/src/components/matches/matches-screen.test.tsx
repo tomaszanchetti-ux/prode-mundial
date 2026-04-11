@@ -2,24 +2,28 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { MatchSummary } from "@prode/shared";
+import type { MatchSummary, TeamRef } from "@prode/shared";
 import { MatchesScreenView } from "./matches-screen";
+
+function buildTeamRef(teamId: string, name: string): TeamRef {
+  return {
+    teamId,
+    name,
+    fifaCode: teamId,
+    iso2: null,
+    iso3: null,
+    flagAsset: "/flags/mock.svg",
+    flagUrl: null
+  };
+}
 
 function buildMatchSummary(overrides: Partial<MatchSummary> = {}): MatchSummary {
   return {
     matchId: "m_001",
     stage: "group",
     groupId: "A",
-    homeTeam: {
-      teamId: "ARG",
-      name: "Argentina",
-      flagUrl: null
-    },
-    awayTeam: {
-      teamId: "BRA",
-      name: "Brasil",
-      flagUrl: null
-    },
+    homeTeam: buildTeamRef("ARG", "Argentina"),
+    awayTeam: buildTeamRef("BRA", "Brasil"),
     kickoffAt: "2026-06-11T19:00:00Z",
     predictionOpensAt: "2026-06-11T14:00:00.000Z",
     status: "scheduled",

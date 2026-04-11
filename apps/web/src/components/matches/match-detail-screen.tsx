@@ -252,9 +252,23 @@ export function MatchDetailScreenView({
         </div>
 
         <div style={{ display: "grid", gap: 10 }}>
-          <TeamDisplay teamName={detail.homeTeam.name} flagUrl={detail.homeTeam.flagUrl} size="lg" weight={700} />
+          <TeamDisplay
+            teamName={detail.homeTeam.name}
+            fifaCode={detail.homeTeam.fifaCode}
+            flagAsset={detail.homeTeam.flagAsset}
+            flagUrl={detail.homeTeam.flagUrl}
+            size="lg"
+            weight={700}
+          />
           <div style={{ paddingLeft: 46, fontSize: 12, color: colors.textMuted, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
-          <TeamDisplay teamName={detail.awayTeam.name} flagUrl={detail.awayTeam.flagUrl} size="lg" weight={700} />
+          <TeamDisplay
+            teamName={detail.awayTeam.name}
+            fifaCode={detail.awayTeam.fifaCode}
+            flagAsset={detail.awayTeam.flagAsset}
+            flagUrl={detail.awayTeam.flagUrl}
+            size="lg"
+            weight={700}
+          />
         </div>
 
         <div style={{ display: "grid", gap: 6 }}>

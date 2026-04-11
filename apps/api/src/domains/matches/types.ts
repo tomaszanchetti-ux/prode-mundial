@@ -15,6 +15,9 @@ export type StoredMatchStatus = MatchStatus | "corrected";
 export type StoredTeam = {
   teamId: string;
   fifaCode: string;
+  iso2: string | null;
+  iso3: string | null;
+  flagAsset: string | null;
   name: string;
   shortName: string;
   flagUrl: string | null;
