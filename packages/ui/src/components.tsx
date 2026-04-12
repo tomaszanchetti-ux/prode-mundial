@@ -155,12 +155,13 @@ const buttonToneStyles: Record<ButtonVariant, CSSProperties> = {
     boxShadow: "0 14px 28px rgba(47, 107, 255, 0.24)"
   },
   secondary: {
-    background: `linear-gradient(180deg, ${colors.bgInteractive} 0%, ${colors.bgSurface} 100%)`,
+    background: `linear-gradient(180deg, rgba(28, 45, 72, 0.96) 0%, rgba(19, 33, 54, 0.96) 100%)`,
     color: colors.textPrimary,
-    border: `1px solid ${colors.border}`
+    border: "1px solid rgba(92, 141, 255, 0.2)",
+    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.04)"
   },
   ghost: {
-    background: colors.bgInset,
+    background: "transparent",
     color: colors.textSecondary,
     border: `1px solid ${colors.borderSubtle}`
   }
@@ -306,75 +307,76 @@ function renderScoreInput(
     <div
       style={{
         width: "100%",
-        minHeight: 152,
+        minHeight: 144,
         borderRadius: radii.lg,
         border: `1px solid ${colors.borderSubtle}`,
-        background: `linear-gradient(180deg, ${colors.bgCanvas} 0%, ${colors.bgSurface} 100%)`,
+        background: `linear-gradient(180deg, rgba(7, 17, 31, 0.98) 0%, rgba(13, 25, 43, 0.98) 100%)`,
         color: colors.textPrimary,
         display: "grid",
         justifyItems: "center",
-        gap: spacing[10],
+        gap: spacing[12],
         padding: `${spacing[14]}px ${spacing[12]}px`
       }}
     >
       <span style={{ ...typography.small, color: colors.textMuted, textAlign: "center" }}>{label}</span>
-      <button
-        type="button"
-        disabled={disabled}
-        aria-label={`Subir marcador de ${label}`}
-        onClick={() => onChange?.(stepScoreValue(safeValue, 1))}
-        style={{
-          width: 48,
-          height: 38,
-          borderRadius: radii.md,
-          border: `1px solid ${colors.border}`,
-          background: colors.bgInset,
-          color: colors.textPrimary,
-          fontSize: 22,
-          fontWeight: 700,
-          cursor: disabled ? "not-allowed" : "pointer",
-          opacity: disabled ? 0.7 : 1
-        }}
-      >
-        +
-      </button>
       <div
         aria-live="polite"
         style={{
-          width: 84,
-          height: 84,
-          borderRadius: 20,
-          border: `1px solid ${colors.border}`,
-          background: `linear-gradient(180deg, ${colors.bgInteractive} 0%, ${colors.bgMuted} 100%)`,
+          width: 92,
+          height: 92,
+          borderRadius: 24,
+          border: "1px solid rgba(92, 141, 255, 0.2)",
+          background: `radial-gradient(circle at top, rgba(92, 141, 255, 0.18), transparent 48%), linear-gradient(180deg, ${colors.bgInteractive} 0%, ${colors.bgMuted} 100%)`,
           display: "grid",
           placeItems: "center",
-          fontSize: 40,
+          boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.04)",
+          fontSize: 42,
           fontWeight: 800,
           lineHeight: 1
         }}
       >
         {safeValue === "" ? "0" : safeValue}
       </div>
-      <button
-        type="button"
-        disabled={disabled}
-        aria-label={`Bajar marcador de ${label}`}
-        onClick={() => onChange?.(stepScoreValue(safeValue, -1))}
-        style={{
-          width: 48,
-          height: 38,
-          borderRadius: radii.md,
-          border: `1px solid ${colors.border}`,
-          background: colors.bgInset,
-          color: colors.textPrimary,
-          fontSize: 22,
-          fontWeight: 700,
-          cursor: disabled ? "not-allowed" : "pointer",
-          opacity: disabled ? 0.7 : 1
-        }}
-      >
-        -
-      </button>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: spacing[8], width: "100%" }}>
+        <button
+          type="button"
+          disabled={disabled}
+          aria-label={`Bajar marcador de ${label}`}
+          onClick={() => onChange?.(stepScoreValue(safeValue, -1))}
+          style={{
+            minHeight: 42,
+            borderRadius: radii.md,
+            border: `1px solid ${colors.border}`,
+            background: colors.bgInset,
+            color: colors.textPrimary,
+            fontSize: 20,
+            fontWeight: 700,
+            cursor: disabled ? "not-allowed" : "pointer",
+            opacity: disabled ? 0.7 : 1
+          }}
+        >
+          -
+        </button>
+        <button
+          type="button"
+          disabled={disabled}
+          aria-label={`Subir marcador de ${label}`}
+          onClick={() => onChange?.(stepScoreValue(safeValue, 1))}
+          style={{
+            minHeight: 42,
+            borderRadius: radii.md,
+            border: `1px solid ${colors.border}`,
+            background: colors.bgInset,
+            color: colors.textPrimary,
+            fontSize: 20,
+            fontWeight: 700,
+            cursor: disabled ? "not-allowed" : "pointer",
+            opacity: disabled ? 0.7 : 1
+          }}
+        >
+          +
+        </button>
+      </div>
     </div>
   );
 }
@@ -438,8 +440,8 @@ export function Button({
       {...props}
       disabled={isDisabled}
       style={{
-        minHeight: 48,
-        padding: "0 16px",
+        minHeight: 46,
+        padding: "0 15px",
         borderRadius: radii.lg,
         cursor: isDisabled ? "not-allowed" : "pointer",
         fontSize: typography.body.fontSize,
@@ -448,7 +450,7 @@ export function Button({
         letterSpacing: "-0.01em",
         width: fullWidth ? "100%" : undefined,
         opacity: isDisabled ? 0.6 : 1,
-        transition: "transform 140ms ease, opacity 140ms ease, background 140ms ease, border-color 140ms ease, box-shadow 140ms ease",
+        transition: "transform 140ms ease, opacity 140ms ease, background 140ms ease, border-color 140ms ease, box-shadow 140ms ease, color 140ms ease",
         ...buttonToneStyles[variant],
         ...style
       }}
@@ -667,9 +669,11 @@ export function MatchCard({
   status,
   statusLabel
 }: MatchCardProps) {
+  const isActionable = status === "editable" || status === "live";
+
   return (
-    <Card elevated style={{ gap: spacing[12], padding: spacing[14] }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
+    <Card elevated style={{ gap: spacing[10], padding: spacing[12] }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: spacing[10], flexWrap: "wrap" }}>
         <div style={{ display: "grid", gap: 6 }}>
           <span style={eyebrowStyle}>{stageLabel}</span>
           <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>{kickoffLabel}</span>
@@ -677,28 +681,35 @@ export function MatchCard({
         <StatusTag status={status} label={statusLabel} />
       </div>
 
-      <div style={{ display: "grid", gap: 10 }}>
+      <div style={{ display: "grid", gap: 8 }}>
         <TeamIdentityRow {...homeTeam} size="md" weight={700} />
         <TeamIdentityRow {...awayTeam} size="md" weight={700} />
       </div>
 
       <div
         style={{
-          display: "grid",
-          gap: spacing[8],
-          padding: spacing[14],
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: spacing[10],
+          padding: `${spacing[10]}px ${spacing[12]}px`,
           borderRadius: radii.md,
-          background: colors.bgInset,
-          border: `1px solid ${colors.borderSubtle}`
+          background: "rgba(255, 255, 255, 0.025)",
+          border: `1px solid ${colors.borderSubtle}`,
+          flexWrap: "wrap"
         }}
       >
-        <p style={{ ...typography.body, margin: 0, color: colors.textPrimary, fontWeight: 600 }}>
+        <p style={{ ...typography.body, margin: 0, color: colors.textPrimary, fontWeight: 600, flex: "1 1 220px" }}>
           {predictionSummary ?? "Aun no predijiste este partido"}
         </p>
-        {resultSummary ? <p style={{ margin: 0, fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{resultSummary}</p> : null}
+        {resultSummary ? (
+          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.35, color: colors.textSecondary, flex: "1 1 220px", textAlign: "left" }}>
+            {resultSummary}
+          </p>
+        ) : null}
       </div>
 
-      <Button variant={status === "locked" ? "secondary" : "primary"} fullWidth onClick={onAction} style={{ minHeight: 48 }}>
+      <Button variant={isActionable ? "primary" : "secondary"} fullWidth onClick={onAction} style={{ minHeight: 44 }}>
         {ctaLabel}
       </Button>
     </Card>
@@ -821,7 +832,7 @@ export function PredictionModal({
         style={{
           width: "min(100%, 560px)",
           ...cardBaseStyle,
-          gap: spacing[20],
+          gap: spacing[18],
           boxShadow: shadows.modal,
           borderTopLeftRadius: radii.xl,
           borderTopRightRadius: radii.xl,
@@ -829,11 +840,11 @@ export function PredictionModal({
           borderBottomRightRadius: radii.lg,
           background: `linear-gradient(180deg, ${colors.bgElevated} 0%, ${colors.bgCanvas} 100%)`
         }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
-          <div style={{ display: "grid", gap: spacing[8] }}>
-            <span style={eyebrowStyle}>{stageLabel}</span>
-            <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>{title}</h2>
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
+            <div style={{ display: "grid", gap: spacing[8] }}>
+              <span style={eyebrowStyle}>{stageLabel}</span>
+              <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>{title}</h2>
             <p style={{ margin: 0, fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{kickoffLabel}</p>
           </div>
           {onClose ? (
@@ -858,12 +869,12 @@ export function PredictionModal({
 
         <div
           style={{
-            display: "grid",
-            gap: spacing[12],
-            padding: spacing[16],
-            borderRadius: radii.lg,
-            background: `linear-gradient(180deg, ${colors.bgCanvas} 0%, ${colors.bgSurface} 100%)`,
-            border: `1px solid ${colors.borderSubtle}`
+          display: "grid",
+          gap: spacing[12],
+          padding: spacing[18],
+          borderRadius: radii.lg,
+          background: `radial-gradient(circle at top, rgba(92, 141, 255, 0.12), transparent 42%), linear-gradient(180deg, ${colors.bgCanvas} 0%, ${colors.bgSurface} 100%)`,
+          border: `1px solid ${colors.borderSubtle}`
           }}
         >
           <TeamIdentityRow {...homeTeam} align="center" size="lg" weight={700} />
@@ -871,11 +882,24 @@ export function PredictionModal({
           <TeamIdentityRow {...awayTeam} align="center" size="lg" weight={700} />
         </div>
 
-        {helperText ? <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{helperText}</p> : null}
+        {helperText ? (
+          <div
+            style={{
+              display: "grid",
+              gap: 6,
+              padding: `${spacing[12]}px ${spacing[14]}px`,
+              borderRadius: radii.md,
+              background: colors.bgInset,
+              border: `1px solid ${colors.borderSubtle}`
+            }}
+          >
+            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{helperText}</p>
+          </div>
+        ) : null}
 
         {children}
 
-        <div style={{ display: "grid", gap: 10 }}>
+        <div style={{ display: "grid", gap: 8 }}>
           <Button fullWidth onClick={onSubmit} loading={saving}>
             {saveLabel}
           </Button>

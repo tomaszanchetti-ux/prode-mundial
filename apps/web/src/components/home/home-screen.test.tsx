@@ -68,11 +68,11 @@ test("HomeScreenView renders pre-tournament next-match hero and follow-up CTAs",
     })
   );
 
-  assert.match(html, /SEGUIS DESDE ACA/);
-  assert.match(html, /Tu proximo pendiente/);
+  assert.match(html, /SIGUE TU MUNDIAL/);
+  assert.match(html, /Argentina vs Brasil/);
   assert.match(html, /TU LIGA HOY/);
-  assert.match(html, /Seguir completando/);
-  assert.match(html, /Ir a Tu Mundial/);
+  assert.match(html, /Ver calendario/);
+  assert.match(html, /Abrir Tu Mundial/);
   assert.match(html, /Invitar amigos/);
 });
 
@@ -93,9 +93,9 @@ test("HomeScreenView keeps live-tournament priority match card when pre-tourname
     })
   );
 
-  assert.match(html, /HOY EN PRODE MUNDIAL/);
-  assert.match(html, /TU PROXIMO PENDIENTE/);
+  assert.match(html, /PARTIDO DESTACADO/);
+  assert.match(html, /Argentina vs Brasil/);
   assert.match(html, /Predecir ahora/);
   assert.match(html, /TU MUNDIAL/);
-  assert.match(html, /Sigue disponible mientras el torneo ya esta en marcha/);
+  assert.match(html, /Sigue disponible/);
 });

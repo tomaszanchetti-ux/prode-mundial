@@ -24,7 +24,7 @@ function toFormState(displayName: string, country: string | null): FormState {
 
 export function ProfileScreen() {
   const [formState, setFormState] = useState<FormState>({ displayName: "", country: "" });
-  const [status, setStatus] = useState<string>("Cargando perfil...");
+  const [status, setStatus] = useState<string>("Preparando tu perfil...");
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
   const { logout, profile, refreshProfile, user } = useAuth();
@@ -35,7 +35,7 @@ export function ProfileScreen() {
     }
 
     setFormState(toFormState(profile.displayName, profile.country));
-    setStatus(profile.profileCompleted ? "Perfil listo." : "Completa tu perfil para entrar al resto de la app.");
+    setStatus(profile.profileCompleted ? "Perfil listo para competir." : "Completa tu perfil para entrar a jugar.");
   }, [profile]);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
@@ -46,7 +46,7 @@ export function ProfileScreen() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSaving(true);
-    setStatus("Guardando cambios...");
+    setStatus("Guardando tu identidad...");
 
     const input: UpdateProfileInput = {
       displayName: formState.displayName.trim(),
@@ -109,7 +109,7 @@ export function ProfileScreen() {
           {profile?.profileCompleted ? "Tu perfil" : "Completa tu perfil"}
         </h1>
         <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 620 }}>
-          Ajusta tu nombre visible y tu pais para que tu identidad se vea bien en ligas, posiciones y resultados.
+          Ajusta tu nombre visible y tu pais para que tu identidad se lea bien en ligas, posiciones y resultados.
         </p>
         <div
           style={{
@@ -220,7 +220,7 @@ export function ProfileScreen() {
       <Card elevated style={{ gap: spacing[12], padding: spacing[20] }}>
         <span style={{ ...typography.small, color: colors.textMuted }}>CUENTA</span>
         <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
-          Si vuelves mas tarde o cambias de dispositivo, tu sesion y tu perfil quedan listos para retomar rapido.
+          Si vuelves mas tarde o cambias de dispositivo, tu perfil queda listo para retomar rapido.
         </p>
         <Button variant="secondary" onClick={handleLogout}>
           Cerrar sesion

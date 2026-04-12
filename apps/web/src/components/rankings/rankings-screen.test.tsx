@@ -101,8 +101,8 @@ test("RankingsScreenView renders points and standings summary", () => {
   assert.match(html, /18 pts/);
   assert.match(html, /Argentina vs Brasil/);
   assert.match(html, /Liga Demo Madrid/);
-  assert.match(html, /Tabla de posiciones/);
-  assert.match(html, /Invitar amigos/);
+  assert.match(html, /Tabla competitiva/);
+  assert.match(html, /La punta la marca Clara con 20 pts/);
   assert.match(html, /Tomas/);
   assert.match(html, /tu posicion/);
 });

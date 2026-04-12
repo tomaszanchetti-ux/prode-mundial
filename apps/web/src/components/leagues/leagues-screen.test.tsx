@@ -33,5 +33,5 @@ test("LeaguesScreenView renders active league cards", () => {
   assert.match(html, /Liga Demo Madrid/);
   assert.match(html, /Activa/);
   assert.match(html, /DEMO26/);
+  assert.match(html, /Estas compitiendo en el puesto #2/);
 });
-

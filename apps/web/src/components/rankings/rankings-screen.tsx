@@ -29,14 +29,15 @@ export function RankingsScreenView({
   onRetry
 }: RankingsScreenViewProps) {
   const selectedLeague = leagues.find((league) => league.leagueId === selectedLeagueId) ?? null;
+  const leader = standings?.items[0] ?? null;
 
   return (
     <div style={{ display: "grid", gap: spacing[16] }}>
       <Card elevated style={{ gap: spacing[12] }}>
         <span style={{ ...typography.small, color: colors.textMuted }}>POSICIONES</span>
-        <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Tu tabla de posiciones</h1>
+        <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Tu competencia liga por liga</h1>
         <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
-          Sigue tu lugar en cada liga, cuánto te falta para alcanzar la punta y cómo vienes sumando.
+          Mira dónde estás parado, quién marca el ritmo y cuánto te falta para alcanzar la punta.
         </p>
       </Card>
 
@@ -63,7 +64,7 @@ export function RankingsScreenView({
           <div style={{ display: "grid", gap: spacing[8] }}>
             <span style={{ ...typography.small, color: colors.textMuted }}>ULTIMOS PUNTOS</span>
             {points.recentMatches.length === 0 ? (
-              <p style={{ fontSize: 14, lineHeight: 1.4, margin: 0, color: colors.textSecondary }}>Todavia no hay puntos recientes para mostrar.</p>
+              <p style={{ fontSize: 14, lineHeight: 1.4, margin: 0, color: colors.textSecondary }}>Tus ultimos puntos van a aparecer aqui.</p>
             ) : (
               points.recentMatches.map((entry) => (
                 <div
@@ -94,18 +95,38 @@ export function RankingsScreenView({
       <Card elevated style={{ gap: spacing[12] }}>
         <div style={{ display: "grid", gap: 6 }}>
           <span style={{ ...typography.small, color: colors.gold500 }}>TU LIGA</span>
-          <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>Tabla de posiciones</h2>
+          <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>Tabla competitiva</h2>
         </div>
 
-        {isLoading ? <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>Cargando tabla...</p> : null}
+        {isLoading ? (
+          <div style={{ display: "grid", gap: spacing[8] }}>
+            <div style={{ width: 104, height: 10, borderRadius: 999, background: "rgba(148, 163, 184, 0.16)" }} />
+            <div style={{ width: "100%", height: 56, borderRadius: 16, background: "rgba(255,255,255,0.03)" }} />
+            <div style={{ width: "100%", height: 56, borderRadius: 16, background: "rgba(255,255,255,0.03)" }} />
+          </div>
+        ) : null}
 
         {!isLoading && leagues.length === 0 ? (
-          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>Todavia no hay ligas disponibles para mostrar.</p>
+          <Card style={{ gap: spacing[8], padding: spacing[16], background: "rgba(255,255,255,0.02)" }}>
+            <span style={{ ...typography.small, color: colors.textMuted }}>SIN COMPETENCIA ACTIVA</span>
+            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+              Todavia no hay ligas para mostrar. La creacion, invitaciones y join real se abren en `Epic 4`.
+            </p>
+          </Card>
         ) : null}
 
         {leagues.length > 0 ? (
           <div style={{ display: "grid", gap: spacing[12] }}>
-            <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "center", flexWrap: "wrap" }}>
+            <div
+              style={{
+                display: "grid",
+                gap: spacing[10],
+                padding: spacing[14],
+                borderRadius: 16,
+                background: "rgba(255,255,255,0.03)",
+                border: `1px solid ${colors.border}`
+              }}
+            >
               <div style={{ display: "grid", gap: 4 }}>
                 <span style={{ ...typography.small, color: colors.textMuted }}>LIGA ACTIVA</span>
                 <strong style={{ fontSize: 18, lineHeight: 1.2, color: colors.textPrimary }}>
@@ -117,23 +138,31 @@ export function RankingsScreenView({
                   </span>
                 ) : null}
               </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <Button variant="ghost">Invitar amigos</Button>
-                <Button variant="ghost">Crear liga</Button>
+              <div style={{ display: "grid", gap: 4 }}>
+                <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>
+                  {standings?.myStanding
+                    ? `Vas #${standings.myStanding.position} con ${standings.myStanding.totalPoints} pts`
+                    : "Tu posicion aparece cuando haya tabla"}
+                </span>
+                <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+                  {leader
+                    ? `La punta la marca ${leader.displayName} con ${leader.totalPoints} pts.`
+                    : "Cuando exista competencia activa vas a ver aqui la distancia con la punta."}
+                </span>
               </div>
             </div>
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {leagues.map((league) => (
-              <Button
-                key={league.leagueId}
-                variant={selectedLeagueId === league.leagueId ? "primary" : "ghost"}
-                style={{ minHeight: 40, padding: "0 14px" }}
-                onClick={() => onSelectLeague(league.leagueId)}
-              >
-                {league.name}
-              </Button>
-            ))}
+              {leagues.map((league) => (
+                <Button
+                  key={league.leagueId}
+                  variant={selectedLeagueId === league.leagueId ? "secondary" : "ghost"}
+                  style={{ minHeight: 40, padding: "0 14px" }}
+                  onClick={() => onSelectLeague(league.leagueId)}
+                >
+                  {league.name}
+                </Button>
+              ))}
             </div>
           </div>
         ) : null}
@@ -151,22 +180,26 @@ export function RankingsScreenView({
                   background:
                     entry.isMe
                       ? "rgba(47, 107, 255, 0.14)"
-                      : entry.position <= 3
-                        ? "rgba(255, 255, 255, 0.05)"
+                      : entry.position === 1
+                        ? "rgba(231, 198, 106, 0.14)"
+                        : entry.position <= 3
+                          ? "rgba(255, 255, 255, 0.05)"
                         : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${entry.isMe ? colors.primary500 : entry.position <= 3 ? colors.borderStrong : colors.border}`
+                  border: `1px solid ${entry.isMe ? colors.primary500 : entry.position === 1 ? colors.gold500 : entry.position <= 3 ? colors.borderStrong : colors.border}`
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "center" }}>
                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    <span style={{ color: entry.isMe ? colors.primary500 : colors.textMuted, fontSize: 14, fontWeight: 700 }}>#{entry.position}</span>
+                    <span style={{ color: entry.isMe ? colors.primary500 : entry.position === 1 ? colors.gold500 : colors.textMuted, fontSize: 14, fontWeight: 700 }}>
+                      #{entry.position}
+                    </span>
                     <span style={{ color: colors.textPrimary, fontWeight: entry.isMe ? 700 : 600 }}>
                       {entry.displayName}
-                      {entry.isOwner ? " · admin" : ""}
+                      {entry.isOwner ? " · creador" : ""}
                       {entry.isMe ? " · tu posicion" : ""}
                     </span>
                   </div>
-                  <StatusTag status={entry.isMe ? "editable" : "scored"} label={`${entry.totalPoints} pts`} />
+                  <StatusTag status={entry.isMe ? "editable" : entry.position === 1 ? "live" : "scored"} label={`${entry.totalPoints} pts`} />
                 </div>
                 <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
                   Exactos {entry.exactHits} · Signos {entry.correctSigns} · Macro {entry.macroPoints}

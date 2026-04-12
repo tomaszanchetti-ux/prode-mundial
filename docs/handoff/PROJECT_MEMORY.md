@@ -1081,3 +1081,55 @@ Orden recomendado:
 # Regla de mantenimiento
 
 Actualizar este documento al cierre de cada sesión relevante.
+
+---
+
+# Actualizacion operativa nueva: cierre formal de V3
+
+Durante la sesion documentada en:
+
+- `docs/handoff/Prode Mundial_WS20_12042026.md`
+
+quedo cerrado en codigo el bloque completo restante de:
+
+- `EPI-UX-002 / UX_UI Elevation V3`
+
+Historias cerradas en esa pasada:
+
+- `STO-UX-013`
+- `STO-UX-014`
+- `STO-UX-015`
+- `STO-UX-016`
+- `STO-UX-017`
+- `STO-UX-018`
+
+Resultado real consolidado:
+
+- navegacion global mas liviana y menos shell-like
+- `Home` mas editorial y enfocada en la accion principal
+- flujo de prediccion reforzado en quick modal y marathon
+- lista de partidos mas compacta y escaneable
+- capa social pulida sin adelantar funcionalidad real de ligas
+- cleanup final de copy, loading states y coherencia visual
+
+Validacion ejecutada en esa sesion:
+
+- `./pnpm typecheck`
+- `./pnpm test`
+
+Resultado:
+
+- `typecheck` global OK
+- `test` global OK
+
+Nuevo criterio de continuidad:
+
+- tratar `UX_UI Elevation V3` como baseline cerrada
+- no reabrir polish general salvo bug o regresion concreta
+- el siguiente foco documentado natural pasa a ser `Epic 4 — Leagues, Invite Flow, Membership & League Detail`
+
+Estado Git esperado para retoma posterior:
+
+- branch de cierre: `codex/epic-3-5-testing-closeout`
+- handoff mas reciente de referencia:
+  - `docs/handoff/Prode Mundial_WS20_12042026.md`

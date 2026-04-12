@@ -19,29 +19,33 @@ function ProtectedHeader() {
         alignItems: "center",
         justifyContent: "space-between",
         gap: 12,
-        paddingTop: 4
+        paddingTop: 2
       }}
     >
-      <div style={{ display: "grid", gap: 4 }}>
-        <strong style={{ fontSize: 20, lineHeight: 1, color: colors.textPrimary, letterSpacing: "-0.02em" }}>Prode Mundial</strong>
-        <span style={{ ...typography.small, color: colors.textMuted }}>
-          {copyForLocale(locale, "Tu proximo partido empieza aca", "Your next match starts here")}
-        </span>
+      <div style={{ display: "grid", gap: 2 }}>
+        <span style={{ ...typography.small, color: colors.textMuted }}>PRODE MUNDIAL</span>
+        <strong style={{ fontSize: 18, lineHeight: 1, color: colors.textPrimary, letterSpacing: "-0.02em" }}>
+          {copyForLocale(locale, "Juega tu torneo", "Play your tournament")}
+        </strong>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <LanguageToggle />
         <Link
           href="/profile"
           style={{
-            width: 44,
-            height: 44,
+            width: 36,
+            height: 36,
             borderRadius: 999,
             display: "grid",
             placeItems: "center",
             textDecoration: "none",
             color: colors.textPrimary,
-            background: "rgba(255, 255, 255, 0.04)",
-            border: `1px solid ${colors.border}`
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            background: "rgba(255, 255, 255, 0.03)",
+            border: `1px solid ${colors.borderSubtle}`
           }}
         >
           {copyForLocale(locale, "Mi", "Me")}
@@ -54,7 +58,7 @@ function ProtectedHeader() {
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
   return (
     <AuthGuard>
-      <main style={{ maxWidth: 1120, margin: "0 auto", padding: "16px 16px 40px", display: "grid", gap: 18 }}>
+      <main style={{ maxWidth: 1120, margin: "0 auto", padding: "12px 16px 32px", display: "grid", gap: 16 }}>
         <ProtectedHeader />
 
         <section>{children}</section>

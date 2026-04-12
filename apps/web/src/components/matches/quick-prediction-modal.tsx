@@ -96,10 +96,10 @@ function toHelperText(detail: MatchDetail | null, errorMessage: string | null, i
   }
 
   if (detail.userPrediction) {
-    return "Ajusta el marcador y vuelve a guardar cuando quieras.";
+    return "Ajusta el marcador y guarda otra vez cuando te cierre.";
   }
 
-  return "Carga el marcador y guárdalo en un solo paso.";
+  return "Marca el resultado y guardalo en un solo paso.";
 }
 
 export function QuickPredictionModal({ matchId, isOpen, onClose, onSaved }: QuickPredictionModalProps) {
@@ -225,7 +225,7 @@ export function QuickPredictionModal({ matchId, isOpen, onClose, onSaved }: Quic
       saveLabel={detail?.userPrediction ? copyForLocale(locale, "Guardar cambios", "Save changes") : copyForLocale(locale, "Guardar prediccion", "Save prediction")}
       saving={isSaving}
       stageLabel={detail ? (locale === "en" && detail.stage === "group" && detail.groupId ? `Group ${detail.groupId}` : toStageLabel(detail)) : copyForLocale(locale, "Partido", "Match")}
-      title={copyForLocale(locale, "Tu proximo pendiente", "Your next pending match")}
+      title={detail ? `${detail.homeTeam.name} vs ${detail.awayTeam.name}` : copyForLocale(locale, "Tu proximo pendiente", "Your next pending match")}
     >
       <ScoreInput
         awayLabel={detail?.awayTeam.name ?? "Visitante"}

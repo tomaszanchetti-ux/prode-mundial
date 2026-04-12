@@ -39,7 +39,7 @@ function toGroupState(group: TuMundialGroupCard) {
     return {
       label: "Pendiente",
       tone: "locked" as const,
-      copy: "Todavia no hay suficientes partidos para proyectar la pelea por clasificar."
+      copy: "Todavia no moviste este grupo."
     };
   }
 
@@ -54,7 +54,7 @@ function toGroupState(group: TuMundialGroupCard) {
   return {
     label: "Parcial",
     tone: "editable" as const,
-    copy: "La tabla sigue viva: todavia quedan partidos que pueden mover a los clasificados."
+    copy: "La tabla sigue viva y todavia puede cambiar."
   };
 }
 
@@ -226,11 +226,10 @@ export function TournamentScreenView({
       ) : null}
 
       {isLoading ? (
-        <Card style={{ gap: spacing[8], padding: spacing[16] }}>
-          <strong style={{ fontSize: 16, color: colors.textPrimary }}>Cargando tus grupos proyectados</strong>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>
-            Estamos armando la tabla segun tus predicciones guardadas.
-          </p>
+        <Card style={{ gap: spacing[10], padding: spacing[16] }}>
+          <div style={{ width: 128, height: 10, borderRadius: 999, background: "rgba(148, 163, 184, 0.16)" }} />
+          <div style={{ width: "68%", height: 14, borderRadius: 999, background: "rgba(255, 255, 255, 0.05)" }} />
+          <div style={{ width: "100%", height: 72, borderRadius: 16, background: "rgba(255, 255, 255, 0.03)" }} />
         </Card>
       ) : null}
 

@@ -140,6 +140,10 @@ function toStatusLabel(match: MatchSummary) {
     return "En vivo";
   }
 
+  if (isPredictionWindowNotOpen(match)) {
+    return "Abre despues";
+  }
+
   if (!canEditPrediction(match)) {
     return "Cerrado";
   }
@@ -201,11 +205,11 @@ function toResultCopy(match: MatchSummary, locale: AppLocale) {
   }
 
   if (isPredictionWindowNotOpen(match)) {
-    return copyForLocale(locale, `Disponible desde ${toLocalKickoffLabel(match.predictionOpensAt, locale)}.`, `Available from ${toLocalKickoffLabel(match.predictionOpensAt, locale)}.`);
+    return copyForLocale(locale, `Se habilita ${toLocalKickoffLabel(match.predictionOpensAt, locale)}.`, `Opens ${toLocalKickoffLabel(match.predictionOpensAt, locale)}.`);
   }
 
   if (!canEditPrediction(match)) {
-    return copyForLocale(locale, "Prediccion cerrada. Solo queda seguir el partido.", "Prediction locked. Now you can only follow the match.");
+    return copyForLocale(locale, "Prediccion cerrada. Solo queda seguir el partido.", "Prediction locked. You can only follow the match now.");
   }
 
   return copyForLocale(locale, `Deadline exacto: ${toLocalKickoffLabel(match.deadlineAt, locale)}`, `Exact deadline: ${toLocalKickoffLabel(match.deadlineAt, locale)}`);
@@ -284,18 +288,17 @@ export function MatchesScreenView({
           <Card
             elevated
             style={{
-              gap: spacing[12],
-              padding: spacing[16],
-              background:
-                "radial-gradient(circle at top right, rgba(231, 198, 106, 0.12), transparent 28%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
+              gap: spacing[10],
+              padding: spacing[14],
+              background: "linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
             }}
           >
             <span style={{ ...typography.small, color: colors.gold500 }}>{copyForLocale(locale, "PROXIMA VENTANA", "NEXT WINDOW")}</span>
-            <strong style={{ fontSize: 22, lineHeight: 1.1, color: colors.textPrimary }}>
+            <strong style={{ fontSize: 20, lineHeight: 1.1, color: colors.textPrimary }}>
               {nextOpeningMatch.homeTeam.name} vs {nextOpeningMatch.awayTeam.name}
             </strong>
             <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
-              {copyForLocale(locale, "Abre", "Opens")} {toLocalKickoffLabel(nextOpeningMatch.predictionOpensAt, locale)} · {toCountdownLabel(nextOpeningMatch.predictionOpensAt, locale)}
+              {copyForLocale(locale, "Se habilita", "Opens")} {toLocalKickoffLabel(nextOpeningMatch.predictionOpensAt, locale)} · {toCountdownLabel(nextOpeningMatch.predictionOpensAt, locale)}
             </span>
             <Button variant="secondary" onClick={() => onOpenMatch(nextOpeningMatch.matchId)}>
               {copyForLocale(locale, "Ver detalle", "View detail")}
@@ -326,8 +329,8 @@ export function MatchesScreenView({
                 style={{
                   minHeight: 34,
                   borderRadius: radii.pill,
-                  border: isActive ? "1px solid rgba(47, 107, 255, 0.26)" : `1px solid ${colors.border}`,
-                  background: isActive ? colors.primarySoft : "rgba(255, 255, 255, 0.02)",
+                  border: isActive ? "1px solid rgba(92, 141, 255, 0.18)" : `1px solid ${colors.border}`,
+                  background: isActive ? "rgba(92, 141, 255, 0.1)" : "rgba(255, 255, 255, 0.02)",
                   color: isActive ? colors.textPrimary : colors.textSecondary,
                   padding: "0 12px",
                   fontSize: 13,

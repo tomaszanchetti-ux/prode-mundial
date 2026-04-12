@@ -127,7 +127,7 @@ function toHelperText(detail: MatchDetail | null, notice: MarathonNotice | null)
     return `La prediccion abre ${toKickoffLabel(detail.predictionOpensAt)}. Puedes seguir navegando la maraton mientras tanto.`;
   }
 
-  return "Guarda y avanzamos automaticamente al siguiente pendiente.";
+  return "Guarda este marcador y seguimos con el proximo pendiente.";
 }
 
 export function MarathonPredictionModalView({
@@ -190,7 +190,7 @@ export function MarathonPredictionModalView({
         elevated
         style={{
           width: "min(100%, 620px)",
-          gap: spacing[16],
+          gap: spacing[14],
           boxShadow: "0 30px 70px rgba(5, 10, 20, 0.5)",
           borderTopLeftRadius: radii.xl,
           borderTopRightRadius: radii.xl,
@@ -203,7 +203,9 @@ export function MarathonPredictionModalView({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
           <div style={{ display: "grid", gap: spacing[8] }}>
             <span style={{ ...typography.small, color: colors.textMuted }}>{toStageLabel(currentSummary)} · MARATHON MODE</span>
-            <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Completa tus grupos sin cortar el ritmo</h2>
+            <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>
+              {currentSummary.homeTeam.name} vs {currentSummary.awayTeam.name}
+            </h2>
             <p style={{ margin: 0, fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{helperText}</p>
           </div>
           <button
@@ -226,12 +228,12 @@ export function MarathonPredictionModalView({
 
         <div
           style={{
-            display: "grid",
-            gap: spacing[12],
-            padding: spacing[16],
-            borderRadius: radii.lg,
-            background: "rgba(255, 255, 255, 0.04)",
-            border: `1px solid ${colors.border}`
+          display: "grid",
+          gap: spacing[12],
+          padding: spacing[14],
+          borderRadius: radii.lg,
+          background: "rgba(255, 255, 255, 0.04)",
+          border: `1px solid ${colors.border}`
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: spacing[12], flexWrap: "wrap" }}>
@@ -358,15 +360,16 @@ export function MarathonPredictionModalView({
           </div>
         ) : null}
 
-        <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+        <Button fullWidth onClick={onSave} disabled={!isEditable || isSaving || isLoading} loading={isSaving}>
+          {canGoNext ? "Guardar y seguir" : "Guardar prediccion"}
+        </Button>
+
+        <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
           <Button variant="ghost" onClick={onPrevious} disabled={!canGoPrevious || isSaving}>
             Anterior
           </Button>
           <Button variant="secondary" onClick={onNext} disabled={!canGoNext || isSaving}>
-            Siguiente
-          </Button>
-          <Button onClick={onSave} disabled={!isEditable || isSaving || isLoading} loading={isSaving}>
-            {canGoNext ? "Guardar y seguir" : "Guardar prediccion"}
+            {nextSummary ? "Saltar por ahora" : "Cerrar"}
           </Button>
         </div>
       </Card>
@@ -490,15 +493,17 @@ export function MarathonPredictionModal({
         predictedQualifierTeamId: shouldRequireQualifier ? formState.predictedQualifierTeamId || null : null
       };
 
+      const hasNextMatch = currentIndex >= 0 && currentIndex < matchIds.length - 1;
+
       await saveMatchPrediction(token, detail.matchId, payload);
       setSavedCount((current) => current + 1);
       setNotice({
         tone: "success",
-        message: "Prediccion guardada. Seguimos con el siguiente partido."
+        message: hasNextMatch ? "Prediccion guardada. Seguimos con el siguiente partido." : "Prediccion guardada."
       });
       onSaved?.();
 
-      if (currentIndex >= 0 && currentIndex < matchIds.length - 1) {
+      if (hasNextMatch) {
         setCurrentMatchId(matchIds[currentIndex + 1] ?? null);
       } else {
         onClose();
@@ -532,7 +537,14 @@ export function MarathonPredictionModal({
       onClassifierChange={(value) => setFormState((current) => ({ ...current, predictedQualifierTeamId: value }))}
       onClose={onClose}
       onHomeChange={(value) => setFormState((current) => ({ ...current, homeScorePred: value }))}
-      onNext={() => goToRelativeMatch(1)}
+      onNext={() => {
+        if (nextSummary) {
+          goToRelativeMatch(1);
+          return;
+        }
+
+        onClose();
+      }}
       onPrevious={() => goToRelativeMatch(-1)}
       onSave={handleSave}
       progressLabel={progressLabel}
