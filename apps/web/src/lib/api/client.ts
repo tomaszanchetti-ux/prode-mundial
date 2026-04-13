@@ -1,5 +1,7 @@
 import type {
   ApiResponse,
+  ConfirmMacroAdjustmentInput,
+  ConfirmMacroAdjustmentResponse,
   CreateLeagueInput,
   JoinLeagueInput,
   LeagueDetail,
@@ -9,9 +11,12 @@ import type {
   ListMatchesQuery,
   ListMatchesResponse,
   MatchDetail,
+  MacroPicksResponse,
   PointsResponse,
   PreTournamentSummary,
   PublicBootstrap,
+  SaveMacroPicksInput,
+  SaveMacroPicksResponse,
   SaveMatchPredictionInput,
   SaveMatchPredictionResponse,
   TuMundialResponse,
@@ -19,6 +24,8 @@ import type {
   UserProfile
 } from "@prode/shared";
 import {
+  confirmMacroAdjustmentInputSchema,
+  confirmMacroAdjustmentResponseSchema,
   createLeagueInputSchema,
   joinLeagueInputSchema,
   leagueDetailSchema,
@@ -27,9 +34,12 @@ import {
   listMyLeaguesResponseSchema,
   listMatchesResponseSchema,
   matchDetailSchema,
+  macroPicksResponseSchema,
   pointsResponseSchema,
   preTournamentSummarySchema,
   publicBootstrapSchema,
+  saveMacroPicksInputSchema,
+  saveMacroPicksResponseSchema,
   saveMatchPredictionResponseSchema,
   tuMundialResponseSchema,
   userProfileSchema
@@ -142,6 +152,58 @@ export async function getTuMundial(token: string): Promise<TuMundialResponse> {
   }
 
   return tuMundialResponseSchema.parse(await parseJson<TuMundialResponse>(response));
+}
+
+export async function getMacroPicks(token: string): Promise<MacroPicksResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load macro picks (${response.status}).`);
+  }
+
+  return macroPicksResponseSchema.parse(await parseJson<MacroPicksResponse>(response));
+}
+
+export async function saveMacroPicks(token: string, input: SaveMacroPicksInput): Promise<SaveMacroPicksResponse> {
+  const payload = saveMacroPicksInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to save macro picks (${response.status}).`);
+  }
+
+  return saveMacroPicksResponseSchema.parse(await parseJson<SaveMacroPicksResponse>(response));
+}
+
+export async function confirmMacroAdjustment(
+  token: string,
+  input: ConfirmMacroAdjustmentInput
+): Promise<ConfirmMacroAdjustmentResponse> {
+  const payload = confirmMacroAdjustmentInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/adjustment`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to confirm macro adjustment (${response.status}).`);
+  }
+
+  return confirmMacroAdjustmentResponseSchema.parse(await parseJson<ConfirmMacroAdjustmentResponse>(response));
 }
 
 export async function getPoints(token: string): Promise<PointsResponse> {

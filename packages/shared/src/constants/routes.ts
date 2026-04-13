@@ -3,6 +3,7 @@ export const APP_ROUTES = {
   login: "/login",
   home: "/home",
   tournament: "/tournament",
+  macroPicks: "/macro-picks",
   matches: "/matches",
   rankings: "/rankings",
   leagues: "/leagues",

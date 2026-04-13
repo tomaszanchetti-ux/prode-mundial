@@ -1231,3 +1231,259 @@ Nuevo punto exacto de continuidad:
   - CTA contextual desde standings de vuelta al detail
   - QA manual completa de create -> invite -> login -> join -> detail -> rankings
   - cierre formal de la epica o apertura de bugs/regresiones puntuales
+
+---
+
+# Actualizacion operativa nueva: Epic 4 validada y lista para cierre formal
+
+Durante la sesion documentada en:
+
+- `docs/handoff/Prode Mundial_WS23_13042026.md`
+
+se ejecuto el cierre operativo de `Epic 4` sin abrir features nuevas.
+
+Resultado efectivo:
+
+- `Epic 4` queda validada manualmente sobre el flujo completo:
+  - create
+  - share / invite
+  - open invite
+  - login con retorno
+  - join
+  - detail
+  - rankings
+- las validaciones automatizadas siguen en verde:
+  - `./pnpm typecheck`
+  - `./pnpm test`
+- no quedaron bugs bloqueantes documentados para la capa social actual
+
+Nuevo criterio de continuidad:
+
+- `Epic 4 — Leagues, Invite Flow, Membership & League Detail` puede tratarse como cerrable
+- el siguiente foco natural del backlog pasa a ser:
+  - `Epic 5 — Macro Picks & Post-Group Adjustment`
+- el arranque recomendado para `Epic 5` mantiene el orden obligatorio:
+  - contratos shared
+  - logica de dominio y persistencia backend
+  - endpoints API
+  - UI de `macro-picks`
+  - tests minimos utiles
+
+Estado Git esperado para la siguiente ejecucion:
+
+- abrir branch dedicada para `Epic 5`
+- no reabrir `Epic 4` salvo bug/regresion concreta detectada durante implementacion posterior
+
+---
+
+# Actualizacion operativa nueva: Epic 5 slice 1 ya abierto
+
+Durante la sesion documentada en:
+
+- `docs/handoff/Prode Mundial_WS24_13042026.md`
+
+quedo abierto en codigo el primer slice tecnico de:
+
+- `Epic 5 — Macro Picks & Post-Group Adjustment`
+
+Alcance efectivamente entregado:
+
+- `packages/shared` ya expone el dominio base de `macro-picks`:
+  - constantes de grupos `A-L`
+  - estados del modulo macro
+  - penalty model del ajuste
+  - contratos y schemas para:
+    - `GET /api/v1/macro-picks`
+    - `PUT /api/v1/macro-picks`
+    - `POST /api/v1/macro-picks/adjustment`
+  - nuevos `ApiErrorCode` publicos:
+    - `INVALID_GROUP_PICK_DUPLICATE`
+    - `INVALID_FINALISTS_DUPLICATE`
+    - `INVALID_CHAMPION_NOT_IN_FINALISTS`
+    - `MACRO_PICKS_LOCKED`
+    - `ADJUSTMENT_NOT_AVAILABLE`
+    - `ADJUSTMENT_ALREADY_USED`
+- `apps/api` ya tiene dominio operativo inicial:
+  - repositorio `macroPredictions`
+  - servicio de estado / deadlines / completion
+  - guardado inicial de picks
+  - confirmacion de ajuste
+  - derivacion server-side de:
+    - `status`
+    - `isLocked`
+    - `adjustmentAvailable`
+    - `adjustmentAlreadyUsed`
+    - `completion`
+- endpoints ya abiertos:
+  - `GET /api/v1/macro-picks`
+  - `PUT /api/v1/macro-picks`
+  - `POST /api/v1/macro-picks/adjustment`
+- cobertura automatizada nueva:
+  - tests de servicio para estado inicial, draft save, validacion de finalistas y ajuste
+  - tests HTTP para GET / PUT / POST de `macro-picks`
+
+Validacion ejecutada en esta sesion:
+
+- `./pnpm typecheck`
+- `./pnpm test`
+
+Resultado:
+
+- `typecheck` global OK
+- `test` global OK
+
+Nuevo punto exacto de continuidad:
+
+- siguiente slice natural de `Epic 5`:
+  - abrir UI real de `macro-picks` en `apps/web`
+  - modelar pantalla editable + progreso + deadline
+  - exponer estado bloqueado y ajuste disponible
+  - conectar guardado inicial y confirmacion de ajuste
+
+---
+
+# Actualizacion operativa nueva: Epic 5 slice 2 ya abierto
+
+Durante la sesion documentada en:
+
+- `docs/handoff/Prode Mundial_WS25_13042026.md`
+
+quedo abierto en codigo el segundo slice vertical de `Epic 5`.
+
+Alcance efectivamente entregado:
+
+- `apps/web` ya tiene ruta protegida nueva:
+  - `/macro-picks`
+- `apps/web` ya consume la API nueva con cliente real para:
+  - `GET /api/v1/macro-picks`
+  - `PUT /api/v1/macro-picks`
+  - `POST /api/v1/macro-picks/adjustment`
+- ya existe pantalla real `Macro Picks` con:
+  - hero + estado del modulo
+  - progreso de completitud
+  - deadlines visibles
+  - formulario editable por grupos `A-L`
+  - finalistas + campeon
+  - guardado draft / submitted
+  - lectura readonly del estado bloqueado
+  - flujo visible de ajuste disponible
+  - estado readonly de ajuste ya confirmado
+- `Tu Mundial` ya suma CTA explicita para abrir `Macro Picks`
+- tests UI nuevos cubren:
+  - draft editable
+  - locked original
+  - adjustment available
+
+Validacion ejecutada en esta sesion:
+
+- `./pnpm --filter @prode/web typecheck`
+- `./pnpm --filter @prode/web test`
+- `./pnpm typecheck`
+- `./pnpm test`
+
+Resultado:
+
+- `typecheck` web OK
+- `test` web OK
+- `typecheck` global OK
+- `test` global OK
+
+Nuevo punto exacto de continuidad:
+
+- siguiente slice natural de `Epic 5`:
+  - polish UX del flujo macro
+  - mejorar validaciones client-side y mensajes de error por regla
+  - decidir si el acceso a `Macro Picks` tambien sube a `home`
+  - revisar si el modulo ya queda cerrable en web o si conviene una pasada visual adicional
+
+---
+
+# Actualizacion operativa nueva: Epic 5 slice 3 UX polish
+
+Durante la sesion documentada en:
+
+- `docs/handoff/Prode Mundial_WS26_13042026.md`
+
+se cerro un polish UX corto sobre la pantalla web de `Macro Picks`.
+
+Alcance efectivamente entregado:
+
+- validaciones client-side nuevas para evitar combinaciones imposibles:
+  - equipo duplicado en 1° y 2° de un mismo grupo
+  - finalistas duplicados
+  - campeon fuera de una dupla valida de finalistas
+  - ajuste post-grupos incompleto o inconsistente
+- CTA principal ahora se bloquea cuando la combinacion actual es invalida
+- la pantalla ya muestra:
+  - card de ayuda sobre lo que falta para cerrar el pick inicial
+  - mensajes especificos de validacion antes de guardar
+  - mensajes especificos dentro del bloque de ajuste
+  - feedback de guardado draft con porcentaje de completitud
+- cobertura automatizada ampliada para:
+  - validaciones de picks iniciales
+  - validaciones del ajuste
+  - hint de completitud
+
+Validacion ejecutada en esta sesion:
+
+- `./pnpm --filter @prode/web typecheck`
+- `./pnpm --filter @prode/web test`
+
+Resultado:
+
+- `typecheck` web OK
+- `test` web OK
+
+Nuevo punto exacto de continuidad:
+
+- `Epic 5` queda muy cerca de cerrable en web
+- siguiente paso recomendado:
+  - decidir si se suma o no un acceso a `Macro Picks` desde `home`
+  - hacer una pasada visual/manual corta en mobile + desktop
+  - si no aparecen fricciones nuevas, marcar `Epic 5` como cerrable y recien ahi abrir `Epic 6`
+
+---
+
+# Actualizacion operativa nueva: Epic 5 cerrada
+
+Durante la sesion documentada en:
+
+- `docs/handoff/Prode Mundial_WS27_13042026.md`
+
+`Epic 5 — Macro Picks & Post-Group Adjustment` queda cerrada a nivel MVP.
+
+Criterio de cierre alcanzado:
+
+- backend/shared del modulo macro implementado
+- endpoints reales operativos para lectura, guardado inicial y ajuste
+- pantalla web protegida operativa con todos los estados principales del flujo
+- validaciones UX minimas cubiertas
+- CTA desde `Tu Mundial` operativa
+- validacion automatizada OK
+- QA manual final OK en revision local desktop + mobile
+
+Decision explicita de alcance:
+
+- no se suma por ahora acceso adicional desde `home`
+- para MVP alcanza con descubribilidad desde `Tu Mundial`
+- scoring macro real e impacto en standings quedan fuera de `Epic 5`
+
+Validacion consolidada para cierre:
+
+- `./pnpm --filter @prode/web typecheck`
+- `./pnpm --filter @prode/web test`
+- `./pnpm typecheck`
+- `./pnpm test`
+- QA manual final del flujo `Tu Mundial -> Macro Picks`
+
+Resultado:
+
+- `Epic 5` cerrada
+
+Nuevo punto exacto de continuidad:
+
+- siguiente bloque recomendado:
+  - abrir `Epic 6`
+  - conectar scoring macro real
+  - impactar puntos / standings
+  - definir strategy de recomputacion y visibilidad del resultado
