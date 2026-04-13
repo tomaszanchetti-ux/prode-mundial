@@ -1,5 +1,9 @@
 import type {
   ApiResponse,
+  CreateLeagueInput,
+  JoinLeagueInput,
+  LeagueDetail,
+  LeagueInvitePreview,
   LeagueStandingsResponse,
   ListMyLeaguesResponse,
   ListMatchesQuery,
@@ -15,6 +19,10 @@ import type {
   UserProfile
 } from "@prode/shared";
 import {
+  createLeagueInputSchema,
+  joinLeagueInputSchema,
+  leagueDetailSchema,
+  leagueInvitePreviewSchema,
   leagueStandingsResponseSchema,
   listMyLeaguesResponseSchema,
   listMatchesResponseSchema,
@@ -85,6 +93,18 @@ export async function getPublicBootstrap(): Promise<PublicBootstrap> {
   return publicBootstrapSchema.parse(await parseJson<PublicBootstrap>(response));
 }
 
+export async function getLeagueInvitePreview(inviteToken: string): Promise<LeagueInvitePreview> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/public/leagues/invite/${inviteToken}`, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load invite preview (${response.status}).`);
+  }
+
+  return leagueInvitePreviewSchema.parse(await parseJson<LeagueInvitePreview>(response));
+}
+
 export async function getMyProfile(token: string): Promise<UserProfile> {
   const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/me`, {
     cache: "no-store",
@@ -148,6 +168,55 @@ export async function getMyLeagues(token: string): Promise<ListMyLeaguesResponse
   }
 
   return listMyLeaguesResponseSchema.parse(await parseJson<ListMyLeaguesResponse>(response));
+}
+
+export async function createLeague(token: string, input: CreateLeagueInput): Promise<LeagueDetail> {
+  const payload = createLeagueInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to create league (${response.status}).`);
+  }
+
+  return leagueDetailSchema.parse(await parseJson<LeagueDetail>(response));
+}
+
+export async function joinLeague(token: string, input: JoinLeagueInput): Promise<LeagueDetail> {
+  const payload = joinLeagueInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues/join`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to join league (${response.status}).`);
+  }
+
+  return leagueDetailSchema.parse(await parseJson<LeagueDetail>(response));
+}
+
+export async function getLeagueDetail(token: string, leagueId: string): Promise<LeagueDetail> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues/${leagueId}`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load league detail (${response.status}).`);
+  }
+
+  return leagueDetailSchema.parse(await parseJson<LeagueDetail>(response));
 }
 
 export async function getLeagueStandings(token: string, leagueId: string): Promise<LeagueStandingsResponse> {

@@ -21,10 +21,21 @@ export class LeaguesRepository {
     return snapshot.exists ? (snapshot.data() as StoredLeague) : null;
   }
 
+  async findLeagueByInviteCode(inviteCode: string): Promise<StoredLeague | null> {
+    const snapshot = await leaguesCollection.where("inviteCode", "==", inviteCode).limit(1).get();
+    const document = snapshot.docs[0];
+    return document ? (document.data() as StoredLeague) : null;
+  }
+
+  async findLeagueByInviteToken(inviteToken: string): Promise<StoredLeague | null> {
+    const snapshot = await leaguesCollection.where("inviteToken", "==", inviteToken).limit(1).get();
+    const document = snapshot.docs[0];
+    return document ? (document.data() as StoredLeague) : null;
+  }
+
   async upsertLeague(league: StoredLeague): Promise<void> {
     await leaguesCollection.doc(league.leagueId).set(league, { merge: true });
   }
 }
 
 export const leaguesRepository = new LeaguesRepository();
-

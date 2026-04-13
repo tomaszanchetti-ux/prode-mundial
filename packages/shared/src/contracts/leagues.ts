@@ -10,8 +10,19 @@ export type LeagueSummary = {
   inviteLink: string | null;
 };
 
+export type LeagueMembershipRole = "owner" | "member";
+
 export type ListMyLeaguesResponse = {
   items: LeagueSummary[];
+};
+
+export type CreateLeagueInput = {
+  name: string;
+};
+
+export type JoinLeagueInput = {
+  inviteCode?: string;
+  inviteToken?: string;
 };
 
 export type LeagueStandingEntry = {
@@ -34,6 +45,8 @@ export type LeagueStandingSummary = {
   macroPoints: number;
 };
 
+export type LeagueStandingMini = LeagueStandingSummary;
+
 export type LeagueStandingsLeague = {
   leagueId: string;
   name: string;
@@ -41,9 +54,28 @@ export type LeagueStandingsLeague = {
   membersCount: number;
 };
 
+export type LeagueDetail = {
+  leagueId: string;
+  name: string;
+  memberLimit: number;
+  membersCount: number;
+  isActive: boolean;
+  inviteCode: string;
+  inviteLink: string | null;
+  membershipRole: LeagueMembershipRole;
+  myStanding: LeagueStandingMini | null;
+};
+
+export type LeagueInvitePreview = {
+  leagueId: string;
+  name: string;
+  memberLimit: number;
+  membersCount: number;
+  isActive: boolean;
+};
+
 export type LeagueStandingsResponse = {
   league: LeagueStandingsLeague;
   items: LeagueStandingEntry[];
   myStanding: LeagueStandingSummary | null;
 };
-

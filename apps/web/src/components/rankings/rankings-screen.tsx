@@ -4,6 +4,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import type { LeagueStandingsResponse, LeagueSummary, PointsResponse } from "@prode/shared";
 import { Button, Card, StatusTag, colors, spacing, typography } from "@prode/ui";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getLeagueStandings, getMyLeagues, getPoints } from "@/lib/api/client";
 
@@ -110,7 +111,7 @@ export function RankingsScreenView({
           <Card style={{ gap: spacing[8], padding: spacing[16], background: "rgba(255,255,255,0.02)" }}>
             <span style={{ ...typography.small, color: colors.textMuted }}>SIN COMPETENCIA ACTIVA</span>
             <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
-              Todavia no hay ligas para mostrar. La creacion, invitaciones y join real se abren en `Epic 4`.
+              Todavia no hay ligas para mostrar. Crea una o unete a una desde la tab de ligas para ver tu tabla competitiva aqui.
             </p>
           </Card>
         ) : null}
@@ -232,14 +233,21 @@ function Metric({ label, value }: { label: string; value: string }) {
 }
 
 export function RankingsScreen() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { status, user } = useAuth();
   const [points, setPoints] = useState<PointsResponse | null>(null);
   const [leagues, setLeagues] = useState<LeagueSummary[]>([]);
   const [standings, setStandings] = useState<LeagueStandingsResponse | null>(null);
-  const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null);
+  const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(searchParams.get("leagueId"));
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    const nextLeagueId = searchParams.get("leagueId");
+    setSelectedLeagueId((current) => (nextLeagueId && nextLeagueId !== current ? nextLeagueId : current));
+  }, [searchParams]);
 
   useEffect(() => {
     let cancelled = false;
@@ -293,7 +301,10 @@ export function RankingsScreen() {
       selectedLeagueId={selectedLeagueId}
       isLoading={isLoading}
       errorMessage={errorMessage}
-      onSelectLeague={setSelectedLeagueId}
+      onSelectLeague={(leagueId) => {
+        setSelectedLeagueId(leagueId);
+        router.replace(`/rankings?leagueId=${leagueId}`);
+      }}
       onRetry={() => setReloadKey((value) => value + 1)}
     />
   );

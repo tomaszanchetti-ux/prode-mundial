@@ -1133,3 +1133,101 @@ Estado Git esperado para retoma posterior:
 - branch de cierre: `codex/epic-3-5-testing-closeout`
 - handoff mas reciente de referencia:
   - `docs/handoff/Prode Mundial_WS20_12042026.md`
+
+---
+
+# Actualizacion operativa nueva: Epic 4 slice 1 ya abierto
+
+Durante la sesion documentada en:
+
+- `docs/handoff/Prode Mundial_WS21_13042026.md`
+
+quedo abierto en codigo el primer slice vertical real de:
+
+- `Epic 4 — Leagues, Invite Flow, Membership & League Detail`
+
+Alcance efectivamente entregado:
+
+- contratos shared nuevos para:
+  - `CreateLeagueInput`
+  - `JoinLeagueInput`
+  - `LeagueDetail`
+  - `LeagueMembershipRole`
+- API nueva y operativa para:
+  - `POST /api/v1/leagues`
+  - `POST /api/v1/leagues/join`
+  - `GET /api/v1/leagues/:leagueId`
+- reglas base ya resueltas:
+  - creacion de liga con owner inicial
+  - generacion de `inviteCode`
+  - generacion de `inviteToken`
+  - `inviteLink` derivado
+  - unicidad logica de membership por `(leagueId, userId)`
+  - bloqueo por `ALREADY_LEAGUE_MEMBER`
+  - bloqueo por `LEAGUE_INACTIVE`
+  - bloqueo por `LEAGUE_CAPACITY_REACHED`
+  - bloqueo por `INVITE_INVALID`
+- `apps/web` ya abre flows reales dentro de `Ligas` para:
+  - crear liga
+  - unirse por codigo
+  - ver estado de exito con codigo e invite link
+
+Validacion ejecutada en esta sesion:
+
+- `./pnpm typecheck`
+- `./pnpm test`
+
+Resultado:
+
+- `typecheck` global OK
+- `test` global OK
+
+Nuevo punto exacto de continuidad:
+
+- siguiente slice natural de `Epic 4`:
+  - invite landing publica por token
+  - join autenticado desde link publico
+  - detail page de liga conectada a UI
+  - navegacion desde `Ligas` al detalle y desde detalle a standings
+
+---
+
+# Actualizacion operativa nueva: Epic 4 slice 2 ya abierto
+
+Durante la sesion documentada en:
+
+- `docs/handoff/Prode Mundial_WS22_13042026.md`
+
+quedo abierto en codigo el segundo slice vertical de `Epic 4`.
+
+Alcance efectivamente entregado:
+
+- endpoint publico nuevo:
+  - `GET /api/v1/public/leagues/invite/:inviteToken`
+- `POST /api/v1/leagues/join` ya acepta:
+  - `inviteCode`
+  - `inviteToken`
+- `apps/web` ya tiene:
+  - landing publica de invitacion en `/leagues/join?token=...`
+  - join autenticado desde link publico
+  - detalle protegido de liga en `/leagues/[leagueId]`
+  - navegacion desde `Ligas` al detalle
+  - salto desde detalle a `Posiciones` con `leagueId` preseleccionada
+
+Validacion ejecutada en esta sesion:
+
+- `./pnpm typecheck`
+- `./pnpm test`
+
+Resultado:
+
+- `typecheck` global OK
+- `test` global OK
+
+Nuevo punto exacto de continuidad:
+
+- siguiente slice natural de `Epic 4`:
+  - polish del detail page
+  - CTA contextual desde standings de vuelta al detail
+  - QA manual completa de create -> invite -> login -> join -> detail -> rankings
+  - cierre formal de la epica o apertura de bugs/regresiones puntuales

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const leagueMembershipRoleSchema = z.enum(["owner", "member"]);
+
 export const leagueSummarySchema = z.object({
   leagueId: z.string().min(1),
   name: z.string().min(1),
@@ -15,6 +17,19 @@ export const leagueSummarySchema = z.object({
 export const listMyLeaguesResponseSchema = z.object({
   items: z.array(leagueSummarySchema)
 });
+
+export const createLeagueInputSchema = z.object({
+  name: z.string().trim().min(3).max(40)
+});
+
+export const joinLeagueInputSchema = z.object({
+  inviteCode: z.string().trim().min(4).max(24).optional(),
+  inviteToken: z.string().trim().min(8).max(128).optional()
+})
+  .refine((value) => Boolean(value.inviteCode || value.inviteToken), {
+    message: "Either inviteCode or inviteToken is required.",
+    path: ["inviteCode"]
+  });
 
 export const leagueStandingEntrySchema = z.object({
   position: z.number().int().positive(),
@@ -36,6 +51,8 @@ export const leagueStandingSummarySchema = z.object({
   macroPoints: z.number().int().nonnegative()
 });
 
+export const leagueStandingMiniSchema = leagueStandingSummarySchema;
+
 export const leagueStandingsLeagueSchema = z.object({
   leagueId: z.string().min(1),
   name: z.string().min(1),
@@ -43,9 +60,28 @@ export const leagueStandingsLeagueSchema = z.object({
   membersCount: z.number().int().nonnegative()
 });
 
+export const leagueDetailSchema = z.object({
+  leagueId: z.string().min(1),
+  name: z.string().min(1),
+  memberLimit: z.number().int().positive(),
+  membersCount: z.number().int().nonnegative(),
+  isActive: z.boolean(),
+  inviteCode: z.string().min(1),
+  inviteLink: z.string().url().nullable(),
+  membershipRole: leagueMembershipRoleSchema,
+  myStanding: leagueStandingMiniSchema.nullable()
+});
+
+export const leagueInvitePreviewSchema = z.object({
+  leagueId: z.string().min(1),
+  name: z.string().min(1),
+  memberLimit: z.number().int().positive(),
+  membersCount: z.number().int().nonnegative(),
+  isActive: z.boolean()
+});
+
 export const leagueStandingsResponseSchema = z.object({
   league: leagueStandingsLeagueSchema,
   items: z.array(leagueStandingEntrySchema),
   myStanding: leagueStandingSummarySchema.nullable()
 });
-

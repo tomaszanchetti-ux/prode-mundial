@@ -1,4 +1,7 @@
 import type {
+  LeagueDetail,
+  LeagueInvitePreview,
+  LeagueMembershipRole,
   LeagueStandingSummary,
   LeagueStandingsLeague,
   LeagueSummary,
@@ -41,6 +44,12 @@ export type StoredLeagueStanding = UserPointsSummary & {
 
 export type LeagueSummaryView = LeagueSummary;
 
+export type LeagueDetailView = LeagueDetail;
+
+export type LeagueInvitePreviewView = LeagueInvitePreview;
+
+export type LeagueMembershipRoleView = LeagueMembershipRole;
+
 export type LeagueStandingsView = {
   league: LeagueStandingsLeague;
   items: Array<
@@ -51,4 +60,3 @@ export type LeagueStandingsView = {
   >;
   myStanding: LeagueStandingSummary | null;
 };
-

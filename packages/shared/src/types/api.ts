@@ -18,6 +18,7 @@ export type ApiErrorCode =
   | "LEAGUE_CAPACITY_REACHED"
   | "ALREADY_LEAGUE_MEMBER"
   | "INVITE_INVALID"
+  | "INVITE_EXPIRED"
   | "INTERNAL_ERROR";
 
 export type ApiError = {
