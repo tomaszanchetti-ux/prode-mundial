@@ -6,6 +6,9 @@ import { getLeagueStandingsController } from "../domains/leagues/controllers/get
 import { getLeaguesController } from "../domains/leagues/controllers/get-leagues-controller";
 import { postJoinLeagueController } from "../domains/leagues/controllers/post-join-league-controller";
 import { postLeaguesController } from "../domains/leagues/controllers/post-leagues-controller";
+import { getMacroPicksController } from "../domains/macro-picks/controllers/get-macro-picks-controller";
+import { postMacroAdjustmentController } from "../domains/macro-picks/controllers/post-macro-adjustment-controller";
+import { putMacroPicksController } from "../domains/macro-picks/controllers/put-macro-picks-controller";
 import { getMatchDetailController } from "../domains/matches/controllers/get-match-detail-controller";
 import { getMatchesController } from "../domains/matches/controllers/get-matches-controller";
 import { putMatchPredictionController } from "../domains/matches/controllers/put-match-prediction-controller";
@@ -42,6 +45,9 @@ export function createApp() {
   app.get("/api/v1/me/pre-tournament", requireAuth, getPreTournamentSummaryController);
   app.get("/api/v1/me/tournament", requireAuth, getTuMundialController);
   app.get("/api/v1/points", requireAuth, getPointsController);
+  app.get("/api/v1/macro-picks", requireAuth, getMacroPicksController);
+  app.put("/api/v1/macro-picks", requireAuth, putMacroPicksController);
+  app.post("/api/v1/macro-picks/adjustment", requireAuth, postMacroAdjustmentController);
   app.get("/api/v1/leagues", requireAuth, getLeaguesController);
   app.post("/api/v1/leagues", requireAuth, postLeaguesController);
   app.post("/api/v1/leagues/join", requireAuth, postJoinLeagueController);

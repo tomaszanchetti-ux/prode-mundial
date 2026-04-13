@@ -18,6 +18,7 @@ type TournamentScreenViewProps = {
   isLoading: boolean;
   onContinuePredictions: () => void;
   onOpenHome: () => void;
+  onOpenMacroPicks: () => void;
   onOpenMatches: () => void;
   onRetry: () => void;
   preTournamentSummary: PreTournamentSummary | null;
@@ -143,6 +144,7 @@ export function TournamentScreenView({
   isLoading,
   onContinuePredictions,
   onOpenHome,
+  onOpenMacroPicks,
   onOpenMatches,
   onRetry,
   preTournamentSummary,
@@ -179,6 +181,9 @@ export function TournamentScreenView({
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <Button onClick={isPreTournament ? onContinuePredictions : onOpenHome}>
             {isPreTournament ? "Continuar mis predicciones" : "Volver al home en vivo"}
+          </Button>
+          <Button variant="secondary" onClick={onOpenMacroPicks}>
+            Abrir Macro Picks
           </Button>
           <Button variant="ghost" onClick={onOpenMatches}>
             Ver calendario
@@ -334,6 +339,7 @@ export function TournamentScreen() {
           router.push(APP_ROUTES.home);
         }}
         onOpenHome={() => router.push(APP_ROUTES.home)}
+        onOpenMacroPicks={() => router.push(APP_ROUTES.macroPicks)}
         onOpenMatches={() => router.push(APP_ROUTES.matches)}
         onRetry={() => setReloadKey((current) => current + 1)}
         preTournamentSummary={preTournamentSummary}

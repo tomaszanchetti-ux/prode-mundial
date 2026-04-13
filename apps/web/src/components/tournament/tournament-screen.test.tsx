@@ -62,6 +62,7 @@ test("TournamentScreenView renders projected groups and continue CTA", () => {
       isLoading: false,
       onContinuePredictions: () => undefined,
       onOpenHome: () => undefined,
+      onOpenMacroPicks: () => undefined,
       onOpenMatches: () => undefined,
       onRetry: () => undefined,
       preTournamentSummary: buildPreTournamentSummary(),
@@ -71,6 +72,7 @@ test("TournamentScreenView renders projected groups and continue CTA", () => {
 
   assert.match(html, /TU MUNDIAL/);
   assert.match(html, /Continuar mis predicciones/);
+  assert.match(html, /Abrir Macro Picks/);
   assert.match(html, /Grupo A/);
   assert.match(html, /Asi va quedando la tabla/);
   assert.match(html, /Mexico/);
@@ -86,6 +88,7 @@ test("TournamentScreenView keeps Tu Mundial accessible after the app returns to 
       isLoading: false,
       onContinuePredictions: () => undefined,
       onOpenHome: () => undefined,
+      onOpenMacroPicks: () => undefined,
       onOpenMatches: () => undefined,
       onRetry: () => undefined,
       preTournamentSummary: buildPreTournamentSummary({ isPreTournament: false }),
