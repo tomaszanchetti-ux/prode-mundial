@@ -1,4 +1,11 @@
-import type { ConfirmMacroAdjustmentResponse, MacroGroupPicks, MacroPicksResponse, SaveMacroPicksResponse } from "@prode/shared";
+import type {
+  ConfirmMacroAdjustmentResponse,
+  MacroGroupPicks,
+  MacroPicksResponse,
+  MacroTournamentResults,
+  MacroScoringLog,
+  SaveMacroPicksResponse
+} from "@prode/shared";
 
 export type StoredMacroPrediction = {
   userId: string;
@@ -21,3 +28,10 @@ export type MacroPicksView = MacroPicksResponse;
 export type SaveMacroPicksView = SaveMacroPicksResponse;
 
 export type ConfirmMacroAdjustmentView = ConfirmMacroAdjustmentResponse;
+
+export type StoredMacroScoringLog = MacroScoringLog;
+
+export type StoredMacroTournamentResults = MacroTournamentResults & {
+  tournamentId: string;
+  updatedAt: string;
+};

@@ -17,6 +17,11 @@ export class MacroPicksRepository {
   async upsert(prediction: StoredMacroPrediction): Promise<void> {
     await macroPredictionsCollection.doc(prediction.userId).set(prediction, { merge: true });
   }
+
+  async listSubmitted(): Promise<StoredMacroPrediction[]> {
+    const snapshot = await macroPredictionsCollection.where("isSubmitted", "==", true).get();
+    return snapshot.docs.map((doc) => doc.data() as StoredMacroPrediction);
+  }
 }
 
 export const macroPicksRepository = new MacroPicksRepository();

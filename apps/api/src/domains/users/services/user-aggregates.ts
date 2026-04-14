@@ -1,17 +1,19 @@
+import { macroScoringLogsRepository } from "../../macro-picks/repositories/macro-scoring-logs-repository";
 import { predictionsRepository } from "../../matches/repositories/predictions-repository";
 import { usersRepository } from "../repositories/users-repository";
 
 export async function rebuildUserAggregates(userId: string) {
-  const [profile, predictions] = await Promise.all([
+  const [profile, predictions, macroScoringLogs] = await Promise.all([
     usersRepository.findByUserId(userId),
-    predictionsRepository.listPredictionsByUser(userId)
+    predictionsRepository.listPredictionsByUser(userId),
+    macroScoringLogsRepository.listByUserId(userId)
   ]);
 
   if (!profile) {
     return null;
   }
 
-  const totals = predictions.reduce(
+  const matchTotals = predictions.reduce(
     (accumulator, prediction) => {
       if (!prediction.isScored || !prediction.scoringBreakdown) {
         return accumulator;
@@ -29,11 +31,14 @@ export async function rebuildUserAggregates(userId: string) {
     }
   );
 
+  const macroPoints = macroScoringLogs.reduce((total, log) => total + log.totalPoints, 0);
+
   const nextProfile = {
     ...profile,
-    totalPoints: totals.totalPoints,
-    exactHits: totals.exactHits,
-    correctSigns: totals.correctSigns
+    totalPoints: matchTotals.totalPoints + macroPoints,
+    macroPoints,
+    exactHits: matchTotals.exactHits,
+    correctSigns: matchTotals.correctSigns
   };
 
   await usersRepository.upsertProfile(nextProfile);

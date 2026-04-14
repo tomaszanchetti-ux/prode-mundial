@@ -14,7 +14,10 @@
     "ensure:wc2026": "tsx src/domains/matches/scripts/ensure-world-cup-2026-base-data.ts",
     "seed:competition-demo": "tsx src/domains/leagues/scripts/seed-competition-demo.ts",
     "reset:competition-demo": "tsx src/domains/leagues/scripts/reset-competition-demo.ts",
-    "fresh:competition-demo": "tsx src/domains/leagues/scripts/fresh-competition-demo.ts"
+    "fresh:competition-demo": "tsx src/domains/leagues/scripts/fresh-competition-demo.ts",
+    "upsert:macro-results": "tsx src/domains/macro-picks/scripts/upsert-macro-results.ts",
+    "score:macro": "tsx src/domains/macro-picks/scripts/score-macro.ts",
+    "rebuild:macro": "tsx src/domains/macro-picks/scripts/rebuild-macro-scoring.ts"
   },
   "dependencies": {
     "@prode/shared": "workspace:*",

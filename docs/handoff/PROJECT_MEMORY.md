@@ -1487,3 +1487,60 @@ Nuevo punto exacto de continuidad:
   - conectar scoring macro real
   - impactar puntos / standings
   - definir strategy de recomputacion y visibilidad del resultado
+
+---
+
+# Actualizacion operativa nueva: Epic 6 foundation backend ya implementada
+
+Durante la sesion documentada en:
+
+- `docs/handoff/Prode Mundial_WS28_14042026.md`
+
+se abrio `Epic 6` y quedo cerrada su base tecnica principal del lado backend.
+
+Alcance efectivamente entregado:
+
+- reglas shared de `macro scoring` formalizadas
+- contratos/schemas nuevos para:
+  - `MacroScoringBreakdown`
+  - `MacroScoringLog`
+  - `MacroTournamentResults`
+- engine puro de scoring macro ya implementado en API
+- scoring por usuario ya operativo
+- batch de scoring por torneo ya operativo
+- rebuild full idempotente ya operativo
+- nueva fuente oficial minima:
+  - `macroResults/{tournamentId}`
+- `user aggregates` ahora recomponen:
+  - `macroPoints`
+  - `totalPoints = matchPoints + macroPoints`
+- standings de ligas ya reflejan impacto de macro scoring via rebuild
+
+Actualizacion operativa nueva adicional:
+
+- `apps/api` ya expone scripts locales para:
+  - cargar `macroResults`
+  - correr `score:macro`
+  - correr `rebuild:macro`
+- `apps/jobs` ya soporta:
+  - `JOB_NAME=score-macro`
+  - `TOURNAMENT_ID`
+
+Validacion ejecutada en esta sesion:
+
+- `corepack pnpm --filter @prode/shared build`
+- `corepack pnpm --filter @prode/api typecheck`
+- `corepack pnpm --filter @prode/api test`
+- `corepack pnpm --filter @prode/jobs typecheck`
+- `corepack pnpm --filter @prode/jobs test`
+
+Resultado:
+
+- todo OK
+
+Nuevo punto exacto de continuidad:
+
+- siguiente slice recomendado:
+  - operacion/admin minima para disparar `score-macro`
+  - evaluar endpoint admin para upsert de `macroResults`
+  - revisar si `points`, `home` o standings necesitan breakdown macro adicional
