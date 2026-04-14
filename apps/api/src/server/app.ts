@@ -11,6 +11,7 @@ import { postMacroAdjustmentController } from "../domains/macro-picks/controller
 import { putMacroPicksController } from "../domains/macro-picks/controllers/put-macro-picks-controller";
 import { getMatchDetailController } from "../domains/matches/controllers/get-match-detail-controller";
 import { getMatchesController } from "../domains/matches/controllers/get-matches-controller";
+import { postMatchResultController } from "../domains/matches/controllers/post-match-result-controller";
 import { putMatchPredictionController } from "../domains/matches/controllers/put-match-prediction-controller";
 import { getPointsController } from "../domains/points/controllers/get-points-controller";
 import { getBootstrapController } from "../domains/public/controllers/get-bootstrap-controller";
@@ -19,6 +20,7 @@ import { getTuMundialController } from "../domains/tournament/controllers/get-tu
 import { getMeController } from "../domains/users/controllers/get-me-controller";
 import { patchMeController } from "../domains/users/controllers/patch-me-controller";
 import { requireAuth } from "./middleware/auth";
+import { requireAdmin } from "./middleware/require-admin";
 import { errorHandler } from "./middleware/error-handler";
 
 export function createApp() {
@@ -56,6 +58,7 @@ export function createApp() {
   app.get("/api/v1/matches", requireAuth, getMatchesController);
   app.get("/api/v1/matches/:matchId", requireAuth, getMatchDetailController);
   app.put("/api/v1/matches/:matchId/prediction", requireAuth, putMatchPredictionController);
+  app.post("/api/v1/admin/matches/:matchId/result", requireAuth, requireAdmin, postMatchResultController);
   app.patch("/api/v1/me", requireAuth, patchMeController);
 
   app.use(errorHandler);

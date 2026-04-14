@@ -1592,3 +1592,51 @@ Nuevo punto exacto de continuidad:
   - abrir `Epic 8`
   - implementar admin ops minima API-first
   - arrancar por triggers manuales, lectura operativa e ingesta/correccion de resultados
+
+# Actualizacion operativa nueva: Toma de control por Claude Code (WS30)
+
+Durante la sesion documentada en:
+
+- `docs/handoff/Prode Mundial_WS30_14042026.md`
+
+Se realizo una auditoria completa del proyecto y toma de control por Claude Code (previamente gestionado por Codex, WS1-WS29).
+
+## Diagnostico principal
+
+Gaps criticos identificados:
+
+1. **Sin integracion de resultados en vivo** — no hay conexion con API de futbol (football-data.org, API-Football, etc). Resultados se seedean a mano via scripts. Showstopper para produccion.
+2. **Inline styles everywhere** — ~5,400 lineas de JSX con `style={{}}`. No hay Tailwind ni CSS framework. Imposible iterar sobre UX.
+3. **Dark mode forzado** — no encaja con app deportiva casual.
+4. **Sin deployment** — cero config de deploy despues de 29 sesiones.
+5. **Componentes enormes** — macro-picks 755 lineas, home 587 lineas, matches 529 lineas.
+
+## Plan Maestro aprobado
+
+Documento completo: `docs/product/MASTER_PLAN_SHIP_IT.md`
+
+Fases:
+
+- FASE 1A: Integrar API de resultados en vivo (football-data.org)
+- FASE 1B: Migrar estilos a Tailwind CSS
+- FASE 1C: Rediseno UI (light mode, componentes simples, responsive real)
+- FASE 1D: PWA (manifest + service worker + meta tags)
+- FASE 1E: Deploy a GCP (Firebase Hosting + Cloud Run + Cloud Scheduler)
+- FASE 2: UX Polish
+- FASE 3: Pre-launch
+
+## Decision de infraestructura
+
+- Se descarta Vercel — todo se despliega en Google Cloud
+- Web: Firebase Hosting
+- API: Cloud Run
+- Jobs: Cloud Run Jobs
+- Scheduler: Cloud Scheduler
+- Mobile: PWA (instalable desde browser, sin app stores)
+
+## Nuevo punto exacto de continuidad
+
+- WS31: FASE 1A — integracion de API de resultados en vivo
+- Evaluar football-data.org vs API-Football
+- Crear MatchSyncService + job de sync + endpoint admin fallback
+- No tocar UI ni scoring engine (ya funcionan)
