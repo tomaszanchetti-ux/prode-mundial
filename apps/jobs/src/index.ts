@@ -1,5 +1,6 @@
 import "./env";
 import { runMatchLockEnforcement } from "./domains/match-lock/run-match-lock-enforcement";
+import { runRebuildMacroJob } from "./domains/score-macro/run-rebuild-macro-job";
 import { runScoreMacroJob } from "./domains/score-macro/run-score-macro-job";
 
 const jobName = process.env.JOB_NAME ?? "match-lock-enforcement";
@@ -19,6 +20,18 @@ async function main() {
 
   if (jobName === "score-macro") {
     const summary = await runScoreMacroJob();
+    console.log(
+      JSON.stringify({
+        ok: true,
+        jobName,
+        summary
+      })
+    );
+    return;
+  }
+
+  if (jobName === "rebuild-macro") {
+    const summary = await runRebuildMacroJob();
     console.log(
       JSON.stringify({
         ok: true,

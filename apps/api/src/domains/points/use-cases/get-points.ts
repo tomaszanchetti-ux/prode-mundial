@@ -1,8 +1,10 @@
-import type { MatchStage, PointsResponse } from "@prode/shared";
+import type { MatchStage, PointsByStage, PointsResponse } from "@prode/shared";
 import { matchesRepository } from "../../matches/repositories/matches-repository";
 import { predictionsRepository } from "../../matches/repositories/predictions-repository";
 import { teamsRepository } from "../../matches/repositories/teams-repository";
+import type { StoredMatchStatus } from "../../matches/types";
 import { usersRepository } from "../../users/repositories/users-repository";
+import { macroScoringLogsRepository } from "../../macro-picks/repositories/macro-scoring-logs-repository";
 
 function toStageLabel(stage: MatchStage, groupId: string | null) {
   if (stage === "group" && groupId) {
@@ -22,18 +24,28 @@ function toStageLabel(stage: MatchStage, groupId: string | null) {
 }
 
 export async function getPoints(userId: string): Promise<PointsResponse> {
-  const [profile, predictions, matches] = await Promise.all([
+  const [profile, predictions, matches, macroScoringLogs] = await Promise.all([
     usersRepository.findByUserId(userId),
     predictionsRepository.listPredictionsByUser(userId),
-    matchesRepository.listMatches()
+    matchesRepository.listMatches(),
+    macroScoringLogsRepository.listByUserId(userId)
   ]);
+
+  const matchPoints = predictions.reduce((total, prediction) => total + prediction.pointsAwarded, 0);
+  const macroPoints = macroScoringLogs.reduce((total, log) => total + log.totalPoints, 0);
+  const totals = {
+    totalPoints: profile?.totalPoints ?? matchPoints + macroPoints,
+    macroPoints: profile?.macroPoints ?? macroPoints,
+    matchPoints,
+    exactHits: profile?.exactHits ?? 0,
+    correctSigns: profile?.correctSigns ?? 0
+  };
 
   if (!profile) {
     return {
-      totalPoints: 0,
-      macroPoints: 0,
-      exactHits: 0,
-      correctSigns: 0,
+      ...totals,
+      totals,
+      byStage: createEmptyStageTotals(macroPoints),
       recentMatches: []
     };
   }
@@ -61,6 +73,8 @@ export async function getPoints(userId: string): Promise<PointsResponse> {
         matchId: prediction.matchId,
         matchLabel: `${homeTeamLabel} vs ${awayTeamLabel}`,
         stageLabel: toStageLabel(match?.stage ?? "group", match?.groupId ?? null),
+        userPredictionSummary: formatPredictionSummary(prediction.homeScorePred, prediction.awayScorePred, prediction.predictedQualifierTeamId),
+        officialResultSummary: formatOfficialResultSummary(match?.homeScore90, match?.awayScore90, match?.winnerTeamId, match?.status),
         points: prediction.pointsAwarded,
         scoredAt: prediction.scoredAt ?? prediction.updatedAt,
         breakdown: {
@@ -75,11 +89,54 @@ export async function getPoints(userId: string): Promise<PointsResponse> {
       };
     });
 
+  const byStage = createEmptyStageTotals(macroPoints);
+
+  for (const prediction of scoredPredictions) {
+    const match = matchMap.get(prediction.matchId);
+
+    if (!match) {
+      continue;
+    }
+
+    byStage[match.stage] += prediction.pointsAwarded;
+  }
+
   return {
-    totalPoints: profile.totalPoints,
-    macroPoints: profile.macroPoints,
-    exactHits: profile.exactHits,
-    correctSigns: profile.correctSigns,
+    ...totals,
+    totals,
+    byStage,
     recentMatches
   };
+}
+
+function createEmptyStageTotals(macroPoints: number): PointsByStage {
+  return {
+    group: 0,
+    R32: 0,
+    R16: 0,
+    QF: 0,
+    SF: 0,
+    BRONZE: 0,
+    FINAL: 0,
+    macro: macroPoints
+  };
+}
+
+function formatPredictionSummary(homeScore: number, awayScore: number, qualifierTeamId?: string | null) {
+  const summary = `${homeScore}-${awayScore}`;
+  return qualifierTeamId ? `${summary} (${qualifierTeamId})` : summary;
+}
+
+function formatOfficialResultSummary(
+  homeScore90: number | null | undefined,
+  awayScore90: number | null | undefined,
+  winnerTeamId: string | null | undefined,
+  status: StoredMatchStatus | undefined
+) {
+  if (homeScore90 === null || awayScore90 === null || homeScore90 === undefined || awayScore90 === undefined) {
+    return status === "finished" || status === "corrected" ? "Resultado cargado" : "Pendiente";
+  }
+
+  const summary = `${homeScore90}-${awayScore90}`;
+  return winnerTeamId ? `${summary} (${winnerTeamId})` : summary;
 }

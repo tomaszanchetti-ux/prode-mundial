@@ -8,13 +8,33 @@ import { RankingsScreenView } from "./rankings-screen";
 const points: PointsResponse = {
   totalPoints: 18,
   macroPoints: 0,
+  matchPoints: 18,
   exactHits: 2,
   correctSigns: 4,
+  totals: {
+    totalPoints: 18,
+    macroPoints: 0,
+    matchPoints: 18,
+    exactHits: 2,
+    correctSigns: 4
+  },
+  byStage: {
+    group: 18,
+    R32: 0,
+    R16: 0,
+    QF: 0,
+    SF: 0,
+    BRONZE: 0,
+    FINAL: 0,
+    macro: 0
+  },
   recentMatches: [
     {
       matchId: "demo_m_001",
       matchLabel: "Argentina vs Brasil",
       stageLabel: "Grupo A",
+      userPredictionSummary: "2-1",
+      officialResultSummary: "2-1",
       points: 6,
       scoredAt: "2026-06-12T21:00:00Z",
       breakdown: {
@@ -100,6 +120,7 @@ test("RankingsScreenView renders points and standings summary", () => {
 
   assert.match(html, /18 pts/);
   assert.match(html, /Argentina vs Brasil/);
+  assert.match(html, /Tu pick 2-1 · oficial 2-1/);
   assert.match(html, /Liga Demo Madrid/);
   assert.match(html, /Tabla competitiva/);
   assert.match(html, /La punta la marca Clara con 20 pts/);

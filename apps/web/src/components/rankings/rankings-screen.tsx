@@ -57,9 +57,19 @@ export function RankingsScreenView({
           </div>
 
           <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))" }}>
-            <Metric label="Exactos" value={String(points.exactHits)} />
-            <Metric label="Signos" value={String(points.correctSigns)} />
-            <Metric label="Macro" value={String(points.macroPoints)} />
+            <Metric label="Match" value={String(points.totals.matchPoints)} />
+            <Metric label="Macro" value={String(points.totals.macroPoints)} />
+            <Metric label="Exactos" value={String(points.totals.exactHits)} />
+            <Metric label="Signos" value={String(points.totals.correctSigns)} />
+          </div>
+
+          <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))" }}>
+            <Metric label="Grupos" value={String(points.byStage.group)} />
+            <Metric label="R32" value={String(points.byStage.R32)} />
+            <Metric label="R16" value={String(points.byStage.R16)} />
+            <Metric label="QF" value={String(points.byStage.QF)} />
+            <Metric label="SF" value={String(points.byStage.SF)} />
+            <Metric label="Final" value={String(points.byStage.FINAL)} />
           </div>
 
           <div style={{ display: "grid", gap: spacing[8] }}>
@@ -85,6 +95,9 @@ export function RankingsScreenView({
                   </div>
                   <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
                     {entry.stageLabel} · exacto {entry.breakdown.pointsExact90} · signo {entry.breakdown.pointsOutcome90} · clasificado {entry.breakdown.pointsQualifier}
+                  </span>
+                  <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textMuted }}>
+                    Tu pick {entry.userPredictionSummary} · oficial {entry.officialResultSummary}
                   </span>
                 </div>
               ))

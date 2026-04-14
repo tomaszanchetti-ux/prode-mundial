@@ -14,6 +14,7 @@ import { ApiError } from "../../../server/errors/api-error";
 import { matchesRepository } from "../../matches/repositories/matches-repository";
 import type { StoredMatch } from "../../matches/types";
 import { macroPicksRepository } from "../repositories/macro-picks-repository";
+import { macroScoringLogsRepository } from "../repositories/macro-scoring-logs-repository";
 import type { StoredMacroPrediction } from "../types";
 
 type MacroSchedule = {
@@ -168,7 +169,7 @@ function assertChampionIsValid(finalists: string[], champion: string | null) {
   }
 }
 
-function toResponse(stored: StoredMacroPrediction | null, schedule: MacroSchedule): MacroPicksResponse {
+function toResponse(stored: StoredMacroPrediction | null, schedule: MacroSchedule, hasScoringLog: boolean): MacroPicksResponse {
   const groupPicks = stored?.groupPicks ?? {};
   const finalists = stored?.finalists ?? [];
   const champion = stored?.champion ?? null;
@@ -178,7 +179,9 @@ function toResponse(stored: StoredMacroPrediction | null, schedule: MacroSchedul
 
   let status: MacroPicksResponse["status"];
 
-  if (adjustmentAlreadyUsed) {
+  if (hasScoringLog && stored?.isSubmitted) {
+    status = "fully_scored";
+  } else if (adjustmentAlreadyUsed) {
     status = "adjusted_locked";
   } else if (adjustmentAvailable) {
     status = "adjustment_available";
@@ -211,12 +214,13 @@ function toResponse(stored: StoredMacroPrediction | null, schedule: MacroSchedul
 
 export class MacroPicksService {
   async getForUser(userId: string, now = new Date()): Promise<MacroPicksResponse> {
-    const [stored, matches] = await Promise.all([
+    const [stored, matches, scoringLogs] = await Promise.all([
       macroPicksRepository.getByUserId(userId),
-      matchesRepository.listMatches()
+      matchesRepository.listMatches(),
+      macroScoringLogsRepository.listByUserId(userId)
     ]);
 
-    return toResponse(stored, getMacroSchedule(matches, now));
+    return toResponse(stored, getMacroSchedule(matches, now), scoringLogs.length > 0);
   }
 
   async saveForUser(userId: string, input: SaveMacroPicksInput, now = new Date()): Promise<SaveMacroPicksResponse> {

@@ -1544,3 +1544,51 @@ Nuevo punto exacto de continuidad:
   - operacion/admin minima para disparar `score-macro`
   - evaluar endpoint admin para upsert de `macroResults`
   - revisar si `points`, `home` o standings necesitan breakdown macro adicional
+
+---
+
+# Actualizacion operativa nueva: Epic 6 cerrada
+
+Durante la sesion documentada en:
+
+- `docs/handoff/Prode Mundial_WS29_14042026.md`
+
+`Epic 6 — Macro Scoring, Rebuilds & Standings Impact` queda cerrada a nivel MVP.
+
+Criterio de cierre alcanzado:
+
+- scoring macro real ya operativo de punta a punta
+- logs macro persistidos y reutilizados como fuente de read models
+- `users.macroPoints` y `users.totalPoints` consistentes via recomputacion
+- standings de liga reflejan impacto macro de forma efectiva
+- `apps/jobs` ya soporta:
+  - `JOB_NAME=score-macro`
+  - `JOB_NAME=rebuild-macro`
+- `GET /api/v1/points` ya expone resumen mas completo con:
+  - `matchPoints`
+  - `totals`
+  - `byStage`
+  - `recentMatches` enriquecido
+- `GET /api/v1/macro-picks` ya puede devolver `fully_scored`
+- `rankings` ya refleja mejor el impacto visible del cierre
+
+Validacion consolidada para cierre:
+
+- `corepack pnpm --filter @prode/shared build`
+- `corepack pnpm --filter @prode/api test`
+- `corepack pnpm --filter @prode/jobs test`
+- `corepack pnpm --filter @prode/web test`
+- `corepack pnpm --filter @prode/api typecheck`
+- `corepack pnpm --filter @prode/jobs typecheck`
+- `corepack pnpm --filter @prode/web typecheck`
+
+Resultado:
+
+- `Epic 6` cerrada
+
+Nuevo punto exacto de continuidad:
+
+- siguiente bloque recomendado:
+  - abrir `Epic 8`
+  - implementar admin ops minima API-first
+  - arrancar por triggers manuales, lectura operativa e ingesta/correccion de resultados

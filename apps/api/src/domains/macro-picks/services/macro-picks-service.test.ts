@@ -9,10 +9,11 @@ process.env.FIREBASE_PRIVATE_KEY ??=
 import type { StoredMatch } from "../../matches/types";
 import type { StoredMacroPrediction } from "../types";
 
-const [{ macroPicksService }, { matchesRepository }, { macroPicksRepository }] = await Promise.all([
+const [{ macroPicksService }, { matchesRepository }, { macroPicksRepository }, { macroScoringLogsRepository }] = await Promise.all([
   import("./macro-picks-service"),
   import("../../matches/repositories/matches-repository"),
-  import("../repositories/macro-picks-repository")
+  import("../repositories/macro-picks-repository"),
+  import("../repositories/macro-scoring-logs-repository")
 ]);
 
 function buildMatch(overrides: Partial<StoredMatch>): StoredMatch {
@@ -69,6 +70,7 @@ function buildStoredPrediction(overrides: Partial<StoredMacroPrediction> = {}): 
 
 test("getForUser returns not_started before tournament kickoff when the user has no saved picks", async () => {
   const getByUserIdMock = mock.method(macroPicksRepository, "getByUserId", async () => null);
+  const scoringLogsMock = mock.method(macroScoringLogsRepository, "listByUserId", async () => []);
   const listMatchesMock = mock.method(matchesRepository, "listMatches", async () => [
     buildMatch({ matchId: "m_001", kickoffAt: "2026-06-11T19:00:00Z" }),
     buildMatch({ matchId: "m_064", stage: "R32", groupId: null, kickoffAt: "2026-06-28T19:00:00Z" })
@@ -83,6 +85,42 @@ test("getForUser returns not_started before tournament kickoff when the user has
     assert.deepEqual(result.groupPicks, {});
   } finally {
     getByUserIdMock.mock.restore();
+    scoringLogsMock.mock.restore();
+    listMatchesMock.mock.restore();
+  }
+});
+
+test("getForUser returns fully_scored when a scoring log already exists", async () => {
+  const getByUserIdMock = mock.method(macroPicksRepository, "getByUserId", async () => buildStoredPrediction());
+  const scoringLogsMock = mock.method(macroScoringLogsRepository, "listByUserId", async () => [
+    {
+      userId: "usr_1",
+      tournamentId: "wc2026",
+      totalPoints: 42,
+      breakdown: {
+        groupPoints: 20,
+        finalistsPoints: 10,
+        championPoints: 12,
+        adjustmentPenaltyApplied: true,
+        totalPoints: 42
+      },
+      isAdjusted: true,
+      createdAt: "2026-07-20T00:00:00Z"
+    }
+  ]);
+  const listMatchesMock = mock.method(matchesRepository, "listMatches", async () => [
+    buildMatch({ matchId: "m_001", kickoffAt: "2026-06-11T19:00:00Z", status: "finished" }),
+    buildMatch({ matchId: "m_049", stage: "R32", groupId: null, kickoffAt: "2026-06-28T19:00:00Z", status: "finished" })
+  ]);
+
+  try {
+    const result = await macroPicksService.getForUser("usr_1", new Date("2026-07-21T12:00:00Z"));
+
+    assert.equal(result.status, "fully_scored");
+    assert.equal(result.isLocked, true);
+  } finally {
+    getByUserIdMock.mock.restore();
+    scoringLogsMock.mock.restore();
     listMatchesMock.mock.restore();
   }
 });
