@@ -1,14 +1,13 @@
 import React from "react";
 import type {
   ButtonHTMLAttributes,
-  CSSProperties,
   ComponentPropsWithoutRef,
   ElementType,
-  InputHTMLAttributes,
   PropsWithChildren,
   ReactNode
 } from "react";
-import { colors, radii, shadows, spacing, surfaceStyle, typography } from "./tokens";
+
+// ── Types ──────────────────────────────────────────────
 
 type ButtonVariant = "primary" | "secondary" | "ghost";
 type StatusTone = "editable" | "locked" | "live" | "scored";
@@ -136,77 +135,6 @@ export type PredictionModalProps = {
   title?: string;
 };
 
-function surfaceInsetStyle(): CSSProperties {
-  return {
-    display: "grid",
-    gap: spacing[12],
-    padding: spacing[14],
-    borderRadius: radii.md,
-    background: `linear-gradient(180deg, ${colors.bgInset} 0%, rgba(255, 255, 255, 0.02) 100%)`,
-    border: `1px solid ${colors.borderSubtle}`
-  };
-}
-
-const buttonToneStyles: Record<ButtonVariant, CSSProperties> = {
-  primary: {
-    background: `linear-gradient(180deg, ${colors.primary400} 0%, ${colors.primary500} 52%, ${colors.primary600} 100%)`,
-    color: colors.textPrimary,
-    border: "1px solid rgba(255, 255, 255, 0.08)",
-    boxShadow: "0 14px 28px rgba(47, 107, 255, 0.24)"
-  },
-  secondary: {
-    background: `linear-gradient(180deg, rgba(28, 45, 72, 0.96) 0%, rgba(19, 33, 54, 0.96) 100%)`,
-    color: colors.textPrimary,
-    border: "1px solid rgba(92, 141, 255, 0.2)",
-    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.04)"
-  },
-  ghost: {
-    background: "transparent",
-    color: colors.textSecondary,
-    border: `1px solid ${colors.borderSubtle}`
-  }
-};
-
-const statusToneStyles: Record<StatusTone, CSSProperties> = {
-  editable: {
-    background: colors.primarySoft,
-    color: "#AFC4FF",
-    border: "1px solid rgba(47, 107, 255, 0.28)"
-  },
-  locked: {
-    background: "rgba(148, 163, 184, 0.12)",
-    color: "#D5DDE7",
-    border: "1px solid rgba(148, 163, 184, 0.2)"
-  },
-  live: {
-    background: "rgba(245, 158, 11, 0.14)",
-    color: "#F7C15A",
-    border: "1px solid rgba(245, 158, 11, 0.24)"
-  },
-  scored: {
-    background: "rgba(34, 197, 94, 0.14)",
-    color: "#9BE5B6",
-    border: "1px solid rgba(34, 197, 94, 0.24)"
-  }
-};
-
-const cardBaseStyle: CSSProperties = {
-  ...surfaceStyle,
-  display: "grid",
-  gap: spacing[14],
-  padding: spacing[18],
-  boxShadow: shadows.soft,
-  backdropFilter: "blur(16px)"
-};
-
-const eyebrowStyle: CSSProperties = {
-  ...typography.small,
-  color: colors.textMuted,
-  textTransform: "uppercase"
-};
-
-const missingFlagWarnings = new Set<string>();
-
 export type SectionHeaderProps = {
   eyebrow?: string;
   title: string;
@@ -214,6 +142,38 @@ export type SectionHeaderProps = {
   action?: ReactNode;
   align?: "start" | "center";
 };
+
+// ── Size class maps ────────────────────────────────────
+
+const flagSizeClasses = {
+  sm: "w-[22px] h-[22px]",
+  md: "w-7 h-7",
+  lg: "w-[34px] h-[34px]"
+} as const;
+
+const flagSizes = { sm: 22, md: 28, lg: 34 } as const;
+
+const teamTextClasses = {
+  sm: "text-[14px]",
+  md: "text-[16px]",
+  lg: "text-[18px]"
+} as const;
+
+const codeTextClasses = {
+  sm: "text-[10px]",
+  md: "text-[10px]",
+  lg: "text-[11px]"
+} as const;
+
+const weightClasses: Record<500 | 600 | 700, string> = {
+  500: "font-medium",
+  600: "font-semibold",
+  700: "font-bold"
+};
+
+// ── Helpers ────────────────────────────────────────────
+
+const missingFlagWarnings = new Set<string>();
 
 function resolveTeamName(team: Pick<TeamDisplayProps, "name" | "teamName">) {
   return team.teamName ?? team.name ?? "Seleccion";
@@ -225,75 +185,30 @@ function resolveTeamFlagSrc(team: Pick<TeamDisplayProps, "flagAsset" | "flagUrl"
 
 function warnMissingFlag(teamName: string, fifaCode?: string | null) {
   const runtime = globalThis as { process?: { env?: { NODE_ENV?: string } } };
-
-  if (runtime.process?.env?.NODE_ENV === "production") {
-    return;
-  }
-
+  if (runtime.process?.env?.NODE_ENV === "production") return;
   const key = `${fifaCode ?? "unknown"}:${teamName}`;
-
-  if (missingFlagWarnings.has(key)) {
-    return;
-  }
-
+  if (missingFlagWarnings.has(key)) return;
   missingFlagWarnings.add(key);
   console.warn(`[ui] Missing flag asset for ${teamName}${fifaCode ? ` (${fifaCode})` : ""}.`);
 }
 
 function getFlagFallback(teamName: string) {
-  return teamName
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0] ?? "")
-    .join("")
-    .toUpperCase();
-}
-
-function getTeamStyles(size: TeamDisplayProps["size"] = "md") {
-  if (size === "lg") {
-    return {
-      flagSize: 34,
-      fontSize: 18,
-      codeSize: 11
-    };
-  }
-
-  if (size === "sm") {
-    return {
-      flagSize: 22,
-      fontSize: 14,
-      codeSize: 10
-    };
-  }
-
-  return {
-    flagSize: 28,
-    fontSize: 16,
-    codeSize: 10
-  };
+  return teamName.trim().split(/\s+/).slice(0, 2).map((part) => part[0] ?? "").join("").toUpperCase();
 }
 
 function normalizeScoreValue(value: string) {
-  if (value === "") {
-    return "";
-  }
-
+  if (value === "") return "";
   const parsed = Number.parseInt(value, 10);
-
-  if (Number.isNaN(parsed) || parsed < 0) {
-    return "";
-  }
-
+  if (Number.isNaN(parsed) || parsed < 0) return "";
   return String(parsed);
 }
 
 function stepScoreValue(value: string, delta: number) {
   const current = value === "" ? 0 : Number.parseInt(value, 10);
-  const next = Math.max(0, current + delta);
-
-  return String(next);
+  return String(Math.max(0, current + delta));
 }
+
+// ── Internal render helpers ────────────────────────────
 
 function renderScoreInput(
   label: string,
@@ -302,58 +217,24 @@ function renderScoreInput(
   onChange: ((value: string) => void) | undefined
 ) {
   const safeValue = normalizeScoreValue(value);
+  const disabledCls = disabled ? "cursor-not-allowed opacity-70" : "cursor-pointer";
 
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: 144,
-        borderRadius: radii.lg,
-        border: `1px solid ${colors.borderSubtle}`,
-        background: `linear-gradient(180deg, rgba(7, 17, 31, 0.98) 0%, rgba(13, 25, 43, 0.98) 100%)`,
-        color: colors.textPrimary,
-        display: "grid",
-        justifyItems: "center",
-        gap: spacing[12],
-        padding: `${spacing[14]}px ${spacing[12]}px`
-      }}
-    >
-      <span style={{ ...typography.small, color: colors.textMuted, textAlign: "center" }}>{label}</span>
+    <div className="w-full min-h-[144px] rounded-lg border border-border-subtle score-panel-bg text-text-primary grid justify-items-center gap-3 py-3.5 px-3">
+      <span className="typo-small text-text-muted text-center">{label}</span>
       <div
         aria-live="polite"
-        style={{
-          width: 92,
-          height: 92,
-          borderRadius: 24,
-          border: "1px solid rgba(92, 141, 255, 0.2)",
-          background: `radial-gradient(circle at top, rgba(92, 141, 255, 0.18), transparent 48%), linear-gradient(180deg, ${colors.bgInteractive} 0%, ${colors.bgMuted} 100%)`,
-          display: "grid",
-          placeItems: "center",
-          boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.04)",
-          fontSize: 42,
-          fontWeight: 800,
-          lineHeight: 1
-        }}
+        className="w-[92px] h-[92px] rounded-[24px] border border-[rgba(92,141,255,0.2)] score-display-bg grid place-items-center text-[42px] font-extrabold leading-none"
       >
         {safeValue === "" ? "0" : safeValue}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: spacing[8], width: "100%" }}>
+      <div className="grid grid-cols-2 gap-2 w-full">
         <button
           type="button"
           disabled={disabled}
           aria-label={`Bajar marcador de ${label}`}
           onClick={() => onChange?.(stepScoreValue(safeValue, -1))}
-          style={{
-            minHeight: 42,
-            borderRadius: radii.md,
-            border: `1px solid ${colors.border}`,
-            background: colors.bgInset,
-            color: colors.textPrimary,
-            fontSize: 20,
-            fontWeight: 700,
-            cursor: disabled ? "not-allowed" : "pointer",
-            opacity: disabled ? 0.7 : 1
-          }}
+          className={`min-h-[42px] rounded-md score-btn text-text-primary text-[20px] font-bold ${disabledCls}`}
         >
           -
         </button>
@@ -362,17 +243,7 @@ function renderScoreInput(
           disabled={disabled}
           aria-label={`Subir marcador de ${label}`}
           onClick={() => onChange?.(stepScoreValue(safeValue, 1))}
-          style={{
-            minHeight: 42,
-            borderRadius: radii.md,
-            border: `1px solid ${colors.border}`,
-            background: colors.bgInset,
-            color: colors.textPrimary,
-            fontSize: 20,
-            fontWeight: 700,
-            cursor: disabled ? "not-allowed" : "pointer",
-            opacity: disabled ? 0.7 : 1
-          }}
+          className={`min-h-[42px] rounded-md score-btn text-text-primary text-[20px] font-bold ${disabledCls}`}
         >
           +
         </button>
@@ -381,20 +252,23 @@ function renderScoreInput(
   );
 }
 
-export function Card<T extends ElementType = "div">({ as, children, elevated = false, style, ...props }: CardProps<T>) {
+// ── Components ─────────────────────────────────────────
+
+export function Card<T extends ElementType = "div">({
+  as,
+  children,
+  className,
+  elevated = false,
+  style,
+  ...props
+}: CardProps<T>) {
   const Component = as ?? "div";
 
   return (
     <Component
       {...props}
-      style={{
-        ...cardBaseStyle,
-        boxShadow: elevated ? shadows.card : undefined,
-        background: elevated
-          ? `linear-gradient(180deg, ${colors.bgElevated} 0%, ${colors.bgSurface} 100%)`
-          : surfaceStyle.background,
-        ...style
-      }}
+      className={`card-base grid gap-3.5 p-4.5 ${elevated ? "card-elevated-bg" : ""} ${className ?? ""}`}
+      style={style}
     >
       {children}
     </Component>
@@ -403,20 +277,12 @@ export function Card<T extends ElementType = "div">({ as, children, elevated = f
 
 export function SectionHeader({ action, align = "start", description, eyebrow, title }: SectionHeaderProps) {
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: align === "center" ? "center" : "flex-end",
-        gap: spacing[12],
-        flexWrap: "wrap"
-      }}
-    >
-      <div style={{ display: "grid", gap: spacing[8], textAlign: align }}>
-        {eyebrow ? <span style={eyebrowStyle}>{eyebrow}</span> : null}
-        <div style={{ display: "grid", gap: 6 }}>
-          <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>{title}</h2>
-          {description ? <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{description}</p> : null}
+    <div className={`flex justify-between gap-3 flex-wrap ${align === "center" ? "items-center" : "items-end"}`}>
+      <div className={`grid gap-2 ${align === "center" ? "text-center" : ""}`}>
+        {eyebrow ? <span className="typo-eyebrow">{eyebrow}</span> : null}
+        <div className="grid gap-[6px]">
+          <h2 className="typo-h3 m-0 text-text-primary">{title}</h2>
+          {description ? <p className="typo-body m-0 text-text-secondary">{description}</p> : null}
         </div>
       </div>
       {action ? <div>{action}</div> : null}
@@ -439,21 +305,8 @@ export function Button({
     <button
       {...props}
       disabled={isDisabled}
-      style={{
-        minHeight: 46,
-        padding: "0 15px",
-        borderRadius: radii.lg,
-        cursor: isDisabled ? "not-allowed" : "pointer",
-        fontSize: typography.body.fontSize,
-        lineHeight: 1,
-        fontWeight: 700,
-        letterSpacing: "-0.01em",
-        width: fullWidth ? "100%" : undefined,
-        opacity: isDisabled ? 0.6 : 1,
-        transition: "transform 140ms ease, opacity 140ms ease, background 140ms ease, border-color 140ms ease, box-shadow 140ms ease, color 140ms ease",
-        ...buttonToneStyles[variant],
-        ...style
-      }}
+      className={`btn-base btn-${variant} ${fullWidth ? "w-full" : ""} ${isDisabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+      style={style}
     >
       {loading ? "Guardando..." : children}
     </button>
@@ -462,21 +315,7 @@ export function Button({
 
 export function StatusTag({ status, label }: StatusTagProps) {
   return (
-    <span
-      style={{
-        ...typography.small,
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "fit-content",
-        minHeight: 26,
-        padding: "0 11px",
-        borderRadius: radii.pill,
-        fontWeight: 700,
-        letterSpacing: "0.06em",
-        ...statusToneStyles[status]
-      }}
-    >
+    <span className={`status-tag status-${status}`}>
       {label ?? status}
     </span>
   );
@@ -485,8 +324,8 @@ export function StatusTag({ status, label }: StatusTagProps) {
 export function TeamFlag({ fifaCode, flagAsset, flagUrl, name, teamName, size = "md" }: TeamFlagProps) {
   const resolvedTeamName = resolveTeamName({ name, teamName });
   const fallback = getFlagFallback(resolvedTeamName);
-  const teamStyles = getTeamStyles(size);
   const flagSrc = resolveTeamFlagSrc({ flagAsset: flagAsset ?? null, flagUrl: flagUrl ?? null });
+  const sizeClass = flagSizeClasses[size];
 
   if (!flagSrc) {
     warnMissingFlag(resolvedTeamName, fifaCode);
@@ -498,31 +337,14 @@ export function TeamFlag({ fifaCode, flagAsset, flagUrl, name, teamName, size = 
         <img
           src={flagSrc}
           alt=""
-          width={teamStyles.flagSize}
-          height={teamStyles.flagSize}
-          style={{
-            borderRadius: radii.pill,
-            objectFit: "cover",
-            border: `1px solid ${colors.border}`,
-            boxShadow: "0 8px 18px rgba(2, 8, 18, 0.2)"
-          }}
+          width={flagSizes[size]}
+          height={flagSizes[size]}
+          className={`${sizeClass} rounded-pill object-cover border border-border-default shadow-[0_8px_18px_rgba(2,8,18,0.2)]`}
         />
       ) : (
         <span
           aria-hidden="true"
-          style={{
-            width: teamStyles.flagSize,
-            height: teamStyles.flagSize,
-            borderRadius: radii.pill,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: `linear-gradient(180deg, ${colors.primarySurface} 0%, ${colors.bgElevated} 100%)`,
-            color: colors.textPrimary,
-            border: `1px solid ${colors.border}`,
-            fontSize: 10,
-            fontWeight: 700
-          }}
+          className={`${sizeClass} rounded-pill inline-flex items-center justify-center flag-fallback-bg text-text-primary border border-border-default text-[10px] font-bold`}
         >
           {fallback}
         </span>
@@ -542,22 +364,16 @@ export function TeamIdentityRow({
   size = "md",
   weight = 600
 }: TeamIdentityRowProps) {
-  const teamStyles = getTeamStyles(size);
   const resolvedTeamName = resolveTeamName({ name, teamName });
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: align === "center" ? "center" : "flex-start",
-        gap: 10
-      }}
-    >
+    <div className={`flex items-center gap-2.5 ${align === "center" ? "justify-center" : "justify-start"}`}>
       <TeamFlag fifaCode={fifaCode} flagAsset={flagAsset} flagUrl={flagUrl} name={name} teamName={teamName} size={size} />
-      <div style={{ display: "grid", gap: 2 }}>
-        <span style={{ fontSize: teamStyles.fontSize, lineHeight: 1.2, color: colors.textPrimary, fontWeight: weight }}>{resolvedTeamName}</span>
-        {code ? <span style={{ ...typography.small, color: colors.textFaint, fontSize: teamStyles.codeSize }}>{code}</span> : null}
+      <div className="grid gap-[2px]">
+        <span className={`${teamTextClasses[size]} leading-[1.2] text-text-primary ${weightClasses[weight]}`}>
+          {resolvedTeamName}
+        </span>
+        {code ? <span className={`typo-small text-text-faint ${codeTextClasses[size]}`}>{code}</span> : null}
       </div>
     </div>
   );
@@ -584,37 +400,31 @@ export function NextMatchHero({
   return (
     <Card
       elevated
-      style={{
-        gap: spacing[12],
-        padding: spacing[16],
-        background:
-          status === "locked"
-            ? `radial-gradient(circle at top right, rgba(231, 198, 106, 0.12), transparent 28%), linear-gradient(180deg, ${colors.bgElevated} 0%, ${colors.bgCanvas} 100%)`
-            : `radial-gradient(circle at top right, rgba(47, 107, 255, 0.16), transparent 28%), linear-gradient(180deg, ${colors.bgElevated} 0%, ${colors.bgCanvas} 100%)`
-      }}
+      className={status === "locked" ? "hero-locked-bg" : "hero-editable-bg"}
+      style={{ gap: 12, padding: 16 }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "flex-start", flexWrap: "wrap" }}>
-        <div style={{ display: "grid", gap: 4 }}>
-          <span style={{ ...typography.small, color: status === "locked" ? colors.gold500 : colors.primary500 }}>{eyebrow}</span>
-          <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>{title}</h2>
-          <span style={{ ...typography.body, color: colors.textSecondary }}>{metaLabel}</span>
+      <div className="flex justify-between gap-3 items-start flex-wrap">
+        <div className="grid gap-1">
+          <span className={`typo-small ${status === "locked" ? "text-gold" : "text-primary-500"}`}>{eyebrow}</span>
+          <h2 className="typo-h2 m-0 text-text-primary">{title}</h2>
+          <span className="typo-body text-text-secondary">{metaLabel}</span>
         </div>
         <StatusTag status={status} label={statusLabel} />
       </div>
 
-      <div style={{ display: "grid", gap: spacing[12] }}>
+      <div className="grid gap-3">
         <TeamIdentityRow {...homeTeam} size="lg" weight={700} />
-        <div style={{ paddingLeft: 44, fontSize: 12, color: colors.textMuted, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
+        <div className="pl-[44px] text-[12px] text-text-muted font-bold tracking-[0.08em]">VS</div>
         <TeamIdentityRow {...awayTeam} size="lg" weight={700} />
       </div>
 
       {helperText ? (
-        <div style={surfaceInsetStyle()}>
-          <span style={{ ...typography.body, color: colors.textPrimary, fontWeight: 600 }}>{helperText}</span>
+        <div className="surface-inset grid gap-3 p-3.5">
+          <span className="typo-body text-text-primary font-semibold">{helperText}</span>
         </div>
       ) : null}
 
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <div className="flex gap-2.5 flex-wrap">
         <Button fullWidth={!secondaryCtaLabel} onClick={onAction}>
           {ctaLabel}
         </Button>
@@ -630,12 +440,12 @@ export function NextMatchHero({
 
 export function ProgressCompact({ items }: ProgressCompactProps) {
   return (
-    <div style={{ display: "grid", gap: spacing[10], gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
+    <div className="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
       {items.map((item) => (
-        <div key={item.label} style={{ ...surfaceInsetStyle(), gap: 6, padding: spacing[14] }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>{item.label}</span>
-          <strong style={{ fontSize: 24, lineHeight: 1, color: colors.textPrimary }}>{item.value}</strong>
-          <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>{item.hint}</span>
+        <div key={item.label} className="surface-inset grid gap-[6px] p-3.5">
+          <span className="typo-small text-text-muted">{item.label}</span>
+          <strong className="text-[24px] leading-none text-text-primary">{item.value}</strong>
+          <span className="text-[13px] leading-[1.35] text-text-secondary">{item.hint}</span>
         </div>
       ))}
     </div>
@@ -644,15 +454,9 @@ export function ProgressCompact({ items }: ProgressCompactProps) {
 
 export function AdSlotCard({ description, title = "Publicidad" }: AdSlotCardProps) {
   return (
-    <Card
-      style={{
-        gap: spacing[8],
-        padding: spacing[16],
-        background: `linear-gradient(180deg, ${colors.bgInteractive} 0%, ${colors.bgSurface} 100%)`
-      }}
-    >
-      <span style={{ ...typography.small, color: colors.textMuted }}>{title}</span>
-      <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{description}</p>
+    <Card className="ad-slot-bg" style={{ gap: 8, padding: 16 }}>
+      <span className="typo-small text-text-muted">{title}</span>
+      <p className="typo-body m-0 text-text-secondary">{description}</p>
     </Card>
   );
 }
@@ -672,38 +476,26 @@ export function MatchCard({
   const isActionable = status === "editable" || status === "live";
 
   return (
-    <Card elevated style={{ gap: spacing[10], padding: spacing[12] }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: spacing[10], flexWrap: "wrap" }}>
-        <div style={{ display: "grid", gap: 6 }}>
-          <span style={eyebrowStyle}>{stageLabel}</span>
-          <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>{kickoffLabel}</span>
+    <Card elevated style={{ gap: 10, padding: 12 }}>
+      <div className="flex justify-between items-center gap-2.5 flex-wrap">
+        <div className="grid gap-[6px]">
+          <span className="typo-eyebrow">{stageLabel}</span>
+          <span className="text-[13px] leading-[1.35] text-text-secondary">{kickoffLabel}</span>
         </div>
         <StatusTag status={status} label={statusLabel} />
       </div>
 
-      <div style={{ display: "grid", gap: 8 }}>
+      <div className="grid gap-2">
         <TeamIdentityRow {...homeTeam} size="md" weight={700} />
         <TeamIdentityRow {...awayTeam} size="md" weight={700} />
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: spacing[10],
-          padding: `${spacing[10]}px ${spacing[12]}px`,
-          borderRadius: radii.md,
-          background: "rgba(255, 255, 255, 0.025)",
-          border: `1px solid ${colors.borderSubtle}`,
-          flexWrap: "wrap"
-        }}
-      >
-        <p style={{ ...typography.body, margin: 0, color: colors.textPrimary, fontWeight: 600, flex: "1 1 220px" }}>
+      <div className="flex justify-between items-start gap-2.5 py-2.5 px-3 rounded-md prediction-row-bg flex-wrap">
+        <p className="typo-body m-0 text-text-primary font-semibold flex-[1_1_220px]">
           {predictionSummary ?? "Aun no predijiste este partido"}
         </p>
         {resultSummary ? (
-          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.35, color: colors.textSecondary, flex: "1 1 220px", textAlign: "left" }}>
+          <p className="m-0 text-[13px] leading-[1.35] text-text-secondary flex-[1_1_220px] text-left">
             {resultSummary}
           </p>
         ) : null}
@@ -731,23 +523,15 @@ export function ScoreInput({
   onHomeChange
 }: ScoreInputProps) {
   const showClassifier = classifierOptions.length > 0;
+  const disabledCls = disabled ? "cursor-not-allowed opacity-70" : "cursor-pointer";
 
   return (
-    <div style={{ display: "grid", gap: spacing[16] }}>
-      <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "minmax(0, 1fr) auto minmax(0, 1fr)", alignItems: "center" }}>
+    <div className="grid gap-4">
+      <div className="grid gap-3 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center">
         {renderScoreInput(homeLabel, homeValue, disabled, onHomeChange)}
         <div
           aria-hidden="true"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: radii.pill,
-            display: "grid",
-            placeItems: "center",
-            color: colors.textMuted,
-            background: colors.bgInset,
-            border: `1px solid ${colors.borderSubtle}`
-          }}
+          className="w-9 h-9 rounded-pill grid place-items-center text-text-muted bg-bg-inset border border-border-subtle"
         >
           -
         </div>
@@ -755,9 +539,9 @@ export function ScoreInput({
       </div>
 
       {showClassifier ? (
-        <div style={{ display: "grid", gap: spacing[8] }}>
-          <span style={{ ...typography.small, color: colors.textSecondary }}>{classifierLabel}</span>
-          <div style={{ display: "grid", gap: spacing[8] }}>
+        <div className="grid gap-2">
+          <span className="typo-small text-text-secondary">{classifierLabel}</span>
+          <div className="grid gap-2">
             {classifierOptions.map((option) => {
               const isActive = option.value === classifierValue;
 
@@ -766,19 +550,7 @@ export function ScoreInput({
                   key={option.value}
                   type="button"
                   disabled={disabled}
-                  style={{
-                    minHeight: 48,
-                    borderRadius: radii.md,
-                    border: isActive ? "1px solid rgba(47, 107, 255, 0.4)" : `1px solid ${colors.border}`,
-                    background: isActive ? colors.primarySoft : colors.bgInset,
-                    color: colors.textPrimary,
-                    textAlign: "left",
-                    padding: "0 14px",
-                    fontSize: typography.body.fontSize,
-                    fontWeight: 600,
-                    cursor: disabled ? "not-allowed" : "pointer",
-                    opacity: disabled ? 0.7 : 1
-                  }}
+                  className={`classifier-option ${isActive ? "classifier-active" : "classifier-inactive"} ${disabledCls}`}
                   onClick={() => onClassifierChange?.(option.value)}
                 >
                   {option.label}
@@ -789,7 +561,7 @@ export function ScoreInput({
         </div>
       ) : null}
 
-      {error ? <p style={{ margin: 0, fontSize: 13, lineHeight: 1.4, color: "#FCA5A5" }}>{error}</p> : null}
+      {error ? <p className="m-0 text-[13px] leading-[1.4] text-[#FCA5A5]">{error}</p> : null}
     </div>
   );
 }
@@ -808,98 +580,43 @@ export function PredictionModal({
   stageLabel,
   title = "Tu proximo partido"
 }: PredictionModalProps) {
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        padding: spacing[12],
-        background: colors.overlay,
-        display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "center",
-        backdropFilter: "blur(10px)",
-        zIndex: 50
-      }}
+      className="fixed inset-0 p-3 modal-overlay flex items-end justify-center z-50"
     >
-      <div
-        style={{
-          width: "min(100%, 560px)",
-          ...cardBaseStyle,
-          gap: spacing[18],
-          boxShadow: shadows.modal,
-          borderTopLeftRadius: radii.xl,
-          borderTopRightRadius: radii.xl,
-          borderBottomLeftRadius: radii.lg,
-          borderBottomRightRadius: radii.lg,
-          background: `linear-gradient(180deg, ${colors.bgElevated} 0%, ${colors.bgCanvas} 100%)`
-        }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
-            <div style={{ display: "grid", gap: spacing[8] }}>
-              <span style={eyebrowStyle}>{stageLabel}</span>
-              <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>{title}</h2>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{kickoffLabel}</p>
+      <div className="w-full max-w-[560px] card-base grid gap-4.5 p-4.5 shadow-modal rounded-t-xl rounded-b-lg modal-content-bg">
+        <div className="flex justify-between items-start gap-3">
+          <div className="grid gap-2">
+            <span className="typo-eyebrow">{stageLabel}</span>
+            <h2 className="typo-h2 m-0 text-text-primary">{title}</h2>
+            <p className="m-0 text-[14px] leading-[1.4] text-text-secondary">{kickoffLabel}</p>
           </div>
           {onClose ? (
-            <button
-              type="button"
-              aria-label="Cerrar"
-              onClick={onClose}
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: radii.pill,
-                border: `1px solid ${colors.borderSubtle}`,
-                background: colors.bgInset,
-                color: colors.textSecondary,
-                cursor: "pointer"
-              }}
-            >
+            <button type="button" aria-label="Cerrar" onClick={onClose} className="close-btn">
               X
             </button>
           ) : null}
         </div>
 
-        <div
-          style={{
-          display: "grid",
-          gap: spacing[12],
-          padding: spacing[18],
-          borderRadius: radii.lg,
-          background: `radial-gradient(circle at top, rgba(92, 141, 255, 0.12), transparent 42%), linear-gradient(180deg, ${colors.bgCanvas} 0%, ${colors.bgSurface} 100%)`,
-          border: `1px solid ${colors.borderSubtle}`
-          }}
-        >
+        <div className="grid gap-3 p-4.5 rounded-lg matchup-panel-bg">
           <TeamIdentityRow {...homeTeam} align="center" size="lg" weight={700} />
-          <div style={{ textAlign: "center", color: colors.textMuted, fontSize: 12, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
+          <div className="text-center text-text-muted text-[12px] font-bold tracking-[0.08em]">VS</div>
           <TeamIdentityRow {...awayTeam} align="center" size="lg" weight={700} />
         </div>
 
         {helperText ? (
-          <div
-            style={{
-              display: "grid",
-              gap: 6,
-              padding: `${spacing[12]}px ${spacing[14]}px`,
-              borderRadius: radii.md,
-              background: colors.bgInset,
-              border: `1px solid ${colors.borderSubtle}`
-            }}
-          >
-            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{helperText}</p>
+          <div className="grid gap-[6px] py-3 px-3.5 rounded-md bg-bg-inset border border-border-subtle">
+            <p className="typo-body m-0 text-text-secondary">{helperText}</p>
           </div>
         ) : null}
 
         {children}
 
-        <div style={{ display: "grid", gap: 8 }}>
+        <div className="grid gap-2">
           <Button fullWidth onClick={onSubmit} loading={saving}>
             {saveLabel}
           </Button>
