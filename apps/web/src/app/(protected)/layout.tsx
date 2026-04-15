@@ -22,7 +22,7 @@ function ProtectedHeader() {
         <LanguageToggle />
         <Link
           href="/profile"
-          className="w-9 h-9 rounded-pill grid place-items-center no-underline text-text-primary text-[12px] font-bold tracking-[0.06em] uppercase bg-[rgba(255,255,255,0.03)] border border-border-subtle"
+          className="w-9 h-9 rounded-pill grid place-items-center no-underline text-text-primary text-[12px] font-bold tracking-[0.06em] uppercase bg-bg-interactive border border-border-default hover:bg-[#E3E7EC] transition-colors"
         >
           {copyForLocale(locale, "Mi", "Me")}
         </Link>

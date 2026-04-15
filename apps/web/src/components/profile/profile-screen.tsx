@@ -103,7 +103,7 @@ export function ProfileScreen() {
         <p className="typo-body m-0 text-text-secondary max-w-[620px]">
           Ajusta tu nombre visible y tu pais para que tu identidad se lea bien en ligas, posiciones y resultados.
         </p>
-        <div className="p-[14px] rounded-md bg-[rgba(255,255,255,0.04)] border border-border-default text-text-secondary text-[14px] leading-[1.45]">
+        <div className="p-[14px] surface-inset text-text-secondary text-[14px] leading-[1.45]">
           {status}
         </div>
       </Card>
@@ -163,7 +163,7 @@ export function ProfileScreen() {
             {profileStats.map((item) => (
               <div
                 key={item.label}
-                className="grid gap-1 p-3 rounded-[14px] bg-[rgba(255,255,255,0.03)] border border-border-default"
+                className="grid gap-1 p-3 surface-inset"
               >
                 <span className="typo-small text-text-muted">{item.label.toUpperCase()}</span>
                 <span className="text-[24px] leading-none text-text-primary font-bold">{item.value}</span>

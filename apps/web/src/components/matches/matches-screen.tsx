@@ -318,9 +318,9 @@ export function MatchesScreenView({
       </div>
 
       {errorMessage ? (
-        <Card elevated style={{ gap: 8, borderColor: "rgba(220, 38, 38, 0.24)" }}>
-          <strong className="text-[16px] text-text-primary">{copyForLocale(locale, "No pudimos cargar los partidos", "We couldn't load the matches")}</strong>
-          <p className="typo-body m-0 text-[#F5B4B4]">{errorMessage}</p>
+        <Card className="alert-error" style={{ gap: 8 }}>
+          <strong className="text-[16px]">{copyForLocale(locale, "No pudimos cargar los partidos", "We couldn't load the matches")}</strong>
+          <p className="typo-body m-0">{errorMessage}</p>
           <Button variant="secondary" onClick={onRetry}>
             {copyForLocale(locale, "Reintentar", "Retry")}
           </Button>
@@ -332,9 +332,9 @@ export function MatchesScreenView({
           {Array.from({ length: 3 }).map((_, index) => (
             <Card key={index} elevated style={{ minHeight: 176, opacity: 0.72 }}>
               <div className="grid gap-3">
-                <div className="w-[88px] h-[10px] rounded-full bg-[rgba(148,163,184,0.16)]" />
-                <div className="w-[54%] h-[12px] rounded-full bg-[rgba(148,163,184,0.16)]" />
-                <div className="w-full h-[84px] rounded-md bg-[rgba(255,255,255,0.03)]" />
+                <div className="w-[88px] h-[10px] rounded-full bg-bg-interactive" />
+                <div className="w-[54%] h-[12px] rounded-full bg-bg-interactive" />
+                <div className="w-full h-[84px] rounded-md bg-bg-muted" />
               </div>
             </Card>
           ))}

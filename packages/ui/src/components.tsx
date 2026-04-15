@@ -224,7 +224,7 @@ function renderScoreInput(
       <span className="typo-small text-text-muted text-center">{label}</span>
       <div
         aria-live="polite"
-        className="w-[92px] h-[92px] rounded-[24px] border border-[rgba(92,141,255,0.2)] score-display-bg grid place-items-center text-[42px] font-extrabold leading-none"
+        className="w-[92px] h-[92px] rounded-[24px] score-display-bg grid place-items-center text-[42px] font-extrabold leading-none"
       >
         {safeValue === "" ? "0" : safeValue}
       </div>
@@ -339,7 +339,7 @@ export function TeamFlag({ fifaCode, flagAsset, flagUrl, name, teamName, size = 
           alt=""
           width={flagSizes[size]}
           height={flagSizes[size]}
-          className={`${sizeClass} rounded-pill object-cover border border-border-default shadow-[0_8px_18px_rgba(2,8,18,0.2)]`}
+          className={`${sizeClass} rounded-pill object-cover border border-border-default shadow-[0_1px_3px_rgba(15,23,42,0.08)]`}
         />
       ) : (
         <span
@@ -561,7 +561,7 @@ export function ScoreInput({
         </div>
       ) : null}
 
-      {error ? <p className="m-0 text-[13px] leading-[1.4] text-[#FCA5A5]">{error}</p> : null}
+      {error ? <p className="m-0 text-[13px] leading-[1.4] text-error">{error}</p> : null}
     </div>
   );
 }

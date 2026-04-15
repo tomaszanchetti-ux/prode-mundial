@@ -5,12 +5,13 @@ import { Button, Card, StatusTag } from "@prode/ui";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getLeagueDetail } from "@/lib/api/client";
+import { CopyButton } from "./copy-button";
 
 type LeagueDetailState = Awaited<ReturnType<typeof getLeagueDetail>>;
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid gap-1 p-3 rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default">
+    <div className="grid gap-1 p-3 surface-inset">
       <span className="typo-small text-text-muted">{label}</span>
       <span className="typo-h3 m-0 text-text-primary">{value}</span>
     </div>
@@ -90,8 +91,8 @@ export function LeagueDetailScreen() {
 
       {isLoading ? (
         <Card elevated style={{ gap: 8 }}>
-          <div className="w-[96px] h-[10px] rounded-full bg-[rgba(148,163,184,0.16)]" />
-          <div className="w-full h-[120px] rounded-[16px] bg-[rgba(255,255,255,0.03)]" />
+          <div className="w-[96px] h-[10px] rounded-full bg-bg-muted" />
+          <div className="w-full h-[120px] rounded-[16px] bg-bg-muted" />
         </Card>
       ) : null}
 
@@ -117,11 +118,22 @@ export function LeagueDetailScreen() {
 
           <Card elevated style={{ gap: 12 }}>
             <span className="typo-small text-text-muted">COMPARTIR</span>
-            <div className="grid gap-1.5 p-3 rounded-[16px] bg-[rgba(255,255,255,0.03)] border border-border-default">
-              <span className="text-[14px] leading-[1.4] text-text-primary font-semibold">Invite link</span>
+            <div className="grid gap-1.5 p-3 rounded-[16px] surface-inset">
+              <div className="flex justify-between gap-2 items-center">
+                <span className="text-[14px] leading-[1.4] text-text-primary font-semibold">Invite link</span>
+                {league.inviteLink ? <CopyButton value={league.inviteLink} label="Copiar link" /> : null}
+              </div>
               <span className="text-[14px] leading-[1.4] text-text-secondary break-all">
                 {league.inviteLink ?? "No hay link disponible para esta liga."}
               </span>
+              {league.inviteCode ? (
+                <div className="flex justify-between gap-2 items-center pt-2 border-t border-border-default">
+                  <span className="text-[13px] leading-[1.4] text-text-secondary">
+                    Codigo: <span className="text-text-primary font-semibold">{league.inviteCode}</span>
+                  </span>
+                  <CopyButton value={league.inviteCode} label="Copiar codigo" />
+                </div>
+              ) : null}
             </div>
           </Card>
         </>

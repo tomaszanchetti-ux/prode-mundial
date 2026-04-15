@@ -19,10 +19,11 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Main navigation"
-      className="sticky bottom-[10px] grid gap-1 p-[6px] rounded-pill border border-[rgba(148,163,184,0.14)] shadow-[0_20px_40px_rgba(2,8,18,0.24)] backdrop-blur-[18px]"
+      className="sticky z-50 grid gap-1 p-[6px] rounded-pill border border-border-default shadow-card backdrop-blur-[18px]"
       style={{
         gridTemplateColumns: `repeat(${MAIN_TABS.length}, minmax(0, 1fr))`,
-        background: "rgba(8, 18, 32, 0.82)"
+        background: "rgba(255, 255, 255, 0.92)",
+        bottom: "max(10px, env(safe-area-inset-bottom))"
       }}
     >
       {MAIN_TABS.map((tab) => {
@@ -32,10 +33,10 @@ export function BottomNav() {
           <Link
             key={tab.key}
             href={tab.href}
-            className={`no-underline text-center py-[9px] px-1 rounded-pill border border-transparent text-[11px] leading-[1.1] uppercase ${
+            className={`no-underline text-center py-[9px] px-1 rounded-pill border border-transparent text-[11px] leading-[1.1] uppercase transition-colors ${
               isActive
-                ? "text-text-primary bg-primary-soft font-bold tracking-[0.06em]"
-                : "text-text-muted bg-transparent font-medium tracking-[0.04em]"
+                ? "text-primary-600 bg-primary-soft font-bold tracking-[0.06em]"
+                : "text-text-muted bg-transparent font-medium tracking-[0.04em] hover:text-text-primary"
             }`}
           >
             {labels[tab.key]}

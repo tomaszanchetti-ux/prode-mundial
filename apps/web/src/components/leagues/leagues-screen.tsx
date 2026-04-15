@@ -8,6 +8,7 @@ import { Button, Card, StatusTag } from "@prode/ui";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, createLeague, getMyLeagues, joinLeague } from "@/lib/api/client";
+import { CopyButton } from "./copy-button";
 
 type LeaguesScreenViewProps = {
   items: LeagueSummary[];
@@ -132,7 +133,7 @@ export function LeaguesScreenView({
 
       {actionError ? (
         <Card elevated style={{ gap: 12 }}>
-          <span className="typo-small text-[#FCA5A5]">NO PUDIMOS COMPLETAR LA ACCION</span>
+          <span className="typo-small text-error">NO PUDIMOS COMPLETAR LA ACCION</span>
           <p className="typo-body m-0 text-text-primary">{actionError}</p>
         </Card>
       ) : null}
@@ -156,8 +157,11 @@ export function LeaguesScreenView({
             </Button>
           </div>
           {lastActionLeague.inviteLink ? (
-            <div className="grid gap-1.5 p-3 rounded-[16px] bg-[rgba(255,255,255,0.03)] border border-border-default">
-              <span className="typo-small text-text-muted">INVITE LINK</span>
+            <div className="grid gap-1.5 p-3 rounded-[16px] surface-inset">
+              <div className="flex justify-between gap-2 items-center">
+                <span className="typo-small text-text-muted">INVITE LINK</span>
+                <CopyButton value={lastActionLeague.inviteLink} />
+              </div>
               <span className="text-[14px] leading-[1.4] text-text-secondary break-all">{lastActionLeague.inviteLink}</span>
             </div>
           ) : null}
@@ -173,8 +177,8 @@ export function LeaguesScreenView({
 
       {isLoading ? (
         <Card elevated style={{ gap: 8 }}>
-          <div className="w-[96px] h-[10px] rounded-full bg-[rgba(148,163,184,0.16)]" />
-          <div className="w-full h-[56px] rounded-[16px] bg-[rgba(255,255,255,0.03)]" />
+          <div className="w-[96px] h-[10px] rounded-full bg-bg-muted" />
+          <div className="w-full h-[56px] rounded-[16px] bg-bg-muted" />
         </Card>
       ) : null}
 
@@ -208,14 +212,17 @@ export function LeaguesScreenView({
                 <Metric label="Código" value={league.inviteCode} />
               </div>
 
-              <div className="grid gap-1.5 p-3 rounded-[16px] bg-[rgba(255,255,255,0.03)] border border-border-default">
-                <span className="typo-small text-text-muted">ESTADO SOCIAL</span>
+              <div className="grid gap-1.5 p-3 rounded-[16px] surface-inset">
+                <div className="flex justify-between gap-2 items-center">
+                  <span className="typo-small text-text-muted">ESTADO SOCIAL</span>
+                  {league.inviteLink ? <CopyButton value={league.inviteLink} label="Copiar link" /> : null}
+                </div>
                 <p className="text-[14px] leading-[1.4] m-0 text-text-primary font-semibold">
                   {league.position
                     ? `Estas compitiendo en el puesto #${league.position}.`
                     : "Tu posicion aparece cuando haya tabla materializada."}
                 </p>
-                <p className="text-[14px] leading-[1.4] m-0 text-text-secondary">
+                <p className="text-[14px] leading-[1.4] m-0 text-text-secondary break-all">
                   {league.inviteLink
                     ? `Comparte este acceso cuando quieras sumar mas gente: ${league.inviteLink}`
                     : "Todavia no tenemos invite link disponible para esta liga."}
@@ -238,7 +245,7 @@ export function LeaguesScreenView({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid gap-1 p-3 rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default">
+    <div className="grid gap-1 p-3 surface-inset">
       <span className="typo-small text-text-muted">{label}</span>
       <span className="typo-h3 m-0 text-text-primary">{value}</span>
     </div>

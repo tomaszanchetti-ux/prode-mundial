@@ -123,23 +123,23 @@ export function LeagueInviteScreen() {
 
       {isLoading ? (
         <Card elevated className="gap-2">
-          <div className="w-24 h-2.5 rounded-pill bg-[rgba(148,163,184,0.16)]" />
-          <div className="w-full h-24 rounded-2xl bg-[rgba(255,255,255,0.03)]" />
+          <div className="w-24 h-2.5 rounded-pill bg-bg-muted" />
+          <div className="w-full h-24 rounded-2xl bg-bg-muted" />
         </Card>
       ) : null}
 
       {preview ? (
         <Card elevated className="gap-4 p-6">
           <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
-            <div className="p-3 rounded-md border border-border-default bg-[rgba(255,255,255,0.03)]">
+            <div className="p-3 surface-inset">
               <span className="typo-small text-text-muted">Jugadores</span>
               <p className="mt-2 mb-0 text-text-primary font-bold">{preview.membersCount}</p>
             </div>
-            <div className="p-3 rounded-md border border-border-default bg-[rgba(255,255,255,0.03)]">
+            <div className="p-3 surface-inset">
               <span className="typo-small text-text-muted">Limite</span>
               <p className="mt-2 mb-0 text-text-primary font-bold">{preview.memberLimit}</p>
             </div>
-            <div className="p-3 rounded-md border border-border-default bg-[rgba(255,255,255,0.03)]">
+            <div className="p-3 surface-inset">
               <span className="typo-small text-text-muted">Estado</span>
               <p className="mt-2 mb-0 text-text-primary font-bold">{preview.isActive ? "Activa" : "Inactiva"}</p>
             </div>

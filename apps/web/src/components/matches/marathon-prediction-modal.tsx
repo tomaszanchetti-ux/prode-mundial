@@ -196,7 +196,7 @@ export function MarathonPredictionModalView({
           </button>
         </div>
 
-        <div className="grid gap-3 p-3.5 rounded-lg border border-border-subtle bg-[rgba(255,255,255,0.04)]">
+        <div className="grid gap-3 p-3.5 surface-inset">
           <div className="flex justify-between items-center gap-3 flex-wrap">
             <div className="grid gap-1">
               <span className="typo-small text-text-muted">PROGRESO GLOBAL</span>
@@ -268,7 +268,7 @@ export function MarathonPredictionModalView({
         />
 
         {nextSummary ? (
-          <div className="grid gap-2 p-3 rounded-md border border-border-subtle bg-[rgba(255,255,255,0.03)]">
+          <div className="grid gap-2 p-3 surface-inset">
             <span className="typo-small text-text-muted">SIGUE DESPUES</span>
             <span className="text-[14px] leading-[1.35] text-text-primary font-semibold">
               {nextSummary.homeTeam.name} vs {nextSummary.awayTeam.name}
