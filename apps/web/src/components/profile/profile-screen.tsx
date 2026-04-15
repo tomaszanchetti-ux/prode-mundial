@@ -9,6 +9,7 @@ import { Button, Card } from "@prode/ui";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { updateMyProfile } from "@/lib/api/client";
+import { InstallAppCard } from "@/components/pwa/install-app-card";
 
 type FormState = {
   displayName: string;
@@ -172,6 +173,8 @@ export function ProfileScreen() {
           </div>
         </Card>
       ) : null}
+
+      <InstallAppCard />
 
       <Card elevated style={{ gap: 12, padding: 20 }}>
         <span className="typo-small text-text-muted">CUENTA</span>
