@@ -7,7 +7,6 @@ coverage
 .env
 .env.local
 .env.*.local
-pnpm-lock.yaml
 firebase-debug.log
 *.tsbuildinfo
 __pycache__/

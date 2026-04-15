@@ -1,0 +1,42 @@
+# .gcloudignore — controla qué se sube en `gcloud builds submit`.
+# Por defecto gcloud toma .gitignore; este archivo lo sobreescribe.
+# Es clave que pnpm-lock.yaml SÍ se suba (lo necesita el Dockerfile).
+
+# Git metadata — no se necesita para buildear.
+.git
+.gitignore
+
+# Outputs de build y caches — se regeneran.
+node_modules
+**/node_modules
+.next
+**/.next
+dist
+**/dist
+.turbo
+**/.turbo
+.cache
+**/.cache
+coverage
+**/coverage
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# Env locales — jamás entran a Cloud Build.
+.env
+.env.local
+.env.*.local
+
+# Logs y temporales.
+firebase-debug.log
+*.log
+.DS_Store
+
+# Python utilitarios del repo.
+__pycache__/
+*.pyc
+
+# Docs y handoffs — no necesarios para runtime.
+docs
+
+# NOTA: pnpm-lock.yaml NO debe estar ignorado acá aunque sí lo esté en .gitignore.
