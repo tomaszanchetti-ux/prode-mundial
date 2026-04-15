@@ -268,7 +268,7 @@ export function MatchDetailScreenView({
           ) : null}
         </div>
 
-        <div className="grid gap-2 p-[14px] rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default">
+        <div className="grid gap-2 p-[14px] surface-inset">
           <span className="text-[14px] leading-[1.35] text-text-primary">
             {isPredictionWindowNotOpen(detail) ? "Prediccion disponible desde la apertura" : "Editable hasta kickoff"}
           </span>
@@ -284,7 +284,7 @@ export function MatchDetailScreenView({
       <Card elevated style={{ gap: 16, padding: 16 }}>
         {saveNotice?.tone === "error" ? (
           <div className="grid gap-3 p-[14px] rounded-md alert-error">
-            <p className="typo-body m-0 text-[#F5B4B4]">{saveNotice.message}</p>
+            <p className="typo-body m-0">{saveNotice.message}</p>
             <Button variant="secondary" onClick={onSave} disabled={isSaving}>
               Reintentar guardado
             </Button>

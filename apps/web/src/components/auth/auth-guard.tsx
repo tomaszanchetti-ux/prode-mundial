@@ -52,11 +52,11 @@ export function AuthGuard({ children }: PropsWithChildren) {
   }
 
   if (status === "error") {
-    return <p style={{ margin: 0, color: "#F5B4B4" }}>No pudimos validar tu sesion.</p>;
+    return <p className="m-0 text-error">No pudimos validar tu sesion.</p>;
   }
 
   if (status !== "authenticated") {
-    return <p style={{ margin: 0, color: "#92A3BA" }}>Volviendo al ingreso...</p>;
+    return <p className="m-0 text-text-secondary">Volviendo al ingreso...</p>;
   }
 
   return <>{children}</>;

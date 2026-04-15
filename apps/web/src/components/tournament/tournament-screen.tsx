@@ -77,7 +77,7 @@ function GroupStandingsCard({ group }: GroupStandingsCardProps) {
 
       <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">{state.copy}</p>
 
-      <div className="grid gap-2 p-3 rounded-[16px] bg-[rgba(255,255,255,0.03)] border border-border-default">
+      <div className="grid gap-2 p-3 rounded-[16px] surface-inset">
         <div className="grid grid-cols-[minmax(0,1fr)_44px_44px_44px] gap-2 items-center">
           <span className="typo-small text-text-muted">Equipo</span>
           <span className="typo-small text-text-muted text-center">PJ</span>
@@ -90,14 +90,14 @@ function GroupStandingsCard({ group }: GroupStandingsCardProps) {
             key={item.teamId}
             className={`grid grid-cols-[minmax(0,1fr)_44px_44px_44px] gap-2 items-center px-3 py-2.5 rounded-[14px] ${
               item.isProjectedQualified
-                ? "bg-[rgba(47,107,255,0.12)] border border-[rgba(47,107,255,0.22)]"
-                : "bg-[rgba(255,255,255,0.02)] border border-border-default"
+                ? "bg-primary-soft border border-[rgba(0,82,204,0.22)]"
+                : "bg-bg-surface border border-border-default"
             }`}
           >
             <div className="grid gap-1">
               <span
                 className={`text-[12px] leading-[1.2] ${
-                  item.isProjectedQualified ? "text-[#9BE5B6] font-bold" : "text-text-muted font-semibold"
+                  item.isProjectedQualified ? "text-primary-600 font-bold" : "text-text-muted font-semibold"
                 }`}
               >
                 #{item.position} {item.isProjectedQualified ? "clasifica" : ""}
@@ -210,20 +210,20 @@ export function TournamentScreenView({
 
       {isLoading ? (
         <Card style={{ gap: 10, padding: 16 }}>
-          <div className="w-32 h-[10px] rounded-full bg-[rgba(148,163,184,0.16)]" />
-          <div className="w-[68%] h-[14px] rounded-full bg-[rgba(255,255,255,0.05)]" />
-          <div className="w-full h-[72px] rounded-[16px] bg-[rgba(255,255,255,0.03)]" />
+          <div className="w-32 h-[10px] rounded-full bg-bg-muted" />
+          <div className="w-[68%] h-[14px] rounded-full bg-bg-muted" />
+          <div className="w-full h-[72px] rounded-[16px] bg-bg-muted" />
         </Card>
       ) : null}
 
       {errorMessage ? (
-        <Card style={{ gap: 8, padding: 16, borderColor: "rgba(220, 38, 38, 0.26)" }}>
-          <strong className="text-[16px] text-text-primary">No pudimos cargar Tu Mundial</strong>
-          <p className="m-0 text-[14px] leading-[1.45] text-[#F5B4B4]">{errorMessage}</p>
+        <div className="grid gap-2 p-4 rounded-md alert-error">
+          <strong className="text-[16px]">No pudimos cargar Tu Mundial</strong>
+          <p className="m-0 text-[14px] leading-[1.45]">{errorMessage}</p>
           <Button variant="secondary" onClick={onRetry}>
             Reintentar
           </Button>
-        </Card>
+        </div>
       ) : null}
 
       <div className="grid gap-3">

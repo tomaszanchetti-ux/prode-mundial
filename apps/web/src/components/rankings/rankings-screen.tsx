@@ -93,7 +93,7 @@ export function RankingsScreenView({
               points.recentMatches.map((entry) => (
                 <div
                   key={entry.matchId}
-                  className="grid gap-1 p-3 rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default"
+                  className="grid gap-1 p-3 surface-inset"
                 >
                   <div className="flex justify-between gap-3 items-center">
                     <span className="text-text-primary font-semibold">{entry.matchLabel}</span>
@@ -120,14 +120,14 @@ export function RankingsScreenView({
 
         {isLoading ? (
           <div className="grid gap-2">
-            <div className="w-[104px] h-[10px] rounded-full bg-[rgba(148,163,184,0.16)]" />
-            <div className="w-full h-[56px] rounded-[16px] bg-[rgba(255,255,255,0.03)]" />
-            <div className="w-full h-[56px] rounded-[16px] bg-[rgba(255,255,255,0.03)]" />
+            <div className="w-[104px] h-[10px] rounded-full bg-bg-muted" />
+            <div className="w-full h-[56px] rounded-[16px] bg-bg-muted" />
+            <div className="w-full h-[56px] rounded-[16px] bg-bg-muted" />
           </div>
         ) : null}
 
         {!isLoading && leagues.length === 0 ? (
-          <Card style={{ gap: 8, padding: 16, background: "rgba(255,255,255,0.02)" }}>
+          <Card className="surface-inset" style={{ gap: 8, padding: 16 }}>
             <span className="typo-small text-text-muted">SIN COMPETENCIA ACTIVA</span>
             <p className="typo-body m-0 text-text-secondary">
               Todavia no hay ligas para mostrar. Crea una o unete a una desde la tab de ligas para ver tu tabla competitiva aqui.
@@ -137,7 +137,7 @@ export function RankingsScreenView({
 
         {leagues.length > 0 ? (
           <div className="grid gap-3">
-            <div className="grid gap-2.5 p-[14px] rounded-[16px] bg-[rgba(255,255,255,0.03)] border border-border-default">
+            <div className="grid gap-2.5 p-[14px] rounded-[16px] surface-inset">
               <div className="grid gap-1">
                 <span className="typo-small text-text-muted">LIGA ACTIVA</span>
                 <strong className="text-[18px] leading-[1.2] text-text-primary">
@@ -212,7 +212,7 @@ export function RankingsScreenView({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid gap-1 p-3 rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default">
+    <div className="grid gap-1 p-3 surface-inset">
       <span className="typo-small text-text-muted">{label}</span>
       <span className="typo-h3 m-0 text-text-primary">{value}</span>
     </div>
