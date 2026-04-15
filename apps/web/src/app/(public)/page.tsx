@@ -1,17 +1,9 @@
 import Link from "next/link";
 import { DEFAULT_PUBLIC_BOOTSTRAP, SUPPORT_LINKS } from "@prode/shared";
-import { Card, colors, radii, spacing, typography } from "@prode/ui";
+import { Card } from "@prode/ui";
 import { getPublicBootstrap } from "@/lib/api/client";
 
 export const dynamic = "force-dynamic";
-
-const publicPageStyle = {
-  maxWidth: 1120,
-  margin: "0 auto",
-  padding: "24px 16px 56px",
-  display: "grid",
-  gap: 18
-} as const;
 
 export default async function LandingPage() {
   const bootstrap = await getPublicBootstrap().catch((error) => {
@@ -26,154 +18,55 @@ export default async function LandingPage() {
   });
 
   return (
-    <main style={publicPageStyle}>
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          padding: "6px 2px"
-        }}
-      >
-        <div style={{ display: "grid", gap: 4 }}>
-          <strong style={{ fontSize: 20, lineHeight: 1, color: colors.textPrimary, letterSpacing: "-0.02em" }}>Prode Mundial</strong>
-          <span style={{ ...typography.small, color: colors.textMuted }}>Predice rapido. Compite mejor.</span>
+    <main className="max-w-[1120px] mx-auto px-4 pt-6 pb-14 grid gap-[18px]">
+      <header className="flex items-center justify-between gap-3 py-1.5 px-0.5">
+        <div className="grid gap-1">
+          <strong className="text-[20px] leading-none text-text-primary tracking-[-0.02em]">Prode Mundial</strong>
+          <span className="typo-small text-text-muted">Predice rapido. Compite mejor.</span>
         </div>
-        <Link
-          href="/login"
-          style={{
-            minHeight: 44,
-            padding: "0 16px",
-            borderRadius: radii.pill,
-            display: "inline-flex",
-            alignItems: "center",
-            textDecoration: "none",
-            background: colors.primary500,
-            color: colors.textPrimary,
-            fontWeight: 700,
-            boxShadow: "0 10px 24px rgba(47, 107, 255, 0.24)"
-          }}
-        >
+        <Link href="/login" className="landing-pill-link">
           Entrar
         </Link>
       </header>
 
-      <section
-        style={{
-          display: "grid",
-          gap: spacing[16],
-          padding: spacing[24],
-          borderRadius: 28,
-          background:
-            "radial-gradient(circle at top right, rgba(47, 107, 255, 0.2), transparent 30%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(7, 17, 31, 0.98) 100%)",
-          border: `1px solid ${colors.border}`,
-          boxShadow: "0 26px 68px rgba(2, 8, 18, 0.3)"
-        }}
-      >
-        <div style={{ display: "grid", gap: spacing[12] }}>
-          <span style={{ ...typography.small, color: colors.primary500 }}>MUNDIAL 2026</span>
-          <h1
-            style={{
-              margin: 0,
-              fontSize: "clamp(3rem, 9vw, 5.8rem)",
-              lineHeight: 0.92,
-              letterSpacing: "-0.05em",
-              color: colors.textPrimary,
-              maxWidth: 760
-            }}
-          >
+      <section className="landing-hero-bg grid gap-4 p-6 rounded-[28px]">
+        <div className="grid gap-3">
+          <span className="typo-small text-primary-500">MUNDIAL 2026</span>
+          <h1 className="m-0 leading-[0.92] tracking-[-0.05em] text-text-primary max-w-[760px] text-[clamp(3rem,9vw,5.8rem)]">
             {bootstrap.productName}
           </h1>
-          <p style={{ margin: 0, maxWidth: 620, fontSize: 20, lineHeight: 1.45, color: colors.textSecondary }}>{bootstrap.tagline}</p>
+          <p className="m-0 max-w-[620px] text-[20px] leading-[1.45] text-text-secondary">{bootstrap.tagline}</p>
         </div>
 
-        <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
-          <div
-            style={{
-              padding: spacing[16],
-              borderRadius: radii.lg,
-              background: "rgba(255, 255, 255, 0.04)",
-              border: `1px solid ${colors.border}`
-            }}
-          >
-            <span style={{ ...typography.small, color: colors.textMuted }}>LOOP</span>
-            <p style={{ margin: "8px 0 0", fontSize: 18, lineHeight: 1.3, color: colors.textPrimary, fontWeight: 600 }}>
+        <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(180px,1fr))]">
+          <div className="p-4 rounded-lg bg-[rgba(255,255,255,0.04)] border border-border-default">
+            <span className="typo-small text-text-muted">LOOP</span>
+            <p className="mt-2 mb-0 text-[18px] leading-[1.3] text-text-primary font-semibold">
               Entra, predice tu proximo partido y vuelve por puntos.
             </p>
           </div>
-          <div
-            style={{
-              padding: spacing[16],
-              borderRadius: radii.lg,
-              background: "rgba(255, 255, 255, 0.04)",
-              border: `1px solid ${colors.border}`
-            }}
-          >
-            <span style={{ ...typography.small, color: colors.textMuted }}>COMPETENCIA</span>
-            <p style={{ margin: "8px 0 0", fontSize: 18, lineHeight: 1.3, color: colors.textPrimary, fontWeight: 600 }}>
+          <div className="p-4 rounded-lg bg-[rgba(255,255,255,0.04)] border border-border-default">
+            <span className="typo-small text-text-muted">COMPETENCIA</span>
+            <p className="mt-2 mb-0 text-[18px] leading-[1.3] text-text-primary font-semibold">
               Todo gira alrededor de tus ligas, no de un ranking global.
             </p>
           </div>
         </div>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-          <Link
-            href="/login"
-            style={{
-              minHeight: 52,
-              padding: "0 18px",
-              borderRadius: 16,
-              display: "inline-flex",
-              alignItems: "center",
-              textDecoration: "none",
-              background: colors.primary500,
-              color: colors.textPrimary,
-              fontWeight: 700,
-              boxShadow: "0 10px 24px rgba(47, 107, 255, 0.24)"
-            }}
-          >
+        <div className="flex flex-wrap gap-2.5">
+          <Link href="/login" className="landing-cta-primary">
             Jugar ahora
           </Link>
-          <Link
-            href="/login"
-            style={{
-              minHeight: 52,
-              padding: "0 18px",
-              borderRadius: 16,
-              display: "inline-flex",
-              alignItems: "center",
-              textDecoration: "none",
-              background: "rgba(255, 255, 255, 0.04)",
-              color: colors.textPrimary,
-              border: `1px solid ${colors.border}`,
-              fontWeight: 700
-            }}
-          >
+          <Link href="/login" className="landing-cta-secondary">
             Unirme a una liga
           </Link>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gap: 10,
-            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))"
-          }}
-        >
+        <div className="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
           {bootstrap.features.map((feature) => (
             <div
               key={feature}
-              style={{
-                padding: spacing[16],
-                borderRadius: radii.lg,
-                background: "rgba(255, 255, 255, 0.03)",
-                border: `1px solid ${colors.border}`,
-                color: colors.textPrimary,
-                fontSize: 15,
-                lineHeight: 1.35,
-                fontWeight: 600
-              }}
+              className="p-4 rounded-lg bg-[rgba(255,255,255,0.03)] border border-border-default text-text-primary text-[15px] leading-[1.35] font-semibold"
             >
               {feature}
             </div>
@@ -181,29 +74,29 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section style={{ display: "grid", gap: spacing[16], gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+      <section className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
         <Card elevated style={{ gap: 10 }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>COMO SE JUEGA</span>
-          <p style={{ margin: 0, fontSize: 18, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>Predice en segundos</p>
-          <p style={{ margin: 0, color: colors.textSecondary }}>Eliges marcador, guardas y sigues. Sin pantallas pesadas ni vueltas raras.</p>
+          <span className="typo-small text-text-muted">COMO SE JUEGA</span>
+          <p className="m-0 text-[18px] leading-[1.35] text-text-primary font-semibold">Predice en segundos</p>
+          <p className="m-0 text-text-secondary">Eliges marcador, guardas y sigues. Sin pantallas pesadas ni vueltas raras.</p>
         </Card>
 
         <Card elevated style={{ gap: 10 }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>COMO SUMAS</span>
-          <p style={{ margin: 0, fontSize: 18, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>Puntos claros post partido</p>
-          <p style={{ margin: 0, color: colors.textSecondary }}>El backend resuelve estados, resultados y scoring para que siempre veas lo importante.</p>
+          <span className="typo-small text-text-muted">COMO SUMAS</span>
+          <p className="m-0 text-[18px] leading-[1.35] text-text-primary font-semibold">Puntos claros post partido</p>
+          <p className="m-0 text-text-secondary">El backend resuelve estados, resultados y scoring para que siempre veas lo importante.</p>
         </Card>
 
         <Card elevated style={{ gap: 10 }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>COMO COMPITES</span>
-          <p style={{ margin: 0, fontSize: 18, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>Tus ligas son el centro</p>
-          <p style={{ margin: 0, color: colors.textSecondary }}>Invitas gente, sigues posiciones y vuelves cada dia con una razon concreta para jugar.</p>
+          <span className="typo-small text-text-muted">COMO COMPITES</span>
+          <p className="m-0 text-[18px] leading-[1.35] text-text-primary font-semibold">Tus ligas son el centro</p>
+          <p className="m-0 text-text-secondary">Invitas gente, sigues posiciones y vuelves cada dia con una razon concreta para jugar.</p>
         </Card>
       </section>
 
-      <footer style={{ display: "flex", flexWrap: "wrap", gap: 12, padding: "4px 2px" }}>
+      <footer className="flex flex-wrap gap-3 py-1 px-0.5">
         {SUPPORT_LINKS.map((link) => (
-          <Link key={link.href} href={link.href} style={{ color: colors.textSecondary, fontWeight: 600, textDecoration: "none" }}>
+          <Link key={link.href} href={link.href} className="text-text-secondary font-semibold no-underline">
             {link.label}
           </Link>
         ))}

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import type { MatchDetail, MatchSummary, PreTournamentSummary, SaveMatchPredictionInput } from "@prode/shared";
-import { Button, Card, ScoreInput, StatusTag, TeamDisplay, colors, radii, spacing, typography } from "@prode/ui";
+import { Button, Card, ScoreInput, StatusTag, TeamDisplay } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
 import { copyForLocale, formatDateTime, useLocale } from "@/lib/i18n/locale-provider";
@@ -170,76 +170,37 @@ export function MarathonPredictionModalView({
   const canGoNext = currentIndex < remainingMatches - 1;
   const isEditable = detail ? canEditPrediction(detail) : false;
 
+  const progressPercent =
+    totalMatches > 0 ? `${Math.max(4, (Number.parseInt(progressLabel, 10) / totalMatches) * 100)}%` : "0%";
+
   return (
     <div
       role="dialog"
       aria-modal="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        padding: spacing[12],
-        background: colors.overlay,
-        display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "center",
-        backdropFilter: "blur(10px)",
-        zIndex: 55
-      }}
+      className="fixed inset-0 p-3 flex items-end justify-center z-[55] modal-overlay"
     >
       <Card
         elevated
-        style={{
-          width: "min(100%, 620px)",
-          gap: spacing[14],
-          boxShadow: "0 30px 70px rgba(5, 10, 20, 0.5)",
-          borderTopLeftRadius: radii.xl,
-          borderTopRightRadius: radii.xl,
-          borderBottomLeftRadius: radii.lg,
-          borderBottomRightRadius: radii.lg,
-          background:
-            "radial-gradient(circle at top right, rgba(255, 196, 76, 0.14), transparent 24%), radial-gradient(circle at left center, rgba(47, 107, 255, 0.18), transparent 30%), linear-gradient(180deg, rgba(16, 29, 49, 0.99) 0%, rgba(10, 21, 35, 0.99) 100%)"
-        }}
+        className="marathon-modal-bg w-full max-w-[620px] gap-3.5 rounded-t-[28px] rounded-b-lg"
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
-          <div style={{ display: "grid", gap: spacing[8] }}>
-            <span style={{ ...typography.small, color: colors.textMuted }}>{toStageLabel(currentSummary)} · MARATHON MODE</span>
-            <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>
+        <div className="flex justify-between items-start gap-3">
+          <div className="grid gap-2">
+            <span className="typo-small text-text-muted">{toStageLabel(currentSummary)} · MARATHON MODE</span>
+            <h2 className="typo-h2 m-0 text-text-primary">
               {currentSummary.homeTeam.name} vs {currentSummary.awayTeam.name}
             </h2>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{helperText}</p>
+            <p className="m-0 text-[14px] leading-[1.4] text-text-secondary">{helperText}</p>
           </div>
-          <button
-            type="button"
-            aria-label="Cerrar"
-            onClick={onClose}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: radii.pill,
-              border: `1px solid ${colors.border}`,
-              background: "rgba(255, 255, 255, 0.03)",
-              color: colors.textSecondary,
-              cursor: "pointer"
-            }}
-          >
+          <button type="button" aria-label="Cerrar" onClick={onClose} className="close-btn">
             X
           </button>
         </div>
 
-        <div
-          style={{
-          display: "grid",
-          gap: spacing[12],
-          padding: spacing[14],
-          borderRadius: radii.lg,
-          background: "rgba(255, 255, 255, 0.04)",
-          border: `1px solid ${colors.border}`
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: spacing[12], flexWrap: "wrap" }}>
-            <div style={{ display: "grid", gap: 4 }}>
-              <span style={{ ...typography.small, color: colors.textMuted }}>PROGRESO GLOBAL</span>
-              <strong style={{ fontSize: 20, lineHeight: 1.2, color: colors.textPrimary }}>{progressLabel}</strong>
+        <div className="grid gap-3 p-3.5 rounded-lg border border-border-subtle bg-[rgba(255,255,255,0.04)]">
+          <div className="flex justify-between items-center gap-3 flex-wrap">
+            <div className="grid gap-1">
+              <span className="typo-small text-text-muted">PROGRESO GLOBAL</span>
+              <strong className="text-[20px] leading-[1.2] text-text-primary">{progressLabel}</strong>
             </div>
             <StatusTag
               status={isEditable ? "editable" : "locked"}
@@ -247,44 +208,21 @@ export function MarathonPredictionModalView({
             />
           </div>
 
-          <div
-            style={{
-              width: "100%",
-              height: 8,
-              borderRadius: radii.pill,
-              background: "rgba(255, 255, 255, 0.06)",
-              overflow: "hidden"
-            }}
-          >
-            <div
-              style={{
-                width: totalMatches > 0 ? `${Math.max(4, (Number.parseInt(progressLabel, 10) / totalMatches) * 100)}%` : "0%",
-                height: "100%",
-                background: "linear-gradient(90deg, rgba(47, 107, 255, 1) 0%, rgba(255, 196, 76, 1) 100%)"
-              }}
-            />
+          <div className="marathon-progress-track">
+            <div className="marathon-progress-fill" style={{ width: progressPercent }} />
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], flexWrap: "wrap" }}>
-            <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+          <div className="flex justify-between gap-3 flex-wrap">
+            <span className="text-[13px] leading-[1.35] text-text-secondary">
               Paso {currentIndex + 1} de {remainingMatches} pendientes
             </span>
-            <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+            <span className="text-[13px] leading-[1.35] text-text-secondary">
               Kickoff: {toKickoffLabel(currentSummary.kickoffAt)}
             </span>
           </div>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gap: spacing[12],
-            padding: spacing[16],
-            borderRadius: radii.lg,
-            background: "linear-gradient(180deg, rgba(7, 17, 31, 1) 0%, rgba(13, 25, 43, 1) 100%)",
-            border: `1px solid ${colors.border}`
-          }}
-        >
+        <div className="marathon-matchup-panel grid gap-3 p-4 rounded-lg">
           <TeamDisplay
             teamName={currentSummary.homeTeam.name}
             fifaCode={currentSummary.homeTeam.fifaCode}
@@ -293,7 +231,7 @@ export function MarathonPredictionModalView({
             size="lg"
             weight={700}
           />
-          <span style={{ ...typography.small, color: colors.textMuted, paddingLeft: 46 }}>VS</span>
+          <span className="typo-small text-text-muted pl-[46px]">VS</span>
           <TeamDisplay
             teamName={currentSummary.awayTeam.name}
             fifaCode={currentSummary.awayTeam.fifaCode}
@@ -306,21 +244,11 @@ export function MarathonPredictionModalView({
 
         {notice ? (
           <div
-            style={{
-              display: "grid",
-              gap: spacing[8],
-              padding: spacing[12],
-              borderRadius: radii.md,
-              background: notice.tone === "success" ? "rgba(34, 197, 94, 0.12)" : "rgba(220, 38, 38, 0.12)",
-              border:
-                notice.tone === "success"
-                  ? "1px solid rgba(34, 197, 94, 0.24)"
-                  : "1px solid rgba(220, 38, 38, 0.22)"
-            }}
+            className={`grid gap-2 p-3 rounded-md ${
+              notice.tone === "success" ? "alert-success" : "alert-error"
+            }`}
           >
-            <span style={{ fontSize: 14, lineHeight: 1.35, color: notice.tone === "success" ? "#9BE5B6" : "#F5B4B4" }}>
-              {notice.message}
-            </span>
+            <span className="text-[14px] leading-[1.35]">{notice.message}</span>
           </div>
         ) : null}
 
@@ -340,21 +268,12 @@ export function MarathonPredictionModalView({
         />
 
         {nextSummary ? (
-          <div
-            style={{
-              display: "grid",
-              gap: spacing[8],
-              padding: spacing[12],
-              borderRadius: radii.md,
-              background: "rgba(255, 255, 255, 0.03)",
-              border: `1px solid ${colors.border}`
-            }}
-          >
-            <span style={{ ...typography.small, color: colors.textMuted }}>SIGUE DESPUES</span>
-            <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>
+          <div className="grid gap-2 p-3 rounded-md border border-border-subtle bg-[rgba(255,255,255,0.03)]">
+            <span className="typo-small text-text-muted">SIGUE DESPUES</span>
+            <span className="text-[14px] leading-[1.35] text-text-primary font-semibold">
               {nextSummary.homeTeam.name} vs {nextSummary.awayTeam.name}
             </span>
-            <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+            <span className="text-[13px] leading-[1.35] text-text-secondary">
               {toKickoffLabel(nextSummary.kickoffAt)}
             </span>
           </div>
@@ -364,7 +283,7 @@ export function MarathonPredictionModalView({
           {canGoNext ? "Guardar y seguir" : "Guardar prediccion"}
         </Button>
 
-        <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+        <div className="grid gap-2 grid-cols-2">
           <Button variant="ghost" onClick={onPrevious} disabled={!canGoPrevious || isSaving}>
             Anterior
           </Button>

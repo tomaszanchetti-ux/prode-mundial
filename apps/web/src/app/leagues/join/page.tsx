@@ -1,12 +1,11 @@
 import { Suspense } from "react";
-import { colors } from "@prode/ui";
 import { LeagueInviteScreen } from "@/components/leagues/league-invite-screen";
 
 export default function LeagueInvitePage() {
   return (
     <Suspense
       fallback={
-        <main style={{ maxWidth: 980, margin: "0 auto", padding: "24px 16px 56px", color: colors.textSecondary }}>
+        <main className="max-w-[980px] mx-auto px-4 pt-6 pb-14 text-text-secondary">
           Cargando invitacion...
         </main>
       }

@@ -4,7 +4,7 @@ import React from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useState } from "react";
 import type { LeagueDetail, LeagueSummary } from "@prode/shared";
-import { Button, Card, StatusTag, colors, radii, spacing, typography } from "@prode/ui";
+import { Button, Card, StatusTag } from "@prode/ui";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, createLeague, getMyLeagues, joinLeague } from "@/lib/api/client";
@@ -31,17 +31,6 @@ type LeaguesScreenViewProps = {
   onRetry: () => void;
 };
 
-const inputStyle = {
-  minHeight: 52,
-  borderRadius: radii.md,
-  border: `1px solid ${colors.border}`,
-  background: colors.bgMuted,
-  color: colors.textPrimary,
-  padding: "0 14px",
-  fontSize: 16,
-  outline: "none"
-} satisfies React.CSSProperties;
-
 export function LeaguesScreenView({
   items,
   mode,
@@ -61,14 +50,14 @@ export function LeaguesScreenView({
   onRetry
 }: LeaguesScreenViewProps) {
   return (
-    <div style={{ display: "grid", gap: spacing[16] }}>
-      <Card elevated style={{ gap: spacing[12] }}>
-        <span style={{ ...typography.small, color: colors.textMuted }}>LIGAS</span>
-        <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Tus ligas y tu lugar en cada una</h1>
-        <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+    <div className="grid gap-4">
+      <Card elevated style={{ gap: 12 }}>
+        <span className="typo-small text-text-muted">LIGAS</span>
+        <h1 className="typo-h2 m-0 text-text-primary">Tus ligas y tu lugar en cada una</h1>
+        <p className="typo-body m-0 text-text-secondary">
           Crea una liga, sumate con un codigo y segui tu competencia sin salir de esta pantalla.
         </p>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <div className="flex gap-2 flex-wrap">
           <Button variant={mode === "create" ? "secondary" : "primary"} onClick={() => onChangeMode(mode === "create" ? null : "create")}>
             {mode === "create" ? "Ocultar crear liga" : "Crear liga"}
           </Button>
@@ -82,17 +71,17 @@ export function LeaguesScreenView({
       </Card>
 
       {mode === "create" ? (
-        <Card elevated style={{ gap: spacing[16] }}>
-          <div style={{ display: "grid", gap: 6 }}>
-            <span style={{ ...typography.small, color: colors.primary500 }}>CREAR LIGA</span>
-            <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>Abre tu mesa competitiva</h2>
-            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+        <Card elevated style={{ gap: 16 }}>
+          <div className="grid gap-1.5">
+            <span className="typo-small text-primary-500">CREAR LIGA</span>
+            <h2 className="typo-h3 m-0 text-text-primary">Abre tu mesa competitiva</h2>
+            <p className="typo-body m-0 text-text-secondary">
               El nombre sale publicado para todos los miembros. Apenas la creas te devolvemos codigo e invite link.
             </p>
           </div>
-          <form onSubmit={onCreateLeague} style={{ display: "grid", gap: spacing[12] }}>
-            <label style={{ display: "grid", gap: spacing[8] }}>
-              <span style={{ ...typography.small, color: colors.textSecondary }}>Nombre de la liga</span>
+          <form onSubmit={onCreateLeague} className="grid gap-3">
+            <label className="grid gap-2">
+              <span className="typo-small text-text-secondary">Nombre de la liga</span>
               <input
                 name="leagueName"
                 value={formState.leagueName}
@@ -101,7 +90,7 @@ export function LeaguesScreenView({
                 maxLength={40}
                 placeholder="Liga del Asado"
                 required
-                style={inputStyle}
+                className="email-input"
               />
             </label>
             <Button type="submit" disabled={isSubmitting}>
@@ -112,17 +101,17 @@ export function LeaguesScreenView({
       ) : null}
 
       {mode === "join" ? (
-        <Card elevated style={{ gap: spacing[16] }}>
-          <div style={{ display: "grid", gap: 6 }}>
-            <span style={{ ...typography.small, color: colors.gold500 }}>JOIN POR CODIGO</span>
-            <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>Entra a una liga existente</h2>
-            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+        <Card elevated style={{ gap: 16 }}>
+          <div className="grid gap-1.5">
+            <span className="typo-small text-gold">JOIN POR CODIGO</span>
+            <h2 className="typo-h3 m-0 text-text-primary">Entra a una liga existente</h2>
+            <p className="typo-body m-0 text-text-secondary">
               Pega el codigo que te compartieron. Lo normalizamos y validamos antes de sumarte.
             </p>
           </div>
-          <form onSubmit={onJoinLeague} style={{ display: "grid", gap: spacing[12] }}>
-            <label style={{ display: "grid", gap: spacing[8] }}>
-              <span style={{ ...typography.small, color: colors.textSecondary }}>Codigo de invitacion</span>
+          <form onSubmit={onJoinLeague} className="grid gap-3">
+            <label className="grid gap-2">
+              <span className="typo-small text-text-secondary">Codigo de invitacion</span>
               <input
                 name="inviteCode"
                 value={formState.inviteCode}
@@ -131,7 +120,7 @@ export function LeaguesScreenView({
                 maxLength={24}
                 placeholder="ASADO26"
                 required
-                style={{ ...inputStyle, textTransform: "uppercase" }}
+                className="email-input uppercase"
               />
             </label>
             <Button type="submit" disabled={isSubmitting}>
@@ -142,74 +131,58 @@ export function LeaguesScreenView({
       ) : null}
 
       {actionError ? (
-        <Card elevated style={{ gap: spacing[12] }}>
-          <span style={{ ...typography.small, color: "#FCA5A5" }}>NO PUDIMOS COMPLETAR LA ACCION</span>
-          <p style={{ ...typography.body, margin: 0, color: colors.textPrimary }}>{actionError}</p>
+        <Card elevated style={{ gap: 12 }}>
+          <span className="typo-small text-[#FCA5A5]">NO PUDIMOS COMPLETAR LA ACCION</span>
+          <p className="typo-body m-0 text-text-primary">{actionError}</p>
         </Card>
       ) : null}
 
       {lastActionLeague ? (
-        <Card
-          elevated
-          style={{
-            gap: spacing[12],
-            background:
-              "radial-gradient(circle at top right, rgba(47, 107, 255, 0.16), transparent 28%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
-          }}
-        >
-          <span style={{ ...typography.small, color: colors.primary500 }}>ACCION COMPLETADA</span>
-          <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>{lastActionLeague.name}</h2>
-          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+        <Card elevated className="league-action-bg" style={{ gap: 12 }}>
+          <span className="typo-small text-primary-500">ACCION COMPLETADA</span>
+          <h2 className="typo-h3 m-0 text-text-primary">{lastActionLeague.name}</h2>
+          <p className="typo-body m-0 text-text-secondary">
             {actionMessage ?? "La liga ya quedo lista para competir."}
           </p>
-          <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))" }}>
+          <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(120px,1fr))]">
             <Metric label="Codigo" value={lastActionLeague.inviteCode} />
             <Metric label="Jugadores" value={`${lastActionLeague.membersCount}/${lastActionLeague.memberLimit}`} />
             <Metric label="Tu rol" value={lastActionLeague.membershipRole === "owner" ? "Creador" : "Miembro"} />
           </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div className="flex gap-2 flex-wrap">
             <Button onClick={() => onOpenLeagueDetail(lastActionLeague.leagueId)}>Ver detalle de liga</Button>
             <Button variant="ghost" onClick={onOpenRankings}>
               Ir a posiciones
             </Button>
           </div>
           {lastActionLeague.inviteLink ? (
-            <div
-              style={{
-                display: "grid",
-                gap: 6,
-                padding: spacing[12],
-                borderRadius: 16,
-                background: "rgba(255,255,255,0.03)",
-                border: `1px solid ${colors.border}`
-              }}
-            >
-              <span style={{ ...typography.small, color: colors.textMuted }}>INVITE LINK</span>
-              <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary, wordBreak: "break-all" }}>{lastActionLeague.inviteLink}</span>
+            <div className="grid gap-1.5 p-3 rounded-[16px] bg-[rgba(255,255,255,0.03)] border border-border-default">
+              <span className="typo-small text-text-muted">INVITE LINK</span>
+              <span className="text-[14px] leading-[1.4] text-text-secondary break-all">{lastActionLeague.inviteLink}</span>
             </div>
           ) : null}
         </Card>
       ) : null}
 
       {errorMessage ? (
-        <Card elevated style={{ gap: spacing[12] }}>
-          <p style={{ ...typography.body, margin: 0, color: colors.textPrimary }}>{errorMessage}</p>
+        <Card elevated style={{ gap: 12 }}>
+          <p className="typo-body m-0 text-text-primary">{errorMessage}</p>
           <Button onClick={onRetry}>Reintentar</Button>
         </Card>
       ) : null}
 
       {isLoading ? (
-        <Card elevated style={{ gap: spacing[8] }}>
-          <div style={{ width: 96, height: 10, borderRadius: 999, background: "rgba(148, 163, 184, 0.16)" }} />
-          <div style={{ width: "100%", height: 56, borderRadius: 16, background: "rgba(255,255,255,0.03)" }} />
+        <Card elevated style={{ gap: 8 }}>
+          <div className="w-[96px] h-[10px] rounded-full bg-[rgba(148,163,184,0.16)]" />
+          <div className="w-full h-[56px] rounded-[16px] bg-[rgba(255,255,255,0.03)]" />
         </Card>
       ) : null}
 
       {!isLoading && !errorMessage && items.length === 0 ? (
-        <Card elevated style={{ gap: spacing[12] }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>SIN LIGAS TODAVIA</span>
-          <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>Todavia no estas compitiendo en ninguna</h2>
-          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+        <Card elevated style={{ gap: 12 }}>
+          <span className="typo-small text-text-muted">SIN LIGAS TODAVIA</span>
+          <h2 className="typo-h3 m-0 text-text-primary">Todavia no estas compitiendo en ninguna</h2>
+          <p className="typo-body m-0 text-text-secondary">
             Arriba ya puedes crear tu primera liga o entrar con un codigo. Cuando exista competencia materializada, tu posicion aparece aqui.
           </p>
         </Card>
@@ -217,53 +190,38 @@ export function LeaguesScreenView({
 
       {!isLoading && !errorMessage
         ? items.map((league) => (
-            <Card key={league.leagueId} elevated style={{ gap: spacing[12] }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "flex-start" }}>
-                <div style={{ display: "grid", gap: 6 }}>
-                  <span style={{ ...typography.small, color: colors.textMuted }}>LIGA ACTIVA</span>
-                  <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>{league.name}</h2>
-                  <p style={{ fontSize: 14, lineHeight: 1.4, margin: 0, color: colors.textSecondary }}>
+            <Card key={league.leagueId} elevated style={{ gap: 12 }}>
+              <div className="flex justify-between gap-3 items-start">
+                <div className="grid gap-1.5">
+                  <span className="typo-small text-text-muted">LIGA ACTIVA</span>
+                  <h2 className="typo-h3 m-0 text-text-primary">{league.name}</h2>
+                  <p className="text-[14px] leading-[1.4] m-0 text-text-secondary">
                     {league.membersCount}/{league.memberLimit} jugadores
                   </p>
                 </div>
                 <StatusTag status={league.isActive ? "editable" : "locked"} label={league.isActive ? "Activa" : "Inactiva"} />
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gap: spacing[8],
-                  gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))"
-                }}
-              >
+              <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(120px,1fr))]">
                 <Metric label="Tu lugar" value={league.position ? `#${league.position}` : "Sin tabla"} />
                 <Metric label="Tus puntos" value={`${league.userPoints}`} />
                 <Metric label="Código" value={league.inviteCode} />
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gap: 6,
-                  padding: spacing[12],
-                  borderRadius: 16,
-                  background: "rgba(255,255,255,0.03)",
-                  border: `1px solid ${colors.border}`
-                }}
-              >
-                <span style={{ ...typography.small, color: colors.textMuted }}>ESTADO SOCIAL</span>
-                <p style={{ fontSize: 14, lineHeight: 1.4, margin: 0, color: colors.textPrimary, fontWeight: 600 }}>
+              <div className="grid gap-1.5 p-3 rounded-[16px] bg-[rgba(255,255,255,0.03)] border border-border-default">
+                <span className="typo-small text-text-muted">ESTADO SOCIAL</span>
+                <p className="text-[14px] leading-[1.4] m-0 text-text-primary font-semibold">
                   {league.position
                     ? `Estas compitiendo en el puesto #${league.position}.`
                     : "Tu posicion aparece cuando haya tabla materializada."}
                 </p>
-                <p style={{ fontSize: 14, lineHeight: 1.4, margin: 0, color: colors.textSecondary }}>
+                <p className="text-[14px] leading-[1.4] m-0 text-text-secondary">
                   {league.inviteLink
                     ? `Comparte este acceso cuando quieras sumar mas gente: ${league.inviteLink}`
                     : "Todavia no tenemos invite link disponible para esta liga."}
                 </p>
               </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div className="flex gap-2 flex-wrap">
                 <Button variant="secondary" onClick={() => onOpenLeagueDetail(league.leagueId)}>
                   Ver detalle
                 </Button>
@@ -280,18 +238,9 @@ export function LeaguesScreenView({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gap: 4,
-        padding: spacing[12],
-        borderRadius: 14,
-        background: "rgba(255,255,255,0.03)",
-        border: `1px solid ${colors.border}`
-      }}
-    >
-      <span style={{ ...typography.small, color: colors.textMuted }}>{label}</span>
-      <span style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>{value}</span>
+    <div className="grid gap-1 p-3 rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default">
+      <span className="typo-small text-text-muted">{label}</span>
+      <span className="typo-h3 m-0 text-text-primary">{value}</span>
     </div>
   );
 }

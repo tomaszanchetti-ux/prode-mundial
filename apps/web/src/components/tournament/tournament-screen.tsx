@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES, type MatchSummary, type PreTournamentSummary, type TuMundialGroupCard, type TuMundialResponse } from "@prode/shared";
-import { Button, Card, ProgressCompact, StatusTag, TeamDisplay, colors, spacing, typography } from "@prode/ui";
+import { Button, Card, ProgressCompact, StatusTag, TeamDisplay } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MarathonPredictionModal } from "@/components/matches/marathon-prediction-modal";
 import { ApiClientError, getMatches, getPreTournamentSummary, getTuMundial } from "@/lib/api/client";
@@ -63,60 +63,43 @@ function GroupStandingsCard({ group }: GroupStandingsCardProps) {
   const state = toGroupState(group);
 
   return (
-    <Card elevated style={{ gap: spacing[12], padding: spacing[16] }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[12] }}>
-        <div style={{ display: "grid", gap: 4 }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>{group.groupName}</span>
-          <strong style={{ fontSize: 18, lineHeight: 1.25, color: colors.textPrimary }}>Asi va quedando la tabla</strong>
-          <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+    <Card elevated style={{ gap: 12, padding: 16 }}>
+      <div className="flex justify-between items-start gap-3">
+        <div className="grid gap-1">
+          <span className="typo-small text-text-muted">{group.groupName}</span>
+          <strong className="text-[18px] leading-[1.25] text-text-primary">Asi va quedando la tabla</strong>
+          <span className="text-[13px] leading-[1.35] text-text-secondary">
             {group.completedMatches} / {group.totalMatches} partidos proyectados
           </span>
         </div>
         <StatusTag status={state.tone} label={state.label} />
       </div>
 
-      <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>{state.copy}</p>
+      <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">{state.copy}</p>
 
-      <div
-        style={{
-          display: "grid",
-          gap: spacing[8],
-          padding: spacing[12],
-          borderRadius: 16,
-          background: "rgba(255, 255, 255, 0.03)",
-          border: `1px solid ${colors.border}`
-        }}
-      >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) 44px 44px 44px",
-            gap: spacing[8],
-            alignItems: "center"
-          }}
-        >
-          <span style={{ ...typography.small, color: colors.textMuted }}>Equipo</span>
-          <span style={{ ...typography.small, color: colors.textMuted, textAlign: "center" }}>PJ</span>
-          <span style={{ ...typography.small, color: colors.textMuted, textAlign: "center" }}>DG</span>
-          <span style={{ ...typography.small, color: colors.textMuted, textAlign: "center" }}>Pts</span>
+      <div className="grid gap-2 p-3 rounded-[16px] bg-[rgba(255,255,255,0.03)] border border-border-default">
+        <div className="grid grid-cols-[minmax(0,1fr)_44px_44px_44px] gap-2 items-center">
+          <span className="typo-small text-text-muted">Equipo</span>
+          <span className="typo-small text-text-muted text-center">PJ</span>
+          <span className="typo-small text-text-muted text-center">DG</span>
+          <span className="typo-small text-text-muted text-center">Pts</span>
         </div>
 
         {group.items.map((item) => (
           <div
             key={item.teamId}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0, 1fr) 44px 44px 44px",
-              gap: spacing[8],
-              alignItems: "center",
-              padding: "10px 12px",
-              borderRadius: 14,
-              background: item.isProjectedQualified ? "rgba(47, 107, 255, 0.12)" : "rgba(255, 255, 255, 0.02)",
-              border: item.isProjectedQualified ? "1px solid rgba(47, 107, 255, 0.22)" : `1px solid ${colors.border}`
-            }}
+            className={`grid grid-cols-[minmax(0,1fr)_44px_44px_44px] gap-2 items-center px-3 py-2.5 rounded-[14px] ${
+              item.isProjectedQualified
+                ? "bg-[rgba(47,107,255,0.12)] border border-[rgba(47,107,255,0.22)]"
+                : "bg-[rgba(255,255,255,0.02)] border border-border-default"
+            }`}
           >
-            <div style={{ display: "grid", gap: 4 }}>
-              <span style={{ fontSize: 12, lineHeight: 1.2, color: item.isProjectedQualified ? "#9BE5B6" : colors.textMuted, fontWeight: item.isProjectedQualified ? 700 : 600 }}>
+            <div className="grid gap-1">
+              <span
+                className={`text-[12px] leading-[1.2] ${
+                  item.isProjectedQualified ? "text-[#9BE5B6] font-bold" : "text-text-muted font-semibold"
+                }`}
+              >
                 #{item.position} {item.isProjectedQualified ? "clasifica" : ""}
               </span>
               <TeamDisplay
@@ -128,9 +111,9 @@ function GroupStandingsCard({ group }: GroupStandingsCardProps) {
                 weight={item.isProjectedQualified ? 700 : 600}
               />
             </div>
-            <span style={{ fontSize: 14, lineHeight: 1.2, color: colors.textPrimary, textAlign: "center" }}>{item.played}</span>
-            <span style={{ fontSize: 14, lineHeight: 1.2, color: colors.textPrimary, textAlign: "center" }}>{item.goalDifference}</span>
-            <span style={{ fontSize: 14, lineHeight: 1.2, color: colors.textPrimary, textAlign: "center", fontWeight: 700 }}>{item.points}</span>
+            <span className="text-[14px] leading-[1.2] text-text-primary text-center">{item.played}</span>
+            <span className="text-[14px] leading-[1.2] text-text-primary text-center">{item.goalDifference}</span>
+            <span className="text-[14px] leading-[1.2] text-text-primary text-center font-bold">{item.points}</span>
           </div>
         ))}
       </div>
@@ -156,29 +139,21 @@ export function TournamentScreenView({
   const isPreTournament = preTournamentSummary?.isPreTournament ?? false;
 
   return (
-    <div style={{ display: "grid", gap: spacing[16] }}>
-      <Card
-        elevated
-        style={{
-          gap: spacing[12],
-          padding: spacing[20],
-          background:
-            "radial-gradient(circle at top right, rgba(255, 196, 76, 0.16), transparent 28%), radial-gradient(circle at left center, rgba(47, 107, 255, 0.18), transparent 32%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
-        }}
-      >
-        <span style={{ ...typography.small, color: colors.textMuted }}>TU MUNDIAL</span>
-        <div style={{ display: "grid", gap: spacing[8] }}>
-          <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>
+    <div className="grid gap-4">
+      <Card elevated className="hero-worldcup-bg" style={{ gap: 12, padding: 20 }}>
+        <span className="typo-small text-text-muted">TU MUNDIAL</span>
+        <div className="grid gap-2">
+          <h1 className="typo-h1 m-0 text-text-primary">
             {profileDisplayName ? `${profileDisplayName}, asi se mueve tu Mundial` : "Asi se mueve tu Mundial"}
           </h1>
-          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 620 }}>
+          <p className="typo-body m-0 text-text-secondary max-w-[620px]">
             {isPreTournament
               ? "Cada prediccion empuja la tabla de su grupo. Aqui ves rapido quienes estarian clasificando segun tu simulacion."
               : "Tus grupos proyectados siguen disponibles aunque el producto ya este priorizando el loop diario del torneo en vivo."}
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div className="flex flex-wrap gap-2.5">
           <Button onClick={isPreTournament ? onContinuePredictions : onOpenHome}>
             {isPreTournament ? "Continuar mis predicciones" : "Volver al home en vivo"}
           </Button>
@@ -212,17 +187,20 @@ export function TournamentScreenView({
       />
 
       {preTournamentSummary ? (
-        <Card elevated style={{ gap: spacing[8], padding: spacing[16] }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "center" }}>
-            <div style={{ display: "grid", gap: 4 }}>
-              <span style={{ ...typography.small, color: colors.textMuted }}>TU AVANCE GLOBAL</span>
-              <strong style={{ fontSize: 20, lineHeight: 1.2, color: colors.textPrimary }}>
+        <Card elevated style={{ gap: 8, padding: 16 }}>
+          <div className="flex justify-between gap-3 items-center">
+            <div className="grid gap-1">
+              <span className="typo-small text-text-muted">TU AVANCE GLOBAL</span>
+              <strong className="text-[20px] leading-[1.2] text-text-primary">
                 {preTournamentSummary.completedMatches} / {preTournamentSummary.totalMatches} partidos
               </strong>
             </div>
-            <StatusTag status={preTournamentSummary.remainingMatches === 0 ? "scored" : "editable"} label={`${preTournamentSummary.completionPercentage}%`} />
+            <StatusTag
+              status={preTournamentSummary.remainingMatches === 0 ? "scored" : "editable"}
+              label={`${preTournamentSummary.completionPercentage}%`}
+            />
           </div>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>
+          <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">
             {preTournamentSummary.remainingMatches === 0
               ? "Ya completaste toda la fase de grupos."
               : `Todavia te faltan ${preTournamentSummary.remainingMatches} partidos para cerrar tu simulacion grupo por grupo.`}
@@ -231,24 +209,24 @@ export function TournamentScreenView({
       ) : null}
 
       {isLoading ? (
-        <Card style={{ gap: spacing[10], padding: spacing[16] }}>
-          <div style={{ width: 128, height: 10, borderRadius: 999, background: "rgba(148, 163, 184, 0.16)" }} />
-          <div style={{ width: "68%", height: 14, borderRadius: 999, background: "rgba(255, 255, 255, 0.05)" }} />
-          <div style={{ width: "100%", height: 72, borderRadius: 16, background: "rgba(255, 255, 255, 0.03)" }} />
+        <Card style={{ gap: 10, padding: 16 }}>
+          <div className="w-32 h-[10px] rounded-full bg-[rgba(148,163,184,0.16)]" />
+          <div className="w-[68%] h-[14px] rounded-full bg-[rgba(255,255,255,0.05)]" />
+          <div className="w-full h-[72px] rounded-[16px] bg-[rgba(255,255,255,0.03)]" />
         </Card>
       ) : null}
 
       {errorMessage ? (
-        <Card style={{ gap: spacing[8], padding: spacing[16], borderColor: "rgba(220, 38, 38, 0.26)" }}>
-          <strong style={{ fontSize: 16, color: colors.textPrimary }}>No pudimos cargar Tu Mundial</strong>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: "#F5B4B4" }}>{errorMessage}</p>
+        <Card style={{ gap: 8, padding: 16, borderColor: "rgba(220, 38, 38, 0.26)" }}>
+          <strong className="text-[16px] text-text-primary">No pudimos cargar Tu Mundial</strong>
+          <p className="m-0 text-[14px] leading-[1.45] text-[#F5B4B4]">{errorMessage}</p>
           <Button variant="secondary" onClick={onRetry}>
             Reintentar
           </Button>
         </Card>
       ) : null}
 
-      <div style={{ display: "grid", gap: spacing[12] }}>
+      <div className="grid gap-3">
         {groups.map((group) => (
           <GroupStandingsCard key={group.groupId} group={group} />
         ))}

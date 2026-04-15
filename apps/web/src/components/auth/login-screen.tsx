@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { APP_ROUTES, SUPPORT_LINKS } from "@prode/shared";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, Card, colors, radii, spacing, typography } from "@prode/ui";
+import { Button, Card } from "@prode/ui";
 import { useAuth } from "./auth-provider";
 
 export function resolveNextRoute(next: string | null, profileCompleted: boolean | undefined) {
@@ -55,124 +55,76 @@ export function LoginScreenView({
   const helperTone = resolveHelperTone(helperMessage && !helperMessage.includes("Te enviamos") ? helperMessage : null, helperMessage);
 
   return (
-    <main style={{ maxWidth: 1080, margin: "0 auto", padding: "24px 16px 56px", display: "grid", gap: spacing[16] }}>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: spacing[12] }}>
-        <div style={{ display: "grid", gap: 4 }}>
-          <strong style={{ fontSize: 20, lineHeight: 1, color: colors.textPrimary, letterSpacing: "-0.02em" }}>Prode Mundial</strong>
-          <span style={{ ...typography.small, color: colors.textMuted }}>Vuelve rapido al proximo partido</span>
+    <main className="max-w-[1080px] mx-auto px-4 pt-6 pb-14 grid gap-4">
+      <header className="flex justify-between items-center gap-3">
+        <div className="grid gap-1">
+          <strong className="text-[20px] leading-none text-text-primary tracking-[-0.02em]">Prode Mundial</strong>
+          <span className="typo-small text-text-muted">Vuelve rapido al proximo partido</span>
         </div>
-        <Link href="/" style={{ color: colors.textSecondary, textDecoration: "none", fontWeight: 600 }}>
+        <Link href="/" className="text-text-secondary no-underline font-semibold">
           Volver
         </Link>
       </header>
 
-      <section style={{ display: "grid", gap: spacing[16], gridTemplateColumns: "1.1fr 0.9fr" }}>
-        <Card
-          elevated
-          style={{
-            gap: spacing[16],
-            padding: spacing[24],
-            background:
-              "radial-gradient(circle at top right, rgba(47, 107, 255, 0.18), transparent 30%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(7, 17, 31, 0.98) 100%)"
-          }}
-        >
-          <span style={{ ...typography.small, color: colors.primary500 }}>ENTRA Y JUEGA</span>
-          <div style={{ display: "grid", gap: spacing[12] }}>
-            <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>Tu proximo partido te esta esperando</h1>
-            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 520 }}>
+      <section className="grid gap-4 grid-cols-[1.1fr_0.9fr]">
+        <Card elevated className="login-hero-bg" style={{ gap: 16, padding: 24 }}>
+          <span className="typo-small text-primary-500">ENTRA Y JUEGA</span>
+          <div className="grid gap-3">
+            <h1 className="typo-h1 m-0 text-text-primary">Tu proximo partido te esta esperando</h1>
+            <p className="typo-body m-0 text-text-secondary max-w-[520px]">
               Entra con Google o por magic link, guarda tu prediccion en segundos y vuelve a seguir tus puntos y tus ligas.
             </p>
           </div>
 
-          <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))" }}>
-            <div
-              style={{
-                padding: spacing[16],
-                borderRadius: radii.lg,
-                background: "rgba(255, 255, 255, 0.04)",
-                border: `1px solid ${colors.border}`
-              }}
-            >
-              <span style={{ ...typography.small, color: colors.textMuted }}>1</span>
-              <p style={{ margin: "8px 0 0", color: colors.textPrimary, fontWeight: 600 }}>Entras</p>
-              <p style={{ margin: "6px 0 0", color: colors.textSecondary, fontSize: 14, lineHeight: 1.4 }}>Con Google o desde tu email.</p>
+          <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(170px,1fr))]">
+            <div className="p-4 rounded-lg step-card">
+              <span className="typo-small text-text-muted">1</span>
+              <p className="mt-2 mb-0 text-text-primary font-semibold">Entras</p>
+              <p className="mt-[6px] mb-0 text-text-secondary text-[14px] leading-[1.4]">Con Google o desde tu email.</p>
             </div>
-            <div
-              style={{
-                padding: spacing[16],
-                borderRadius: radii.lg,
-                background: "rgba(255, 255, 255, 0.04)",
-                border: `1px solid ${colors.border}`
-              }}
-            >
-              <span style={{ ...typography.small, color: colors.textMuted }}>2</span>
-              <p style={{ margin: "8px 0 0", color: colors.textPrimary, fontWeight: 600 }}>Predices</p>
-              <p style={{ margin: "6px 0 0", color: colors.textSecondary, fontSize: 14, lineHeight: 1.4 }}>Siempre hasta el kickoff exacto.</p>
+            <div className="p-4 rounded-lg step-card">
+              <span className="typo-small text-text-muted">2</span>
+              <p className="mt-2 mb-0 text-text-primary font-semibold">Predices</p>
+              <p className="mt-[6px] mb-0 text-text-secondary text-[14px] leading-[1.4]">Siempre hasta el kickoff exacto.</p>
             </div>
-            <div
-              style={{
-                padding: spacing[16],
-                borderRadius: radii.lg,
-                background: "rgba(255, 255, 255, 0.04)",
-                border: `1px solid ${colors.border}`
-              }}
-            >
-              <span style={{ ...typography.small, color: colors.textMuted }}>3</span>
-              <p style={{ margin: "8px 0 0", color: colors.textPrimary, fontWeight: 600 }}>Compites</p>
-              <p style={{ margin: "6px 0 0", color: colors.textSecondary, fontSize: 14, lineHeight: 1.4 }}>Tus ligas concentran toda la tension.</p>
+            <div className="p-4 rounded-lg step-card">
+              <span className="typo-small text-text-muted">3</span>
+              <p className="mt-2 mb-0 text-text-primary font-semibold">Compites</p>
+              <p className="mt-[6px] mb-0 text-text-secondary text-[14px] leading-[1.4]">Tus ligas concentran toda la tension.</p>
             </div>
           </div>
         </Card>
 
-        <Card elevated style={{ gap: spacing[16], padding: spacing[24] }}>
-          <div style={{ display: "grid", gap: spacing[8] }}>
-            <span style={{ ...typography.small, color: colors.textMuted }}>ACCESO</span>
-            <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Entra para seguir jugando</h2>
-            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+        <Card elevated style={{ gap: 16, padding: 24 }}>
+          <div className="grid gap-2">
+            <span className="typo-small text-text-muted">ACCESO</span>
+            <h2 className="typo-h2 m-0 text-text-primary">Entra para seguir jugando</h2>
+            <p className="typo-body m-0 text-text-secondary">
               Elige la forma mas rapida para volver a tu home de partidos y ligas.
             </p>
           </div>
 
           {!isConfigured ? (
-            <div
-              style={{
-                padding: spacing[16],
-                borderRadius: radii.md,
-                background: "rgba(220, 38, 38, 0.08)",
-                border: "1px solid rgba(220, 38, 38, 0.18)",
-                color: "#F5B4B4",
-                fontSize: 14,
-                lineHeight: 1.45
-              }}
-            >
+            <div className="p-4 rounded-md alert-error text-[14px] leading-[1.45]">
               Firebase no está configurado todavía en este entorno. Completa las variables `NEXT_PUBLIC_FIREBASE_*`.
             </div>
           ) : null}
 
-          <div style={{ display: "grid", gap: spacing[12] }}>
+          <div className="grid gap-3">
             <Button onClick={onGoogleLogin} disabled={!isConfigured || isSubmitting}>
               {isSubmitting ? "Conectando..." : "Continuar con Google"}
             </Button>
 
-            <form onSubmit={onSendMagicLink} style={{ display: "grid", gap: spacing[12] }}>
-              <label style={{ display: "grid", gap: spacing[8] }}>
-                <span style={{ ...typography.small, color: colors.textSecondary }}>Tu email</span>
+            <form onSubmit={onSendMagicLink} className="grid gap-3">
+              <label className="grid gap-2">
+                <span className="typo-small text-text-secondary">Tu email</span>
                 <input
                   type="email"
                   value={email}
                   onChange={(event) => onEmailChange(event.target.value)}
                   placeholder="tu@email.com"
                   required
-                  style={{
-                    minHeight: 52,
-                    borderRadius: radii.md,
-                    border: `1px solid ${colors.border}`,
-                    background: colors.bgMuted,
-                    color: colors.textPrimary,
-                    padding: "0 14px",
-                    fontSize: 16,
-                    outline: "none"
-                  }}
+                  className="email-input"
                 />
               </label>
               <Button type="submit" variant="secondary" disabled={!isConfigured || isSubmitting}>
@@ -188,27 +140,16 @@ export function LoginScreenView({
           </div>
 
           {helperMessage ? (
-            <div
-              style={{
-                padding: 14,
-                borderRadius: radii.md,
-                background: helperTone === "success" ? "rgba(34, 197, 94, 0.1)" : "rgba(220, 38, 38, 0.08)",
-                border:
-                  helperTone === "success" ? "1px solid rgba(34, 197, 94, 0.18)" : "1px solid rgba(220, 38, 38, 0.18)",
-                color: helperTone === "success" ? "#9BE5B6" : "#F5B4B4",
-                fontSize: 14,
-                lineHeight: 1.45
-              }}
-            >
+            <div className={`p-3.5 rounded-md text-[14px] leading-[1.45] ${helperTone === "success" ? "alert-success" : "alert-error"}`}>
               {helperMessage}
             </div>
           ) : null}
         </Card>
       </section>
 
-      <footer style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+      <footer className="flex flex-wrap gap-3">
         {SUPPORT_LINKS.map((link) => (
-          <Link key={link.href} href={link.href} style={{ color: colors.textSecondary, fontWeight: 600, textDecoration: "none" }}>
+          <Link key={link.href} href={link.href} className="text-text-secondary font-semibold no-underline">
             {link.label}
           </Link>
         ))}
