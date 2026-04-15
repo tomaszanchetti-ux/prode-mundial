@@ -3,7 +3,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import type { LeagueStandingsResponse, LeagueSummary, PointsResponse } from "@prode/shared";
-import { Button, Card, StatusTag, colors, spacing, typography } from "@prode/ui";
+import { Button, Card, StatusTag } from "@prode/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getLeagueStandings, getMyLeagues, getPoints } from "@/lib/api/client";
@@ -19,6 +19,19 @@ type RankingsScreenViewProps = {
   onRetry: () => void;
 };
 
+function toStandingRowClass(entry: { isMe: boolean; position: number }) {
+  if (entry.isMe) return "standing-me";
+  if (entry.position === 1) return "standing-leader";
+  if (entry.position <= 3) return "standing-podium";
+  return "standing-default";
+}
+
+function toPositionColor(entry: { isMe: boolean; position: number }) {
+  if (entry.isMe) return "text-primary-500";
+  if (entry.position === 1) return "text-gold";
+  return "text-text-muted";
+}
+
 export function RankingsScreenView({
   leagues,
   points,
@@ -33,37 +46,37 @@ export function RankingsScreenView({
   const leader = standings?.items[0] ?? null;
 
   return (
-    <div style={{ display: "grid", gap: spacing[16] }}>
-      <Card elevated style={{ gap: spacing[12] }}>
-        <span style={{ ...typography.small, color: colors.textMuted }}>POSICIONES</span>
-        <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Tu competencia liga por liga</h1>
-        <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+    <div className="grid gap-4">
+      <Card elevated style={{ gap: 12 }}>
+        <span className="typo-small text-text-muted">POSICIONES</span>
+        <h1 className="typo-h2 m-0 text-text-primary">Tu competencia liga por liga</h1>
+        <p className="typo-body m-0 text-text-secondary">
           Mira dónde estás parado, quién marca el ritmo y cuánto te falta para alcanzar la punta.
         </p>
       </Card>
 
       {errorMessage ? (
-        <Card elevated style={{ gap: spacing[12] }}>
-          <p style={{ ...typography.body, margin: 0, color: colors.textPrimary }}>{errorMessage}</p>
+        <Card elevated style={{ gap: 12 }}>
+          <p className="typo-body m-0 text-text-primary">{errorMessage}</p>
           <Button onClick={onRetry}>Reintentar</Button>
         </Card>
       ) : null}
 
       {points ? (
-        <Card elevated style={{ gap: spacing[12] }}>
-          <div style={{ display: "grid", gap: 6 }}>
-            <span style={{ ...typography.small, color: colors.primary500 }}>TU RESUMEN</span>
-            <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>{points.totalPoints} pts</h2>
+        <Card elevated style={{ gap: 12 }}>
+          <div className="grid gap-1.5">
+            <span className="typo-small text-primary-500">TU RESUMEN</span>
+            <h2 className="typo-h3 m-0 text-text-primary">{points.totalPoints} pts</h2>
           </div>
 
-          <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))" }}>
+          <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(120px,1fr))]">
             <Metric label="Match" value={String(points.totals.matchPoints)} />
             <Metric label="Macro" value={String(points.totals.macroPoints)} />
             <Metric label="Exactos" value={String(points.totals.exactHits)} />
             <Metric label="Signos" value={String(points.totals.correctSigns)} />
           </div>
 
-          <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))" }}>
+          <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(110px,1fr))]">
             <Metric label="Grupos" value={String(points.byStage.group)} />
             <Metric label="R32" value={String(points.byStage.R32)} />
             <Metric label="R16" value={String(points.byStage.R16)} />
@@ -72,31 +85,24 @@ export function RankingsScreenView({
             <Metric label="Final" value={String(points.byStage.FINAL)} />
           </div>
 
-          <div style={{ display: "grid", gap: spacing[8] }}>
-            <span style={{ ...typography.small, color: colors.textMuted }}>ULTIMOS PUNTOS</span>
+          <div className="grid gap-2">
+            <span className="typo-small text-text-muted">ULTIMOS PUNTOS</span>
             {points.recentMatches.length === 0 ? (
-              <p style={{ fontSize: 14, lineHeight: 1.4, margin: 0, color: colors.textSecondary }}>Tus ultimos puntos van a aparecer aqui.</p>
+              <p className="text-[14px] leading-[1.4] m-0 text-text-secondary">Tus ultimos puntos van a aparecer aqui.</p>
             ) : (
               points.recentMatches.map((entry) => (
                 <div
                   key={entry.matchId}
-                  style={{
-                    display: "grid",
-                    gap: 4,
-                    padding: spacing[12],
-                    borderRadius: 14,
-                    background: "rgba(255,255,255,0.03)",
-                    border: `1px solid ${colors.border}`
-                  }}
+                  className="grid gap-1 p-3 rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default"
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "center" }}>
-                    <span style={{ color: colors.textPrimary, fontWeight: 600 }}>{entry.matchLabel}</span>
+                  <div className="flex justify-between gap-3 items-center">
+                    <span className="text-text-primary font-semibold">{entry.matchLabel}</span>
                     <StatusTag status="scored" label={`+${entry.points} pts`} />
                   </div>
-                  <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
+                  <span className="text-[14px] leading-[1.4] text-text-secondary">
                     {entry.stageLabel} · exacto {entry.breakdown.pointsExact90} · signo {entry.breakdown.pointsOutcome90} · clasificado {entry.breakdown.pointsQualifier}
                   </span>
-                  <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textMuted }}>
+                  <span className="text-[13px] leading-[1.35] text-text-muted">
                     Tu pick {entry.userPredictionSummary} · oficial {entry.officialResultSummary}
                   </span>
                 </div>
@@ -106,59 +112,50 @@ export function RankingsScreenView({
         </Card>
       ) : null}
 
-      <Card elevated style={{ gap: spacing[12] }}>
-        <div style={{ display: "grid", gap: 6 }}>
-          <span style={{ ...typography.small, color: colors.gold500 }}>TU LIGA</span>
-          <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>Tabla competitiva</h2>
+      <Card elevated style={{ gap: 12 }}>
+        <div className="grid gap-1.5">
+          <span className="typo-small text-gold">TU LIGA</span>
+          <h2 className="typo-h3 m-0 text-text-primary">Tabla competitiva</h2>
         </div>
 
         {isLoading ? (
-          <div style={{ display: "grid", gap: spacing[8] }}>
-            <div style={{ width: 104, height: 10, borderRadius: 999, background: "rgba(148, 163, 184, 0.16)" }} />
-            <div style={{ width: "100%", height: 56, borderRadius: 16, background: "rgba(255,255,255,0.03)" }} />
-            <div style={{ width: "100%", height: 56, borderRadius: 16, background: "rgba(255,255,255,0.03)" }} />
+          <div className="grid gap-2">
+            <div className="w-[104px] h-[10px] rounded-full bg-[rgba(148,163,184,0.16)]" />
+            <div className="w-full h-[56px] rounded-[16px] bg-[rgba(255,255,255,0.03)]" />
+            <div className="w-full h-[56px] rounded-[16px] bg-[rgba(255,255,255,0.03)]" />
           </div>
         ) : null}
 
         {!isLoading && leagues.length === 0 ? (
-          <Card style={{ gap: spacing[8], padding: spacing[16], background: "rgba(255,255,255,0.02)" }}>
-            <span style={{ ...typography.small, color: colors.textMuted }}>SIN COMPETENCIA ACTIVA</span>
-            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+          <Card style={{ gap: 8, padding: 16, background: "rgba(255,255,255,0.02)" }}>
+            <span className="typo-small text-text-muted">SIN COMPETENCIA ACTIVA</span>
+            <p className="typo-body m-0 text-text-secondary">
               Todavia no hay ligas para mostrar. Crea una o unete a una desde la tab de ligas para ver tu tabla competitiva aqui.
             </p>
           </Card>
         ) : null}
 
         {leagues.length > 0 ? (
-          <div style={{ display: "grid", gap: spacing[12] }}>
-            <div
-              style={{
-                display: "grid",
-                gap: spacing[10],
-                padding: spacing[14],
-                borderRadius: 16,
-                background: "rgba(255,255,255,0.03)",
-                border: `1px solid ${colors.border}`
-              }}
-            >
-              <div style={{ display: "grid", gap: 4 }}>
-                <span style={{ ...typography.small, color: colors.textMuted }}>LIGA ACTIVA</span>
-                <strong style={{ fontSize: 18, lineHeight: 1.2, color: colors.textPrimary }}>
+          <div className="grid gap-3">
+            <div className="grid gap-2.5 p-[14px] rounded-[16px] bg-[rgba(255,255,255,0.03)] border border-border-default">
+              <div className="grid gap-1">
+                <span className="typo-small text-text-muted">LIGA ACTIVA</span>
+                <strong className="text-[18px] leading-[1.2] text-text-primary">
                   {selectedLeague?.name ?? leagues[0]?.name ?? "Tu liga"}
                 </strong>
                 {selectedLeague ? (
-                  <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+                  <span className="text-[13px] leading-[1.35] text-text-secondary">
                     {selectedLeague.membersCount}/{selectedLeague.memberLimit} jugadores
                   </span>
                 ) : null}
               </div>
-              <div style={{ display: "grid", gap: 4 }}>
-                <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary, fontWeight: 600 }}>
+              <div className="grid gap-1">
+                <span className="text-[14px] leading-[1.35] text-text-primary font-semibold">
                   {standings?.myStanding
                     ? `Vas #${standings.myStanding.position} con ${standings.myStanding.totalPoints} pts`
                     : "Tu posicion aparece cuando haya tabla"}
                 </span>
-                <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+                <span className="text-[13px] leading-[1.35] text-text-secondary">
                   {leader
                     ? `La punta la marca ${leader.displayName} con ${leader.totalPoints} pts.`
                     : "Cuando exista competencia activa vas a ver aqui la distancia con la punta."}
@@ -166,7 +163,7 @@ export function RankingsScreenView({
               </div>
             </div>
 
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <div className="flex gap-2 flex-wrap">
               {leagues.map((league) => (
                 <Button
                   key={league.leagueId}
@@ -182,32 +179,18 @@ export function RankingsScreenView({
         ) : null}
 
         {standings ? (
-          <div style={{ display: "grid", gap: spacing[8] }}>
+          <div className="grid gap-2">
             {standings.items.map((entry) => (
               <div
                 key={entry.userId}
-                style={{
-                  display: "grid",
-                  gap: 6,
-                  padding: spacing[12],
-                  borderRadius: 16,
-                  background:
-                    entry.isMe
-                      ? "rgba(47, 107, 255, 0.14)"
-                      : entry.position === 1
-                        ? "rgba(231, 198, 106, 0.14)"
-                        : entry.position <= 3
-                          ? "rgba(255, 255, 255, 0.05)"
-                        : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${entry.isMe ? colors.primary500 : entry.position === 1 ? colors.gold500 : entry.position <= 3 ? colors.borderStrong : colors.border}`
-                }}
+                className={`grid gap-1.5 p-3 rounded-[16px] ${toStandingRowClass(entry)}`}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "center" }}>
-                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    <span style={{ color: entry.isMe ? colors.primary500 : entry.position === 1 ? colors.gold500 : colors.textMuted, fontSize: 14, fontWeight: 700 }}>
+                <div className="flex justify-between gap-3 items-center">
+                  <div className="flex gap-2.5 items-center">
+                    <span className={`text-[14px] font-bold ${toPositionColor(entry)}`}>
                       #{entry.position}
                     </span>
-                    <span style={{ color: colors.textPrimary, fontWeight: entry.isMe ? 700 : 600 }}>
+                    <span className={`text-text-primary ${entry.isMe ? "font-bold" : "font-semibold"}`}>
                       {entry.displayName}
                       {entry.isOwner ? " · creador" : ""}
                       {entry.isMe ? " · tu posicion" : ""}
@@ -215,7 +198,7 @@ export function RankingsScreenView({
                   </div>
                   <StatusTag status={entry.isMe ? "editable" : entry.position === 1 ? "live" : "scored"} label={`${entry.totalPoints} pts`} />
                 </div>
-                <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
+                <span className="text-[14px] leading-[1.4] text-text-secondary">
                   Exactos {entry.exactHits} · Signos {entry.correctSigns} · Macro {entry.macroPoints}
                 </span>
               </div>
@@ -229,18 +212,9 @@ export function RankingsScreenView({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div
-      style={{
-        display: "grid",
-        gap: 4,
-        padding: spacing[12],
-        borderRadius: 14,
-        background: "rgba(255,255,255,0.03)",
-        border: `1px solid ${colors.border}`
-      }}
-    >
-      <span style={{ ...typography.small, color: colors.textMuted }}>{label}</span>
-      <span style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>{value}</span>
+    <div className="grid gap-1 p-3 rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default">
+      <span className="typo-small text-text-muted">{label}</span>
+      <span className="typo-h3 m-0 text-text-primary">{value}</span>
     </div>
   );
 }

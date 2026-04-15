@@ -9,7 +9,7 @@ import type {
   SaveMacroPicksInput
 } from "@prode/shared";
 import { APP_ROUTES } from "@prode/shared";
-import { Button, Card, ProgressCompact, StatusTag, TeamDisplay, colors, radii, spacing, typography } from "@prode/ui";
+import { Button, Card, ProgressCompact, StatusTag, TeamDisplay } from "@prode/ui";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, confirmMacroAdjustment, getMacroPicks, saveMacroPicks } from "@/lib/api/client";
@@ -42,17 +42,6 @@ type MacroPicksScreenViewProps = {
   onSave: () => void;
   onConfirmAdjustment: () => void;
 };
-
-const selectStyle = {
-  minHeight: 48,
-  borderRadius: radii.md,
-  border: `1px solid ${colors.border}`,
-  background: colors.bgMuted,
-  color: colors.textPrimary,
-  padding: "0 14px",
-  fontSize: 15,
-  outline: "none"
-} satisfies React.CSSProperties;
 
 function cloneGroupPicks(groupPicks: MacroGroupPicks): MacroGroupPicks {
   return Object.fromEntries(
@@ -118,7 +107,7 @@ function renderTeamSummary(teamId: string | null | undefined, fallback = "Sin de
   const team = teamId ? MACRO_TEAM_BY_ID.get(teamId) ?? null : null;
 
   if (!team) {
-    return <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>{fallback}</span>;
+    return <span className="text-[14px] leading-[1.4] text-text-secondary">{fallback}</span>;
   }
 
   return (
@@ -151,20 +140,20 @@ function GroupPickerCard({
   const group = MACRO_GROUPS.find((item) => item.groupId === groupId);
 
   return (
-    <Card elevated style={{ gap: spacing[12], padding: spacing[16] }}>
-      <div style={{ display: "grid", gap: 4 }}>
-        <span style={{ ...typography.small, color: colors.textMuted }}>{groupLabel.toUpperCase()}</span>
-        <strong style={{ fontSize: 18, lineHeight: 1.2, color: colors.textPrimary }}>Tus clasificados</strong>
+    <Card elevated style={{ gap: 12, padding: 16 }}>
+      <div className="grid gap-1">
+        <span className="typo-small text-text-muted">{groupLabel.toUpperCase()}</span>
+        <strong className="text-[18px] leading-[1.2] text-text-primary">Tus clasificados</strong>
       </div>
 
-      <label style={{ display: "grid", gap: 8 }}>
-        <span style={{ ...typography.small, color: colors.textSecondary }}>1° del grupo</span>
+      <label className="grid gap-2">
+        <span className="typo-small text-text-secondary">1° del grupo</span>
         <select
           aria-label={`${groupLabel} primero`}
           disabled={disabled}
           value={firstTeamId}
           onChange={(event) => onChange("firstTeamId", event.target.value)}
-          style={selectStyle}
+          className="select-input"
         >
           <option value="">Selecciona equipo</option>
           {group?.teams.map((team) => (
@@ -175,14 +164,14 @@ function GroupPickerCard({
         </select>
       </label>
 
-      <label style={{ display: "grid", gap: 8 }}>
-        <span style={{ ...typography.small, color: colors.textSecondary }}>2° del grupo</span>
+      <label className="grid gap-2">
+        <span className="typo-small text-text-secondary">2° del grupo</span>
         <select
           aria-label={`${groupLabel} segundo`}
           disabled={disabled}
           value={secondTeamId}
           onChange={(event) => onChange("secondTeamId", event.target.value)}
-          style={selectStyle}
+          className="select-input"
         >
           <option value="">Selecciona equipo</option>
           {group?.teams.map((team) => (
@@ -208,22 +197,22 @@ function MacroSummaryCard({
   champion: string | null;
 }) {
   return (
-    <Card elevated style={{ gap: spacing[12], padding: spacing[16] }}>
-      <div style={{ display: "grid", gap: 4 }}>
-        <span style={{ ...typography.small, color: colors.textMuted }}>{title.toUpperCase()}</span>
-        <strong style={{ fontSize: 18, lineHeight: 1.2, color: colors.textPrimary }}>{subtitle}</strong>
+    <Card elevated style={{ gap: 12, padding: 16 }}>
+      <div className="grid gap-1">
+        <span className="typo-small text-text-muted">{title.toUpperCase()}</span>
+        <strong className="text-[18px] leading-[1.2] text-text-primary">{subtitle}</strong>
       </div>
-      <div style={{ display: "grid", gap: spacing[8] }}>
-        <div style={{ display: "grid", gap: 6, padding: spacing[12], borderRadius: 14, background: "rgba(255,255,255,0.03)", border: `1px solid ${colors.border}` }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>FINALISTA 1</span>
+      <div className="grid gap-2">
+        <div className="grid gap-1.5 p-3 rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default">
+          <span className="typo-small text-text-muted">FINALISTA 1</span>
           {renderTeamSummary(finalists[0] ?? null)}
         </div>
-        <div style={{ display: "grid", gap: 6, padding: spacing[12], borderRadius: 14, background: "rgba(255,255,255,0.03)", border: `1px solid ${colors.border}` }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>FINALISTA 2</span>
+        <div className="grid gap-1.5 p-3 rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default">
+          <span className="typo-small text-text-muted">FINALISTA 2</span>
           {renderTeamSummary(finalists[1] ?? null)}
         </div>
-        <div style={{ display: "grid", gap: 6, padding: spacing[12], borderRadius: 14, background: "rgba(255,255,255,0.03)", border: `1px solid ${colors.border}` }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>CAMPEON</span>
+        <div className="grid gap-1.5 p-3 rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default">
+          <span className="typo-small text-text-muted">CAMPEON</span>
           {renderTeamSummary(champion)}
         </div>
       </div>
@@ -260,30 +249,22 @@ export function MacroPicksScreenView({
   const hasAdjustmentValidationErrors = adjustmentValidationMessages.length > 0;
 
   return (
-    <div style={{ display: "grid", gap: spacing[16] }}>
-      <Card
-        elevated
-        style={{
-          gap: spacing[12],
-          padding: spacing[20],
-          background:
-            "radial-gradient(circle at top right, rgba(255, 196, 76, 0.16), transparent 28%), radial-gradient(circle at left center, rgba(47, 107, 255, 0.18), transparent 32%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "flex-start", flexWrap: "wrap" }}>
-          <div style={{ display: "grid", gap: 6 }}>
-            <span style={{ ...typography.small, color: colors.textMuted }}>MACRO PICKS</span>
-            <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Tu apuesta larga del torneo</h1>
-            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+    <div className="grid gap-4">
+      <Card elevated className="hero-worldcup-bg" style={{ gap: 12, padding: 20 }}>
+        <div className="flex justify-between gap-3 items-start flex-wrap">
+          <div className="grid gap-1.5">
+            <span className="typo-small text-text-muted">MACRO PICKS</span>
+            <h1 className="typo-h2 m-0 text-text-primary">Tu apuesta larga del torneo</h1>
+            <p className="typo-body m-0 text-text-secondary">
               Completa grupos, finalistas y campeon. Guardas cuando quieras y el backend resuelve estados, cierres y elegibilidad del ajuste.
             </p>
           </div>
           <StatusTag status={statusMeta.tone} label={statusMeta.label} />
         </div>
 
-        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>{statusMeta.description}</p>
+        <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">{statusMeta.description}</p>
 
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div className="flex gap-2.5 flex-wrap">
           <Button variant="ghost" onClick={onOpenTournament}>
             Volver a Tu Mundial
           </Button>
@@ -323,37 +304,37 @@ export function MacroPicksScreenView({
       ) : null}
 
       {data ? (
-        <Card elevated style={{ gap: spacing[10], padding: spacing[16] }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>VENTANAS OFICIALES</span>
-          <span style={{ fontSize: 15, lineHeight: 1.45, color: colors.textPrimary }}>
+        <Card elevated style={{ gap: 10, padding: 16 }}>
+          <span className="typo-small text-text-muted">VENTANAS OFICIALES</span>
+          <span className="text-[15px] leading-[1.45] text-text-primary">
             Cierre inicial: {formatDeadline(data.initialDeadlineAt)}
           </span>
-          <span style={{ fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>
+          <span className="text-[14px] leading-[1.45] text-text-secondary">
             Ajuste: {formatDeadline(data.adjustmentWindow.opensAt)} → {formatDeadline(data.adjustmentWindow.closesAt)}
           </span>
         </Card>
       ) : null}
 
       {completionHint ? (
-        <Card elevated style={{ gap: spacing[8], padding: spacing[16], borderColor: "rgba(245, 158, 11, 0.24)" }}>
-          <strong style={{ fontSize: 16, color: colors.textPrimary }}>Que te falta para cerrarlo</strong>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>{completionHint}</p>
+        <Card elevated style={{ gap: 8, padding: 16, borderColor: "rgba(245, 158, 11, 0.24)" }}>
+          <strong className="text-[16px] text-text-primary">Que te falta para cerrarlo</strong>
+          <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">{completionHint}</p>
         </Card>
       ) : null}
 
       {feedbackMessage ? (
-        <Card elevated style={{ gap: spacing[8], padding: spacing[16], borderColor: "rgba(92, 141, 255, 0.28)" }}>
-          <strong style={{ fontSize: 16, color: colors.textPrimary }}>Estado actualizado</strong>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>{feedbackMessage}</p>
+        <Card elevated style={{ gap: 8, padding: 16, borderColor: "rgba(92, 141, 255, 0.28)" }}>
+          <strong className="text-[16px] text-text-primary">Estado actualizado</strong>
+          <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">{feedbackMessage}</p>
         </Card>
       ) : null}
 
       {!isLoading && isEditable && hasValidationErrors ? (
-        <Card elevated style={{ gap: spacing[8], padding: spacing[16], borderColor: "rgba(245, 158, 11, 0.24)" }}>
-          <strong style={{ fontSize: 16, color: colors.textPrimary }}>Revisa estas combinaciones antes de guardar</strong>
-          <div style={{ display: "grid", gap: 6 }}>
+        <Card elevated style={{ gap: 8, padding: 16, borderColor: "rgba(245, 158, 11, 0.24)" }}>
+          <strong className="text-[16px] text-text-primary">Revisa estas combinaciones antes de guardar</strong>
+          <div className="grid gap-1.5">
             {validationMessages.map((message) => (
-              <p key={message} style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>
+              <p key={message} className="m-0 text-[14px] leading-[1.45] text-text-secondary">
                 {message}
               </p>
             ))}
@@ -362,9 +343,9 @@ export function MacroPicksScreenView({
       ) : null}
 
       {errorMessage ? (
-        <Card elevated style={{ gap: spacing[8], padding: spacing[16], borderColor: "rgba(220, 38, 38, 0.26)" }}>
-          <strong style={{ fontSize: 16, color: colors.textPrimary }}>No pudimos cargar o guardar tus macro picks</strong>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: "#F5B4B4" }}>{errorMessage}</p>
+        <Card elevated style={{ gap: 8, padding: 16, borderColor: "rgba(220, 38, 38, 0.26)" }}>
+          <strong className="text-[16px] text-text-primary">No pudimos cargar o guardar tus macro picks</strong>
+          <p className="m-0 text-[14px] leading-[1.45] text-[#F5B4B4]">{errorMessage}</p>
           <Button variant="secondary" onClick={onRetry}>
             Reintentar
           </Button>
@@ -372,16 +353,16 @@ export function MacroPicksScreenView({
       ) : null}
 
       {isLoading ? (
-        <Card elevated style={{ gap: spacing[10], padding: spacing[16] }}>
-          <div style={{ width: 128, height: 10, borderRadius: 999, background: "rgba(148, 163, 184, 0.16)" }} />
-          <div style={{ width: "72%", height: 14, borderRadius: 999, background: "rgba(255,255,255,0.05)" }} />
-          <div style={{ width: "100%", height: 88, borderRadius: 16, background: "rgba(255,255,255,0.03)" }} />
+        <Card elevated style={{ gap: 10, padding: 16 }}>
+          <div className="w-[128px] h-[10px] rounded-full bg-[rgba(148,163,184,0.16)]" />
+          <div className="w-[72%] h-[14px] rounded-full bg-[rgba(255,255,255,0.05)]" />
+          <div className="w-full h-[88px] rounded-[16px] bg-[rgba(255,255,255,0.03)]" />
         </Card>
       ) : null}
 
       {!isLoading && isEditable ? (
         <>
-          <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+          <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
             {MACRO_GROUPS.map((group) => {
               const currentPick = formState.groupPicks[group.groupId];
 
@@ -399,22 +380,22 @@ export function MacroPicksScreenView({
             })}
           </div>
 
-          <Card elevated style={{ gap: spacing[16], padding: spacing[16] }}>
-            <div style={{ display: "grid", gap: 4 }}>
-              <span style={{ ...typography.small, color: colors.gold500 }}>TRAMO FINAL</span>
-              <strong style={{ fontSize: 18, lineHeight: 1.2, color: colors.textPrimary }}>Finalistas y campeon</strong>
+          <Card elevated style={{ gap: 16, padding: 16 }}>
+            <div className="grid gap-1">
+              <span className="typo-small text-gold">TRAMO FINAL</span>
+              <strong className="text-[18px] leading-[1.2] text-text-primary">Finalistas y campeon</strong>
             </div>
 
-            <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+            <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
               {[0, 1].map((index) => (
-                <label key={index} style={{ display: "grid", gap: 8 }}>
-                  <span style={{ ...typography.small, color: colors.textSecondary }}>Finalista {index + 1}</span>
+                <label key={index} className="grid gap-2">
+                  <span className="typo-small text-text-secondary">Finalista {index + 1}</span>
                   <select
                     aria-label={`Finalista ${index + 1}`}
                     disabled={isSaving}
                     value={formState.finalists[index] ?? ""}
                     onChange={(event) => onChangeFinalist(index as 0 | 1, event.target.value)}
-                    style={selectStyle}
+                    className="select-input"
                   >
                     <option value="">Selecciona equipo</option>
                     {MACRO_ALL_TEAMS.map((team) => (
@@ -426,14 +407,14 @@ export function MacroPicksScreenView({
                 </label>
               ))}
 
-              <label style={{ display: "grid", gap: 8 }}>
-                <span style={{ ...typography.small, color: colors.textSecondary }}>Campeon</span>
+              <label className="grid gap-2">
+                <span className="typo-small text-text-secondary">Campeon</span>
                 <select
                   aria-label="Campeon"
                   disabled={isSaving}
                   value={formState.champion ?? ""}
                   onChange={(event) => onChangeChampion(event.target.value)}
-                  style={selectStyle}
+                  className="select-input"
                 >
                   <option value="">Selecciona equipo</option>
                   {MACRO_ALL_TEAMS.map((team) => (
@@ -450,30 +431,23 @@ export function MacroPicksScreenView({
 
       {!isLoading && data && !isEditable ? (
         <>
-          <Card elevated style={{ gap: spacing[12], padding: spacing[16] }}>
-            <div style={{ display: "grid", gap: 4 }}>
-              <span style={{ ...typography.small, color: colors.textMuted }}>PICKS ORIGINALES</span>
-              <strong style={{ fontSize: 18, lineHeight: 1.2, color: colors.textPrimary }}>
+          <Card elevated style={{ gap: 12, padding: 16 }}>
+            <div className="grid gap-1">
+              <span className="typo-small text-text-muted">PICKS ORIGINALES</span>
+              <strong className="text-[18px] leading-[1.2] text-text-primary">
                 {data.status === "adjustment_available" ? "Tu base inicial ya quedo congelada" : "Asi quedaron tus picks iniciales"}
               </strong>
             </div>
-            <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+            <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
               {MACRO_GROUPS.map((group) => {
                 const groupPick = data.groupPicks[group.groupId];
 
                 return (
                   <div
                     key={group.groupId}
-                    style={{
-                      display: "grid",
-                      gap: 8,
-                      padding: spacing[12],
-                      borderRadius: 14,
-                      background: "rgba(255,255,255,0.03)",
-                      border: `1px solid ${colors.border}`
-                    }}
+                    className="grid gap-2 p-3 rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default"
                   >
-                    <span style={{ ...typography.small, color: colors.textMuted }}>{group.label}</span>
+                    <span className="typo-small text-text-muted">{group.label}</span>
                     {renderTeamSummary(groupPick?.firstTeamId, "1° sin definir")}
                     {renderTeamSummary(groupPick?.secondTeamId, "2° sin definir")}
                   </div>
@@ -487,25 +461,25 @@ export function MacroPicksScreenView({
       ) : null}
 
       {!isLoading && canAdjust ? (
-        <Card elevated style={{ gap: spacing[16], padding: spacing[16] }}>
-          <div style={{ display: "grid", gap: 6 }}>
-            <span style={{ ...typography.small, color: colors.primary500 }}>AJUSTE POST GRUPOS</span>
-            <strong style={{ fontSize: 18, lineHeight: 1.2, color: colors.textPrimary }}>Ahora solo puedes tocar finalistas y campeon</strong>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>
+        <Card elevated style={{ gap: 16, padding: 16 }}>
+          <div className="grid gap-1.5">
+            <span className="typo-small text-primary-500">AJUSTE POST GRUPOS</span>
+            <strong className="text-[18px] leading-[1.2] text-text-primary">Ahora solo puedes tocar finalistas y campeon</strong>
+            <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">
               Este ajuste es unico e irreversible. Los grupos ya no se modifican y el modelo aplica penalizacion reducida en los aciertos finales.
             </p>
           </div>
 
-          <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+          <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
             {[0, 1].map((index) => (
-              <label key={index} style={{ display: "grid", gap: 8 }}>
-                <span style={{ ...typography.small, color: colors.textSecondary }}>Nuevo finalista {index + 1}</span>
+              <label key={index} className="grid gap-2">
+                <span className="typo-small text-text-secondary">Nuevo finalista {index + 1}</span>
                 <select
                   aria-label={`Nuevo finalista ${index + 1}`}
                   disabled={isConfirmingAdjustment}
                   value={adjustmentState.finalists[index] ?? ""}
                   onChange={(event) => onChangeAdjustmentFinalist(index as 0 | 1, event.target.value)}
-                  style={selectStyle}
+                  className="select-input"
                 >
                   <option value="">Selecciona equipo</option>
                   {MACRO_ALL_TEAMS.map((team) => (
@@ -517,14 +491,14 @@ export function MacroPicksScreenView({
               </label>
             ))}
 
-            <label style={{ display: "grid", gap: 8 }}>
-              <span style={{ ...typography.small, color: colors.textSecondary }}>Nuevo campeon</span>
+            <label className="grid gap-2">
+              <span className="typo-small text-text-secondary">Nuevo campeon</span>
               <select
                 aria-label="Nuevo campeon"
                 disabled={isConfirmingAdjustment}
                 value={adjustmentState.champion}
                 onChange={(event) => onChangeAdjustmentChampion(event.target.value)}
-                style={selectStyle}
+                className="select-input"
               >
                 <option value="">Selecciona equipo</option>
                 {MACRO_ALL_TEAMS.map((team) => (
@@ -537,24 +511,15 @@ export function MacroPicksScreenView({
           </div>
 
           {hasAdjustmentValidationErrors ? (
-            <div
-              style={{
-                display: "grid",
-                gap: 6,
-                padding: spacing[12],
-                borderRadius: 14,
-                background: "rgba(245, 158, 11, 0.08)",
-                border: "1px solid rgba(245, 158, 11, 0.24)"
-              }}
-            >
+            <div className="grid gap-1.5 p-3 rounded-md alert-warning">
               {adjustmentValidationMessages.map((message) => (
-                <p key={message} style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>
+                <p key={message} className="m-0 text-[14px] leading-[1.45] text-text-secondary">
                   {message}
                 </p>
               ))}
             </div>
           ) : (
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: colors.textSecondary }}>
+            <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">
               Cuando lo confirmes, esta version queda congelada y reemplaza solo el tramo final del pick original.
             </p>
           )}

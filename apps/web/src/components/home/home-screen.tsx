@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES, type MatchSummary, type PreTournamentSummary } from "@prode/shared";
-import { AdSlotCard, Button, Card, NextMatchHero, ProgressCompact, StatusTag, colors, spacing, typography } from "@prode/ui";
+import { AdSlotCard, Button, Card, NextMatchHero, ProgressCompact, StatusTag } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MarathonPredictionModal } from "@/components/matches/marathon-prediction-modal";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
@@ -186,7 +186,7 @@ export function HomeScreenView({
 
   if (preTournamentSummary?.isPreTournament) {
     return (
-      <div style={{ display: "grid", gap: spacing[16] }}>
+      <div className="grid gap-4">
         {nextPreTournamentMatch ? (
           <NextMatchHero
             awayTeam={{
@@ -219,21 +219,13 @@ export function HomeScreenView({
             title={`${nextPreTournamentMatch.homeTeam.name} vs ${nextPreTournamentMatch.awayTeam.name}`}
           />
         ) : (
-          <Card
-            elevated
-            style={{
-              gap: spacing[12],
-              padding: spacing[20],
-              background:
-                "radial-gradient(circle at top right, rgba(255, 196, 76, 0.16), transparent 28%), radial-gradient(circle at left center, rgba(47, 107, 255, 0.18), transparent 32%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
-            }}
-          >
-            <span style={{ ...typography.small, color: colors.textMuted }}>TU MUNDIAL</span>
-            <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>
+          <Card elevated className="hero-worldcup-bg" style={{ gap: 12, padding: 20 }}>
+            <span className="typo-small text-text-muted">TU MUNDIAL</span>
+            <h1 className="typo-h1 m-0 text-text-primary">
               {copyForLocale(locale, "Completa tu Mundial", "Complete your World Cup")}
             </h1>
-            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 560 }}>{toCompletionCopy(preTournamentSummary, locale)}</p>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <p className="typo-body m-0 text-text-secondary max-w-[560px]">{toCompletionCopy(preTournamentSummary, locale)}</p>
+            <div className="flex gap-2.5 flex-wrap">
               <Button onClick={onOpenMatches}>{copyForLocale(locale, "Ver calendario", "See schedule")}</Button>
               <Button variant="ghost" onClick={onOpenTournament}>
                 {copyForLocale(locale, "Ir a Tu Mundial", "Go to Your World Cup")}
@@ -262,16 +254,16 @@ export function HomeScreenView({
           ]}
         />
 
-        <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+        <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
           <Card elevated style={{ gap: 10 }}>
-            <div style={{ display: "grid", gap: 4 }}>
-              <span style={{ ...typography.small, color: colors.textMuted }}>TU LIGA HOY</span>
-              <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>
+            <div className="grid gap-1">
+              <span className="typo-small text-text-muted">TU LIGA HOY</span>
+              <h2 className="typo-h3 m-0 text-text-primary">
                 {toSupportCardTitle(preTournamentSummary, profileDisplayName, locale)}
               </h2>
             </div>
-            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{toLeagueSummaryCopy(preTournamentSummary, locale)}</p>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <p className="typo-body m-0 text-text-secondary">{toLeagueSummaryCopy(preTournamentSummary, locale)}</p>
+            <div className="flex gap-2.5 flex-wrap">
               <Button variant="secondary" onClick={onOpenRankings}>
                 {copyForLocale(locale, "Ver tabla", "See table")}
               </Button>
@@ -282,13 +274,13 @@ export function HomeScreenView({
           </Card>
 
           <Card elevated style={{ gap: 10 }}>
-            <div style={{ display: "grid", gap: 4 }}>
-              <span style={{ ...typography.small, color: colors.textMuted }}>TU MUNDIAL</span>
-              <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>
+            <div className="grid gap-1">
+              <span className="typo-small text-text-muted">TU MUNDIAL</span>
+              <h2 className="typo-h3 m-0 text-text-primary">
                 {copyForLocale(locale, "Sigue tomando forma", "It keeps taking shape")}
               </h2>
             </div>
-            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{toTournamentSupportCopy(preTournamentSummary, locale)}</p>
+            <p className="typo-body m-0 text-text-secondary">{toTournamentSupportCopy(preTournamentSummary, locale)}</p>
             <Button variant="ghost" onClick={onOpenTournament}>
               {copyForLocale(locale, "Abrir Tu Mundial", "Open Your World Cup")}
             </Button>
@@ -298,9 +290,9 @@ export function HomeScreenView({
         <AdSlotCard description={copyForLocale(locale, "Espacio reservado para patrocinio nativo, ubicado despues de la accion principal.", "Reserved slot for native sponsorship, placed after the main action.")} />
 
         {errorMessage ? (
-          <Card style={{ gap: spacing[8], padding: spacing[16], borderColor: "rgba(220, 38, 38, 0.26)" }}>
-            <strong style={{ fontSize: 16, color: colors.textPrimary }}>No pudimos cargar tu home</strong>
-            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: "#F5B4B4" }}>{errorMessage}</p>
+          <Card style={{ gap: 8, padding: 16, borderColor: "rgba(220, 38, 38, 0.26)" }}>
+            <strong className="text-[16px] text-text-primary">No pudimos cargar tu home</strong>
+            <p className="m-0 text-[14px] leading-[1.45] text-[#F5B4B4]">{errorMessage}</p>
             <Button variant="secondary" onClick={onRetry}>
               Reintentar
             </Button>
@@ -308,10 +300,10 @@ export function HomeScreenView({
         ) : null}
 
         {isLoading ? (
-          <Card style={{ gap: spacing[10], padding: spacing[16] }}>
-            <div style={{ width: 124, height: 10, borderRadius: 999, background: "rgba(148, 163, 184, 0.16)" }} />
-            <div style={{ width: "72%", height: 14, borderRadius: 999, background: "rgba(255, 255, 255, 0.05)" }} />
-            <div style={{ width: "100%", height: 72, borderRadius: 16, background: "rgba(255, 255, 255, 0.03)" }} />
+          <Card style={{ gap: 10, padding: 16 }}>
+            <div className="w-[124px] h-[10px] rounded-full bg-[rgba(148,163,184,0.16)]" />
+            <div className="w-[72%] h-[14px] rounded-full bg-[rgba(255,255,255,0.05)]" />
+            <div className="w-full h-[72px] rounded-[16px] bg-[rgba(255,255,255,0.03)]" />
           </Card>
         ) : null}
       </div>
@@ -319,7 +311,7 @@ export function HomeScreenView({
   }
 
   return (
-    <div style={{ display: "grid", gap: spacing[16] }}>
+    <div className="grid gap-4">
       {priorityMatch ? (
         <NextMatchHero
           awayTeam={{
@@ -352,19 +344,19 @@ export function HomeScreenView({
       ) : null}
 
       {!priorityMatch && nextOpeningMatch ? (
-        <Card elevated style={{ gap: spacing[16], padding: spacing[18] }}>
-          <div style={{ display: "grid", gap: 6 }}>
-            <span style={{ ...typography.small, color: colors.gold500 }}>PROXIMA VENTANA</span>
-            <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>
+        <Card elevated style={{ gap: 16, padding: 18 }}>
+          <div className="grid gap-1.5">
+            <span className="typo-small text-gold">PROXIMA VENTANA</span>
+            <h1 className="typo-h2 m-0 text-text-primary">
               {copyForLocale(locale, "Tu siguiente prediccion abre pronto", "Your next prediction opens soon")}
             </h1>
-            <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 560 }}>
+            <p className="typo-body m-0 text-text-secondary max-w-[560px]">
               {nextOpeningMatch.homeTeam.name} vs {nextOpeningMatch.awayTeam.name} · {toStageLabel(nextOpeningMatch, locale)}
             </p>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "center", flexWrap: "wrap" }}>
-            <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
+          <div className="flex justify-between gap-3 items-center flex-wrap">
+            <span className="text-[14px] leading-[1.4] text-text-secondary">
               {copyForLocale(locale, "Se habilita", "It opens")} {toKickoffLabel(nextOpeningMatch.predictionOpensAt, locale)}
             </span>
             <StatusTag status="locked" label={toCountdownLabel(nextOpeningMatch.predictionOpensAt, locale)} />
@@ -396,20 +388,20 @@ export function HomeScreenView({
         ]}
       />
 
-      <div style={{ display: "grid", gap: spacing[12], gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+      <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
         <Card elevated style={{ gap: 10 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "center" }}>
-            <div style={{ display: "grid", gap: 4 }}>
-              <span style={{ ...typography.small, color: colors.textMuted }}>TU LIGA HOY</span>
-              <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>
+          <div className="flex justify-between gap-3 items-center">
+            <div className="grid gap-1">
+              <span className="typo-small text-text-muted">TU LIGA HOY</span>
+              <h2 className="typo-h3 m-0 text-text-primary">
                 {toSupportCardTitle(preTournamentSummary, profileDisplayName, locale)}
               </h2>
             </div>
           </div>
-          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+          <p className="typo-body m-0 text-text-secondary">
             {copyForLocale(locale, "Revisa como viene tu competencia y vuelve rapido a tu siguiente partido.", "Check how your competition stands and jump back into your next match.")}
           </p>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <div className="flex gap-2.5 flex-wrap">
             <Button variant="secondary" onClick={onOpenRankings}>
               {copyForLocale(locale, "Ver tabla", "See table")}
             </Button>
@@ -420,13 +412,13 @@ export function HomeScreenView({
         </Card>
 
         <Card elevated style={{ gap: 10 }}>
-          <div style={{ display: "grid", gap: 4 }}>
-            <span style={{ ...typography.small, color: colors.textMuted }}>TU MUNDIAL</span>
-            <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>
+          <div className="grid gap-1">
+            <span className="typo-small text-text-muted">TU MUNDIAL</span>
+            <h2 className="typo-h3 m-0 text-text-primary">
               {copyForLocale(locale, "Sigue disponible", "Still available")}
             </h2>
           </div>
-          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{toTournamentSupportCopy(preTournamentSummary, locale)}</p>
+          <p className="typo-body m-0 text-text-secondary">{toTournamentSupportCopy(preTournamentSummary, locale)}</p>
           <Button variant="ghost" onClick={onOpenTournament}>
             {copyForLocale(locale, "Abrir Tu Mundial", "Open Your World Cup")}
           </Button>
@@ -436,9 +428,9 @@ export function HomeScreenView({
       <AdSlotCard description={copyForLocale(locale, "Espacio reservado para patrocinio nativo, ubicado despues del bloque principal.", "Reserved slot for native sponsorship, placed after the main block.")} />
 
       {errorMessage ? (
-        <Card style={{ gap: spacing[8], padding: spacing[16], borderColor: "rgba(220, 38, 38, 0.26)" }}>
-          <strong style={{ fontSize: 16, color: colors.textPrimary }}>No pudimos cargar tu home</strong>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.45, color: "#F5B4B4" }}>{errorMessage}</p>
+        <Card style={{ gap: 8, padding: 16, borderColor: "rgba(220, 38, 38, 0.26)" }}>
+          <strong className="text-[16px] text-text-primary">No pudimos cargar tu home</strong>
+          <p className="m-0 text-[14px] leading-[1.45] text-[#F5B4B4]">{errorMessage}</p>
           <Button variant="secondary" onClick={onRetry}>
             Reintentar
           </Button>
@@ -446,10 +438,10 @@ export function HomeScreenView({
       ) : null}
 
       {isLoading ? (
-        <Card style={{ gap: spacing[10], padding: spacing[16] }}>
-          <div style={{ width: 124, height: 10, borderRadius: 999, background: "rgba(148, 163, 184, 0.16)" }} />
-          <div style={{ width: "72%", height: 14, borderRadius: 999, background: "rgba(255, 255, 255, 0.05)" }} />
-          <div style={{ width: "100%", height: 72, borderRadius: 16, background: "rgba(255, 255, 255, 0.03)" }} />
+        <Card style={{ gap: 10, padding: 16 }}>
+          <div className="w-[124px] h-[10px] rounded-full bg-[rgba(148,163,184,0.16)]" />
+          <div className="w-[72%] h-[14px] rounded-full bg-[rgba(255,255,255,0.05)]" />
+          <div className="w-full h-[72px] rounded-[16px] bg-[rgba(255,255,255,0.03)]" />
         </Card>
       ) : null}
     </div>

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MatchDetail, SaveMatchPredictionInput } from "@prode/shared";
-import { Button, Card, ScoreInput, StatusTag, TeamDisplay, colors, radii, spacing, typography } from "@prode/ui";
+import { Button, Card, ScoreInput, StatusTag, TeamDisplay } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
 import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/editability";
@@ -191,7 +191,7 @@ export function MatchDetailScreenView({
 
   if (isLoading) {
     return (
-      <div style={{ display: "grid", gap: 14 }}>
+      <div className="grid gap-[14px]">
         <Card elevated style={{ minHeight: 180 }} />
         <Card elevated style={{ minHeight: 320 }} />
       </div>
@@ -200,12 +200,12 @@ export function MatchDetailScreenView({
 
   if (!detail) {
     return (
-      <Card elevated style={{ gap: spacing[12] }}>
-        <h1 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>Partido no disponible</h1>
-        <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+      <Card elevated style={{ gap: 12 }}>
+        <h1 className="typo-h2 m-0 text-text-primary">Partido no disponible</h1>
+        <p className="typo-body m-0 text-text-secondary">
           {loadErrorMessage ?? "No encontramos el detalle de este partido o todavia no pudimos cargarlo."}
         </p>
-        <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+        <div className="grid gap-2 grid-cols-2">
           <Button variant="secondary" onClick={onRetryLoad}>
             Reintentar
           </Button>
@@ -218,40 +218,25 @@ export function MatchDetailScreenView({
   }
 
   return (
-    <div style={{ display: "grid", gap: 14 }}>
+    <div className="grid gap-[14px]">
       {saveNotice ? (
-        <div
-          style={{
-            position: "sticky",
-            top: 12,
-            zIndex: 20,
-            justifySelf: "center",
-            padding: "12px 16px",
-            borderRadius: radii.pill,
-            background: saveNotice.tone === "success" ? "rgba(34, 197, 94, 0.16)" : "rgba(220, 38, 38, 0.14)",
-            color: saveNotice.tone === "success" ? "#9BE5B6" : "#F5B4B4",
-            border: saveNotice.tone === "success" ? "1px solid rgba(34, 197, 94, 0.24)" : "1px solid rgba(220, 38, 38, 0.22)",
-            fontSize: 14,
-            lineHeight: 1.35,
-            fontWeight: 600
-          }}
-        >
+        <div className={`toast-base ${saveNotice.tone === "success" ? "toast-success" : "toast-error"}`}>
           {saveNotice.message}
         </div>
       ) : null}
 
       <Card elevated style={{ gap: 14, padding: 18 }}>
-        <div style={{ display: "grid", gap: spacing[8] }}>
-          <Link href="/matches" style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary, textDecoration: "none" }}>
+        <div className="grid gap-2">
+          <Link href="/matches" className="text-[13px] leading-[1.35] text-text-secondary no-underline">
             Volver a partidos
           </Link>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: spacing[12], alignItems: "flex-start" }}>
-            <span style={{ ...typography.small, color: colors.textMuted }}>{toStageLabel(detail)}</span>
+          <div className="flex justify-between gap-3 items-start">
+            <span className="typo-small text-text-muted">{toStageLabel(detail)}</span>
             <StatusTag status={toStatusTone(detail)} label={toStatusLabel(detail)} />
           </div>
         </div>
 
-        <div style={{ display: "grid", gap: 10 }}>
+        <div className="grid gap-2.5">
           <TeamDisplay
             teamName={detail.homeTeam.name}
             fifaCode={detail.homeTeam.fifaCode}
@@ -260,7 +245,7 @@ export function MatchDetailScreenView({
             size="lg"
             weight={700}
           />
-          <div style={{ paddingLeft: 46, fontSize: 12, color: colors.textMuted, fontWeight: 700, letterSpacing: "0.08em" }}>VS</div>
+          <div className="pl-[46px] text-[12px] text-text-muted font-bold tracking-[0.08em]">VS</div>
           <TeamDisplay
             teamName={detail.awayTeam.name}
             fifaCode={detail.awayTeam.fifaCode}
@@ -271,53 +256,35 @@ export function MatchDetailScreenView({
           />
         </div>
 
-        <div style={{ display: "grid", gap: 6 }}>
-          <span style={{ fontSize: 15, lineHeight: 1.4, color: colors.textPrimary, fontWeight: 600 }}>{toKickoffLabel(detail.kickoffAt)}</span>
-          <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
+        <div className="grid gap-1.5">
+          <span className="text-[15px] leading-[1.4] text-text-primary font-semibold">{toKickoffLabel(detail.kickoffAt)}</span>
+          <span className="text-[14px] leading-[1.4] text-text-secondary">
             Deadline: {toKickoffLabel(detail.deadlineAt)}
           </span>
           {isPredictionWindowNotOpen(detail) ? (
-            <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
+            <span className="text-[14px] leading-[1.4] text-text-secondary">
               Apertura: {toKickoffLabel(detail.predictionOpensAt)}
             </span>
           ) : null}
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gap: spacing[8],
-            padding: 14,
-            borderRadius: radii.md,
-            background: "rgba(255, 255, 255, 0.03)",
-            border: `1px solid ${colors.border}`
-          }}
-        >
-          <span style={{ fontSize: 14, lineHeight: 1.35, color: colors.textPrimary }}>
+        <div className="grid gap-2 p-[14px] rounded-md bg-[rgba(255,255,255,0.03)] border border-border-default">
+          <span className="text-[14px] leading-[1.35] text-text-primary">
             {isPredictionWindowNotOpen(detail) ? "Prediccion disponible desde la apertura" : "Editable hasta kickoff"}
           </span>
-          <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+          <span className="text-[13px] leading-[1.35] text-text-secondary">
             Exacto: {detail.scoringRules.exact90Points} pts
           </span>
-          <span style={{ fontSize: 13, lineHeight: 1.35, color: colors.textSecondary }}>
+          <span className="text-[13px] leading-[1.35] text-text-secondary">
             Signo: {detail.scoringRules.correctOutcome90Points} pts · Clasificado: {detail.scoringRules.correctQualifierPoints} pts
           </span>
         </div>
       </Card>
 
-      <Card elevated style={{ gap: spacing[16], padding: spacing[16] }}>
+      <Card elevated style={{ gap: 16, padding: 16 }}>
         {saveNotice?.tone === "error" ? (
-          <div
-            style={{
-              display: "grid",
-              gap: spacing[12],
-              padding: 14,
-              borderRadius: radii.md,
-              background: "rgba(220, 38, 38, 0.08)",
-              border: "1px solid rgba(220, 38, 38, 0.18)"
-            }}
-          >
-            <p style={{ ...typography.body, margin: 0, color: "#F5B4B4" }}>{saveNotice.message}</p>
+          <div className="grid gap-3 p-[14px] rounded-md alert-error">
+            <p className="typo-body m-0 text-[#F5B4B4]">{saveNotice.message}</p>
             <Button variant="secondary" onClick={onSave} disabled={isSaving}>
               Reintentar guardado
             </Button>
@@ -339,7 +306,7 @@ export function MatchDetailScreenView({
           onHomeChange={onHomeChange}
         />
 
-        <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>{toHelperText(detail, formState)}</p>
+        <p className="typo-body m-0 text-text-secondary">{toHelperText(detail, formState)}</p>
 
         <Button
           fullWidth
@@ -352,20 +319,20 @@ export function MatchDetailScreenView({
       </Card>
 
       {detail.officialResult || detail.userPrediction ? (
-        <Card elevated style={{ gap: spacing[12], padding: spacing[16] }}>
-          <h2 style={{ ...typography.h3, margin: 0, color: colors.textPrimary }}>Resultado y puntos</h2>
+        <Card elevated style={{ gap: 12, padding: 16 }}>
+          <h2 className="typo-h3 m-0 text-text-primary">Resultado y puntos</h2>
 
           {detail.userPrediction ? (
-            <div style={{ display: "grid", gap: spacing[8] }}>
-              <p style={{ ...typography.body, margin: 0, color: colors.textPrimary }}>
+            <div className="grid gap-2">
+              <p className="typo-body m-0 text-text-primary">
                 Tu prediccion: {detail.userPrediction.homeScorePred}-{detail.userPrediction.awayScorePred}
               </p>
-              <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+              <p className="typo-body m-0 text-text-secondary">
                 Estado: {detail.userPrediction.status}
                 {detail.userPrediction.pointsAwarded !== null ? ` · ${detail.userPrediction.pointsAwarded} pts` : ""}
               </p>
               {detail.userPrediction.scoringBreakdown ? (
-                <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+                <p className="typo-body m-0 text-text-secondary">
                   Breakdown: exacto {detail.userPrediction.scoringBreakdown.pointsExact90}, signo {detail.userPrediction.scoringBreakdown.pointsOutcome90},
                   clasificado {detail.userPrediction.scoringBreakdown.pointsQualifier}.
                 </p>
@@ -374,11 +341,11 @@ export function MatchDetailScreenView({
           ) : null}
 
           {detail.officialResult ? (
-            <div style={{ display: "grid", gap: spacing[8] }}>
-              <p style={{ ...typography.body, margin: 0, color: colors.textPrimary }}>
+            <div className="grid gap-2">
+              <p className="typo-body m-0 text-text-primary">
                 Resultado oficial: {detail.officialResult.homeScore90}-{detail.officialResult.awayScore90}
               </p>
-              <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+              <p className="typo-body m-0 text-text-secondary">
                 Clasificado: {detail.officialResult.qualifiedTeamId ?? "No aplica"}
               </p>
             </div>

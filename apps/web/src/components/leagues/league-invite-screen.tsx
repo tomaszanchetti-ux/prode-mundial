@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Button, Card, colors, radii, spacing, typography } from "@prode/ui";
+import { Button, Card } from "@prode/ui";
 import { APP_ROUTES } from "@prode/shared";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -93,36 +93,28 @@ export function LeagueInviteScreen() {
   }
 
   return (
-    <main style={{ maxWidth: 980, margin: "0 auto", padding: "24px 16px 56px", display: "grid", gap: spacing[16] }}>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: spacing[12] }}>
-        <div style={{ display: "grid", gap: 4 }}>
-          <strong style={{ fontSize: 20, lineHeight: 1, color: colors.textPrimary, letterSpacing: "-0.02em" }}>Prode Mundial</strong>
-          <span style={{ ...typography.small, color: colors.textMuted }}>Invitacion a liga privada</span>
+    <main className="max-w-[980px] mx-auto px-4 pt-6 pb-14 grid gap-4">
+      <header className="flex justify-between items-center gap-3">
+        <div className="grid gap-1">
+          <strong className="text-[20px] leading-none text-text-primary tracking-[-0.02em]">Prode Mundial</strong>
+          <span className="typo-small text-text-muted">Invitacion a liga privada</span>
         </div>
-        <Link href="/" style={{ color: colors.textSecondary, textDecoration: "none", fontWeight: 600 }}>
+        <Link href="/" className="text-text-secondary no-underline font-semibold">
           Volver
         </Link>
       </header>
 
-      <Card
-        elevated
-        style={{
-          gap: spacing[16],
-          padding: spacing[24],
-          background:
-            "radial-gradient(circle at top right, rgba(47, 107, 255, 0.18), transparent 30%), linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(7, 17, 31, 0.98) 100%)"
-        }}
-      >
-        <span style={{ ...typography.small, color: colors.primary500 }}>INVITE LINK</span>
-        <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>{preview?.name ?? "Liga privada"}</h1>
-        <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 560 }}>
+      <Card elevated className="login-hero-bg gap-4 p-6">
+        <span className="typo-small text-primary-500">INVITE LINK</span>
+        <h1 className="typo-h1 m-0 text-text-primary">{preview?.name ?? "Liga privada"}</h1>
+        <p className="typo-body m-0 text-text-secondary max-w-[560px]">
           Entra a esta liga y compite dentro de una tabla cerrada. Si ya tienes sesión, puedes confirmar el join desde aquí mismo.
         </p>
       </Card>
 
       {errorMessage ? (
-        <Card elevated style={{ gap: spacing[12] }}>
-          <p style={{ ...typography.body, margin: 0, color: colors.textPrimary }}>{errorMessage}</p>
+        <Card elevated className="gap-3">
+          <p className="typo-body m-0 text-text-primary">{errorMessage}</p>
           <Button variant="ghost" onClick={() => setReloadKey((value) => value + 1)}>
             Reintentar
           </Button>
@@ -130,31 +122,31 @@ export function LeagueInviteScreen() {
       ) : null}
 
       {isLoading ? (
-        <Card elevated style={{ gap: spacing[8] }}>
-          <div style={{ width: 96, height: 10, borderRadius: 999, background: "rgba(148, 163, 184, 0.16)" }} />
-          <div style={{ width: "100%", height: 96, borderRadius: 16, background: "rgba(255,255,255,0.03)" }} />
+        <Card elevated className="gap-2">
+          <div className="w-24 h-2.5 rounded-pill bg-[rgba(148,163,184,0.16)]" />
+          <div className="w-full h-24 rounded-2xl bg-[rgba(255,255,255,0.03)]" />
         </Card>
       ) : null}
 
       {preview ? (
-        <Card elevated style={{ gap: spacing[16], padding: spacing[24] }}>
-          <div style={{ display: "grid", gap: spacing[8], gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
-            <div style={{ padding: spacing[12], borderRadius: radii.md, background: "rgba(255,255,255,0.03)", border: `1px solid ${colors.border}` }}>
-              <span style={{ ...typography.small, color: colors.textMuted }}>Jugadores</span>
-              <p style={{ margin: "8px 0 0", color: colors.textPrimary, fontWeight: 700 }}>{preview.membersCount}</p>
+        <Card elevated className="gap-4 p-6">
+          <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
+            <div className="p-3 rounded-md border border-border-default bg-[rgba(255,255,255,0.03)]">
+              <span className="typo-small text-text-muted">Jugadores</span>
+              <p className="mt-2 mb-0 text-text-primary font-bold">{preview.membersCount}</p>
             </div>
-            <div style={{ padding: spacing[12], borderRadius: radii.md, background: "rgba(255,255,255,0.03)", border: `1px solid ${colors.border}` }}>
-              <span style={{ ...typography.small, color: colors.textMuted }}>Limite</span>
-              <p style={{ margin: "8px 0 0", color: colors.textPrimary, fontWeight: 700 }}>{preview.memberLimit}</p>
+            <div className="p-3 rounded-md border border-border-default bg-[rgba(255,255,255,0.03)]">
+              <span className="typo-small text-text-muted">Limite</span>
+              <p className="mt-2 mb-0 text-text-primary font-bold">{preview.memberLimit}</p>
             </div>
-            <div style={{ padding: spacing[12], borderRadius: radii.md, background: "rgba(255,255,255,0.03)", border: `1px solid ${colors.border}` }}>
-              <span style={{ ...typography.small, color: colors.textMuted }}>Estado</span>
-              <p style={{ margin: "8px 0 0", color: colors.textPrimary, fontWeight: 700 }}>{preview.isActive ? "Activa" : "Inactiva"}</p>
+            <div className="p-3 rounded-md border border-border-default bg-[rgba(255,255,255,0.03)]">
+              <span className="typo-small text-text-muted">Estado</span>
+              <p className="mt-2 mb-0 text-text-primary font-bold">{preview.isActive ? "Activa" : "Inactiva"}</p>
             </div>
           </div>
 
           {status === "authenticated" ? (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <div className="flex gap-2 flex-wrap">
               <Button onClick={() => void handleJoin()} disabled={isJoining}>
                 {isJoining ? "Uniendome..." : "Unirme a esta liga"}
               </Button>
@@ -163,11 +155,11 @@ export function LeagueInviteScreen() {
               </Button>
             </div>
           ) : (
-            <div style={{ display: "grid", gap: spacing[10] }}>
-              <p style={{ ...typography.body, margin: 0, color: colors.textSecondary }}>
+            <div className="grid gap-2.5">
+              <p className="typo-body m-0 text-text-secondary">
                 Para confirmar el join necesitas iniciar sesion primero. Te llevamos de vuelta a esta invitacion apenas entres.
               </p>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div className="flex gap-2 flex-wrap">
                 <Button onClick={() => router.push(loginHref)}>Entrar para unirme</Button>
                 <Button variant="ghost" onClick={() => router.push("/")}>
                   Volver al inicio

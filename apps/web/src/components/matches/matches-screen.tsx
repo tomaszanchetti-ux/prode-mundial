@@ -4,7 +4,7 @@ import React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ListMatchesQuery, MatchStage, MatchSummary } from "@prode/shared";
-import { Button, Card, MatchCard, NextMatchHero, colors, radii, spacing, typography } from "@prode/ui";
+import { Button, Card, MatchCard, NextMatchHero } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getMatches } from "@/lib/api/client";
@@ -246,11 +246,11 @@ export function MatchesScreenView({
   const nextOpeningMatch = pickNextOpeningMatch(items);
 
   return (
-    <div style={{ display: "grid", gap: spacing[16] }}>
-      <div style={{ display: "grid", gap: spacing[12] }}>
-        <div style={{ display: "grid", gap: spacing[8] }}>
-          <h1 style={{ ...typography.h1, margin: 0, color: colors.textPrimary }}>{copyForLocale(locale, "Partidos", "Matches")}</h1>
-          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 560 }}>
+    <div className="grid gap-4">
+      <div className="grid gap-3">
+        <div className="grid gap-2">
+          <h1 className="typo-h1 m-0 text-text-primary">{copyForLocale(locale, "Partidos", "Matches")}</h1>
+          <p className="typo-body m-0 text-text-secondary max-w-[560px]">
             {summarizeActiveFilter(activeFilter.query, locale)}
           </p>
         </div>
@@ -285,19 +285,12 @@ export function MatchesScreenView({
         ) : null}
 
         {!quickMatch && nextOpeningMatch ? (
-          <Card
-            elevated
-            style={{
-              gap: spacing[10],
-              padding: spacing[14],
-              background: "linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%)"
-            }}
-          >
-            <span style={{ ...typography.small, color: colors.gold500 }}>{copyForLocale(locale, "PROXIMA VENTANA", "NEXT WINDOW")}</span>
-            <strong style={{ fontSize: 20, lineHeight: 1.1, color: colors.textPrimary }}>
+          <Card elevated className="next-window-bg" style={{ gap: 10, padding: 14 }}>
+            <span className="typo-small text-gold">{copyForLocale(locale, "PROXIMA VENTANA", "NEXT WINDOW")}</span>
+            <strong className="text-[20px] leading-[1.1] text-text-primary">
               {nextOpeningMatch.homeTeam.name} vs {nextOpeningMatch.awayTeam.name}
             </strong>
-            <span style={{ fontSize: 14, lineHeight: 1.4, color: colors.textSecondary }}>
+            <span className="text-[14px] leading-[1.4] text-text-secondary">
               {copyForLocale(locale, "Se habilita", "Opens")} {toLocalKickoffLabel(nextOpeningMatch.predictionOpensAt, locale)} · {toCountdownLabel(nextOpeningMatch.predictionOpensAt, locale)}
             </span>
             <Button variant="secondary" onClick={() => onOpenMatch(nextOpeningMatch.matchId)}>
@@ -306,18 +299,7 @@ export function MatchesScreenView({
           </Card>
         ) : null}
 
-        <div
-          style={{
-            display: "flex",
-            gap: spacing[8],
-            overflowX: "auto",
-            paddingBottom: 2,
-            position: "sticky",
-            top: 0,
-            zIndex: 2,
-            background: "linear-gradient(180deg, rgba(7, 17, 31, 0.98) 0%, rgba(7, 17, 31, 0.92) 100%)"
-          }}
-        >
+        <div className="flex gap-2 overflow-x-auto pb-[2px] sticky top-0 z-[2] filter-bar-bg">
           {filterChips.map((chip) => {
             const isActive = chip.key === activeFilter.key;
 
@@ -326,18 +308,7 @@ export function MatchesScreenView({
                 key={chip.key}
                 type="button"
                 onClick={() => onFilterSelect(chip.key)}
-                style={{
-                  minHeight: 34,
-                  borderRadius: radii.pill,
-                  border: isActive ? "1px solid rgba(92, 141, 255, 0.18)" : `1px solid ${colors.border}`,
-                  background: isActive ? "rgba(92, 141, 255, 0.1)" : "rgba(255, 255, 255, 0.02)",
-                  color: isActive ? colors.textPrimary : colors.textSecondary,
-                  padding: "0 12px",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  whiteSpace: "nowrap",
-                  cursor: "pointer"
-                }}
+                className={`filter-chip ${isActive ? "filter-chip-active" : "filter-chip-inactive"}`}
               >
                 {toFilterLabel(chip.key, locale)}
               </button>
@@ -347,9 +318,9 @@ export function MatchesScreenView({
       </div>
 
       {errorMessage ? (
-        <Card elevated style={{ gap: spacing[8], borderColor: "rgba(220, 38, 38, 0.24)" }}>
-          <strong style={{ fontSize: 16, color: colors.textPrimary }}>{copyForLocale(locale, "No pudimos cargar los partidos", "We couldn't load the matches")}</strong>
-          <p style={{ ...typography.body, margin: 0, color: "#F5B4B4" }}>{errorMessage}</p>
+        <Card elevated style={{ gap: 8, borderColor: "rgba(220, 38, 38, 0.24)" }}>
+          <strong className="text-[16px] text-text-primary">{copyForLocale(locale, "No pudimos cargar los partidos", "We couldn't load the matches")}</strong>
+          <p className="typo-body m-0 text-[#F5B4B4]">{errorMessage}</p>
           <Button variant="secondary" onClick={onRetry}>
             {copyForLocale(locale, "Reintentar", "Retry")}
           </Button>
@@ -357,13 +328,13 @@ export function MatchesScreenView({
       ) : null}
 
       {isLoading ? (
-        <section style={{ display: "grid", gap: 14 }}>
+        <section className="grid gap-[14px]">
           {Array.from({ length: 3 }).map((_, index) => (
             <Card key={index} elevated style={{ minHeight: 176, opacity: 0.72 }}>
-              <div style={{ display: "grid", gap: spacing[12] }}>
-                <div style={{ width: 88, height: 10, borderRadius: radii.pill, background: "rgba(148, 163, 184, 0.16)" }} />
-                <div style={{ width: "54%", height: 12, borderRadius: radii.pill, background: "rgba(148, 163, 184, 0.16)" }} />
-                <div style={{ width: "100%", height: 84, borderRadius: radii.md, background: "rgba(255, 255, 255, 0.03)" }} />
+              <div className="grid gap-3">
+                <div className="w-[88px] h-[10px] rounded-full bg-[rgba(148,163,184,0.16)]" />
+                <div className="w-[54%] h-[12px] rounded-full bg-[rgba(148,163,184,0.16)]" />
+                <div className="w-full h-[84px] rounded-md bg-[rgba(255,255,255,0.03)]" />
               </div>
             </Card>
           ))}
@@ -371,17 +342,17 @@ export function MatchesScreenView({
       ) : null}
 
       {!isLoading && !errorMessage && items.length === 0 ? (
-        <Card elevated style={{ gap: spacing[8], textAlign: "center", justifyItems: "center", padding: spacing[24] }}>
-          <span style={{ ...typography.small, color: colors.textMuted }}>{copyForLocale(locale, "SIN PARTIDOS", "NO MATCHES")}</span>
-          <h2 style={{ ...typography.h2, margin: 0, color: colors.textPrimary }}>{copyForLocale(locale, "No encontramos cruces para este filtro", "We couldn't find matches for this filter")}</h2>
-          <p style={{ ...typography.body, margin: 0, color: colors.textSecondary, maxWidth: 420 }}>
+        <Card elevated style={{ gap: 8, textAlign: "center", justifyItems: "center", padding: 24 }}>
+          <span className="typo-small text-text-muted">{copyForLocale(locale, "SIN PARTIDOS", "NO MATCHES")}</span>
+          <h2 className="typo-h2 m-0 text-text-primary">{copyForLocale(locale, "No encontramos cruces para este filtro", "We couldn't find matches for this filter")}</h2>
+          <p className="typo-body m-0 text-text-secondary max-w-[420px]">
             {copyForLocale(locale, "Cambia de vista para seguir avanzando o revisar otra fase del torneo.", "Switch views to keep going or review another phase of the tournament.")}
           </p>
         </Card>
       ) : null}
 
       {!isLoading && items.length > 0 ? (
-        <section style={{ display: "grid", gap: 14 }}>
+        <section className="grid gap-[14px]">
           {items.map((match) => (
             <MatchCard
               key={match.matchId}
