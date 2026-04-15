@@ -1,5 +1,4 @@
 import type { PreTournamentSummary } from "@prode/shared";
-import { getPredictionOpensAt } from "../../matches/services/match-state";
 import { matchesRepository } from "../../matches/repositories/matches-repository";
 import { predictionsRepository } from "../../matches/repositories/predictions-repository";
 import type { StoredMatch } from "../../matches/types";
@@ -19,7 +18,7 @@ function resolveIsPreTournament(matches: StoredMatch[], now: Date) {
     return false;
   }
 
-  return now.getTime() < getPredictionOpensAt(firstMatch).getTime();
+  return now.getTime() < new Date(firstMatch.kickoffAt).getTime();
 }
 
 export class PreTournamentSummaryService {

@@ -100,7 +100,7 @@ test("getSummaryForUser returns group progress and next pending match in chronol
   }
 });
 
-test("getSummaryForUser exits pre-tournament once the first prediction window opens", async () => {
+test("getSummaryForUser exits pre-tournament once the first match has kicked off", async () => {
   const service = new PreTournamentSummaryService();
   const listMatchesMock = mock.method(matchesRepository, "listMatches", async (input?: { stage?: string }) => {
     if (input?.stage === "group") {
@@ -116,7 +116,7 @@ test("getSummaryForUser exits pre-tournament once the first prediction window op
   );
 
   try {
-    const summary = await service.getSummaryForUser("usr_1", new Date("2026-06-11T14:00:00Z"));
+    const summary = await service.getSummaryForUser("usr_1", new Date("2026-06-11T19:30:00Z"));
 
     assert.equal(summary.isPreTournament, false);
     assert.equal(summary.nextPendingMatchId, "m_001");

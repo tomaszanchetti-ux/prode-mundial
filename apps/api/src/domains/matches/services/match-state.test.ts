@@ -44,12 +44,16 @@ function buildPrediction(overrides: Partial<StoredPrediction> = {}): StoredPredi
   };
 }
 
-test("deriveMatchFunctionalState returns EDITABLE before kickoff for scheduled unlocked match", () => {
-  assert.equal(deriveMatchFunctionalState(buildMatch(), new Date("2026-06-11T15:00:00Z")), "EDITABLE");
+test("deriveMatchFunctionalState returns EDITABLE before prediction deadline for scheduled unlocked match", () => {
+  assert.equal(deriveMatchFunctionalState(buildMatch(), new Date("2026-06-11T17:00:00Z")), "EDITABLE");
 });
 
-test("deriveMatchFunctionalState returns SCHEDULED_WAITING_WINDOW before prediction window opens", () => {
-  assert.equal(deriveMatchFunctionalState(buildMatch(), new Date("2026-06-11T12:30:00Z")), "SCHEDULED_WAITING_WINDOW");
+test("deriveMatchFunctionalState returns EDITABLE many hours before kickoff (predictions always open)", () => {
+  assert.equal(deriveMatchFunctionalState(buildMatch(), new Date("2026-04-15T10:00:00Z")), "EDITABLE");
+});
+
+test("deriveMatchFunctionalState returns LOCKED_PENDING once within 1 hour of kickoff", () => {
+  assert.equal(deriveMatchFunctionalState(buildMatch(), new Date("2026-06-11T18:00:00Z")), "LOCKED_PENDING");
 });
 
 test("deriveMatchFunctionalState returns LOCKED_PENDING once scheduled match reaches kickoff", () => {

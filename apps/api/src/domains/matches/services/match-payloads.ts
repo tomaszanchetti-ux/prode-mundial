@@ -15,7 +15,7 @@ import type {
   StoredPrediction,
   StoredTeam
 } from "../types";
-import { deriveMatchState, getPredictionOpensAt } from "./match-state";
+import { deriveMatchState, getPredictionDeadlineAt, getPredictionOpensAt } from "./match-state";
 
 const CURSOR_SEPARATOR = "::";
 
@@ -101,8 +101,6 @@ export function deriveMatchViewState(match: StoredMatch, prediction: StoredPredi
     ctaLabel = "Editar prediccion";
   } else if (derivedState.predictionStatus === "scored") {
     ctaLabel = "Ver puntos";
-  } else if (derivedState.matchState === "SCHEDULED_WAITING_WINDOW") {
-    ctaLabel = "Disponible pronto";
   } else if (derivedState.predictionStatus === "locked_unscored") {
     ctaLabel = derivedState.publicStatus === "finished" ? "Ver resultado" : "Bloqueado";
   } else if (derivedState.predictionStatus === "void") {
@@ -179,7 +177,7 @@ export function toMatchSummary(
     kickoffAt: match.kickoffAt,
     predictionOpensAt: getPredictionOpensAt(match).toISOString(),
     status: state.publicStatus,
-    deadlineAt: match.kickoffAt,
+    deadlineAt: getPredictionDeadlineAt(match).toISOString(),
     isLocked: state.isLocked,
     isFinished: state.isFinished,
     isScored: state.isScored,

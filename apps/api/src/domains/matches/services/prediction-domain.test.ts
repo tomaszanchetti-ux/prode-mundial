@@ -145,28 +145,26 @@ test("assertMatchPredictionEditable rejects locked matches", () => {
   );
 });
 
-test("assertMatchPredictionEditable rejects matches before the 5 hour prediction window opens", () => {
+test("assertMatchPredictionEditable allows matches many hours before kickoff (predictions always open)", () => {
+  assert.doesNotThrow(() => assertMatchPredictionEditable(buildMatch(), new Date("2026-04-15T10:00:00Z")));
+});
+
+test("assertMatchPredictionEditable rejects matches within 1 hour of kickoff", () => {
   assert.throws(
-    () => assertMatchPredictionEditable(buildMatch(), new Date("2026-06-11T12:30:00Z")),
+    () => assertMatchPredictionEditable(buildMatch(), new Date("2026-06-11T18:30:00Z")),
     (error: unknown) =>
       error instanceof ApiError &&
       error.code === "MATCH_LOCKED"
   );
 });
 
-test("assertMatchPredictionEditable allows local lab bypass before the prediction window opens", () => {
-  const previousValue = process.env.PRODE_ENABLE_LAB_PREDICTIONS;
-  process.env.PRODE_ENABLE_LAB_PREDICTIONS = "true";
-
-  try {
-    assert.doesNotThrow(() => assertMatchPredictionEditable(buildMatch(), new Date("2026-06-11T12:30:00Z")));
-  } finally {
-    if (previousValue === undefined) {
-      delete process.env.PRODE_ENABLE_LAB_PREDICTIONS;
-    } else {
-      process.env.PRODE_ENABLE_LAB_PREDICTIONS = previousValue;
-    }
-  }
+test("assertMatchPredictionEditable rejects matches exactly at the prediction deadline", () => {
+  assert.throws(
+    () => assertMatchPredictionEditable(buildMatch(), new Date("2026-06-11T18:00:00Z")),
+    (error: unknown) =>
+      error instanceof ApiError &&
+      error.code === "MATCH_LOCKED"
+  );
 });
 
 test("assertPredictionOwnership rejects prediction from another user", () => {
