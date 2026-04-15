@@ -13,8 +13,8 @@ export function LanguageToggle() {
         gap: 6,
         padding: 4,
         borderRadius: 999,
-        background: "rgba(255, 255, 255, 0.03)",
-        border: "1px solid rgba(148, 163, 184, 0.12)"
+        background: "var(--color-bg-interactive)",
+        border: "1px solid var(--color-border-default)"
       }}
     >
       <Button

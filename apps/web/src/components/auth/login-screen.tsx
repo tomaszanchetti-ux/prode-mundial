@@ -66,7 +66,7 @@ export function LoginScreenView({
         </Link>
       </header>
 
-      <section className="grid gap-4 grid-cols-[1.1fr_0.9fr]">
+      <section className="grid gap-4 grid-cols-1 md:grid-cols-[1.1fr_0.9fr]">
         <Card elevated className="login-hero-bg" style={{ gap: 16, padding: 24 }}>
           <span className="typo-small text-primary-500">ENTRA Y JUEGA</span>
           <div className="grid gap-3">
