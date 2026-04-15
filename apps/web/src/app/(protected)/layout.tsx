@@ -3,12 +3,36 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { AuthGuard } from "@/components/auth/auth-guard";
+import { useAuth } from "@/components/auth/auth-provider";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { LanguageToggle } from "@/components/layout/language-toggle";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 
+function resolveInitials(name: string | null | undefined) {
+  if (!name) {
+    return null;
+  }
+
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length === 0) {
+    return null;
+  }
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+
 function ProtectedHeader() {
   const { locale } = useLocale();
+  const { profile, user } = useAuth();
+  const initials =
+    resolveInitials(profile?.displayName) ?? resolveInitials(user?.displayName ?? null);
+  const fallback = copyForLocale(locale, "Mi", "Me");
+  const profileLabel = copyForLocale(locale, "Abrir perfil", "Open profile");
 
   return (
     <header className="flex items-center justify-between gap-3 pt-[2px]">
@@ -22,9 +46,11 @@ function ProtectedHeader() {
         <LanguageToggle />
         <Link
           href="/profile"
-          className="w-9 h-9 rounded-pill grid place-items-center no-underline text-text-primary text-[12px] font-bold tracking-[0.06em] uppercase bg-bg-interactive border border-border-default hover:bg-[#E3E7EC] transition-colors"
+          aria-label={profileLabel}
+          title={profileLabel}
+          className="w-11 h-11 rounded-pill grid place-items-center no-underline text-text-primary text-[13px] font-bold tracking-[0.06em] uppercase bg-bg-interactive border border-border-default hover:bg-[#E3E7EC] transition-colors"
         >
-          {copyForLocale(locale, "Mi", "Me")}
+          {initials ?? fallback}
         </Link>
       </div>
     </header>

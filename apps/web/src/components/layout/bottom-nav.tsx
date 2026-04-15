@@ -11,9 +11,9 @@ export function BottomNav() {
   const labels = {
     home: copyForLocale(locale, "Inicio", "Home"),
     matches: copyForLocale(locale, "Partidos", "Matches"),
+    tournament: copyForLocale(locale, "Tu Mundial", "Your World Cup"),
     rankings: copyForLocale(locale, "Posiciones", "Standings"),
-    leagues: copyForLocale(locale, "Ligas", "Leagues"),
-    profile: copyForLocale(locale, "Perfil", "Profile")
+    leagues: copyForLocale(locale, "Ligas", "Leagues")
   } as const;
 
   return (
