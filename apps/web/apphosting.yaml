@@ -1,0 +1,74 @@
+# Firebase App Hosting — configuración del backend web (@prode/web).
+# Docs: https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  # Entre 0 y 5 instancias; scale-to-zero para minimizar costo pre-launch.
+  minInstances: 0
+  maxInstances: 5
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  # === Branding y URLs ===
+  - variable: NEXT_PUBLIC_APP_NAME
+    value: "Prode Mundial"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_WEB_URL
+    value: "https://prode-mundial-4e419.web.app"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_API_URL
+    value: "https://prode-api-59331857833.europe-west1.run.app"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_ENABLE_LAB_PREDICTIONS
+    value: "true"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # === Firebase client SDK ===
+  # Son públicos por diseño (restricciones se controlan vía Firebase Security Rules).
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "AIzaSyD00ZSLGxoNc_hlfgGL9YlXDawbULfoLmY"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "prode-mundial-4e419.firebaseapp.com"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "prode-mundial-4e419"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: "prode-mundial-4e419.firebasestorage.app"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "59331857833"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:59331857833:web:1b907f74adc79c024cc8b8"
+    availability:
+      - BUILD
+      - RUNTIME

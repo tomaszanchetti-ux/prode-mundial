@@ -25,10 +25,24 @@ import { errorHandler } from "./middleware/error-handler";
 
 export function createApp() {
   const app = express();
-  const allowedOrigin = process.env.NEXT_PUBLIC_WEB_URL ?? "http://localhost:3000";
+
+  // Orígenes permitidos:
+  //  - PRODE_ALLOWED_ORIGINS: lista CSV (preferido en prod).
+  //  - NEXT_PUBLIC_WEB_URL: fallback un-solo-origen.
+  //  - Default: localhost:3000 para dev.
+  const allowedOrigins = (process.env.PRODE_ALLOWED_ORIGINS ?? process.env.NEXT_PUBLIC_WEB_URL ?? "http://localhost:3000")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
 
   app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", allowedOrigin);
+    const requestOrigin = req.headers.origin;
+    // Reflejamos el Origin solo si está en la allowlist. Si no hay Origin
+    // (server-to-server) no se setea el header y se deja pasar la request.
+    if (typeof requestOrigin === "string" && allowedOrigins.includes(requestOrigin)) {
+      res.header("Access-Control-Allow-Origin", requestOrigin);
+      res.header("Vary", "Origin");
+    }
     res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
 

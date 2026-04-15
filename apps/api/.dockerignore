@@ -1,0 +1,43 @@
+# Paths are relative to the build context (repo root).
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/.cache
+**/.tsbuildinfo
+**/coverage
+
+# Env y secretos — nunca entran a la imagen.
+.env
+.env.*
+!.env.example
+
+# Git y CI.
+.git
+.github
+.gitignore
+
+# Docs y handoffs.
+docs
+*.md
+!apps/api/**/*.md
+
+# Editor y SO.
+.vscode
+.idea
+.DS_Store
+
+# Tests no se ejecutan en runtime.
+**/*.test.ts
+**/*.test.tsx
+
+# Apps que no son @prode/api (el Dockerfile copia explícitamente lo que necesita).
+apps/web
+apps/admin
+apps/jobs
+packages/ui
+packages/config
+
+# Scripts auxiliares del repo.
+scripts
+infra
