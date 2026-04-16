@@ -3,15 +3,17 @@
  * Estos partidos tenían status demo (live/finished) del seed inicial.
  *
  * Uso: npx tsx scripts/ops/reset-demo-matches.ts
- * Requiere: variables FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY en .env
+ * Requiere: variables FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY en .env (root del repo)
  */
 
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { config } from "dotenv";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-config({ path: resolve(import.meta.dirname, "../../apps/api/.env") });
+const __dirname = dirname(fileURLToPath(import.meta.url));
+config({ path: resolve(__dirname, "../../.env") });
 
 function requireEnv(name: string) {
   const value = process.env[name]?.trim();
