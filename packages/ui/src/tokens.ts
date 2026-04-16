@@ -11,13 +11,14 @@ export const colors = {
   warning500: "#F59E0B",
   gold500: "#E7C66A",
   goldSoft: "rgba(231, 198, 106, 0.16)",
-  bgMain: "#06101C",
-  bgCanvas: "#0A1628",
-  bgSurface: "#0F1B2F",
-  bgElevated: "#142238",
-  bgInteractive: "#182A43",
-  bgMuted: "#12243C",
-  bgInset: "rgba(255, 255, 255, 0.035)",
+  bgMain: "#F0F1F3",
+  bgSurface: "#FFFFFF",
+  bgSurfaceRaised: "#F5F6F8",
+  bgSurfaceHighlight: "rgba(0, 82, 204, 0.06)",
+  bgElevated: "#F7F8FA",
+  bgInteractive: "#EBF0F7",
+  bgMuted: "#ECEEF2",
+  bgInset: "rgba(15, 23, 42, 0.04)",
   borderSubtle: "rgba(148, 163, 184, 0.12)",
   border: "rgba(148, 163, 184, 0.18)",
   borderStrong: "rgba(148, 163, 184, 0.3)",
@@ -43,36 +44,36 @@ export const spacing = {
 } as const;
 
 export const radii = {
-  sm: 8,
-  md: 14,
-  lg: 18,
-  xl: 28,
+  sm: 6,
+  md: 10,
+  lg: 14,
+  xl: 20,
   pill: 999
 } as const;
 
 export const typography = {
   h1: {
-    fontSize: 36,
-    fontWeight: 800,
-    lineHeight: 1.02,
-    letterSpacing: "-0.04em"
-  },
-  h2: {
-    fontSize: 26,
+    fontSize: 34,
     fontWeight: 700,
-    lineHeight: 1.06,
+    lineHeight: 1.08,
     letterSpacing: "-0.03em"
   },
-  h3: {
-    fontSize: 21,
+  h2: {
+    fontSize: 24,
     fontWeight: 700,
     lineHeight: 1.12,
     letterSpacing: "-0.02em"
   },
+  h3: {
+    fontSize: 20,
+    fontWeight: 600,
+    lineHeight: 1.2,
+    letterSpacing: "-0.01em"
+  },
   lead: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: 500,
-    lineHeight: 1.45
+    lineHeight: 1.5
   },
   body: {
     fontSize: 15,
@@ -80,17 +81,23 @@ export const typography = {
     lineHeight: 1.5
   },
   small: {
+    fontSize: 12,
+    fontWeight: 600,
+    lineHeight: 1.35,
+    letterSpacing: "0.04em"
+  },
+  eyebrow: {
     fontSize: 11,
-    fontWeight: 700,
-    lineHeight: 1.3,
-    letterSpacing: "0.08em"
+    fontWeight: 600,
+    lineHeight: 1.35,
+    letterSpacing: "0.06em"
   }
 } as const;
 
 export const shadows = {
-  soft: "0 10px 30px rgba(2, 8, 18, 0.16)",
-  card: "0 22px 56px rgba(2, 8, 18, 0.28)",
-  modal: "0 36px 88px rgba(2, 8, 18, 0.42)"
+  soft: "0 1px 2px rgba(15, 23, 42, 0.03), 0 1px 3px rgba(15, 23, 42, 0.05)",
+  card: "0 2px 10px rgba(15, 23, 42, 0.06)",
+  modal: "0 16px 40px rgba(15, 23, 42, 0.14)"
 } as const;
 
 export const uiTheme = {
