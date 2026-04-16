@@ -69,32 +69,7 @@ const NORMALIZED_MATCHES = normalizedSchedule.matches as WorldCup2026NormalizedM
 const MATCH_STATE_OVERRIDES: Record<
   string,
   Partial<Pick<MatchSeed, "status" | "homeScore90" | "awayScore90" | "winnerTeamId" | "isLocked" | "isScored">>
-> = {
-  m_002: {
-    status: "live",
-    homeScore90: 1,
-    awayScore90: 0,
-    winnerTeamId: "KOR",
-    isLocked: true,
-    isScored: false
-  },
-  m_003: {
-    status: "finished",
-    homeScore90: 2,
-    awayScore90: 1,
-    winnerTeamId: "CAN",
-    isLocked: true,
-    isScored: true
-  },
-  m_004: {
-    status: "finished",
-    homeScore90: 0,
-    awayScore90: 0,
-    winnerTeamId: null,
-    isLocked: true,
-    isScored: false
-  }
-};
+> = {};
 
 function chunk<T>(items: T[], size: number): T[][] {
   const chunks: T[][] = [];

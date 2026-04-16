@@ -9,6 +9,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getMatches } from "@/lib/api/client";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
+import { canEditPrediction } from "@/lib/matches/editability";
 import {
   filterChips,
   pickNextOpeningMatch,
@@ -218,7 +219,7 @@ export function MatchesScreen() {
 
       try {
         const token = await user.getIdToken();
-        const response = await getMatches(token, activeFilter.query);
+        const response = await getMatches(token, { ...activeFilter.query, limit: 200 });
 
         if (!cancelled) {
           setItems(response.items);
@@ -283,13 +284,23 @@ export function MatchesScreen() {
       <QuickPredictionModal
         matchId={activeMatchId}
         isOpen={activeMatchId !== null}
+        hasNextPending={items.filter((m) => canEditPrediction(m) && m.matchId !== activeMatchId).length > 0}
         onClose={() => {
           setActiveMatchId(null);
           setDismissedCycle(true);
         }}
         onSaved={() => {
-          setActiveMatchId(null);
-          setDismissedCycle(true);
+          const editableMatches = items
+            .filter((m) => canEditPrediction(m) && m.matchId !== activeMatchId)
+            .sort((a, b) => a.kickoffAt.localeCompare(b.kickoffAt));
+          const nextMatch = editableMatches.find((m) => m.predictionStatus === "empty") ?? editableMatches[0] ?? null;
+
+          if (nextMatch) {
+            setActiveMatchId(nextMatch.matchId);
+          } else {
+            setActiveMatchId(null);
+            setDismissedCycle(true);
+          }
           setReloadKey((current) => current + 1);
         }}
       />
