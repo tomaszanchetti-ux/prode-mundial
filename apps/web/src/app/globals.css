@@ -331,6 +331,94 @@
     border: 1px solid var(--color-border-default);
   }
 
+  /* ── Stage Badges ── */
+  .stage-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .stage-badge-sm {
+    height: 22px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+  .stage-badge-md {
+    height: 26px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+  .stage-badge-icon {
+    font-size: 0.85em;
+    line-height: 1;
+  }
+  .stage-badge-group {
+    background: var(--color-primary-surface);
+    color: var(--color-primary-600);
+    border: 1px solid rgba(0, 82, 204, 0.14);
+  }
+  .stage-badge-knockout {
+    background: rgba(234, 88, 12, 0.08);
+    color: #c2410c;
+    border: 1px solid rgba(234, 88, 12, 0.16);
+  }
+  .stage-badge-semi {
+    background: rgba(147, 51, 234, 0.08);
+    color: #7c3aed;
+    border: 1px solid rgba(147, 51, 234, 0.16);
+  }
+  .stage-badge-bronze {
+    background: rgba(180, 130, 60, 0.08);
+    color: #92650a;
+    border: 1px solid rgba(180, 130, 60, 0.16);
+  }
+  .stage-badge-final {
+    background: linear-gradient(135deg, rgba(212, 168, 66, 0.12) 0%, rgba(234, 179, 8, 0.08) 100%);
+    color: #92650a;
+    border: 1px solid rgba(212, 168, 66, 0.24);
+    font-weight: 700;
+  }
+
+  /* ── Section Dividers ── */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 0;
+  }
+  .section-divider-line {
+    flex: 1;
+    height: 1px;
+  }
+  .section-divider-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .section-divider-default .section-divider-line {
+    background: var(--color-border-default);
+  }
+  .section-divider-default .section-divider-label {
+    color: var(--color-text-muted);
+  }
+  .section-divider-knockout .section-divider-line {
+    background: linear-gradient(90deg, transparent 0%, rgba(234, 88, 12, 0.3) 50%, transparent 100%);
+  }
+  .section-divider-knockout .section-divider-label {
+    color: #c2410c;
+  }
+  .section-divider-final .section-divider-line {
+    background: linear-gradient(90deg, transparent 0%, rgba(212, 168, 66, 0.4) 50%, transparent 100%);
+  }
+  .section-divider-final .section-divider-label {
+    color: #92650a;
+  }
+
   /* ── Filter Bar ── */
   .filter-bar-bg {
     background: rgba(255, 255, 255, 0.92);

@@ -2,17 +2,22 @@ import React from "react";
 import type { MatchCardProps } from "./types";
 import { Button } from "./button";
 import { Card } from "./card";
+import { StageBadge, type TournamentStage } from "./stage-badge";
 import { StatusTag } from "./status-tag";
 import { TeamIdentity } from "./team";
+
+const KNOWN_STAGES = new Set(["group", "R32", "R16", "QF", "SF", "BRONZE", "FINAL"]);
 
 export function MatchCard({
   awayTeam,
   ctaLabel,
+  groupId,
   homeTeam,
   kickoffLabel,
   onAction,
   predictionSummary,
   resultSummary,
+  stage,
   stageLabel,
   status,
   statusLabel
@@ -23,7 +28,11 @@ export function MatchCard({
     <Card elevated style={{ gap: 10, padding: 12 }}>
       <div className="flex justify-between items-center gap-2.5 flex-wrap">
         <div className="grid gap-[6px]">
-          <span className="typo-eyebrow">{stageLabel}</span>
+          {stage && KNOWN_STAGES.has(stage) ? (
+            <StageBadge stage={stage as TournamentStage} groupId={groupId} label={stageLabel} size="sm" />
+          ) : (
+            <span className="typo-eyebrow">{stageLabel}</span>
+          )}
           <span className="text-[13px] leading-[1.35] text-text-secondary">{kickoffLabel}</span>
         </div>
         <StatusTag status={status} label={statusLabel} />

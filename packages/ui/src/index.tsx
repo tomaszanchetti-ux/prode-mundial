@@ -11,3 +11,7 @@ export { PredictionModal } from "./prediction-modal";
 export { ProgressCompact, AdSlotCard } from "./progress";
 export { Toast, InlineNotification } from "./notifications";
 export type { ToastProps, InlineNotificationProps } from "./notifications";
+export { StageBadge } from "./stage-badge";
+export type { StageBadgeProps, TournamentStage } from "./stage-badge";
+export { SectionDivider } from "./section-divider";
+export type { SectionDividerProps } from "./section-divider";

@@ -379,6 +379,8 @@ export function MatchesScreenView({
               onAction={() => onOpenMatch(match.matchId)}
               predictionSummary={toPredictionCopy(match, locale)}
               resultSummary={toResultCopy(match, locale)}
+              stage={match.stage}
+              groupId={match.groupId}
               stageLabel={toStageLabel(match.stage, match.groupId, locale)}
               status={toCardTone(match)}
               statusLabel={toStatusLabel(match)}

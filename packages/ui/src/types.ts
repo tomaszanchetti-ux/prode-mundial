@@ -124,11 +124,13 @@ export type AdSlotCardProps = {
 export type MatchCardProps = {
   awayTeam: TeamData;
   ctaLabel: string;
+  groupId?: string | null;
   homeTeam: TeamData;
   kickoffLabel: string;
   onAction?: () => void;
   predictionSummary?: string;
   resultSummary?: string;
+  stage?: string;
   stageLabel: string;
   status: MatchCardStatus;
   statusLabel?: string;
