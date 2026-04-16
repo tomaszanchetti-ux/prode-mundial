@@ -8,7 +8,7 @@ import type {
 
 // ── Primitives ────────────────────────────────────────
 
-export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
 // Sistema semántico estricto (WS50 / Fase 2 ronda 2):
 //   editable      → acción disponible (azul)
 //   saved         → predicción guardada (verde)

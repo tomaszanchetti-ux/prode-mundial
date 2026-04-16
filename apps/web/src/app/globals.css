@@ -84,10 +84,10 @@
     color: var(--color-text-muted);
   }
 
-  /* ── Buttons ── */
+  /* ── Buttons ── WS50 · WAVE 1 · C3 (unificados: altura 44, misma jerarquía) */
   .btn-base {
-    min-height: 46px;
-    padding: 0 15px;
+    min-height: 44px;
+    padding: 0 16px;
     border-radius: var(--radius-lg);
     font-size: 15px;
     line-height: 1;
@@ -121,6 +121,15 @@
   }
   .btn-ghost:hover:not(:disabled) {
     background: var(--color-primary-surface);
+  }
+  .btn-destructive {
+    background: #FFFFFF;
+    color: var(--color-error);
+    border: 1px solid rgba(229, 72, 77, 0.32);
+  }
+  .btn-destructive:hover:not(:disabled) {
+    background: rgba(229, 72, 77, 0.06);
+    border-color: var(--color-error);
   }
 
   /* ── Status Pills ── */
@@ -285,50 +294,6 @@
       radial-gradient(circle at top right, var(--color-primary-surface), transparent 32%),
       linear-gradient(180deg, var(--color-primary-surface) 0%, #FFFFFF 70%);
     border: 1px solid rgba(0, 82, 204, 0.14);
-  }
-
-  /* ── Landing (public) ── */
-  .landing-hero-bg {
-    background: radial-gradient(circle at top right, rgba(47, 107, 255, 0.2), transparent 30%),
-      linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(7, 17, 31, 0.98) 100%);
-    border: 1px solid var(--color-border-default);
-    box-shadow: 0 26px 68px rgba(2, 8, 18, 0.3);
-  }
-  .landing-cta-primary {
-    min-height: 52px;
-    padding: 0 18px;
-    border-radius: 16px;
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-    background: var(--color-primary-500);
-    color: var(--color-text-primary);
-    font-weight: 700;
-    box-shadow: 0 10px 24px rgba(47, 107, 255, 0.24);
-  }
-  .landing-cta-secondary {
-    min-height: 52px;
-    padding: 0 18px;
-    border-radius: 16px;
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--color-text-primary);
-    border: 1px solid var(--color-border-default);
-    font-weight: 700;
-  }
-  .landing-pill-link {
-    min-height: 44px;
-    padding: 0 16px;
-    border-radius: var(--radius-pill);
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-    background: var(--color-primary-500);
-    color: var(--color-text-primary);
-    font-weight: 700;
-    box-shadow: 0 10px 24px rgba(47, 107, 255, 0.24);
   }
 
   /* ── Home Hero ── */
@@ -630,8 +595,8 @@
 
   /* ── Close Button ── */
   .close-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--radius-pill);
     border: 1px solid var(--color-border-default);
     background: #FFFFFF;
