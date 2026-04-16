@@ -4,9 +4,19 @@ import React, { useEffect, useMemo, useState } from "react";
 import type { MatchDetail, MatchSummary, PreTournamentSummary, SaveMatchPredictionInput } from "@prode/shared";
 import { Button, Card, ScoreInput, StatusTag, TeamIdentity } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
-import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
+import { getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
 import { copyForLocale, formatDateTime, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/editability";
+import {
+  type MarathonFormState,
+  type MarathonNotice,
+  toErrorMessage,
+  toFormState,
+  toHelperText,
+  toKickoffLabel,
+  toLoadErrorMessage,
+  toStageLabel
+} from "./marathon-helpers";
 
 type MarathonPredictionModalProps = {
   isOpen: boolean;
@@ -18,22 +28,11 @@ type MarathonPredictionModalProps = {
   onSaved?: () => void;
 };
 
-type FormState = {
-  homeScorePred: string;
-  awayScorePred: string;
-  predictedQualifierTeamId: string;
-};
-
-type MarathonNotice = {
-  tone: "error" | "success";
-  message: string;
-};
-
 export type MarathonPredictionModalViewProps = {
   currentIndex: number;
   currentSummary: MatchSummary | MatchDetail | null;
   detail: MatchDetail | null;
-  formState: FormState;
+  formState: MarathonFormState;
   helperText: string;
   isLoading: boolean;
   isSaving: boolean;
@@ -50,85 +49,6 @@ export type MarathonPredictionModalViewProps = {
   remainingMatches: number;
   totalMatches: number;
 };
-
-function toStageLabel(summary: MatchSummary | MatchDetail) {
-  if (summary.stage === "group" && summary.groupId) {
-    return `Grupo ${summary.groupId}`;
-  }
-
-  const labels: Record<string, string> = {
-    R32: "Octavos",
-    R16: "R16",
-    QF: "Cuartos",
-    SF: "Semifinal",
-    BRONZE: "Tercer puesto",
-    FINAL: "Final"
-  };
-
-  return labels[summary.stage] ?? summary.stage;
-}
-
-function toKickoffLabel(iso: string) {
-  return formatDateTime("es", iso, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-}
-
-function toFormState(detail: MatchDetail): FormState {
-  return {
-    homeScorePred: detail.userPrediction ? String(detail.userPrediction.homeScorePred) : "",
-    awayScorePred: detail.userPrediction ? String(detail.userPrediction.awayScorePred) : "",
-    predictedQualifierTeamId: detail.userPrediction?.predictedQualifierTeamId ?? ""
-  };
-}
-
-function toErrorMessage(error: unknown) {
-  if (error instanceof ApiClientError) {
-    if (error.code === "MATCH_LOCKED") {
-      return "Este partido ya se cerro.";
-    }
-
-    if (error.code === "INVALID_SCORE") {
-      return "Ingresa un marcador valido.";
-    }
-
-    if (error.code === "INVALID_KNOCKOUT_CLASSIFIER") {
-      return "Si eliges empate, tienes que marcar quien clasifica.";
-    }
-
-    return error.message;
-  }
-
-  return error instanceof Error ? error.message : "No pudimos guardar tu prediccion.";
-}
-
-function toLoadErrorMessage(error: unknown) {
-  if (error instanceof ApiClientError && error.status === 404) {
-    return "No encontramos este partido.";
-  }
-
-  return error instanceof Error ? error.message : "No pudimos cargar el partido.";
-}
-
-function toHelperText(detail: MatchDetail | null, notice: MarathonNotice | null) {
-  if (notice?.tone === "error") {
-    return notice.message;
-  }
-
-  if (!detail) {
-    return "Cargando partido...";
-  }
-
-  if (isPredictionWindowNotOpen(detail)) {
-    return `La prediccion abre ${toKickoffLabel(detail.predictionOpensAt)}. Puedes seguir navegando la maraton mientras tanto.`;
-  }
-
-  return "Guarda este marcador y seguimos con el proximo pendiente.";
-}
 
 export function MarathonPredictionModalView({
   currentIndex,
@@ -299,7 +219,7 @@ export function MarathonPredictionModal({
   const { status, user } = useAuth();
   const [currentMatchId, setCurrentMatchId] = useState<string | null>(initialMatchId);
   const [detail, setDetail] = useState<MatchDetail | null>(null);
-  const [formState, setFormState] = useState<FormState>({
+  const [formState, setFormState] = useState<MarathonFormState>({
     homeScorePred: "",
     awayScorePred: "",
     predictedQualifierTeamId: ""

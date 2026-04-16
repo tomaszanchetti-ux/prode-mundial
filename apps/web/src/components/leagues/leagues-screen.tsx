@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, createLeague, getMyLeagues, joinLeague } from "@/lib/api/client";
 import { CopyButton } from "./copy-button";
+import { ActionResultCard, CreateLeagueForm, JoinLeagueForm, Metric } from "./leagues-forms";
 
 type LeaguesScreenViewProps = {
   items: LeagueSummary[];
@@ -72,63 +73,21 @@ export function LeaguesScreenView({
       </Card>
 
       {mode === "create" ? (
-        <Card elevated style={{ gap: 16 }}>
-          <div className="grid gap-1.5">
-            <span className="typo-small text-primary-500">CREAR LIGA</span>
-            <h2 className="typo-h3 m-0 text-text-primary">Abre tu mesa competitiva</h2>
-            <p className="typo-body m-0 text-text-secondary">
-              El nombre sale publicado para todos los miembros. Apenas la creas te devolvemos codigo e invite link.
-            </p>
-          </div>
-          <form onSubmit={onCreateLeague} className="grid gap-3">
-            <label className="grid gap-2">
-              <span className="typo-small text-text-secondary">Nombre de la liga</span>
-              <input
-                name="leagueName"
-                value={formState.leagueName}
-                onChange={onFieldChange}
-                minLength={3}
-                maxLength={40}
-                placeholder="Liga del Asado"
-                required
-                className="email-input"
-              />
-            </label>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creando..." : "Crear liga"}
-            </Button>
-          </form>
-        </Card>
+        <CreateLeagueForm
+          formState={formState}
+          isSubmitting={isSubmitting}
+          onFieldChange={onFieldChange}
+          onSubmit={onCreateLeague}
+        />
       ) : null}
 
       {mode === "join" ? (
-        <Card elevated style={{ gap: 16 }}>
-          <div className="grid gap-1.5">
-            <span className="typo-small text-gold">JOIN POR CODIGO</span>
-            <h2 className="typo-h3 m-0 text-text-primary">Entra a una liga existente</h2>
-            <p className="typo-body m-0 text-text-secondary">
-              Pega el codigo que te compartieron. Lo normalizamos y validamos antes de sumarte.
-            </p>
-          </div>
-          <form onSubmit={onJoinLeague} className="grid gap-3">
-            <label className="grid gap-2">
-              <span className="typo-small text-text-secondary">Codigo de invitacion</span>
-              <input
-                name="inviteCode"
-                value={formState.inviteCode}
-                onChange={onFieldChange}
-                minLength={4}
-                maxLength={24}
-                placeholder="ASADO26"
-                required
-                className="email-input uppercase"
-              />
-            </label>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Uniendome..." : "Unirme a la liga"}
-            </Button>
-          </form>
-        </Card>
+        <JoinLeagueForm
+          formState={formState}
+          isSubmitting={isSubmitting}
+          onFieldChange={onFieldChange}
+          onSubmit={onJoinLeague}
+        />
       ) : null}
 
       {actionError ? (
@@ -139,33 +98,12 @@ export function LeaguesScreenView({
       ) : null}
 
       {lastActionLeague ? (
-        <Card elevated className="league-action-bg" style={{ gap: 12 }}>
-          <span className="typo-small text-primary-500">ACCION COMPLETADA</span>
-          <h2 className="typo-h3 m-0 text-text-primary">{lastActionLeague.name}</h2>
-          <p className="typo-body m-0 text-text-secondary">
-            {actionMessage ?? "La liga ya quedo lista para competir."}
-          </p>
-          <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(120px,1fr))]">
-            <Metric label="Codigo" value={lastActionLeague.inviteCode} />
-            <Metric label="Jugadores" value={`${lastActionLeague.membersCount}/${lastActionLeague.memberLimit}`} />
-            <Metric label="Tu rol" value={lastActionLeague.membershipRole === "owner" ? "Creador" : "Miembro"} />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            <Button onClick={() => onOpenLeagueDetail(lastActionLeague.leagueId)}>Ver detalle de liga</Button>
-            <Button variant="ghost" onClick={onOpenRankings}>
-              Ir a posiciones
-            </Button>
-          </div>
-          {lastActionLeague.inviteLink ? (
-            <div className="grid gap-1.5 p-3 rounded-[16px] surface-inset">
-              <div className="flex justify-between gap-2 items-center">
-                <span className="typo-small text-text-muted">INVITE LINK</span>
-                <CopyButton value={lastActionLeague.inviteLink} />
-              </div>
-              <span className="text-[14px] leading-[1.4] text-text-secondary break-all">{lastActionLeague.inviteLink}</span>
-            </div>
-          ) : null}
-        </Card>
+        <ActionResultCard
+          actionMessage={actionMessage}
+          league={lastActionLeague}
+          onOpenLeagueDetail={onOpenLeagueDetail}
+          onOpenRankings={onOpenRankings}
+        />
       ) : null}
 
       {errorMessage ? (
@@ -239,15 +177,6 @@ export function LeaguesScreenView({
             </Card>
           ))
         : null}
-    </div>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="grid gap-1 p-3 surface-inset">
-      <span className="typo-small text-text-muted">{label}</span>
-      <span className="typo-h3 m-0 text-text-primary">{value}</span>
     </div>
   );
 }
