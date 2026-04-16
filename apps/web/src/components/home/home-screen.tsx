@@ -70,7 +70,7 @@ export function HomeScreen() {
       try {
         const token = await user.getIdToken();
         const [matchesResponse, summaryResponse, leaguesResponse] = await Promise.all([
-          getMatches(token, { limit: 100 }),
+          getMatches(token, { limit: 120 }),
           getPreTournamentSummary(token),
           getMyLeagues(token).catch(() => ({ items: [] as LeagueSummary[] }))
         ]);

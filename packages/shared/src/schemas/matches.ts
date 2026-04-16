@@ -86,7 +86,7 @@ export const listMatchesQuerySchema = z.object({
   stage: matchStageSchema.optional(),
   filter: matchListFilterSchema.optional(),
   cursor: z.string().min(1).optional(),
-  limit: z.number().int().positive().max(100).optional()
+  limit: z.number().int().positive().max(200).optional()
 });
 
 export const listMatchesResponseSchema = z.object({
