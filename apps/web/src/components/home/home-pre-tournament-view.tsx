@@ -4,9 +4,11 @@ import { AdSlotCard, Button, Card, NextMatchHero, ProgressCompact } from "@prode
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
 import {
+  pickNextChronologicalMatch,
   pickPriorityMatch,
   toCompletionCopy,
   toCountdownLabel,
+  toEditWindowLabel,
   toKickoffLabel,
   toLeagueSummaryCopy,
   toStageLabel
@@ -43,43 +45,74 @@ export function HomePreTournamentView({
   onOpenTournament
 }: HomePreTournamentViewProps) {
   const { locale } = useLocale();
-  // Usa pickPriorityMatch (ordena por kickoff, considera todos los partidos editables)
-  // en vez de preTournamentSummary.nextPendingMatchId del backend, que solo mira grupos
-  // sin ordenar cronológicamente.
-  const nextPreTournamentMatch = pickPriorityMatch(items);
+  // Hero: prioriza el próximo pendiente (empty/saved_editable). Si no hay, muestra el
+  // próximo partido cronológico (ya predicho o no) para que el hero siempre tenga valor.
+  const priorityMatch = pickPriorityMatch(items);
+  const upcomingMatch = pickNextChronologicalMatch(items);
+  const heroMatch = priorityMatch ?? upcomingMatch;
+  const heroIsEditable = heroMatch ? canEditPrediction(heroMatch) : false;
+  const heroHasPrediction = Boolean(heroMatch?.userPredictionSummary);
+
+  const heroCtaLabel = heroMatch
+    ? heroHasPrediction
+      ? copyForLocale(locale, "Editar prediccion", "Edit prediction")
+      : copyForLocale(locale, "Seguir completando", "Continue filling")
+    : "";
+
+  const heroHelperText = heroMatch
+    ? heroHasPrediction
+      ? heroIsEditable
+        ? copyForLocale(
+            locale,
+            `Tu prediccion: ${heroMatch.userPredictionSummary} · ${toEditWindowLabel(heroMatch.deadlineAt, locale)}`,
+            `Your prediction: ${heroMatch.userPredictionSummary} · ${toEditWindowLabel(heroMatch.deadlineAt, locale)}`
+          )
+        : copyForLocale(
+            locale,
+            `Tu prediccion: ${heroMatch.userPredictionSummary} · Ventana cerrada`,
+            `Your prediction: ${heroMatch.userPredictionSummary} · Edit window closed`
+          )
+      : heroIsEditable
+        ? undefined
+        : copyForLocale(
+            locale,
+            `Abre ${toKickoffLabel(heroMatch.predictionOpensAt, locale)}`,
+            `Opens ${toKickoffLabel(heroMatch.predictionOpensAt, locale)}`
+          )
+    : undefined;
+
+  const heroStatusLabel = heroMatch
+    ? heroIsEditable
+      ? heroHasPrediction
+        ? copyForLocale(locale, "Editable", "Editable")
+        : copyForLocale(locale, "Pendiente", "Pending")
+      : copyForLocale(locale, "Cerrado", "Locked")
+    : "";
 
   return (
     <div className="grid gap-4">
-      {nextPreTournamentMatch ? (
+      {heroMatch ? (
         <NextMatchHero
           awayTeam={{
-            teamName: nextPreTournamentMatch.awayTeam.name,
-            fifaCode: nextPreTournamentMatch.awayTeam.fifaCode,
-            flagAsset: nextPreTournamentMatch.awayTeam.flagAsset,
-            flagUrl: nextPreTournamentMatch.awayTeam.flagUrl
+            teamName: heroMatch.awayTeam.name,
+            fifaCode: heroMatch.awayTeam.fifaCode,
+            flagAsset: heroMatch.awayTeam.flagAsset,
+            flagUrl: heroMatch.awayTeam.flagUrl
           }}
-          ctaLabel={nextPreTournamentMatch.userPredictionSummary
-            ? copyForLocale(locale, "Editar prediccion", "Edit prediction")
-            : copyForLocale(locale, "Seguir completando", "Continue filling")}
-          eyebrow={`${toStageLabel(nextPreTournamentMatch, locale)} · ${toKickoffLabel(nextPreTournamentMatch.kickoffAt, locale)}`}
-          helperText={
-            nextPreTournamentMatch.userPredictionSummary
-              ? copyForLocale(locale, `Guardaste ${nextPreTournamentMatch.userPredictionSummary}`, `You saved ${nextPreTournamentMatch.userPredictionSummary}`)
-              : !canEditPrediction(nextPreTournamentMatch)
-                ? copyForLocale(locale, `Abre ${toKickoffLabel(nextPreTournamentMatch.predictionOpensAt, locale)}`, `Opens ${toKickoffLabel(nextPreTournamentMatch.predictionOpensAt, locale)}`)
-                : undefined
-          }
+          ctaLabel={heroCtaLabel}
+          eyebrow={`${toStageLabel(heroMatch, locale)} · ${toKickoffLabel(heroMatch.kickoffAt, locale)}`}
+          helperText={heroHelperText}
           homeTeam={{
-            teamName: nextPreTournamentMatch.homeTeam.name,
-            fifaCode: nextPreTournamentMatch.homeTeam.fifaCode,
-            flagAsset: nextPreTournamentMatch.homeTeam.flagAsset,
-            flagUrl: nextPreTournamentMatch.homeTeam.flagUrl
+            teamName: heroMatch.homeTeam.name,
+            fifaCode: heroMatch.homeTeam.fifaCode,
+            flagAsset: heroMatch.homeTeam.flagAsset,
+            flagUrl: heroMatch.homeTeam.flagUrl
           }}
-          metaLabel={`${toStageLabel(nextPreTournamentMatch, locale)} · ${toKickoffLabel(nextPreTournamentMatch.kickoffAt, locale)}`}
-          onAction={() => onOpenMatch(nextPreTournamentMatch.matchId)}
-          status={canEditPrediction(nextPreTournamentMatch) ? "editable" : "locked"}
-          statusLabel={canEditPrediction(nextPreTournamentMatch) ? copyForLocale(locale, "Listo", "Ready") : toCountdownLabel(nextPreTournamentMatch.predictionOpensAt, locale)}
-          title={`${nextPreTournamentMatch.homeTeam.name} vs ${nextPreTournamentMatch.awayTeam.name}`}
+          metaLabel={`${toStageLabel(heroMatch, locale)} · ${toKickoffLabel(heroMatch.kickoffAt, locale)}`}
+          onAction={() => onOpenMatch(heroMatch.matchId)}
+          status={heroIsEditable ? "editable" : "locked"}
+          statusLabel={heroStatusLabel}
+          title={`${heroMatch.homeTeam.name} vs ${heroMatch.awayTeam.name}`}
         />
       ) : (
         <Card elevated className="hero-worldcup-bg" style={{ gap: 12, padding: 20 }}>

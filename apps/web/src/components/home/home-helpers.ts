@@ -124,6 +124,38 @@ export function pickNextOpeningMatch(matches: MatchSummary[], now = new Date()) 
   );
 }
 
+export function pickNextChronologicalMatch(matches: MatchSummary[], now = new Date()) {
+  return (
+    matches.find(
+      (match) => match.status === "scheduled" && new Date(match.kickoffAt).getTime() > now.getTime()
+    ) ?? null
+  );
+}
+
+export function toEditWindowLabel(deadlineIso: string, locale: AppLocale, now = new Date()) {
+  const diffMs = new Date(deadlineIso).getTime() - now.getTime();
+
+  if (diffMs <= 0) {
+    return copyForLocale(locale, "Ventana de edicion cerrada", "Edit window closed");
+  }
+
+  const totalMinutes = Math.ceil(diffMs / 60000);
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const remainingMinutesAfterDays = totalMinutes - days * 60 * 24;
+  const hours = Math.floor(remainingMinutesAfterDays / 60);
+  const minutes = remainingMinutesAfterDays % 60;
+
+  if (days > 0) {
+    return copyForLocale(locale, `Podes editarla ${days}d ${hours}h mas`, `You can still edit ${days}d ${hours}h`);
+  }
+
+  if (hours > 0) {
+    return copyForLocale(locale, `Podes editarla ${hours}h ${minutes}m mas`, `You can still edit ${hours}h ${minutes}m`);
+  }
+
+  return copyForLocale(locale, `Podes editarla ${minutes}m mas`, `You can still edit ${minutes}m`);
+}
+
 export function compareMatchesChronologically(left: MatchSummary, right: MatchSummary) {
   const kickoffDifference = new Date(left.kickoffAt).getTime() - new Date(right.kickoffAt).getTime();
 
