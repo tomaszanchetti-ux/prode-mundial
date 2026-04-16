@@ -119,12 +119,12 @@ export function MarathonPredictionModalView({
         <div className="grid gap-3 p-3.5 surface-inset">
           <div className="flex justify-between items-center gap-3 flex-wrap">
             <div className="grid gap-1">
-              <span className="typo-small text-text-muted">PROGRESO GLOBAL</span>
+              <span className="typo-small text-text-muted">TU AVANCE</span>
               <strong className="text-[20px] leading-[1.2] text-text-primary">{progressLabel}</strong>
             </div>
             <StatusTag
               status={isEditable ? "editable" : "locked"}
-              label={isEditable ? "Listo para guardar" : "Pendiente en cronologia"}
+              label={isEditable ? "Editable" : "Bloqueado"}
             />
           </div>
 

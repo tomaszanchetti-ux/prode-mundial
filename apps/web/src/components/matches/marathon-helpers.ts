@@ -87,8 +87,8 @@ export function toHelperText(detail: MatchDetail | null, notice: MarathonNotice 
   }
 
   if (isPredictionWindowNotOpen(detail)) {
-    return `La prediccion abre ${toKickoffLabel(detail.predictionOpensAt)}. Puedes seguir navegando la maraton mientras tanto.`;
+    return `Abre ${toKickoffLabel(detail.predictionOpensAt)}.`;
   }
 
-  return "Guarda este marcador y seguimos con el proximo pendiente.";
+  return "";
 }

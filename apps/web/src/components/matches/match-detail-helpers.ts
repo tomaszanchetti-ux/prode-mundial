@@ -97,7 +97,7 @@ export function toHelperText(detail: MatchDetail, formState: FormState) {
     return "Si eliges empate, marca quien clasifica.";
   }
 
-  return "Toca guardar para confirmar.";
+  return "";
 }
 
 export function toErrorMessage(error: unknown) {

@@ -22,7 +22,7 @@ function toGroupState(group: TuMundialGroupCard) {
   }
 
   return {
-    label: "Parcial",
+    label: "En juego",
     tone: "editable" as const
   };
 }

@@ -72,7 +72,7 @@ export function LeagueDetailScreen() {
         <span className="typo-small text-text-muted">DETALLE DE LIGA</span>
         <h1 className="typo-h2 m-0 text-text-primary">{league?.name ?? "Tu liga"}</h1>
         <p className="typo-body m-0 text-text-secondary">
-          Revisa el estado de la liga, comparte el acceso y salta directo a la tabla competitiva.
+          {league?.membersCount ?? 0} miembros · {league?.isActive ? "Abierta" : "Cerrada"}
         </p>
         <div className="flex gap-2 flex-wrap">
           <Button onClick={() => router.push(`/rankings?leagueId=${params.leagueId}`)}>Ver posiciones</Button>

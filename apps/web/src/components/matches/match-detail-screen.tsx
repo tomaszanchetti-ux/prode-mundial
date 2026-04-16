@@ -89,7 +89,7 @@ export function MatchDetailScreenView({
       <Card elevated style={{ gap: 12 }}>
         <h1 className="typo-h2 m-0 text-text-primary">Partido no disponible</h1>
         <p className="typo-body m-0 text-text-secondary">
-          {loadErrorMessage ?? "No encontramos el detalle de este partido o todavia no pudimos cargarlo."}
+          {loadErrorMessage ?? "No pudimos cargar este partido."}
         </p>
         <div className="grid gap-2 grid-cols-2">
           <Button variant="secondary" onClick={onRetryLoad}>

@@ -130,7 +130,7 @@ export function RankingsScreenView({
           <Card className="surface-inset" style={{ gap: 8, padding: 16 }}>
             <span className="typo-small text-text-muted">SIN COMPETENCIA ACTIVA</span>
             <p className="typo-body m-0 text-text-secondary">
-              Todavia no hay ligas para mostrar. Crea una o unete a una desde la tab de ligas para ver tu tabla competitiva aqui.
+              Unite a una liga o crea la tuya para ver la tabla de posiciones.
             </p>
           </Card>
         ) : null}
