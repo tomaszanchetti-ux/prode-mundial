@@ -2,11 +2,12 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { APP_ROUTES, type MatchSummary, type PreTournamentSummary } from "@prode/shared";
+import { APP_ROUTES, type LeagueSummary, type MatchSummary, type PreTournamentSummary } from "@prode/shared";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MarathonPredictionModal } from "@/components/matches/marathon-prediction-modal";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
-import { ApiClientError, getMatches, getPreTournamentSummary } from "@/lib/api/client";
+import { ApiClientError, getMatches, getMyLeagues, getPreTournamentSummary } from "@/lib/api/client";
+import { canEditPrediction } from "@/lib/matches/editability";
 import { compareMatchesChronologically, pickPriorityMatch } from "./home-helpers";
 import { HomeInTournamentView } from "./home-in-tournament-view";
 import { HomePreTournamentView } from "./home-pre-tournament-view";
@@ -14,6 +15,7 @@ import { HomePreTournamentView } from "./home-pre-tournament-view";
 export type HomeScreenViewProps = {
   profileDisplayName: string | null;
   items: MatchSummary[];
+  leagues: LeagueSummary[];
   preTournamentSummary: PreTournamentSummary | null;
   isLoading: boolean;
   errorMessage: string | null;
@@ -42,6 +44,7 @@ export function HomeScreen() {
   const router = useRouter();
   const { profile, status, user } = useAuth();
   const [items, setItems] = useState<MatchSummary[]>([]);
+  const [leagues, setLeagues] = useState<LeagueSummary[]>([]);
   const [preTournamentSummary, setPreTournamentSummary] = useState<PreTournamentSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -66,13 +69,15 @@ export function HomeScreen() {
 
       try {
         const token = await user.getIdToken();
-        const [matchesResponse, summaryResponse] = await Promise.all([
+        const [matchesResponse, summaryResponse, leaguesResponse] = await Promise.all([
           getMatches(token, { limit: 64 }),
-          getPreTournamentSummary(token)
+          getPreTournamentSummary(token),
+          getMyLeagues(token).catch(() => ({ items: [] as LeagueSummary[] }))
         ]);
 
         if (!cancelled) {
           setItems(matchesResponse.items);
+          setLeagues(leaguesResponse.items);
           setPreTournamentSummary(summaryResponse);
         }
       } catch (error) {
@@ -122,6 +127,7 @@ export function HomeScreen() {
       <HomeScreenView
         profileDisplayName={profile?.displayName ?? null}
         items={items}
+        leagues={leagues}
         preTournamentSummary={preTournamentSummary}
         isLoading={isLoading}
         errorMessage={errorMessage}
@@ -143,13 +149,24 @@ export function HomeScreen() {
       <QuickPredictionModal
         matchId={activeMatchId}
         isOpen={activeMatchId !== null}
+        hasNextPending={items.filter((m) => canEditPrediction(m) && m.matchId !== activeMatchId).length > 0}
         onClose={() => {
           setActiveMatchId(null);
           setDismissedCycle(true);
         }}
         onSaved={() => {
-          setActiveMatchId(null);
-          setDismissedCycle(true);
+          // Auto-advance: find next pending match after the current one
+          const editableMatches = items
+            .filter((m) => canEditPrediction(m) && m.matchId !== activeMatchId)
+            .sort(compareMatchesChronologically);
+          const nextMatch = editableMatches.find((m) => m.predictionStatus === "empty") ?? editableMatches[0] ?? null;
+
+          if (nextMatch) {
+            setActiveMatchId(nextMatch.matchId);
+          } else {
+            setActiveMatchId(null);
+            setDismissedCycle(true);
+          }
           setReloadKey((current) => current + 1);
         }}
       />

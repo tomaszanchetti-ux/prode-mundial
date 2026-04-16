@@ -1,6 +1,6 @@
 import { ApiError } from "../../../server/errors/api-error";
 import type { StoredMatch, StoredPrediction } from "../types";
-import { getPredictionOpensAt } from "./match-state";
+import { getPredictionDeadlineAt } from "./match-state";
 
 export type ValidatedPredictionInput = {
   homeScorePred: number;
@@ -13,15 +13,7 @@ function isFiniteInteger(value: unknown): value is number {
 }
 
 function resolveEditableDeadline(match: StoredMatch) {
-  return new Date(match.kickoffAt).getTime();
-}
-
-function resolveEditableStart(match: StoredMatch) {
-  return getPredictionOpensAt(match).getTime();
-}
-
-function isLabPredictionWindowBypassEnabled() {
-  return process.env.PRODE_ENABLE_LAB_PREDICTIONS === "true";
+  return getPredictionDeadlineAt(match).getTime();
 }
 
 function isKnockoutMatch(match: StoredMatch) {
@@ -80,15 +72,8 @@ export function assertMatchPredictionEditable(match: StoredMatch, now = new Date
   if (match.isLocked || match.status !== "scheduled" || resolveEditableDeadline(match) <= now.getTime()) {
     throw new ApiError(409, "MATCH_LOCKED", "This match is locked and cannot be edited anymore.", {
       matchId: match.matchId,
-      kickoffAt: match.kickoffAt
-    });
-  }
-
-  if (!isLabPredictionWindowBypassEnabled() && resolveEditableStart(match) > now.getTime()) {
-    throw new ApiError(409, "MATCH_LOCKED", "This match prediction window is not open yet.", {
-      matchId: match.matchId,
       kickoffAt: match.kickoffAt,
-      predictionOpensAt: getPredictionOpensAt(match).toISOString()
+      predictionDeadlineAt: getPredictionDeadlineAt(match).toISOString()
     });
   }
 }

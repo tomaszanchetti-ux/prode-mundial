@@ -1,7 +1,17 @@
+import { PREDICTION_LOCK_MINUTES_BEFORE_KICKOFF } from "@prode/shared";
 import type { JobStoredMatch, JobStoredPrediction, MatchLockExecutionSummary, MatchLockPlan } from "../types";
 
+export function getPredictionDeadlineAt(match: Pick<JobStoredMatch, "kickoffAt">) {
+  const kickoffMs = new Date(match.kickoffAt).getTime();
+  return new Date(kickoffMs - PREDICTION_LOCK_MINUTES_BEFORE_KICKOFF * 60 * 1000);
+}
+
 export function shouldLockMatch(match: JobStoredMatch, now = new Date()) {
-  return match.status === "scheduled" && !match.isLocked && new Date(match.kickoffAt).getTime() <= now.getTime();
+  return (
+    match.status === "scheduled" &&
+    !match.isLocked &&
+    getPredictionDeadlineAt(match).getTime() <= now.getTime()
+  );
 }
 
 export function buildMatchLockPlan(

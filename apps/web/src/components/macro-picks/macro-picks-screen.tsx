@@ -8,7 +8,7 @@ import type {
   SaveMacroPicksInput
 } from "@prode/shared";
 import { APP_ROUTES } from "@prode/shared";
-import { Button, Card, ProgressCompact, StatusTag } from "@prode/ui";
+import { Button, Card, ErrorCard, ProgressCompact, SkeletonCard, StatusTag } from "@prode/ui";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, confirmMacroAdjustment, getMacroPicks, saveMacroPicks } from "@/lib/api/client";
@@ -85,7 +85,10 @@ export function MacroPicksScreenView({
       <Card elevated className="hero-worldcup-bg" style={{ gap: 12, padding: 20 }}>
         <div className="flex justify-between gap-3 items-start flex-wrap">
           <div className="grid gap-1.5">
-            <span className="typo-small text-text-muted">MACRO PICKS</span>
+            <div className="flex items-center gap-3">
+              <img src="/mundial/wc2026-logo.png" alt="" width={32} height={32} className="opacity-70" />
+              <span className="typo-small text-text-muted">MACRO PICKS</span>
+            </div>
             <h1 className="typo-h2 m-0 text-text-primary">Tu apuesta larga del torneo</h1>
             <p className="typo-body m-0 text-text-secondary">
               Completa grupos, finalistas y campeon. Guardas cuando quieras y el backend resuelve estados, cierres y elegibilidad del ajuste.
@@ -178,22 +181,10 @@ export function MacroPicksScreenView({
       ) : null}
 
       {errorMessage ? (
-        <div className="grid gap-2 p-4 rounded-md alert-error">
-          <strong className="text-[16px]">No pudimos cargar o guardar tus macro picks</strong>
-          <p className="m-0 text-[14px] leading-[1.45]">{errorMessage}</p>
-          <Button variant="secondary" onClick={onRetry}>
-            Reintentar
-          </Button>
-        </div>
+        <ErrorCard title="No pudimos procesar tus macro picks" message={errorMessage} onRetry={onRetry} />
       ) : null}
 
-      {isLoading ? (
-        <Card elevated style={{ gap: 10, padding: 16 }}>
-          <div className="w-[128px] h-[10px] rounded-full bg-bg-muted" />
-          <div className="w-[72%] h-[14px] rounded-full bg-bg-muted" />
-          <div className="w-full h-[88px] rounded-[16px] bg-bg-muted" />
-        </Card>
-      ) : null}
+      {isLoading ? <SkeletonCard lines={3} /> : null}
 
       {!isLoading && isEditable ? (
         <MacroPicksEditor

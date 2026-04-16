@@ -2,7 +2,7 @@
 
 import React from "react";
 import type { MacroGroupId } from "@prode/shared";
-import { Card, TeamDisplay } from "@prode/ui";
+import { Card, TeamIdentity } from "@prode/ui";
 import { MACRO_GROUPS, MACRO_TEAM_BY_ID } from "./macro-picks-data";
 
 export function renderTeamSummary(teamId: string | null | undefined, fallback = "Sin definir") {
@@ -13,14 +13,7 @@ export function renderTeamSummary(teamId: string | null | undefined, fallback = 
   }
 
   return (
-    <TeamDisplay
-      teamName={team.name}
-      fifaCode={team.fifaCode}
-      flagAsset={team.flagAsset}
-      flagUrl={team.flagUrl}
-      size="sm"
-      weight={600}
-    />
+    <TeamIdentity team={team} size="sm" emphasis="default" />
   );
 }
 

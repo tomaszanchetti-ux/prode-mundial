@@ -3,7 +3,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import type { LeagueStandingsResponse, LeagueSummary, PointsResponse } from "@prode/shared";
-import { Button, Card, StatusTag } from "@prode/ui";
+import { Button, Card, ErrorCard, SkeletonStandingRow, StatusTag } from "@prode/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getLeagueStandings, getMyLeagues, getPoints } from "@/lib/api/client";
@@ -47,19 +47,16 @@ export function RankingsScreenView({
 
   return (
     <div className="grid gap-4">
-      <Card elevated style={{ gap: 12 }}>
+      <Card elevated style={{ gap: 10 }}>
         <span className="typo-small text-text-muted">POSICIONES</span>
-        <h1 className="typo-h2 m-0 text-text-primary">Tu competencia liga por liga</h1>
+        <h1 className="typo-h2 m-0 text-text-primary">Tabla de posiciones</h1>
         <p className="typo-body m-0 text-text-secondary">
-          Mira dónde estás parado, quién marca el ritmo y cuánto te falta para alcanzar la punta.
+          Tu lugar en cada liga, quien lidera y cuanto falta para la punta.
         </p>
       </Card>
 
       {errorMessage ? (
-        <Card elevated style={{ gap: 12 }}>
-          <p className="typo-body m-0 text-text-primary">{errorMessage}</p>
-          <Button onClick={onRetry}>Reintentar</Button>
-        </Card>
+        <ErrorCard message={errorMessage} onRetry={onRetry} />
       ) : null}
 
       {points ? (
@@ -120,9 +117,9 @@ export function RankingsScreenView({
 
         {isLoading ? (
           <div className="grid gap-2">
-            <div className="w-[104px] h-[10px] rounded-full bg-bg-muted" />
-            <div className="w-full h-[56px] rounded-[16px] bg-bg-muted" />
-            <div className="w-full h-[56px] rounded-[16px] bg-bg-muted" />
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonStandingRow key={i} />
+            ))}
           </div>
         ) : null}
 
@@ -130,7 +127,7 @@ export function RankingsScreenView({
           <Card className="surface-inset" style={{ gap: 8, padding: 16 }}>
             <span className="typo-small text-text-muted">SIN COMPETENCIA ACTIVA</span>
             <p className="typo-body m-0 text-text-secondary">
-              Todavia no hay ligas para mostrar. Crea una o unete a una desde la tab de ligas para ver tu tabla competitiva aqui.
+              Unite a una liga o crea la tuya para ver la tabla de posiciones.
             </p>
           </Card>
         ) : null}
@@ -163,43 +160,46 @@ export function RankingsScreenView({
               </div>
             </div>
 
-            <div className="flex gap-2 flex-wrap">
-              {leagues.map((league) => (
-                <Button
-                  key={league.leagueId}
-                  variant={selectedLeagueId === league.leagueId ? "secondary" : "ghost"}
-                  style={{ minHeight: 40, padding: "0 14px" }}
-                  onClick={() => onSelectLeague(league.leagueId)}
-                >
-                  {league.name}
-                </Button>
-              ))}
+            <div className="flex gap-1.5 overflow-x-auto px-[2px]">
+              {leagues.map((league) => {
+                const isActive = selectedLeagueId === league.leagueId;
+
+                return (
+                  <button
+                    key={league.leagueId}
+                    type="button"
+                    onClick={() => onSelectLeague(league.leagueId)}
+                    className={`filter-chip ${isActive ? "filter-chip-active" : "filter-chip-inactive"}`}
+                  >
+                    {league.name}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ) : null}
 
         {standings ? (
-          <div className="grid gap-2">
+          <div className="grid gap-[6px]">
             {standings.items.map((entry) => (
               <div
                 key={entry.userId}
-                className={`grid gap-1.5 p-3 rounded-[16px] ${toStandingRowClass(entry)}`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-[10px] ${toStandingRowClass(entry)}`}
               >
-                <div className="flex justify-between gap-3 items-center">
-                  <div className="flex gap-2.5 items-center">
-                    <span className={`text-[14px] font-bold ${toPositionColor(entry)}`}>
-                      #{entry.position}
-                    </span>
-                    <span className={`text-text-primary ${entry.isMe ? "font-bold" : "font-semibold"}`}>
-                      {entry.displayName}
-                      {entry.isOwner ? " · creador" : ""}
-                      {entry.isMe ? " · tu posicion" : ""}
-                    </span>
-                  </div>
-                  <StatusTag status={entry.isMe ? "editable" : entry.position === 1 ? "live" : "scored"} label={`${entry.totalPoints} pts`} />
+                <span className={`text-[13px] font-bold w-[24px] text-center flex-shrink-0 ${toPositionColor(entry)}`}>
+                  {entry.position}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <span className={`text-[14px] leading-[1.3] text-text-primary truncate block ${entry.isMe ? "font-bold" : "font-medium"}`}>
+                    {entry.displayName}
+                    {entry.isMe ? " (tu)" : ""}
+                  </span>
+                  <span className="text-[12px] leading-[1.3] text-text-muted">
+                    E{entry.exactHits} · S{entry.correctSigns} · M{entry.macroPoints}
+                  </span>
                 </div>
-                <span className="text-[14px] leading-[1.4] text-text-secondary">
-                  Exactos {entry.exactHits} · Signos {entry.correctSigns} · Macro {entry.macroPoints}
+                <span className={`text-[14px] font-bold flex-shrink-0 ${entry.isMe ? "text-primary-600" : entry.position === 1 ? "text-gold" : "text-text-primary"}`}>
+                  {entry.totalPoints}
                 </span>
               </div>
             ))}

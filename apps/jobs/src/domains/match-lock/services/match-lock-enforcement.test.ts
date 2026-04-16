@@ -23,8 +23,16 @@ function buildPrediction(overrides: Partial<JobStoredPrediction> = {}): JobStore
   };
 }
 
+test("shouldLockMatch returns true when within 1 hour of kickoff", () => {
+  assert.equal(shouldLockMatch(buildMatch(), new Date("2026-06-11T18:00:00Z")), true);
+});
+
 test("shouldLockMatch returns true when scheduled match reaches kickoff", () => {
   assert.equal(shouldLockMatch(buildMatch(), new Date("2026-06-11T19:00:00Z")), true);
+});
+
+test("shouldLockMatch returns false more than 1 hour before kickoff", () => {
+  assert.equal(shouldLockMatch(buildMatch(), new Date("2026-06-11T17:30:00Z")), false);
 });
 
 test("shouldLockMatch returns false for already locked matches", () => {

@@ -56,6 +56,7 @@ test("HomeScreenView renders pre-tournament next-match hero and follow-up CTAs",
     createElement(HomeScreenView, {
       profileDisplayName: "Tomas",
       items: [buildMatchSummary()],
+      leagues: [],
       preTournamentSummary: buildPreTournamentSummary(),
       isLoading: false,
       errorMessage: null,
@@ -68,12 +69,12 @@ test("HomeScreenView renders pre-tournament next-match hero and follow-up CTAs",
     })
   );
 
-  assert.match(html, /SIGUE TU MUNDIAL/);
-  assert.match(html, /Argentina vs Brasil/);
+  assert.match(html, /Grupo A/);
+  assert.match(html, /Argentina/);
+  assert.match(html, /Brasil/);
   assert.match(html, /TU LIGA HOY/);
-  assert.match(html, /Ver calendario/);
-  assert.match(html, /Abrir Tu Mundial/);
-  assert.match(html, /Invitar amigos/);
+  assert.match(html, /Crear liga/);
+  assert.match(html, /Ver grupos y llaves/);
 });
 
 test("HomeScreenView keeps live-tournament priority match card when pre-tournament is inactive", () => {
@@ -81,6 +82,7 @@ test("HomeScreenView keeps live-tournament priority match card when pre-tourname
     createElement(HomeScreenView, {
       profileDisplayName: "Tomas",
       items: [buildMatchSummary()],
+      leagues: [],
       preTournamentSummary: buildPreTournamentSummary({ isPreTournament: false }),
       isLoading: false,
       errorMessage: null,
@@ -93,9 +95,9 @@ test("HomeScreenView keeps live-tournament priority match card when pre-tourname
     })
   );
 
-  assert.match(html, /PARTIDO DESTACADO/);
-  assert.match(html, /Argentina vs Brasil/);
+  assert.match(html, /Grupo A/);
+  assert.match(html, /Argentina/);
+  assert.match(html, /Brasil/);
   assert.match(html, /Predecir ahora/);
   assert.match(html, /TU MUNDIAL/);
-  assert.match(html, /Sigue disponible/);
 });

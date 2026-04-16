@@ -2,11 +2,21 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import type { MatchDetail, MatchSummary, PreTournamentSummary, SaveMatchPredictionInput } from "@prode/shared";
-import { Button, Card, ScoreInput, StatusTag, TeamDisplay } from "@prode/ui";
+import { Button, Card, ScoreInput, StatusTag, TeamIdentity } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
-import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
+import { getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
 import { copyForLocale, formatDateTime, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/editability";
+import {
+  type MarathonFormState,
+  type MarathonNotice,
+  toErrorMessage,
+  toFormState,
+  toHelperText,
+  toKickoffLabel,
+  toLoadErrorMessage,
+  toStageLabel
+} from "./marathon-helpers";
 
 type MarathonPredictionModalProps = {
   isOpen: boolean;
@@ -18,22 +28,11 @@ type MarathonPredictionModalProps = {
   onSaved?: () => void;
 };
 
-type FormState = {
-  homeScorePred: string;
-  awayScorePred: string;
-  predictedQualifierTeamId: string;
-};
-
-type MarathonNotice = {
-  tone: "error" | "success";
-  message: string;
-};
-
 export type MarathonPredictionModalViewProps = {
   currentIndex: number;
   currentSummary: MatchSummary | MatchDetail | null;
   detail: MatchDetail | null;
-  formState: FormState;
+  formState: MarathonFormState;
   helperText: string;
   isLoading: boolean;
   isSaving: boolean;
@@ -50,85 +49,6 @@ export type MarathonPredictionModalViewProps = {
   remainingMatches: number;
   totalMatches: number;
 };
-
-function toStageLabel(summary: MatchSummary | MatchDetail) {
-  if (summary.stage === "group" && summary.groupId) {
-    return `Grupo ${summary.groupId}`;
-  }
-
-  const labels: Record<string, string> = {
-    R32: "Octavos",
-    R16: "R16",
-    QF: "Cuartos",
-    SF: "Semifinal",
-    BRONZE: "Tercer puesto",
-    FINAL: "Final"
-  };
-
-  return labels[summary.stage] ?? summary.stage;
-}
-
-function toKickoffLabel(iso: string) {
-  return formatDateTime("es", iso, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-}
-
-function toFormState(detail: MatchDetail): FormState {
-  return {
-    homeScorePred: detail.userPrediction ? String(detail.userPrediction.homeScorePred) : "",
-    awayScorePred: detail.userPrediction ? String(detail.userPrediction.awayScorePred) : "",
-    predictedQualifierTeamId: detail.userPrediction?.predictedQualifierTeamId ?? ""
-  };
-}
-
-function toErrorMessage(error: unknown) {
-  if (error instanceof ApiClientError) {
-    if (error.code === "MATCH_LOCKED") {
-      return "Este partido ya se cerro.";
-    }
-
-    if (error.code === "INVALID_SCORE") {
-      return "Ingresa un marcador valido.";
-    }
-
-    if (error.code === "INVALID_KNOCKOUT_CLASSIFIER") {
-      return "Si eliges empate, tienes que marcar quien clasifica.";
-    }
-
-    return error.message;
-  }
-
-  return error instanceof Error ? error.message : "No pudimos guardar tu prediccion.";
-}
-
-function toLoadErrorMessage(error: unknown) {
-  if (error instanceof ApiClientError && error.status === 404) {
-    return "No encontramos este partido.";
-  }
-
-  return error instanceof Error ? error.message : "No pudimos cargar el partido.";
-}
-
-function toHelperText(detail: MatchDetail | null, notice: MarathonNotice | null) {
-  if (notice?.tone === "error") {
-    return notice.message;
-  }
-
-  if (!detail) {
-    return "Cargando partido...";
-  }
-
-  if (isPredictionWindowNotOpen(detail)) {
-    return `La prediccion abre ${toKickoffLabel(detail.predictionOpensAt)}. Puedes seguir navegando la maraton mientras tanto.`;
-  }
-
-  return "Guarda este marcador y seguimos con el proximo pendiente.";
-}
 
 export function MarathonPredictionModalView({
   currentIndex,
@@ -181,7 +101,7 @@ export function MarathonPredictionModalView({
     >
       <Card
         elevated
-        className="marathon-modal-bg w-full max-w-[620px] gap-3.5 rounded-t-[28px] rounded-b-lg"
+        className="marathon-modal-bg modal-sheet-enter w-full max-w-[620px] gap-3.5 rounded-t-[28px] rounded-b-lg"
       >
         <div className="flex justify-between items-start gap-3">
           <div className="grid gap-2">
@@ -199,12 +119,12 @@ export function MarathonPredictionModalView({
         <div className="grid gap-3 p-3.5 surface-inset">
           <div className="flex justify-between items-center gap-3 flex-wrap">
             <div className="grid gap-1">
-              <span className="typo-small text-text-muted">PROGRESO GLOBAL</span>
+              <span className="typo-small text-text-muted">TU AVANCE</span>
               <strong className="text-[20px] leading-[1.2] text-text-primary">{progressLabel}</strong>
             </div>
             <StatusTag
               status={isEditable ? "editable" : "locked"}
-              label={isEditable ? "Listo para guardar" : "Pendiente en cronologia"}
+              label={isEditable ? "Editable" : "Bloqueado"}
             />
           </div>
 
@@ -223,23 +143,9 @@ export function MarathonPredictionModalView({
         </div>
 
         <div className="marathon-matchup-panel grid gap-3 p-4 rounded-lg">
-          <TeamDisplay
-            teamName={currentSummary.homeTeam.name}
-            fifaCode={currentSummary.homeTeam.fifaCode}
-            flagAsset={currentSummary.homeTeam.flagAsset}
-            flagUrl={currentSummary.homeTeam.flagUrl}
-            size="lg"
-            weight={700}
-          />
+          <TeamIdentity team={currentSummary.homeTeam} size="lg" emphasis="hero" />
           <span className="typo-small text-text-muted pl-[46px]">VS</span>
-          <TeamDisplay
-            teamName={currentSummary.awayTeam.name}
-            fifaCode={currentSummary.awayTeam.fifaCode}
-            flagAsset={currentSummary.awayTeam.flagAsset}
-            flagUrl={currentSummary.awayTeam.flagUrl}
-            size="lg"
-            weight={700}
-          />
+          <TeamIdentity team={currentSummary.awayTeam} size="lg" emphasis="hero" />
         </div>
 
         {notice ? (
@@ -254,6 +160,7 @@ export function MarathonPredictionModalView({
 
         <ScoreInput
           awayLabel={currentSummary.awayTeam.name}
+          awayTeam={{ teamName: currentSummary.awayTeam.name, fifaCode: currentSummary.awayTeam.fifaCode, flagAsset: currentSummary.awayTeam.flagAsset, flagUrl: currentSummary.awayTeam.flagUrl }}
           awayValue={formState.awayScorePred}
           classifierLabel="Quien clasifica"
           classifierOptions={qualifierOptions}
@@ -261,6 +168,7 @@ export function MarathonPredictionModalView({
           disabled={isLoading || isSaving || !isEditable}
           error={notice?.tone === "error" ? notice.message : undefined}
           homeLabel={currentSummary.homeTeam.name}
+          homeTeam={{ teamName: currentSummary.homeTeam.name, fifaCode: currentSummary.homeTeam.fifaCode, flagAsset: currentSummary.homeTeam.flagAsset, flagUrl: currentSummary.homeTeam.flagUrl }}
           homeValue={formState.homeScorePred}
           onAwayChange={onAwayChange}
           onClassifierChange={onClassifierChange}
@@ -284,11 +192,13 @@ export function MarathonPredictionModalView({
         </Button>
 
         <div className="grid gap-2 grid-cols-2">
-          <Button variant="ghost" onClick={onPrevious} disabled={!canGoPrevious || isSaving}>
-            Anterior
-          </Button>
-          <Button variant="secondary" onClick={onNext} disabled={!canGoNext || isSaving}>
-            {nextSummary ? "Saltar por ahora" : "Cerrar"}
+          {canGoPrevious ? (
+            <Button variant="secondary" onClick={onPrevious} disabled={isSaving}>
+              Anterior
+            </Button>
+          ) : <span />}
+          <Button variant="ghost" onClick={canGoNext ? onNext : onClose} disabled={isSaving}>
+            {canGoNext ? "Saltar" : "Cerrar"}
           </Button>
         </div>
       </Card>
@@ -309,7 +219,7 @@ export function MarathonPredictionModal({
   const { status, user } = useAuth();
   const [currentMatchId, setCurrentMatchId] = useState<string | null>(initialMatchId);
   const [detail, setDetail] = useState<MatchDetail | null>(null);
-  const [formState, setFormState] = useState<FormState>({
+  const [formState, setFormState] = useState<MarathonFormState>({
     homeScorePred: "",
     awayScorePred: "",
     predictedQualifierTeamId: ""

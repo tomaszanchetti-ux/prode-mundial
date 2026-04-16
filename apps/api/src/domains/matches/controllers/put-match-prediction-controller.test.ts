@@ -42,7 +42,7 @@ function buildUrl(pathname: string) {
 }
 
 test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and returns envelope", async () => {
-  const kickoffAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  const kickoffAt = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
   const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
     uid: "usr_1",
     email: "tomas@example.com",
@@ -236,7 +236,7 @@ test("PUT /api/v1/matches/:matchId/prediction returns MATCH_LOCKED when domain r
 });
 
 test("PUT /api/v1/matches/:matchId/prediction returns INVALID_KNOCKOUT_CLASSIFIER on draw without qualifier", async () => {
-  const kickoffAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  const kickoffAt = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
   const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
     uid: "usr_1",
     email: "tomas@example.com",

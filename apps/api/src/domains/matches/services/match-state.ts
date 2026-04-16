@@ -1,9 +1,8 @@
-import { MATCH_PREDICTION_WINDOW_HOURS } from "@prode/shared";
+import { PREDICTION_LOCK_MINUTES_BEFORE_KICKOFF } from "@prode/shared";
 import type { MatchStatus, PredictionStatus } from "@prode/shared";
 import type { StoredMatch, StoredPrediction } from "../types";
 
 export type MatchFunctionalState =
-  | "SCHEDULED_WAITING_WINDOW"
   | "EDITABLE"
   | "LOCKED_PENDING"
   | "LIVE_LOCKED"
@@ -31,23 +30,28 @@ function toDateValue(timestamp: string) {
   return new Date(timestamp).getTime();
 }
 
-function hasReachedKickoff(match: StoredMatch, now: Date) {
-  return toDateValue(match.kickoffAt) <= now.getTime();
-}
-
-export function getPredictionOpensAt(match: StoredMatch) {
+export function getPredictionDeadlineAt(match: StoredMatch) {
   const kickoffAt = toDateValue(match.kickoffAt);
-  return new Date(kickoffAt - MATCH_PREDICTION_WINDOW_HOURS * 60 * 60 * 1000);
+  return new Date(kickoffAt - PREDICTION_LOCK_MINUTES_BEFORE_KICKOFF * 60 * 1000);
 }
 
-function hasReachedPredictionWindow(match: StoredMatch, now: Date) {
-  return getPredictionOpensAt(match).getTime() <= now.getTime();
+function hasReachedPredictionDeadline(match: StoredMatch, now: Date) {
+  return getPredictionDeadlineAt(match).getTime() <= now.getTime();
+}
+
+/**
+ * Predictions are open from the moment a match exists in the DB.
+ * For payload compatibility we expose `predictionOpensAt` as the
+ * match creation timestamp (falling back to kickoff if unavailable).
+ */
+export function getPredictionOpensAt(match: StoredMatch) {
+  const createdAt = match.createdAt ? toDateValue(match.createdAt) : toDateValue(match.kickoffAt);
+  return new Date(createdAt);
 }
 
 export function deriveMatchFunctionalState(match: StoredMatch, now = new Date()): MatchFunctionalState {
   const publicStatus = normalizeMatchStatus(match.status);
-  const kickoffReached = hasReachedKickoff(match, now);
-  const predictionWindowReached = hasReachedPredictionWindow(match, now);
+  const deadlineReached = hasReachedPredictionDeadline(match, now);
 
   if (publicStatus === "finished") {
     return match.isScored ? "SCORED" : "FINISHED_PENDING_SCORING";
@@ -57,11 +61,7 @@ export function deriveMatchFunctionalState(match: StoredMatch, now = new Date())
     return "LIVE_LOCKED";
   }
 
-  if (!predictionWindowReached && !kickoffReached && !match.isLocked) {
-    return "SCHEDULED_WAITING_WINDOW";
-  }
-
-  if (!kickoffReached && !match.isLocked) {
+  if (!deadlineReached && !match.isLocked) {
     return "EDITABLE";
   }
 

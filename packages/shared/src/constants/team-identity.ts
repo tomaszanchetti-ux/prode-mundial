@@ -90,3 +90,67 @@ export function resolveTeamIdentity(
 export function resolveTeamFlagSrc(identity: Pick<ResolvedTeamIdentity, "flagAsset" | "flagUrl">) {
   return identity.flagAsset ?? identity.flagUrl ?? null;
 }
+
+// ── getTeamFlag: single source of truth for flag resolution ──
+
+export type TeamFlagInput = {
+  fifaCode?: string | null;
+  iso2?: string | null;
+  flagAsset?: string | null;
+  flagUrl?: string | null;
+  name?: string;
+  teamName?: string;
+};
+
+export type TeamFlagResult = {
+  src: string | null;
+  fallbackLabel: string;
+};
+
+/**
+ * Central flag resolver with robust fallback chain:
+ * 1. flagAsset (pre-resolved static path)
+ * 2. flagUrl (external URL from API)
+ * 3. /flags/{iso2}.svg (constructed from iso2 code)
+ * 4. Lookup by fifaCode in identity table → flagAsset
+ * 5. null (UI renders monogram fallback)
+ *
+ * fallbackLabel: fifaCode (3 letters) if available, else first 2-3 chars of name.
+ */
+export function getTeamFlag(team: TeamFlagInput): TeamFlagResult {
+  const teamName = team.teamName ?? team.name ?? "";
+
+  // 1. Pre-resolved flagAsset
+  if (team.flagAsset) {
+    return { src: team.flagAsset, fallbackLabel: buildFallbackLabel(team.fifaCode, teamName) };
+  }
+
+  // 2. External flagUrl
+  if (team.flagUrl) {
+    return { src: team.flagUrl, fallbackLabel: buildFallbackLabel(team.fifaCode, teamName) };
+  }
+
+  // 3. Construct from iso2
+  if (team.iso2) {
+    return { src: `/flags/${team.iso2.toLowerCase()}.svg`, fallbackLabel: buildFallbackLabel(team.fifaCode, teamName) };
+  }
+
+  // 4. Lookup by fifaCode
+  if (team.fifaCode) {
+    const identity = TEAM_IDENTITY_BY_FIFA_CODE[team.fifaCode];
+    if (identity) {
+      return { src: identity.flagAsset, fallbackLabel: identity.fifaCode };
+    }
+  }
+
+  // 5. No flag found
+  return { src: null, fallbackLabel: buildFallbackLabel(team.fifaCode, teamName) };
+}
+
+function buildFallbackLabel(fifaCode: string | null | undefined, teamName: string): string {
+  // Prefer fifaCode (3-letter, e.g. ARG, BRA) — recognizable and dignified
+  if (fifaCode) return fifaCode;
+  // Fallback: first 3 chars of name, uppercase
+  if (teamName.length >= 2) return teamName.slice(0, 3).toUpperCase();
+  return "??";
+}
