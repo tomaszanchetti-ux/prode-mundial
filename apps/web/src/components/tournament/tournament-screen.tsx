@@ -174,7 +174,7 @@ export function TournamentScreen() {
         const [nextData, nextSummary, matchesResponse] = await Promise.all([
           getTuMundial(token),
           getPreTournamentSummary(token),
-          getMatches(token, { limit: 120 })
+          getMatches(token, { limit: 100 })
         ]);
 
         if (!cancelled) {
