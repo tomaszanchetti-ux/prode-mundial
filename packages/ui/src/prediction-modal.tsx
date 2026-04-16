@@ -6,59 +6,88 @@ import { TeamIdentity } from "./team";
 export function PredictionModal({
   awayTeam,
   children,
+  closeLabel = "Mas tarde",
   helperText,
   homeTeam,
   isOpen,
   kickoffLabel,
   onClose,
   onSubmit,
+  progressCurrent,
+  progressTotal,
   saveLabel = "Guardar prediccion",
   saving = false,
   stageLabel,
-  title = "Tu proximo partido"
+  title
 }: PredictionModalProps) {
   if (!isOpen) return null;
+
+  const showProgress = progressCurrent != null && progressTotal != null && progressTotal > 0;
+  const progressPct = showProgress ? Math.round((progressCurrent / progressTotal) * 100) : 0;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 p-3 modal-overlay flex items-end justify-center z-50"
+      className="fixed inset-0 modal-overlay flex items-end justify-center z-50"
     >
-      <div className="w-full max-w-[560px] card-base grid gap-4.5 p-4.5 shadow-modal rounded-t-xl rounded-b-lg modal-content-bg">
-        <div className="flex justify-between items-start gap-3">
-          <div className="grid gap-2">
-            <span className="typo-eyebrow">{stageLabel}</span>
-            <h2 className="typo-h2 m-0 text-text-primary">{title}</h2>
-            <p className="m-0 text-[14px] leading-[1.4] text-text-secondary">{kickoffLabel}</p>
+      <div className="w-full max-w-[560px] max-h-[92vh] overflow-y-auto card-base grid gap-4 shadow-modal rounded-t-xl modal-content-bg">
+        {/* ── Header: close + progress ── */}
+        <div className="sticky top-0 z-10 modal-content-bg px-5 pt-4 pb-0 grid gap-3">
+          <div className="flex justify-between items-center">
+            <span className="typo-eyebrow text-text-muted uppercase">{stageLabel}</span>
+            {onClose ? (
+              <button type="button" aria-label="Cerrar" onClick={onClose} className="close-btn">
+                X
+              </button>
+            ) : null}
           </div>
-          {onClose ? (
-            <button type="button" aria-label="Cerrar" onClick={onClose} className="close-btn">
-              X
-            </button>
+
+          {showProgress ? (
+            <div className="grid gap-1.5">
+              <div className="h-1 rounded-full bg-[var(--color-bg-muted)] overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{ width: `${progressPct}%`, background: "var(--color-primary-500)" }}
+                />
+              </div>
+              <span className="typo-eyebrow text-text-muted text-right">
+                {progressCurrent} / {progressTotal}
+              </span>
+            </div>
           ) : null}
         </div>
 
-        <div className="grid gap-3 p-4.5 rounded-lg matchup-panel-bg">
-          <TeamIdentity team={homeTeam} align="center" size="lg" emphasis="hero" />
-          <div className="text-center text-text-muted text-[12px] font-bold tracking-[0.08em]">VS</div>
-          <TeamIdentity team={awayTeam} align="center" size="lg" emphasis="hero" />
+        {/* ── Matchup (centered duel) ── */}
+        <div className="px-5">
+          <div className="flex items-center justify-center gap-5 py-3">
+            <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+              <TeamIdentity team={homeTeam} size="lg" emphasis="hero" align="center" />
+            </div>
+            <span className="text-[13px] font-bold tracking-[0.1em] text-text-muted shrink-0">VS</span>
+            <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+              <TeamIdentity team={awayTeam} size="lg" emphasis="hero" align="center" />
+            </div>
+          </div>
+          <p className="m-0 typo-small text-text-muted text-center">{kickoffLabel}</p>
         </div>
 
         {helperText ? (
-          <div className="grid gap-[6px] py-3 px-3.5 rounded-md bg-bg-inset border border-border-subtle">
-            <p className="typo-body m-0 text-text-secondary">{helperText}</p>
+          <div className="mx-5 py-2.5 px-3.5 rounded-md bg-bg-inset border border-border-subtle">
+            <p className="typo-body m-0 text-text-secondary text-center">{helperText}</p>
           </div>
         ) : null}
 
-        {children}
+        {/* ── Score picker (children) ── */}
+        <div className="px-5">{children}</div>
 
-        <div className="grid gap-2">
+        {/* ── CTAs ── */}
+        <div className="grid gap-2 px-5 pb-5">
           <Button fullWidth onClick={onSubmit} loading={saving}>
             {saveLabel}
           </Button>
           <Button variant="ghost" fullWidth onClick={onClose}>
-            Mas tarde
+            {closeLabel}
           </Button>
         </div>
       </div>

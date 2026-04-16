@@ -240,6 +240,7 @@ export function MarathonPredictionModalView({
 
         <ScoreInput
           awayLabel={currentSummary.awayTeam.name}
+          awayTeam={{ teamName: currentSummary.awayTeam.name, fifaCode: currentSummary.awayTeam.fifaCode, flagAsset: currentSummary.awayTeam.flagAsset, flagUrl: currentSummary.awayTeam.flagUrl }}
           awayValue={formState.awayScorePred}
           classifierLabel="Quien clasifica"
           classifierOptions={qualifierOptions}
@@ -247,6 +248,7 @@ export function MarathonPredictionModalView({
           disabled={isLoading || isSaving || !isEditable}
           error={notice?.tone === "error" ? notice.message : undefined}
           homeLabel={currentSummary.homeTeam.name}
+          homeTeam={{ teamName: currentSummary.homeTeam.name, fifaCode: currentSummary.homeTeam.fifaCode, flagAsset: currentSummary.homeTeam.flagAsset, flagUrl: currentSummary.homeTeam.flagUrl }}
           homeValue={formState.homeScorePred}
           onAwayChange={onAwayChange}
           onClassifierChange={onClassifierChange}
@@ -270,11 +272,13 @@ export function MarathonPredictionModalView({
         </Button>
 
         <div className="grid gap-2 grid-cols-2">
-          <Button variant="ghost" onClick={onPrevious} disabled={!canGoPrevious || isSaving}>
-            Anterior
-          </Button>
-          <Button variant="secondary" onClick={onNext} disabled={!canGoNext || isSaving}>
-            {nextSummary ? "Saltar por ahora" : "Cerrar"}
+          {canGoPrevious ? (
+            <Button variant="secondary" onClick={onPrevious} disabled={isSaving}>
+              Anterior
+            </Button>
+          ) : <span />}
+          <Button variant="ghost" onClick={canGoNext ? onNext : onClose} disabled={isSaving}>
+            {canGoNext ? "Saltar" : "Cerrar"}
           </Button>
         </div>
       </Card>

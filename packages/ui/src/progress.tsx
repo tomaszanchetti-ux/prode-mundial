@@ -1,17 +1,36 @@
 import React from "react";
-import type { AdSlotCardProps, ProgressCompactProps } from "./types";
+import type { AdSlotCardProps, ProgressCompactProps, StatTone } from "./types";
 import { Card } from "./card";
+
+const toneValueClass: Record<StatTone, string> = {
+  neutral: "text-text-primary",
+  success: "text-[#16a34a]",
+  primary: "text-[#2563eb]",
+  warning: "text-[#d97706]"
+};
+
+const toneDotClass: Record<StatTone, string> = {
+  neutral: "bg-text-muted",
+  success: "bg-[#16a34a]",
+  primary: "bg-[#2563eb]",
+  warning: "bg-[#d97706]"
+};
 
 export function ProgressCompact({ items }: ProgressCompactProps) {
   return (
-    <div className="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
-      {items.map((item) => (
-        <div key={item.label} className="surface-inset grid gap-[6px] p-3.5">
-          <span className="typo-small text-text-muted">{item.label}</span>
-          <strong className="text-[24px] leading-none text-text-primary">{item.value}</strong>
-          <span className="text-[13px] leading-[1.35] text-text-secondary">{item.hint}</span>
-        </div>
-      ))}
+    <div className="grid grid-cols-3 gap-px surface-inset rounded-[var(--radius-md)] overflow-hidden">
+      {items.map((item) => {
+        const tone = item.tone ?? "neutral";
+        return (
+          <div key={item.label} className="flex flex-col items-center gap-1 py-3.5 px-2 bg-[var(--color-bg-surface)]">
+            <strong className={`text-[28px] leading-none tracking-tight ${toneValueClass[tone]}`}>{item.value}</strong>
+            <div className="flex items-center gap-1.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${toneDotClass[tone]}`} />
+              <span className="typo-eyebrow text-text-muted">{item.label}</span>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

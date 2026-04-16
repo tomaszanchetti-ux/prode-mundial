@@ -60,29 +60,30 @@ export function TeamIdentity({
   }
 
   const showText = showName || showCode;
+  const stacked = emphasis === "hero" && align === "center";
 
   return (
-    <div className={`flex items-center ${emphasisGap[emphasis]} ${align === "center" ? "justify-center" : "justify-start"}`}>
+    <div className={`flex ${stacked ? "flex-col items-center gap-2" : `items-center ${emphasisGap[emphasis]}`} ${!stacked && align === "center" ? "justify-center" : !stacked ? "justify-start" : ""}`}>
       {showFlag ? (
         flagSrc ? (
           <img
             src={flagSrc}
             alt=""
-            width={flagSizes[size]}
-            height={flagSizes[size]}
-            className={`${flagSizeClasses[size]} rounded-pill object-cover border border-border-default shadow-[0_1px_3px_rgba(15,23,42,0.08)]`}
+            width={stacked ? 56 : flagSizes[size]}
+            height={stacked ? 56 : flagSizes[size]}
+            className={`${stacked ? "w-[56px] h-[56px]" : flagSizeClasses[size]} rounded-pill object-cover border border-border-default shadow-[0_1px_3px_rgba(15,23,42,0.08)]`}
           />
         ) : (
           <span
             aria-hidden="true"
-            className={`${flagSizeClasses[size]} rounded-pill inline-flex items-center justify-center flag-fallback-bg text-text-primary border border-border-default text-[9px] font-bold tracking-tight`}
+            className={`${stacked ? "w-[56px] h-[56px]" : flagSizeClasses[size]} rounded-pill inline-flex items-center justify-center flag-fallback-bg text-text-primary border border-border-default text-[9px] font-bold tracking-tight`}
           >
             {fallbackLabel}
           </span>
         )
       ) : null}
       {showText ? (
-        <div className="grid gap-[2px]">
+        <div className={`grid gap-[2px] ${stacked ? "text-center" : ""}`}>
           {showName ? (
             <span className={`${emphasisTextSize[emphasis][size]} leading-[1.2] text-text-primary ${emphasisWeight[emphasis]}`}>
               {resolvedName}

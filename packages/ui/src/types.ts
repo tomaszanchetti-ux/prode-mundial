@@ -108,11 +108,14 @@ export type NextMatchHeroProps = {
   title: string;
 };
 
+export type StatTone = "neutral" | "success" | "primary" | "warning";
+
 export type ProgressCompactProps = {
   items: Array<{
     label: string;
     value: string;
-    hint: string;
+    hint?: string;
+    tone?: StatTone;
   }>;
 };
 
@@ -138,6 +141,7 @@ export type MatchCardProps = {
 
 export type ScoreInputProps = {
   awayLabel?: string;
+  awayTeam?: TeamData;
   awayValue: string;
   classifierLabel?: string;
   classifierOptions?: Array<{ label: string; value: string }>;
@@ -145,6 +149,7 @@ export type ScoreInputProps = {
   disabled?: boolean;
   error?: string;
   homeLabel?: string;
+  homeTeam?: TeamData;
   homeValue: string;
   onAwayChange?: (value: string) => void;
   onClassifierChange?: (value: string) => void;
@@ -154,12 +159,15 @@ export type ScoreInputProps = {
 export type PredictionModalProps = {
   awayTeam: TeamData;
   children?: ReactNode;
+  closeLabel?: string;
   helperText?: string;
   homeTeam: TeamData;
   isOpen: boolean;
   kickoffLabel: string;
   onClose?: () => void;
   onSubmit?: () => void;
+  progressCurrent?: number;
+  progressTotal?: number;
   saveLabel?: string;
   saving?: boolean;
   stageLabel: string;

@@ -1,41 +1,59 @@
 import React from "react";
-import type { ScoreInputProps } from "./types";
-import { normalizeScoreValue, stepScoreValue } from "./helpers";
+import type { ScoreInputProps, TeamData } from "./types";
+import { normalizeScoreValue, resolveFlag, stepScoreValue } from "./helpers";
 
-function renderScoreInput(
-  label: string,
-  value: string,
-  disabled: boolean | undefined,
-  onChange: ((value: string) => void) | undefined
-) {
+function ScoreStepper({
+  label,
+  team,
+  value,
+  disabled,
+  onChange
+}: {
+  label: string;
+  team?: TeamData;
+  value: string;
+  disabled?: boolean;
+  onChange?: (value: string) => void;
+}) {
   const safeValue = normalizeScoreValue(value);
-  const disabledCls = disabled ? "cursor-not-allowed opacity-70" : "cursor-pointer";
+  const disabledCls = disabled ? "cursor-not-allowed opacity-70" : "";
+
+  const resolvedFlag = team ? resolveFlag(team) : null;
+  const teamName = team?.teamName ?? team?.name ?? label;
 
   return (
-    <div className="w-full min-h-[144px] rounded-lg border border-border-subtle score-panel-bg text-text-primary grid justify-items-center gap-3 py-3.5 px-3">
-      <span className="typo-small text-text-muted text-center">{label}</span>
+    <div className="flex flex-col items-center gap-2.5">
+      {/* Team identity mini */}
+      {resolvedFlag?.src ? (
+        <img src={resolvedFlag.src} alt="" width={32} height={32} className="w-8 h-8 rounded-pill object-cover border border-border-default" />
+      ) : null}
+      <span className="typo-eyebrow text-text-muted text-center truncate max-w-full">{teamName}</span>
+
+      {/* Score display */}
       <div
         aria-live="polite"
-        className="w-[92px] h-[92px] rounded-[24px] score-display-bg grid place-items-center text-[42px] font-extrabold leading-none"
+        className="w-[88px] h-[88px] rounded-[22px] score-display-bg grid place-items-center text-[44px] font-extrabold leading-none select-none"
       >
         {safeValue === "" ? "0" : safeValue}
       </div>
+
+      {/* +/- buttons */}
       <div className="grid grid-cols-2 gap-2 w-full">
         <button
           type="button"
           disabled={disabled}
           aria-label={`Bajar marcador de ${label}`}
           onClick={() => onChange?.(stepScoreValue(safeValue, -1))}
-          className={`min-h-[42px] rounded-md score-btn text-text-primary text-[20px] font-bold ${disabledCls}`}
+          className={`min-h-[48px] rounded-[var(--radius-md)] score-btn text-[22px] font-bold active:scale-95 transition-transform ${disabledCls}`}
         >
-          -
+          −
         </button>
         <button
           type="button"
           disabled={disabled}
           aria-label={`Subir marcador de ${label}`}
           onClick={() => onChange?.(stepScoreValue(safeValue, 1))}
-          className={`min-h-[42px] rounded-md score-btn text-text-primary text-[20px] font-bold ${disabledCls}`}
+          className={`min-h-[48px] rounded-[var(--radius-md)] score-btn text-[22px] font-bold active:scale-95 transition-transform ${disabledCls}`}
         >
           +
         </button>
@@ -46,6 +64,7 @@ function renderScoreInput(
 
 export function ScoreInput({
   awayLabel = "Visitante",
+  awayTeam,
   awayValue,
   classifierLabel = "Quien clasifica",
   classifierOptions = [],
@@ -53,6 +72,7 @@ export function ScoreInput({
   disabled,
   error,
   homeLabel = "Local",
+  homeTeam,
   homeValue,
   onAwayChange,
   onClassifierChange,
@@ -63,15 +83,12 @@ export function ScoreInput({
 
   return (
     <div className="grid gap-4">
-      <div className="grid gap-3 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center">
-        {renderScoreInput(homeLabel, homeValue, disabled, onHomeChange)}
-        <div
-          aria-hidden="true"
-          className="w-9 h-9 rounded-pill grid place-items-center text-text-muted bg-bg-inset border border-border-subtle"
-        >
-          -
-        </div>
-        {renderScoreInput(awayLabel, awayValue, disabled, onAwayChange)}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
+        <ScoreStepper label={homeLabel} team={homeTeam} value={homeValue} disabled={disabled} onChange={onHomeChange} />
+        <span aria-hidden="true" className="text-[13px] font-bold tracking-[0.1em] text-text-muted mt-[72px]">
+          –
+        </span>
+        <ScoreStepper label={awayLabel} team={awayTeam} value={awayValue} disabled={disabled} onChange={onAwayChange} />
       </div>
 
       {showClassifier ? (
