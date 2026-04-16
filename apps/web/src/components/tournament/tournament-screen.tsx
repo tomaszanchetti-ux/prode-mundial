@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES, type MatchSummary, type PreTournamentSummary, type TuMundialGroupCard, type TuMundialResponse } from "@prode/shared";
-import { Button, Card, ProgressCompact, StatusTag } from "@prode/ui";
+import { Button, Card, ProgressCompact, SkeletonCard, StatusTag } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MarathonPredictionModal } from "@/components/matches/marathon-prediction-modal";
 import { ApiClientError, getMatches, getPreTournamentSummary, getTuMundial } from "@/lib/api/client";
@@ -123,11 +123,10 @@ export function TournamentScreenView({
       ) : null}
 
       {isLoading ? (
-        <Card style={{ gap: 10, padding: 16 }}>
-          <div className="w-32 h-[10px] rounded-full bg-bg-muted" />
-          <div className="w-[68%] h-[14px] rounded-full bg-bg-muted" />
-          <div className="w-full h-[72px] rounded-[16px] bg-bg-muted" />
-        </Card>
+        <div className="grid gap-3">
+          <SkeletonCard lines={3} />
+          <SkeletonCard lines={3} />
+        </div>
       ) : null}
 
       {errorMessage ? (

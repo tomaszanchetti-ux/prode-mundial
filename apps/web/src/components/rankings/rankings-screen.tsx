@@ -3,7 +3,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import type { LeagueStandingsResponse, LeagueSummary, PointsResponse } from "@prode/shared";
-import { Button, Card, StatusTag } from "@prode/ui";
+import { Button, Card, SkeletonStandingRow, StatusTag } from "@prode/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getLeagueStandings, getMyLeagues, getPoints } from "@/lib/api/client";
@@ -120,9 +120,9 @@ export function RankingsScreenView({
 
         {isLoading ? (
           <div className="grid gap-2">
-            <div className="w-[104px] h-[10px] rounded-full bg-bg-muted" />
-            <div className="w-full h-[56px] rounded-[16px] bg-bg-muted" />
-            <div className="w-full h-[56px] rounded-[16px] bg-bg-muted" />
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonStandingRow key={i} />
+            ))}
           </div>
         ) : null}
 

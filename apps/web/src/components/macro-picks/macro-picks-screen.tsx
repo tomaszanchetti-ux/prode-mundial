@@ -8,7 +8,7 @@ import type {
   SaveMacroPicksInput
 } from "@prode/shared";
 import { APP_ROUTES } from "@prode/shared";
-import { Button, Card, ProgressCompact, StatusTag } from "@prode/ui";
+import { Button, Card, ProgressCompact, SkeletonCard, StatusTag } from "@prode/ui";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, confirmMacroAdjustment, getMacroPicks, saveMacroPicks } from "@/lib/api/client";
@@ -190,13 +190,7 @@ export function MacroPicksScreenView({
         </div>
       ) : null}
 
-      {isLoading ? (
-        <Card elevated style={{ gap: 10, padding: 16 }}>
-          <div className="w-[128px] h-[10px] rounded-full bg-bg-muted" />
-          <div className="w-[72%] h-[14px] rounded-full bg-bg-muted" />
-          <div className="w-full h-[88px] rounded-[16px] bg-bg-muted" />
-        </Card>
-      ) : null}
+      {isLoading ? <SkeletonCard lines={3} /> : null}
 
       {!isLoading && isEditable ? (
         <MacroPicksEditor

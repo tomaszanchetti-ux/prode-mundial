@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, StatusTag } from "@prode/ui";
+import { Button, Card, SkeletonCard, StatusTag } from "@prode/ui";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getLeagueDetail } from "@/lib/api/client";
@@ -89,12 +89,7 @@ export function LeagueDetailScreen() {
         </Card>
       ) : null}
 
-      {isLoading ? (
-        <Card elevated style={{ gap: 8 }}>
-          <div className="w-[96px] h-[10px] rounded-full bg-bg-muted" />
-          <div className="w-full h-[120px] rounded-[16px] bg-bg-muted" />
-        </Card>
-      ) : null}
+      {isLoading ? <SkeletonCard lines={3} /> : null}
 
       {league ? (
         <>

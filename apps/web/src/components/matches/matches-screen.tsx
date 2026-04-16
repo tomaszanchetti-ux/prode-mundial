@@ -4,7 +4,7 @@ import React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { MatchSummary } from "@prode/shared";
-import { Button, Card, MatchCard, NextMatchHero } from "@prode/ui";
+import { Button, Card, MatchCard, NextMatchHero, SkeletonMatchCard } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getMatches } from "@/lib/api/client";
@@ -134,14 +134,8 @@ export function MatchesScreenView({
 
       {isLoading ? (
         <section className="grid gap-[14px]">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <Card key={index} elevated style={{ minHeight: 176, opacity: 0.72 }}>
-              <div className="grid gap-3">
-                <div className="w-[88px] h-[10px] rounded-full bg-bg-interactive" />
-                <div className="w-[54%] h-[12px] rounded-full bg-bg-interactive" />
-                <div className="w-full h-[84px] rounded-md bg-bg-muted" />
-              </div>
-            </Card>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonMatchCard key={i} />
           ))}
         </section>
       ) : null}

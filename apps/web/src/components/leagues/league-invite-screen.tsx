@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Button, Card } from "@prode/ui";
+import { Button, Card, SkeletonCard } from "@prode/ui";
 import { APP_ROUTES } from "@prode/shared";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -121,12 +121,7 @@ export function LeagueInviteScreen() {
         </Card>
       ) : null}
 
-      {isLoading ? (
-        <Card elevated className="gap-2">
-          <div className="w-24 h-2.5 rounded-pill bg-bg-muted" />
-          <div className="w-full h-24 rounded-2xl bg-bg-muted" />
-        </Card>
-      ) : null}
+      {isLoading ? <SkeletonCard lines={2} /> : null}
 
       {preview ? (
         <Card elevated className="gap-4 p-6">

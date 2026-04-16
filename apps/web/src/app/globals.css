@@ -630,6 +630,17 @@
     color: #0F7A3F;
   }
 
+  /* ── Skeleton / Shimmer ── */
+  .skeleton {
+    background: linear-gradient(90deg, var(--color-bg-muted) 25%, var(--color-bg-interactive) 50%, var(--color-bg-muted) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-md);
+  }
+  .skeleton-pill {
+    border-radius: var(--radius-pill);
+  }
+
   /* ── Close Button ── */
   .close-btn {
     width: 40px;
@@ -643,4 +654,9 @@
   .close-btn:hover {
     background: var(--color-bg-interactive);
   }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

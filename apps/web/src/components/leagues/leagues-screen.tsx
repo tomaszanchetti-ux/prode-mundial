@@ -4,7 +4,7 @@ import React from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useState } from "react";
 import type { LeagueDetail, LeagueSummary } from "@prode/shared";
-import { Button, Card, StatusTag } from "@prode/ui";
+import { Button, Card, SkeletonCard, StatusTag } from "@prode/ui";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, createLeague, getMyLeagues, joinLeague } from "@/lib/api/client";
@@ -114,10 +114,10 @@ export function LeaguesScreenView({
       ) : null}
 
       {isLoading ? (
-        <Card elevated style={{ gap: 8 }}>
-          <div className="w-[96px] h-[10px] rounded-full bg-bg-muted" />
-          <div className="w-full h-[56px] rounded-[16px] bg-bg-muted" />
-        </Card>
+        <div className="grid gap-3">
+          <SkeletonCard lines={2} />
+          <SkeletonCard lines={2} />
+        </div>
       ) : null}
 
       {!isLoading && !errorMessage && items.length === 0 ? (
