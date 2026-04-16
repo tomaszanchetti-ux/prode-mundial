@@ -1,4 +1,4 @@
-import type { TeamDisplayProps } from "./types";
+import type { TeamData } from "./types";
 
 // ── Size class maps ────────────────────────────────────
 
@@ -10,35 +10,40 @@ export const flagSizeClasses = {
 
 export const flagSizes = { sm: 22, md: 28, lg: 34 } as const;
 
-export const teamTextClasses = {
-  sm: "text-[14px]",
-  md: "text-[16px]",
-  lg: "text-[18px]"
-} as const;
+// ── Flag resolution ───────────────────────────────────
 
-export const codeTextClasses = {
-  sm: "text-[10px]",
-  md: "text-[10px]",
-  lg: "text-[11px]"
-} as const;
+type FlagResult = { src: string | null; fallbackLabel: string };
 
-export const weightClasses: Record<500 | 600 | 700, string> = {
-  500: "font-medium",
-  600: "font-semibold",
-  700: "font-bold"
-};
+/**
+ * Robust flag resolver with fallback chain:
+ * 1. flagAsset (pre-resolved static path)
+ * 2. flagUrl (external URL from API)
+ * 3. /flags/{iso2}.svg (constructed from iso2 code)
+ * 4. null → UI renders monogram fallback
+ *
+ * fallbackLabel: fifaCode (3 letters, e.g. ARG) if available,
+ * else first 3 chars of team name uppercase.
+ */
+export function resolveFlag(team: TeamData): FlagResult {
+  const label = buildFallbackLabel(team);
 
-// ── Helpers ────────────────────────────────────────────
+  if (team.flagAsset) return { src: team.flagAsset, fallbackLabel: label };
+  if (team.flagUrl) return { src: team.flagUrl, fallbackLabel: label };
+  if (team.iso2) return { src: `/flags/${team.iso2.toLowerCase()}.svg`, fallbackLabel: label };
+
+  return { src: null, fallbackLabel: label };
+}
+
+function buildFallbackLabel(team: TeamData): string {
+  if (team.fifaCode) return team.fifaCode;
+  const name = team.teamName ?? team.name ?? "";
+  if (name.length >= 2) return name.slice(0, 3).toUpperCase();
+  return "??";
+}
+
+// ── Dev warnings ──────────────────────────────────────
 
 const missingFlagWarnings = new Set<string>();
-
-export function resolveTeamName(team: Pick<TeamDisplayProps, "name" | "teamName">) {
-  return team.teamName ?? team.name ?? "Seleccion";
-}
-
-export function resolveTeamFlagSrc(team: Pick<TeamDisplayProps, "flagAsset" | "flagUrl">) {
-  return team.flagAsset ?? team.flagUrl ?? null;
-}
 
 export function warnMissingFlag(teamName: string, fifaCode?: string | null) {
   const runtime = globalThis as { process?: { env?: { NODE_ENV?: string } } };
@@ -46,11 +51,7 @@ export function warnMissingFlag(teamName: string, fifaCode?: string | null) {
   const key = `${fifaCode ?? "unknown"}:${teamName}`;
   if (missingFlagWarnings.has(key)) return;
   missingFlagWarnings.add(key);
-  console.warn(`[ui] Missing flag asset for ${teamName}${fifaCode ? ` (${fifaCode})` : ""}.`);
-}
-
-export function getFlagFallback(teamName: string) {
-  return teamName.trim().split(/\s+/).slice(0, 2).map((part) => part[0] ?? "").join("").toUpperCase();
+  console.warn(`[ui] Missing flag asset for ${teamName}${fifaCode ? ` (${fifaCode})` : ""} — fallback monogram will render.`);
 }
 
 export function normalizeScoreValue(value: string) {

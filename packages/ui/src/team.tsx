@@ -11,9 +11,7 @@ import type {
 import {
   flagSizeClasses,
   flagSizes,
-  getFlagFallback,
-  resolveTeamFlagSrc,
-  resolveTeamName,
+  resolveFlag,
   warnMissingFlag
 } from "./helpers";
 
@@ -54,12 +52,8 @@ export function TeamIdentity({
   emphasis = "default",
   align = "start"
 }: TeamIdentityProps) {
-  const resolvedName = resolveTeamName(team);
-  const flagSrc = resolveTeamFlagSrc({
-    flagAsset: team.flagAsset ?? null,
-    flagUrl: team.flagUrl ?? null
-  });
-  const fallback = getFlagFallback(resolvedName);
+  const resolvedName = team.teamName ?? team.name ?? "Selección";
+  const { src: flagSrc, fallbackLabel } = resolveFlag(team);
 
   if (showFlag && !flagSrc) {
     warnMissingFlag(resolvedName, team.fifaCode);
@@ -81,9 +75,9 @@ export function TeamIdentity({
         ) : (
           <span
             aria-hidden="true"
-            className={`${flagSizeClasses[size]} rounded-pill inline-flex items-center justify-center flag-fallback-bg text-text-primary border border-border-default text-[10px] font-bold`}
+            className={`${flagSizeClasses[size]} rounded-pill inline-flex items-center justify-center flag-fallback-bg text-text-primary border border-border-default text-[9px] font-bold tracking-tight`}
           >
-            {fallback}
+            {fallbackLabel}
           </span>
         )
       ) : null}
