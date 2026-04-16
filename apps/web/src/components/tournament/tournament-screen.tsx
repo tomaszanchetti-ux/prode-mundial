@@ -138,7 +138,10 @@ export function TournamentScreenView({
   return (
     <div className="grid gap-4">
       <Card elevated className="hero-worldcup-bg" style={{ gap: 12, padding: 20 }}>
-        <span className="typo-small text-text-muted">TU MUNDIAL</span>
+        <div className="flex items-center gap-3">
+          <img src="/mundial/wc2026-logo.png" alt="" width={36} height={36} className="opacity-70" />
+          <span className="typo-small text-text-muted">TU MUNDIAL</span>
+        </div>
         <div className="grid gap-2">
           <h1 className="typo-h1 m-0 text-text-primary">
             {profileDisplayName ? `${profileDisplayName}, asi se mueve tu Mundial` : "Asi se mueve tu Mundial"}

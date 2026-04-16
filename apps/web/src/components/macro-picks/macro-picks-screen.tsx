@@ -85,7 +85,10 @@ export function MacroPicksScreenView({
       <Card elevated className="hero-worldcup-bg" style={{ gap: 12, padding: 20 }}>
         <div className="flex justify-between gap-3 items-start flex-wrap">
           <div className="grid gap-1.5">
-            <span className="typo-small text-text-muted">MACRO PICKS</span>
+            <div className="flex items-center gap-3">
+              <img src="/mundial/wc2026-logo.png" alt="" width={32} height={32} className="opacity-70" />
+              <span className="typo-small text-text-muted">MACRO PICKS</span>
+            </div>
             <h1 className="typo-h2 m-0 text-text-primary">Tu apuesta larga del torneo</h1>
             <p className="typo-body m-0 text-text-secondary">
               Completa grupos, finalistas y campeon. Guardas cuando quieras y el backend resuelve estados, cierres y elegibilidad del ajuste.

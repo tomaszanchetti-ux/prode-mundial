@@ -235,11 +235,15 @@
 
   /* ── Hero Backgrounds ── */
   .hero-editable-bg {
-    background: linear-gradient(180deg, var(--color-primary-surface) 0%, #FFFFFF 60%);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.96) 60%),
+      url("/mundial/hero-stadium.jpg") center top / cover no-repeat;
     border: 1px solid rgba(0, 82, 204, 0.14);
   }
   .hero-locked-bg {
-    background: linear-gradient(180deg, var(--color-gold-soft) 0%, #FFFFFF 60%);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.95) 60%),
+      url("/mundial/hero-stadium.jpg") center top / cover no-repeat;
     border: 1px solid rgba(212, 168, 66, 0.22);
   }
 
@@ -322,9 +326,8 @@
   /* ── Home Hero ── */
   .hero-worldcup-bg {
     background:
-      radial-gradient(circle at top right, var(--color-gold-soft), transparent 32%),
-      radial-gradient(circle at left center, var(--color-primary-surface), transparent 36%),
-      #FFFFFF;
+      linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.94) 70%),
+      url("/mundial/tournament-trophy.jpg") center center / cover no-repeat;
     border: 1px solid var(--color-border-default);
   }
 
