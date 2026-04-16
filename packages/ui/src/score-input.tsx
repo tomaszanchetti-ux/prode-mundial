@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import type { ScoreInputProps, TeamData } from "./types";
 import { normalizeScoreValue, resolveFlag, stepScoreValue } from "./helpers";
