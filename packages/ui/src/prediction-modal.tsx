@@ -1,6 +1,9 @@
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
 import type { PredictionModalProps } from "./types";
 import { Button } from "./button";
+import { StatusTag } from "./status-tag";
 import { TeamIdentity } from "./team";
 
 export function PredictionModal({
@@ -18,8 +21,20 @@ export function PredictionModal({
   saveLabel = "Guardar prediccion",
   saving = false,
   stageLabel,
+  statusLabel,
+  statusTone,
   title
 }: PredictionModalProps) {
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (!isOpen) return;
+
+    document.body.classList.add("prediction-modal-open");
+    return () => {
+      document.body.classList.remove("prediction-modal-open");
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const showProgress = progressCurrent != null && progressTotal != null && progressTotal > 0;
@@ -29,16 +44,19 @@ export function PredictionModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 modal-overlay flex items-end justify-center z-50"
+      className="fixed inset-0 modal-overlay flex items-center justify-center z-50 p-4"
     >
-      <div className="w-full max-w-[560px] max-h-[92vh] overflow-y-auto card-base grid gap-4 shadow-modal rounded-t-xl modal-content-bg modal-sheet-enter">
+      <div className="w-full max-w-[560px] max-h-[92vh] overflow-y-auto card-base grid gap-4 shadow-modal rounded-xl modal-content-bg modal-sheet-enter">
         {/* ── Header: close + progress ── */}
         <div className="sticky top-0 z-10 modal-content-bg px-5 pt-4 pb-0 grid gap-3">
-          <div className="flex justify-between items-center">
-            <span className="typo-eyebrow text-text-muted uppercase">{stageLabel}</span>
+          <div className="flex justify-between items-center gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="typo-eyebrow text-text-muted uppercase truncate">{stageLabel}</span>
+              {statusTone ? <StatusTag status={statusTone} label={statusLabel} /> : null}
+            </div>
             {onClose ? (
               <button type="button" aria-label="Cerrar" onClick={onClose} className="close-btn">
-                X
+                <span aria-hidden="true" className="block text-[20px] leading-none font-normal">×</span>
               </button>
             ) : null}
           </div>

@@ -18,6 +18,7 @@ export function BottomNav() {
 
   return (
     <nav
+      data-bottom-nav
       aria-label="Main navigation"
       className="sticky z-50 grid gap-1 p-[6px] rounded-pill border border-border-default shadow-card backdrop-blur-[18px]"
       style={{

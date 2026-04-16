@@ -498,6 +498,13 @@
   .modal-sheet-enter {
     animation: slide-up 280ms cubic-bezier(0.32, 0.72, 0, 1);
   }
+  body.prediction-modal-open {
+    overflow: hidden;
+  }
+  body.prediction-modal-open [data-bottom-nav] {
+    visibility: hidden;
+    pointer-events: none;
+  }
 
   /* ── Matchup Panel ── */
   .matchup-panel-bg {
@@ -594,16 +601,26 @@
 
   /* ── Close Button ── */
   .close-btn {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border-radius: var(--radius-pill);
-    border: 1px solid var(--color-border-default);
-    background: #FFFFFF;
-    color: var(--color-text-secondary);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-text-muted);
     cursor: pointer;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 80ms ease;
   }
   .close-btn:hover {
     background: var(--color-bg-interactive);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-default);
+  }
+  .close-btn:active {
+    background: var(--color-bg-muted);
+    transform: scale(0.94);
   }
 }
 

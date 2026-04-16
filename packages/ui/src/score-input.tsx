@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import type { ScoreInputProps, TeamData } from "./types";
-import { normalizeScoreValue, resolveFlag, stepScoreValue } from "./helpers";
+import { normalizeScoreValue, stepScoreValue } from "./helpers";
 
 function ScoreStepper({
   label,
@@ -31,17 +31,8 @@ function ScoreStepper({
     }
   }, [safeValue]);
 
-  const resolvedFlag = team ? resolveFlag(team) : null;
-  const teamName = team?.teamName ?? team?.name ?? label;
-
   return (
     <div className="flex flex-col items-center gap-2.5">
-      {/* Team identity mini */}
-      {resolvedFlag?.src ? (
-        <img src={resolvedFlag.src} alt="" width={32} height={32} className="w-8 h-8 rounded-pill object-cover border border-border-default" />
-      ) : null}
-      <span className="typo-eyebrow text-text-muted text-center truncate max-w-full">{teamName}</span>
-
       {/* Score display */}
       <div
         aria-live="polite"
@@ -99,7 +90,7 @@ export function ScoreInput({
     <div className="grid gap-4">
       <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
         <ScoreStepper label={homeLabel} team={homeTeam} value={homeValue} disabled={disabled} onChange={onHomeChange} />
-        <span aria-hidden="true" className="text-[13px] font-bold tracking-[0.1em] text-text-muted mt-[72px]">
+        <span aria-hidden="true" className="text-[13px] font-bold tracking-[0.1em] text-text-muted mt-[38px]">
           –
         </span>
         <ScoreStepper label={awayLabel} team={awayTeam} value={awayValue} disabled={disabled} onChange={onAwayChange} />

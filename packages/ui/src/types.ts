@@ -184,5 +184,7 @@ export type PredictionModalProps = {
   saveLabel?: string;
   saving?: boolean;
   stageLabel: string;
+  statusLabel?: string;
+  statusTone?: StatusTone;
   title?: string;
 };
