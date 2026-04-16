@@ -104,7 +104,7 @@ export function MatchesScreenView({
           </Card>
         ) : null}
 
-        <div className="flex gap-2 overflow-x-auto pb-[2px] sticky top-0 z-[2] filter-bar-bg">
+        <div className="flex gap-1.5 overflow-x-auto sticky top-0 z-[2] filter-bar-bg px-[2px]">
           {filterChips.map((chip) => {
             const isActive = chip.key === activeFilter.key;
 
