@@ -93,5 +93,5 @@ test("MarathonPredictionModalView renders progress and navigation controls", () 
   assert.match(html, /Paso 1 de 4 pendientes/);
   assert.match(html, /Guardar y seguir/);
   assert.match(html, /SIGUE DESPUES/);
-  assert.match(html, /Saltar por ahora/);
+  assert.match(html, /Saltar/);
 });

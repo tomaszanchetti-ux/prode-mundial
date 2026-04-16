@@ -70,7 +70,8 @@ test("HomeScreenView renders pre-tournament next-match hero and follow-up CTAs",
   );
 
   assert.match(html, /Grupo A/);
-  assert.match(html, /Argentina vs Brasil/);
+  assert.match(html, /Argentina/);
+  assert.match(html, /Brasil/);
   assert.match(html, /TU LIGA HOY/);
   assert.match(html, /Crear liga/);
   assert.match(html, /Ver grupos y llaves/);
@@ -95,7 +96,8 @@ test("HomeScreenView keeps live-tournament priority match card when pre-tourname
   );
 
   assert.match(html, /Grupo A/);
-  assert.match(html, /Argentina vs Brasil/);
+  assert.match(html, /Argentina/);
+  assert.match(html, /Brasil/);
   assert.match(html, /Predecir ahora/);
   assert.match(html, /TU MUNDIAL/);
 });

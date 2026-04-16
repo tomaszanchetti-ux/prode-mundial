@@ -1,7 +1,6 @@
 export const webConfig = {
   apiBaseUrl: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000",
   appName: process.env.NEXT_PUBLIC_APP_NAME ?? "Prode Mundial",
-  enableLabPredictions: process.env.NEXT_PUBLIC_ENABLE_LAB_PREDICTIONS === "true",
   webUrl: process.env.NEXT_PUBLIC_WEB_URL ?? "http://localhost:3000",
   firebase: {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",

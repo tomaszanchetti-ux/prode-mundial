@@ -6,8 +6,6 @@ export const PREDICTION_STATUSES = ["empty", "saved_editable", "locked_unscored"
 
 export const MATCH_LIST_FILTERS = ["all", "today", "upcoming", "pending", "scored", "finished"] as const;
 
-export const MATCH_PREDICTION_WINDOW_HOURS = 5 as const;
-
 export const PREDICTION_LOCK_MINUTES_BEFORE_KICKOFF = 60 as const;
 
 export const MATCH_SCORING_RULES = {

@@ -29,11 +29,6 @@ env:
       - BUILD
       - RUNTIME
 
-  - variable: NEXT_PUBLIC_ENABLE_LAB_PREDICTIONS
-    value: "true"
-    availability:
-      - BUILD
-      - RUNTIME
 
   # === Firebase client SDK ===
   # Son públicos por diseño (restricciones se controlan vía Firebase Security Rules).

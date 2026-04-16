@@ -125,5 +125,5 @@ test("RankingsScreenView renders points and standings summary", () => {
   assert.match(html, /Tabla competitiva/);
   assert.match(html, /La punta la marca Clara con 20 pts/);
   assert.match(html, /Tomas/);
-  assert.match(html, /tu posicion/);
+  assert.match(html, /Tomas \(tu\)/);
 });

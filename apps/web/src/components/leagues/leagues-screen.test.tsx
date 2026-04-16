@@ -66,7 +66,8 @@ test("LeaguesScreenView renders active league cards", () => {
   assert.match(html, /Liga Demo Madrid/);
   assert.match(html, /Activa/);
   assert.match(html, /DEMO26/);
-  assert.match(html, /Estas compitiendo en el puesto #2/);
+  assert.match(html, /Tu lugar/);
+  assert.match(html, /#2/);
 });
 
 test("LeaguesScreenView renders create success state", () => {

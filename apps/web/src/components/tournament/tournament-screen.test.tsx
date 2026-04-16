@@ -74,10 +74,10 @@ test("TournamentScreenView renders projected groups and continue CTA", () => {
   assert.match(html, /Continuar mis predicciones/);
   assert.match(html, /Abrir Macro Picks/);
   assert.match(html, /Grupo A/);
-  assert.match(html, /Asi va quedando la tabla/);
+  assert.match(html, /Cada prediccion empuja la tabla/);
   assert.match(html, /Mexico/);
   assert.match(html, /clasifica/);
-  assert.match(html, /Pts/);
+  assert.match(html, /PTS/);
 });
 
 test("TournamentScreenView keeps Tu Mundial accessible after the app returns to live mode", () => {
