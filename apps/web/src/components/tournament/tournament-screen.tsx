@@ -7,6 +7,7 @@ import { Button, Card, ErrorCard, ProgressCompact, SkeletonCard, StatusTag } fro
 import { useAuth } from "@/components/auth/auth-provider";
 import { MarathonPredictionModal } from "@/components/matches/marathon-prediction-modal";
 import { ApiClientError, getMatches, getPreTournamentSummary, getTuMundial } from "@/lib/api/client";
+import { canEditPrediction } from "@/lib/matches/editability";
 import { GroupStandingsCard } from "./group-standings-card";
 
 type TournamentScreenViewProps = {
@@ -202,7 +203,7 @@ export function TournamentScreen() {
   const pendingGroupMatches = useMemo(
     () =>
       items
-        .filter((match) => match.stage === "group" && match.predictionStatus === "empty")
+        .filter((match) => match.stage === "group" && match.predictionStatus !== "scored" && canEditPrediction(match))
         .sort(compareMatchesChronologically),
     [items]
   );

@@ -108,7 +108,7 @@ export function HomeScreen() {
   const pendingGroupMatches = useMemo(
     () =>
       items
-        .filter((match) => match.stage === "group" && match.status === "scheduled" && !match.isFinished && match.predictionStatus !== "scored")
+        .filter((match) => match.stage === "group" && match.status === "scheduled" && !match.isFinished && match.predictionStatus !== "scored" && canEditPrediction(match))
         .sort(compareMatchesChronologically),
     [items]
   );

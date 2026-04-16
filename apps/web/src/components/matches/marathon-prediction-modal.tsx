@@ -89,6 +89,7 @@ export function MarathonPredictionModalView({
   const canGoPrevious = currentIndex > 0;
   const canGoNext = currentIndex < remainingMatches - 1;
   const isEditable = detail ? canEditPrediction(detail) : false;
+  const isDetailLoaded = detail !== null;
 
   const progressPercent =
     totalMatches > 0 ? `${Math.max(4, (Number.parseInt(progressLabel, 10) / totalMatches) * 100)}%` : "0%";
@@ -101,7 +102,7 @@ export function MarathonPredictionModalView({
     >
       <Card
         elevated
-        className="marathon-modal-bg modal-sheet-enter w-full max-w-[620px] gap-3.5 rounded-t-[28px] rounded-b-lg"
+        className="marathon-modal-bg modal-sheet-enter w-full max-w-[620px] max-h-[92vh] overflow-y-auto gap-3.5 rounded-t-[28px] rounded-b-lg"
       >
         <div className="flex justify-between items-start gap-3">
           <div className="grid gap-2">
@@ -123,8 +124,8 @@ export function MarathonPredictionModalView({
               <strong className="text-[20px] leading-[1.2] text-text-primary">{progressLabel}</strong>
             </div>
             <StatusTag
-              status={isEditable ? "editable" : "locked"}
-              label={isEditable ? "Editable" : "Bloqueado"}
+              status={isLoading || !isDetailLoaded ? "live" : isEditable ? "editable" : "locked"}
+              label={isLoading || !isDetailLoaded ? "Cargando..." : isEditable ? "Editable" : "Bloqueado"}
             />
           </div>
 
