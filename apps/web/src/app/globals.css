@@ -34,10 +34,10 @@
   --color-border-default: #E3E7EC;
   --color-border-strong: rgba(15, 23, 42, 0.18);
 
+  /* Escala de texto: primary (títulos), secondary (body/metadata), muted (hints). */
   --color-text-primary: #0E1116;
   --color-text-secondary: #5B6470;
   --color-text-muted: #8A94A1;
-  --color-text-faint: #AAB3BF;
 
   --color-overlay: rgba(15, 23, 42, 0.45);
 

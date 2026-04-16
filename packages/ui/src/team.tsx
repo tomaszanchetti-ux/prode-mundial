@@ -90,7 +90,7 @@ export function TeamIdentity({
             </span>
           ) : null}
           {showCode && team.fifaCode ? (
-            <span className={`typo-small text-text-faint ${emphasisCodeSize[emphasis]}`}>
+            <span className={`typo-small text-text-muted ${emphasisCodeSize[emphasis]}`}>
               {team.fifaCode}
             </span>
           ) : null}

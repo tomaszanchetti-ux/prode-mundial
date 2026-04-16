@@ -25,7 +25,6 @@ export const colors = {
   textPrimary: "#F3F7FC",
   textSecondary: "#C2CCD9",
   textMuted: "#92A3BA",
-  textFaint: "#73849A",
   overlay: "rgba(2, 8, 18, 0.78)"
 } as const;
 
