@@ -1,46 +1,45 @@
 import { ApiError } from "../../../server/errors/api-error";
-import type { MacroTournamentResults } from "@prode/shared";
 import { leagueMembersRepository } from "../../leagues/repositories/league-members-repository";
 import { rebuildLeagueStandings } from "../../leagues/services/league-standings-builder";
 import { rebuildUserAggregates } from "../../users/services/user-aggregates";
-import type { StoredMacroPrediction } from "../types";
-import { macroPicksRepository } from "../repositories/macro-picks-repository";
-import { macroScoringLogsRepository } from "../repositories/macro-scoring-logs-repository";
-import { computeMacroScore } from "./macro-scoring-engine";
+import type { StoredChampionPick } from "../types";
+import { championPicksRepository } from "../repositories/macro-picks-repository";
+import { championScoringLogsRepository } from "../repositories/macro-scoring-logs-repository";
+import { scoreChampionPick } from "./macro-scoring-engine";
 
-export async function persistMacroScoreForPrediction(
-  prediction: StoredMacroPrediction,
+export async function persistChampionScoreForPick(
+  pick: StoredChampionPick,
   tournamentId: string,
-  results: MacroTournamentResults,
+  officialChampion: string,
   nowIso = new Date().toISOString()
 ) {
-  const breakdown = computeMacroScore(prediction, results);
+  const breakdown = scoreChampionPick(pick, officialChampion);
 
-  await macroScoringLogsRepository.upsert({
-    userId: prediction.userId,
+  await championScoringLogsRepository.upsert({
+    userId: pick.userId,
     tournamentId,
-    totalPoints: breakdown.totalPoints,
-    breakdown,
-    isAdjusted: prediction.isAdjusted,
-    createdAt: nowIso
+    totalPoints: breakdown.championPoints,
+    championPoints: breakdown.championPoints,
+    wasAdjusted: breakdown.wasAdjusted,
+    scoredAt: nowIso
   });
 
   return breakdown;
 }
 
-export async function scoreMacroPredictionForUser(
+export async function scoreChampionPredictionForUser(
   userId: string,
   tournamentId: string,
-  results: MacroTournamentResults,
+  officialChampion: string,
   nowIso = new Date().toISOString()
 ) {
-  const prediction = await macroPicksRepository.getByUserId(userId);
+  const pick = await championPicksRepository.getByUserId(userId);
 
-  if (!prediction?.isSubmitted) {
-    throw new ApiError(404, "MATCH_NOT_FOUND", "Submitted macro picks were not found for this user.");
+  if (!pick?.championTeamId) {
+    throw new ApiError(404, "CHAMPION_PICK_NOT_FOUND", "Champion pick was not found for this user.");
   }
 
-  const breakdown = await persistMacroScoreForPrediction(prediction, tournamentId, results, nowIso);
+  const breakdown = await persistChampionScoreForPick(pick, tournamentId, officialChampion, nowIso);
 
   await rebuildUserAggregates(userId);
 
@@ -52,7 +51,7 @@ export async function scoreMacroPredictionForUser(
   return {
     userId,
     tournamentId,
-    totalPoints: breakdown.totalPoints,
+    totalPoints: breakdown.championPoints,
     affectedLeagues: affectedLeagueIds.length
   };
 }

@@ -1,12 +1,11 @@
 import { ApiError } from "../../../server/errors/api-error";
-import type { MacroTournamentResults } from "@prode/shared";
 import { leagueMembersRepository } from "../../leagues/repositories/league-members-repository";
 import { rebuildLeagueStandings } from "../../leagues/services/league-standings-builder";
 import { rebuildUserAggregates } from "../../users/services/user-aggregates";
-import { macroPicksRepository } from "../repositories/macro-picks-repository";
-import { macroResultsRepository } from "../repositories/macro-results-repository";
-import { macroScoringLogsRepository } from "../repositories/macro-scoring-logs-repository";
-import { persistMacroScoreForPrediction } from "./score-macro-prediction";
+import { championPicksRepository } from "../repositories/macro-picks-repository";
+import { championResultsRepository } from "../repositories/macro-results-repository";
+import { championScoringLogsRepository } from "../repositories/macro-scoring-logs-repository";
+import { persistChampionScoreForPick } from "./score-macro-prediction";
 
 async function rebuildAffectedUsersAndLeagues(userIds: string[], nowIso: string) {
   const affectedLeagueIds = new Set<string>();
@@ -25,67 +24,68 @@ async function rebuildAffectedUsersAndLeagues(userIds: string[], nowIso: string)
   return affectedLeagueIds.size;
 }
 
-async function resolveResults(tournamentId: string, inputResults?: MacroTournamentResults): Promise<MacroTournamentResults> {
-  const storedResults = inputResults ?? (await macroResultsRepository.getByTournamentId(tournamentId));
-
-  if (!storedResults) {
-    throw new ApiError(404, "MATCH_NOT_FOUND", "Official macro results were not found for this tournament.");
+async function resolveOfficialChampion(tournamentId: string, inputChampion?: string): Promise<string> {
+  if (inputChampion) {
+    return inputChampion;
   }
 
-  return {
-    groups: storedResults.groups,
-    finalists: storedResults.finalists,
-    champion: storedResults.champion
-  };
+  const storedResult = await championResultsRepository.getByTournamentId(tournamentId);
+
+  if (!storedResult) {
+    throw new ApiError(404, "CHAMPION_RESULT_NOT_FOUND", "Official champion result was not found for this tournament.");
+  }
+
+  return storedResult.championTeamId;
 }
 
-async function scorePredictionsWithResults(tournamentId: string, results: MacroTournamentResults, nowIso: string) {
-  const predictions = await macroPicksRepository.listSubmitted();
+async function scoreAllPicks(tournamentId: string, officialChampion: string, nowIso: string) {
+  const picks = await championPicksRepository.listAll();
+  const picksWithChampion = picks.filter((pick) => pick.championTeamId !== null);
 
-  for (const prediction of predictions) {
-    await persistMacroScoreForPrediction(prediction, tournamentId, results, nowIso);
+  for (const pick of picksWithChampion) {
+    await persistChampionScoreForPick(pick, tournamentId, officialChampion, nowIso);
   }
 
-  return predictions;
+  return picksWithChampion;
 }
 
 export async function scoreMacroBatch(
   tournamentId: string,
-  inputResults?: MacroTournamentResults,
+  inputChampion?: string,
   nowIso = new Date().toISOString()
 ) {
-  const results = await resolveResults(tournamentId, inputResults);
-  const predictions = await scorePredictionsWithResults(tournamentId, results, nowIso);
+  const officialChampion = await resolveOfficialChampion(tournamentId, inputChampion);
+  const picks = await scoreAllPicks(tournamentId, officialChampion, nowIso);
 
   const affectedLeagues = await rebuildAffectedUsersAndLeagues(
-    [...new Set(predictions.map((prediction) => prediction.userId))],
+    [...new Set(picks.map((pick) => pick.userId))],
     nowIso
   );
 
   return {
     tournamentId,
-    usersProcessed: predictions.length,
+    usersProcessed: picks.length,
     affectedLeagues
   };
 }
 
-export async function rebuildMacroScoring(tournamentId: string, inputResults?: MacroTournamentResults, nowIso = new Date().toISOString()) {
-  const existingLogs = await macroScoringLogsRepository.listByTournamentId(tournamentId);
-  await macroScoringLogsRepository.deleteByTournamentId(tournamentId);
+export async function rebuildMacroScoring(tournamentId: string, inputChampion?: string, nowIso = new Date().toISOString()) {
+  const existingLogs = await championScoringLogsRepository.listByTournamentId(tournamentId);
+  await championScoringLogsRepository.deleteByTournamentId(tournamentId);
 
-  const results = await resolveResults(tournamentId, inputResults);
-  const predictions = await scorePredictionsWithResults(tournamentId, results, nowIso);
+  const officialChampion = await resolveOfficialChampion(tournamentId, inputChampion);
+  const picks = await scoreAllPicks(tournamentId, officialChampion, nowIso);
   const affectedUserIds = new Set(existingLogs.map((log) => log.userId));
 
-  for (const prediction of predictions) {
-    affectedUserIds.add(prediction.userId);
+  for (const pick of picks) {
+    affectedUserIds.add(pick.userId);
   }
 
   const affectedLeagues = await rebuildAffectedUsersAndLeagues([...affectedUserIds], nowIso);
 
   return {
     tournamentId,
-    usersProcessed: predictions.length,
+    usersProcessed: picks.length,
     clearedLogs: existingLogs.length,
     affectedLeagues
   };

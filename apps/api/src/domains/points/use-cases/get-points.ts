@@ -4,7 +4,7 @@ import { predictionsRepository } from "../../matches/repositories/predictions-re
 import { teamsRepository } from "../../matches/repositories/teams-repository";
 import type { StoredMatchStatus } from "../../matches/types";
 import { usersRepository } from "../../users/repositories/users-repository";
-import { macroScoringLogsRepository } from "../../macro-picks/repositories/macro-scoring-logs-repository";
+import { championScoringLogsRepository } from "../../macro-picks/repositories/macro-scoring-logs-repository";
 
 function toStageLabel(stage: MatchStage, groupId: string | null) {
   if (stage === "group" && groupId) {
@@ -28,7 +28,7 @@ export async function getPoints(userId: string): Promise<PointsResponse> {
     usersRepository.findByUserId(userId),
     predictionsRepository.listPredictionsByUser(userId),
     matchesRepository.listMatches(),
-    macroScoringLogsRepository.listByUserId(userId)
+    championScoringLogsRepository.listByUserId(userId)
   ]);
 
   const matchPoints = predictions.reduce((total, prediction) => total + prediction.pointsAwarded, 0);

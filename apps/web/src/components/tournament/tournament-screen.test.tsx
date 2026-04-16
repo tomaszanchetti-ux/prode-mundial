@@ -72,7 +72,7 @@ test("TournamentScreenView renders projected groups and continue CTA", () => {
 
   assert.match(html, /TU MUNDIAL/);
   assert.match(html, /Continuar mis predicciones/);
-  assert.match(html, /Abrir Macro Picks/);
+  assert.match(html, /Tu Campeon/);
   assert.match(html, /Grupo A/);
   assert.match(html, /Cada prediccion empuja la tabla/);
   assert.match(html, /Mexico/);

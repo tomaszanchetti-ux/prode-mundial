@@ -7,9 +7,9 @@ process.env.FIREBASE_PRIVATE_KEY ??=
   "-----BEGIN RSA PRIVATE KEY-----\nMIIBOgIBAAJBAMfe9B1wxxL2Bkwvs71MaSBu5LUirhmHsarDuqsbonKnZuXeQVoc\n+3v6INANIlMAPbyX3IiSTidqwa3JEsmMxtkCAwEAAQJBAKUwcsfmTtIv/jJ3dnEs\ntvI0VNgUKpo1GTUOgbgrpc5lcPAeFlSIId8ZyiBd/KBT2js/ierOgmL/EgzGaMep\nHhECIQDjASMe4DBkuZzyJrDcTREaXmZRr0ZaqRty5SXzR5KpbQIhAOFmkl95xoV5\nW8NoK4k0vvECPV8cKY/KK2IHq3BRUfudAiATkRiG48ooFHu7v6wFATuVK0fkiJgm\n3ma4S5ou0x+ILQIgJFtSItpWnjLsDUHhO9lpLyDIW24EejAG/WH1UkGbsrUCIHS+\n+BtOHeKqgGjtfGbuovhxUIIDnPmB1eKWSrihDXKA\n-----END RSA PRIVATE KEY-----\n";
 
 import type { StoredMatch } from "../../matches/types";
-import type { StoredMacroPrediction } from "../types";
+import type { StoredChampionPick } from "../types";
 
-const [{ macroPicksService }, { matchesRepository }, { macroPicksRepository }, { macroScoringLogsRepository }] = await Promise.all([
+const [{ championPickService }, { matchesRepository }, { championPicksRepository }, { championScoringLogsRepository }] = await Promise.all([
   import("./macro-picks-service"),
   import("../../matches/repositories/matches-repository"),
   import("../repositories/macro-picks-repository"),
@@ -36,53 +36,35 @@ function buildMatch(overrides: Partial<StoredMatch>): StoredMatch {
   };
 }
 
-function buildStoredPrediction(overrides: Partial<StoredMacroPrediction> = {}): StoredMacroPrediction {
+function buildStoredPick(overrides: Partial<StoredChampionPick> = {}): StoredChampionPick {
   return {
     userId: "usr_1",
-    groupPicks: {
-      A: { firstTeamId: "ARG", secondTeamId: "MEX" },
-      B: { firstTeamId: "BRA", secondTeamId: "ESP" },
-      C: { firstTeamId: "FRA", secondTeamId: "GER" },
-      D: { firstTeamId: "POR", secondTeamId: "URU" },
-      E: { firstTeamId: "ENG", secondTeamId: "NED" },
-      F: { firstTeamId: "BEL", secondTeamId: "CRO" },
-      G: { firstTeamId: "USA", secondTeamId: "JPN" },
-      H: { firstTeamId: "MEX", secondTeamId: "SUI" },
-      I: { firstTeamId: "ARG", secondTeamId: "COL" },
-      J: { firstTeamId: "BRA", secondTeamId: "PAR" },
-      K: { firstTeamId: "ESP", secondTeamId: "MAR" },
-      L: { firstTeamId: "GER", secondTeamId: "DEN" }
-    },
-    finalists: ["ARG", "BRA"],
-    champion: "ARG",
+    championTeamId: "ARG",
+    adjustedChampionTeamId: null,
     isLocked: true,
-    isSubmitted: true,
     isAdjusted: false,
-    adjustedAt: null,
-    adjustedFinalists: null,
-    adjustedChampion: null,
     createdAt: "2026-06-01T00:00:00Z",
     updatedAt: "2026-06-01T00:00:00Z",
     lockedAt: "2026-06-11T19:00:00Z",
+    adjustedAt: null,
     ...overrides
   };
 }
 
-test("getForUser returns not_started before tournament kickoff when the user has no saved picks", async () => {
-  const getByUserIdMock = mock.method(macroPicksRepository, "getByUserId", async () => null);
-  const scoringLogsMock = mock.method(macroScoringLogsRepository, "listByUserId", async () => []);
+test("getForUser returns empty before tournament kickoff when the user has no saved pick", async () => {
+  const getByUserIdMock = mock.method(championPicksRepository, "getByUserId", async () => null);
+  const scoringLogsMock = mock.method(championScoringLogsRepository, "listByUserId", async () => []);
   const listMatchesMock = mock.method(matchesRepository, "listMatches", async () => [
     buildMatch({ matchId: "m_001", kickoffAt: "2026-06-11T19:00:00Z" }),
     buildMatch({ matchId: "m_064", stage: "R32", groupId: null, kickoffAt: "2026-06-28T19:00:00Z" })
   ]);
 
   try {
-    const result = await macroPicksService.getForUser("usr_1", new Date("2026-06-10T18:00:00Z"));
+    const result = await championPickService.getForUser("usr_1", new Date("2026-06-10T18:00:00Z"));
 
-    assert.equal(result.status, "not_started");
+    assert.equal(result.status, "empty");
     assert.equal(result.isLocked, false);
-    assert.equal(result.adjustmentAvailable, false);
-    assert.deepEqual(result.groupPicks, {});
+    assert.equal(result.championTeamId, null);
   } finally {
     getByUserIdMock.mock.restore();
     scoringLogsMock.mock.restore();
@@ -90,22 +72,16 @@ test("getForUser returns not_started before tournament kickoff when the user has
   }
 });
 
-test("getForUser returns fully_scored when a scoring log already exists", async () => {
-  const getByUserIdMock = mock.method(macroPicksRepository, "getByUserId", async () => buildStoredPrediction());
-  const scoringLogsMock = mock.method(macroScoringLogsRepository, "listByUserId", async () => [
+test("getForUser returns scored when a scoring log already exists", async () => {
+  const getByUserIdMock = mock.method(championPicksRepository, "getByUserId", async () => buildStoredPick());
+  const scoringLogsMock = mock.method(championScoringLogsRepository, "listByUserId", async () => [
     {
       userId: "usr_1",
       tournamentId: "wc2026",
-      totalPoints: 42,
-      breakdown: {
-        groupPoints: 20,
-        finalistsPoints: 10,
-        championPoints: 12,
-        adjustmentPenaltyApplied: true,
-        totalPoints: 42
-      },
-      isAdjusted: true,
-      createdAt: "2026-07-20T00:00:00Z"
+      totalPoints: 25,
+      championPoints: 25,
+      wasAdjusted: false,
+      scoredAt: "2026-07-20T00:00:00Z"
     }
   ]);
   const listMatchesMock = mock.method(matchesRepository, "listMatches", async () => [
@@ -114,10 +90,11 @@ test("getForUser returns fully_scored when a scoring log already exists", async 
   ]);
 
   try {
-    const result = await macroPicksService.getForUser("usr_1", new Date("2026-07-21T12:00:00Z"));
+    const result = await championPickService.getForUser("usr_1", new Date("2026-07-21T12:00:00Z"));
 
-    assert.equal(result.status, "fully_scored");
+    assert.equal(result.status, "scored");
     assert.equal(result.isLocked, true);
+    assert.deepEqual(result.scoringResult, { points: 25, wasAdjusted: false });
   } finally {
     getByUserIdMock.mock.restore();
     scoringLogsMock.mock.restore();
@@ -125,28 +102,23 @@ test("getForUser returns fully_scored when a scoring log already exists", async 
   }
 });
 
-test("saveForUser stores draft state before kickoff when picks are still incomplete", async () => {
+test("saveForUser stores champion pick before kickoff", async () => {
   const listMatchesMock = mock.method(matchesRepository, "listMatches", async () => [
     buildMatch({ matchId: "m_001", kickoffAt: "2026-06-11T19:00:00Z" }),
     buildMatch({ matchId: "m_064", stage: "R32", groupId: null, kickoffAt: "2026-06-28T19:00:00Z" })
   ]);
-  const getByUserIdMock = mock.method(macroPicksRepository, "getByUserId", async () => null);
-  const upsertMock = mock.method(macroPicksRepository, "upsert", async () => undefined);
+  const getByUserIdMock = mock.method(championPicksRepository, "getByUserId", async () => null);
+  const upsertMock = mock.method(championPicksRepository, "upsert", async () => undefined);
 
   try {
-    const result = await macroPicksService.saveForUser(
+    const result = await championPickService.saveForUser(
       "usr_1",
-      {
-        groupPicks: {
-          A: { firstTeamId: "ARG", secondTeamId: "MEX" }
-        },
-        finalists: [],
-        champion: null
-      },
+      { championTeamId: "ARG" },
       new Date("2026-06-10T18:00:00Z")
     );
 
-    assert.equal(result.status, "draft_editable");
+    assert.equal(result.ok, true);
+    assert.equal(result.status, "picked");
     assert.equal(upsertMock.mock.callCount(), 1);
   } finally {
     listMatchesMock.mock.restore();
@@ -155,59 +127,25 @@ test("saveForUser stores draft state before kickoff when picks are still incompl
   }
 });
 
-test("saveForUser rejects duplicated finalists with INVALID_FINALISTS_DUPLICATE", async () => {
-  const listMatchesMock = mock.method(matchesRepository, "listMatches", async () => [
-    buildMatch({ matchId: "m_001", kickoffAt: "2026-06-11T19:00:00Z" }),
-    buildMatch({ matchId: "m_064", stage: "R32", groupId: null, kickoffAt: "2026-06-28T19:00:00Z" })
-  ]);
-
-  try {
-    await assert.rejects(
-      () =>
-        macroPicksService.saveForUser(
-          "usr_1",
-          {
-            groupPicks: {},
-            finalists: ["ARG", "ARG"],
-            champion: "ARG"
-          },
-          new Date("2026-06-10T18:00:00Z")
-        ),
-      (error: unknown) =>
-        typeof error === "object" &&
-        error !== null &&
-        "code" in error &&
-        error.code === "INVALID_FINALISTS_DUPLICATE"
-    );
-  } finally {
-    listMatchesMock.mock.restore();
-  }
-});
-
-test("confirmAdjustmentForUser persists the adjustment during the knockout window", async () => {
-  const existing = buildStoredPrediction();
+test("adjustForUser persists the adjustment during the knockout window", async () => {
+  const existing = buildStoredPick();
   const listMatchesMock = mock.method(matchesRepository, "listMatches", async () => [
     buildMatch({ matchId: "m_001", kickoffAt: "2026-06-11T19:00:00Z", status: "finished" }),
     buildMatch({ matchId: "m_048", kickoffAt: "2026-06-26T19:00:00Z", status: "finished" }),
     buildMatch({ matchId: "m_049", stage: "R32", groupId: null, kickoffAt: "2026-06-28T19:00:00Z", status: "scheduled" })
   ]);
-  const getByUserIdMock = mock.method(macroPicksRepository, "getByUserId", async () => existing);
-  const upsertMock = mock.method(macroPicksRepository, "upsert", async () => undefined);
+  const getByUserIdMock = mock.method(championPicksRepository, "getByUserId", async () => existing);
+  const upsertMock = mock.method(championPicksRepository, "upsert", async () => undefined);
 
   try {
-    const result = await macroPicksService.confirmAdjustmentForUser(
+    const result = await championPickService.adjustForUser(
       "usr_1",
-      {
-        finalists: ["ARG", "ESP"],
-        champion: "ARG"
-      },
+      { championTeamId: "ESP" },
       new Date("2026-06-27T12:00:00Z")
     );
 
-    assert.equal(result.status, "adjusted_locked");
-    assert.deepEqual(result.adjustedFinalists, ["ARG", "ESP"]);
-    assert.equal(result.adjustedChampion, "ARG");
-    assert.equal(result.penaltyModel.finalistPoints, 5);
+    assert.equal(result.ok, true);
+    assert.equal(result.status, "adjusted");
     assert.equal(upsertMock.mock.callCount(), 1);
   } finally {
     listMatchesMock.mock.restore();

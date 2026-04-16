@@ -1,28 +1,24 @@
 import {
-  MACRO_GROUP_IDS,
-  MACRO_PICKS_ADJUSTMENT_PENALTY_MODEL,
-  type ConfirmMacroAdjustmentInput,
-  type ConfirmMacroAdjustmentResponse,
-  type MacroGroupPick,
-  type MacroGroupPicks,
-  type MacroPicksCompletion,
-  type MacroPicksResponse,
-  type SaveMacroPicksInput,
-  type SaveMacroPicksResponse
+  type ChampionPickResponse,
+  type ChampionPickStatus,
+  type SaveChampionPickInput,
+  type SaveChampionPickResponse,
+  type AdjustChampionInput,
+  type AdjustChampionResponse
 } from "@prode/shared";
 import { ApiError } from "../../../server/errors/api-error";
 import { matchesRepository } from "../../matches/repositories/matches-repository";
 import type { StoredMatch } from "../../matches/types";
-import { macroPicksRepository } from "../repositories/macro-picks-repository";
-import { macroScoringLogsRepository } from "../repositories/macro-scoring-logs-repository";
-import type { StoredMacroPrediction } from "../types";
+import { championPicksRepository } from "../repositories/macro-picks-repository";
+import { championScoringLogsRepository } from "../repositories/macro-scoring-logs-repository";
+import type { StoredChampionPick } from "../types";
 
-type MacroSchedule = {
-  initialDeadlineAt: string;
-  adjustmentWindow: {
-    opensAt: string | null;
-    closesAt: string | null;
-  };
+// ── Schedule helpers ────────────────────────────────────
+
+type ChampionSchedule = {
+  initialDeadlineAt: string | null;
+  adjustmentWindowOpensAt: string | null;
+  adjustmentWindowClosesAt: string | null;
   initialLocked: boolean;
   adjustmentWindowOpen: boolean;
 };
@@ -37,12 +33,18 @@ function compareKickoff(left: StoredMatch, right: StoredMatch) {
   return left.matchId.localeCompare(right.matchId);
 }
 
-function getMacroSchedule(matches: StoredMatch[], now: Date): MacroSchedule {
+function getChampionSchedule(matches: StoredMatch[], now: Date): ChampionSchedule {
   const sortedMatches = [...matches].sort(compareKickoff);
   const firstMatch = sortedMatches[0];
 
   if (!firstMatch) {
-    throw new Error("Cannot resolve macro picks schedule without tournament matches.");
+    return {
+      initialDeadlineAt: null,
+      adjustmentWindowOpensAt: null,
+      adjustmentWindowClosesAt: null,
+      initialLocked: false,
+      adjustmentWindowOpen: false
+    };
   }
 
   const groupMatches = sortedMatches.filter((match) => match.stage === "group");
@@ -51,269 +53,171 @@ function getMacroSchedule(matches: StoredMatch[], now: Date): MacroSchedule {
   const firstKnockoutMatch = knockoutMatches[0] ?? null;
   const groupStageCompleted =
     groupMatches.length > 0 && groupMatches.every((match) => match.status === "finished" || match.status === "corrected");
+
   const initialDeadlineAt = firstMatch.kickoffAt;
-  const adjustmentOpensAt = lastGroupMatch?.kickoffAt ?? null;
-  const adjustmentClosesAt = firstKnockoutMatch?.kickoffAt ?? null;
+  const adjustmentWindowOpensAt = lastGroupMatch?.kickoffAt ?? null;
+  const adjustmentWindowClosesAt = firstKnockoutMatch?.kickoffAt ?? null;
   const initialLocked = now.getTime() >= new Date(initialDeadlineAt).getTime();
   const adjustmentWindowOpen = Boolean(
     groupStageCompleted &&
-      adjustmentClosesAt &&
-      now.getTime() < new Date(adjustmentClosesAt).getTime()
+      adjustmentWindowClosesAt &&
+      now.getTime() < new Date(adjustmentWindowClosesAt).getTime()
   );
 
   return {
     initialDeadlineAt,
-    adjustmentWindow: {
-      opensAt: adjustmentOpensAt,
-      closesAt: adjustmentClosesAt
-    },
+    adjustmentWindowOpensAt,
+    adjustmentWindowClosesAt,
     initialLocked,
     adjustmentWindowOpen
   };
 }
 
-function isNonEmptyTeamId(value: string | null | undefined): value is string {
-  return typeof value === "string" && value.trim().length > 0;
-}
+// ── Status derivation ───────────────────────────────────
 
-function isCompletedGroupPick(groupPick: MacroGroupPick | undefined): groupPick is MacroGroupPick {
-  return Boolean(
-    groupPick &&
-      isNonEmptyTeamId(groupPick.firstTeamId) &&
-      isNonEmptyTeamId(groupPick.secondTeamId) &&
-      groupPick.firstTeamId !== groupPick.secondTeamId
-  );
-}
-
-function hasUniqueFinalists(finalists: string[]) {
-  return finalists.length === 2 && new Set(finalists).size === finalists.length;
-}
-
-function hasValidChampion(finalists: string[], champion: string | null) {
-  return isNonEmptyTeamId(champion) && finalists.includes(champion);
-}
-
-function deriveCompletion(groupPicks: MacroGroupPicks, finalists: string[], champion: string | null): MacroPicksCompletion {
-  const groupsCompleted = MACRO_GROUP_IDS.filter((groupId) => isCompletedGroupPick(groupPicks[groupId])).length;
-  const hasFinalists = hasUniqueFinalists(finalists);
-  const hasChampion = hasValidChampion(finalists, champion);
-  const completedUnits = groupsCompleted + (hasFinalists ? 1 : 0) + (hasChampion ? 1 : 0);
-  const totalUnits = MACRO_GROUP_IDS.length + 2;
-
-  return {
-    groupsCompleted,
-    groupsTotal: MACRO_GROUP_IDS.length,
-    hasFinalists,
-    hasChampion,
-    percent: Math.round((completedUnits / totalUnits) * 100)
-  };
-}
-
-function normalizeGroupPicks(groupPicks: MacroGroupPicks): MacroGroupPicks {
-  const normalizedEntries = Object.entries(groupPicks).flatMap(([groupId, groupPick]) => {
-    if (!groupPick || !isNonEmptyTeamId(groupPick.firstTeamId) || !isNonEmptyTeamId(groupPick.secondTeamId)) {
-      return [];
-    }
-
-    return [
-      [
-        groupId,
-        {
-          firstTeamId: groupPick.firstTeamId.trim(),
-          secondTeamId: groupPick.secondTeamId.trim()
-        }
-      ] as const
-    ];
-  });
-
-  return Object.fromEntries(normalizedEntries) as MacroGroupPicks;
-}
-
-function normalizeFinalists(finalists: string[]) {
-  return finalists.map((teamId) => teamId.trim()).filter((teamId) => teamId.length > 0);
-}
-
-function assertGroupPicksAreValid(groupPicks: MacroGroupPicks) {
-  for (const groupId of MACRO_GROUP_IDS) {
-    const groupPick = groupPicks[groupId];
-
-    if (!groupPick) {
-      continue;
-    }
-
-    if (groupPick.firstTeamId.trim() === groupPick.secondTeamId.trim()) {
-      throw new ApiError(400, "INVALID_GROUP_PICK_DUPLICATE", "Group picks cannot repeat the same team.", {
-        groupId
-      });
-    }
-  }
-}
-
-function assertFinalistsAreValid(finalists: string[]) {
-  if (finalists.length === 0) {
-    return;
+function deriveStatus(
+  stored: StoredChampionPick | null,
+  schedule: ChampionSchedule,
+  hasScoringLog: boolean
+): ChampionPickStatus {
+  if (hasScoringLog && stored?.championTeamId) {
+    return "scored";
   }
 
-  if (finalists.length !== 2 || new Set(finalists).size !== finalists.length) {
-    throw new ApiError(400, "INVALID_FINALISTS_DUPLICATE", "Finalists must contain two different teams.");
+  if (stored?.isAdjusted) {
+    return "adjusted";
   }
+
+  if (schedule.adjustmentWindowOpen && stored?.isLocked && stored.championTeamId && !stored.isAdjusted) {
+    return "adjustment_available";
+  }
+
+  if (schedule.initialLocked && stored?.championTeamId) {
+    return "locked";
+  }
+
+  if (stored?.championTeamId) {
+    return "picked";
+  }
+
+  return "empty";
 }
 
-function assertChampionIsValid(finalists: string[], champion: string | null) {
-  if (!champion) {
-    return;
-  }
+// ── Response builder ────────────────────────────────────
 
-  if (!finalists.includes(champion)) {
-    throw new ApiError(400, "INVALID_CHAMPION_NOT_IN_FINALISTS", "Champion must belong to finalists.");
-  }
-}
-
-function toResponse(stored: StoredMacroPrediction | null, schedule: MacroSchedule, hasScoringLog: boolean): MacroPicksResponse {
-  const groupPicks = stored?.groupPicks ?? {};
-  const finalists = stored?.finalists ?? [];
-  const champion = stored?.champion ?? null;
-  const completion = deriveCompletion(groupPicks, finalists, champion);
-  const adjustmentAlreadyUsed = Boolean(stored?.isAdjusted);
-  const adjustmentAvailable = Boolean(schedule.adjustmentWindowOpen && stored?.isSubmitted && !adjustmentAlreadyUsed);
-
-  let status: MacroPicksResponse["status"];
-
-  if (hasScoringLog && stored?.isSubmitted) {
-    status = "fully_scored";
-  } else if (adjustmentAlreadyUsed) {
-    status = "adjusted_locked";
-  } else if (adjustmentAvailable) {
-    status = "adjustment_available";
-  } else if (schedule.initialLocked) {
-    status = "locked_original";
-  } else if (!stored || completion.percent === 0) {
-    status = "not_started";
-  } else if (stored.isSubmitted) {
-    status = "submitted_editable";
-  } else {
-    status = "draft_editable";
-  }
+function toResponse(
+  stored: StoredChampionPick | null,
+  schedule: ChampionSchedule,
+  hasScoringLog: boolean,
+  scoringPoints: number | null,
+  scoringWasAdjusted: boolean | null
+): ChampionPickResponse {
+  const status = deriveStatus(stored, schedule, hasScoringLog);
 
   return {
     status,
-    isLocked: schedule.initialLocked || adjustmentAlreadyUsed,
-    adjustmentAvailable,
-    adjustmentAlreadyUsed,
+    championTeamId: stored?.championTeamId ?? null,
+    adjustedChampionTeamId: stored?.adjustedChampionTeamId ?? null,
     initialDeadlineAt: schedule.initialDeadlineAt,
-    adjustmentWindow: schedule.adjustmentWindow,
-    groupPicks,
-    finalists,
-    champion,
-    adjustedFinalists: stored?.adjustedFinalists ?? undefined,
-    adjustedChampion: stored?.adjustedChampion ?? undefined,
-    adjustmentConfirmedAt: stored?.adjustedAt ?? undefined,
-    completion
+    adjustmentWindowOpensAt: schedule.adjustmentWindowOpensAt,
+    adjustmentWindowClosesAt: schedule.adjustmentWindowClosesAt,
+    isLocked: schedule.initialLocked || Boolean(stored?.isAdjusted),
+    isAdjustmentWindowOpen: schedule.adjustmentWindowOpen,
+    scoringResult: hasScoringLog && scoringPoints !== null
+      ? { points: scoringPoints, wasAdjusted: scoringWasAdjusted ?? false }
+      : null
   };
 }
 
-export class MacroPicksService {
-  async getForUser(userId: string, now = new Date()): Promise<MacroPicksResponse> {
+// ── Service ─────────────────────────────────────────────
+
+export class ChampionPickService {
+  async getForUser(userId: string, now = new Date()): Promise<ChampionPickResponse> {
     const [stored, matches, scoringLogs] = await Promise.all([
-      macroPicksRepository.getByUserId(userId),
+      championPicksRepository.getByUserId(userId),
       matchesRepository.listMatches(),
-      macroScoringLogsRepository.listByUserId(userId)
+      championScoringLogsRepository.listByUserId(userId)
     ]);
 
-    return toResponse(stored, getMacroSchedule(matches, now), scoringLogs.length > 0);
+    const schedule = getChampionSchedule(matches, now);
+    const latestLog = scoringLogs.length > 0 ? scoringLogs[0] : null;
+
+    return toResponse(
+      stored,
+      schedule,
+      scoringLogs.length > 0,
+      latestLog?.championPoints ?? null,
+      latestLog?.wasAdjusted ?? null
+    );
   }
 
-  async saveForUser(userId: string, input: SaveMacroPicksInput, now = new Date()): Promise<SaveMacroPicksResponse> {
+  async saveForUser(userId: string, input: SaveChampionPickInput, now = new Date()): Promise<SaveChampionPickResponse> {
     const matches = await matchesRepository.listMatches();
-    const schedule = getMacroSchedule(matches, now);
+    const schedule = getChampionSchedule(matches, now);
 
     if (schedule.initialLocked) {
-      throw new ApiError(409, "MACRO_PICKS_LOCKED", "Macro picks are already locked.");
+      throw new ApiError(409, "CHAMPION_PICK_LOCKED", "Champion pick is already locked.");
     }
 
-    const groupPicks = normalizeGroupPicks(input.groupPicks);
-    const finalists = normalizeFinalists(input.finalists);
-    const champion = input.champion?.trim() ?? null;
-
-    assertGroupPicksAreValid(groupPicks);
-    assertFinalistsAreValid(finalists);
-    assertChampionIsValid(finalists, champion);
-
-    const completion = deriveCompletion(groupPicks, finalists, champion);
-    const existing = await macroPicksRepository.getByUserId(userId);
+    const existing = await championPicksRepository.getByUserId(userId);
     const nowIso = now.toISOString();
-    const nextPrediction: StoredMacroPrediction = {
+
+    const nextPick: StoredChampionPick = {
       userId,
-      groupPicks,
-      finalists: finalists.length > 0 ? finalists : null,
-      champion,
+      championTeamId: input.championTeamId.trim(),
+      adjustedChampionTeamId: existing?.adjustedChampionTeamId ?? null,
       isLocked: false,
-      isSubmitted: completion.groupsCompleted === MACRO_GROUP_IDS.length && completion.hasFinalists && completion.hasChampion,
       isAdjusted: existing?.isAdjusted ?? false,
-      adjustedAt: existing?.adjustedAt ?? null,
-      adjustedFinalists: existing?.adjustedFinalists ?? null,
-      adjustedChampion: existing?.adjustedChampion ?? null,
       createdAt: existing?.createdAt ?? nowIso,
       updatedAt: nowIso,
-      lockedAt: existing?.lockedAt ?? null
+      lockedAt: existing?.lockedAt ?? null,
+      adjustedAt: existing?.adjustedAt ?? null
     };
 
-    await macroPicksRepository.upsert(nextPrediction);
+    await championPicksRepository.upsert(nextPick);
 
-    return {
-      status: nextPrediction.isSubmitted ? "submitted_editable" : "draft_editable",
-      savedAt: nowIso,
-      completionPercent: completion.percent
-    };
+    return { ok: true, status: "picked" };
   }
 
-  async confirmAdjustmentForUser(
-    userId: string,
-    input: ConfirmMacroAdjustmentInput,
-    now = new Date()
-  ): Promise<ConfirmMacroAdjustmentResponse> {
+  async adjustForUser(userId: string, input: AdjustChampionInput, now = new Date()): Promise<AdjustChampionResponse> {
     const [existing, matches] = await Promise.all([
-      macroPicksRepository.getByUserId(userId),
+      championPicksRepository.getByUserId(userId),
       matchesRepository.listMatches()
     ]);
-    const schedule = getMacroSchedule(matches, now);
+    const schedule = getChampionSchedule(matches, now);
 
-    if (!existing?.isSubmitted || !schedule.initialLocked || !schedule.adjustmentWindowOpen) {
-      throw new ApiError(409, "ADJUSTMENT_NOT_AVAILABLE", "Macro adjustment is not available.");
+    if (!existing?.championTeamId || !schedule.initialLocked) {
+      throw new ApiError(409, "ADJUSTMENT_NOT_AVAILABLE", "Champion adjustment is not available.");
+    }
+
+    if (!schedule.adjustmentWindowOpen) {
+      throw new ApiError(409, "ADJUSTMENT_WINDOW_CLOSED", "The adjustment window is not open.");
     }
 
     if (existing.isAdjusted) {
-      throw new ApiError(409, "ADJUSTMENT_ALREADY_USED", "Macro adjustment was already used.");
+      throw new ApiError(409, "ADJUSTMENT_ALREADY_USED", "Champion adjustment was already used.");
     }
 
-    const finalists = normalizeFinalists(input.finalists);
-    const champion = input.champion.trim();
-
-    assertFinalistsAreValid(finalists);
-    assertChampionIsValid(finalists, champion);
-
     const nowIso = now.toISOString();
-    const nextPrediction: StoredMacroPrediction = {
+
+    const nextPick: StoredChampionPick = {
       ...existing,
+      adjustedChampionTeamId: input.championTeamId.trim(),
       isLocked: true,
       isAdjusted: true,
       adjustedAt: nowIso,
-      adjustedFinalists: finalists,
-      adjustedChampion: champion,
       updatedAt: nowIso,
       lockedAt: existing.lockedAt ?? schedule.initialDeadlineAt
     };
 
-    await macroPicksRepository.upsert(nextPrediction);
+    await championPicksRepository.upsert(nextPick);
 
     return {
-      status: "adjusted_locked",
-      adjustmentConfirmedAt: nowIso,
-      adjustedFinalists: finalists,
-      adjustedChampion: champion,
-      penaltyModel: MACRO_PICKS_ADJUSTMENT_PENALTY_MODEL
+      ok: true,
+      status: "adjusted",
+      penaltyNotice: "Si aciertas el campeon ajustado, sumas 10 pts en vez de 25."
     };
   }
 }
 
-export const macroPicksService = new MacroPicksService();
+export const championPickService = new ChampionPickService();

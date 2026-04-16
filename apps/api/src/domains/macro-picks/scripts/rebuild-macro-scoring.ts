@@ -1,6 +1,6 @@
 import "../../../env";
 import { readFile } from "node:fs/promises";
-import { macroTournamentResultsSchema, type MacroTournamentResults } from "@prode/shared";
+import { championResultSchema } from "@prode/shared";
 import { rebuildMacroScoring } from "../services/score-macro-batch";
 
 function getArg(name: string) {
@@ -8,9 +8,10 @@ function getArg(name: string) {
   return process.argv.find((arg) => arg.startsWith(prefix))?.slice(prefix.length) ?? null;
 }
 
-async function loadResultsFromFile(filePath: string): Promise<MacroTournamentResults> {
+async function loadChampionFromFile(filePath: string): Promise<string> {
   const raw = await readFile(filePath, "utf8");
-  return macroTournamentResultsSchema.parse(JSON.parse(raw));
+  const parsed = championResultSchema.parse(JSON.parse(raw));
+  return parsed.championTeamId;
 }
 
 async function main() {
@@ -21,14 +22,14 @@ async function main() {
   }
 
   const resultsFile = getArg("resultsFile");
-  const results = resultsFile ? await loadResultsFromFile(resultsFile) : undefined;
-  const summary = await rebuildMacroScoring(tournamentId, results);
+  const champion = resultsFile ? await loadChampionFromFile(resultsFile) : undefined;
+  const summary = await rebuildMacroScoring(tournamentId, champion);
 
   console.log(JSON.stringify({ ok: true, summary }, null, 2));
 }
 
 main().catch((error: unknown) => {
-  console.error("Failed to rebuild macro scoring.");
+  console.error("Failed to rebuild champion scoring.");
   console.error(error);
   process.exitCode = 1;
 });

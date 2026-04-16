@@ -1,20 +1,12 @@
-import type { MACRO_SCORING_RULES } from "../constants/macro-picks";
-
-export type MacroScoringRules = typeof MACRO_SCORING_RULES;
-
-export type MacroScoringBreakdown = {
-  groupPoints: number;
-  finalistsPoints: number;
+export type ChampionScoringBreakdown = {
   championPoints: number;
-  adjustmentPenaltyApplied: boolean;
-  totalPoints: number;
+  wasAdjusted: boolean;
 };
 
-export type MacroScoringLog = {
+export type ChampionScoringLog = {
   userId: string;
   tournamentId: string;
   totalPoints: number;
-  breakdown: MacroScoringBreakdown;
-  isAdjusted: boolean;
-  createdAt: string;
+  breakdown: ChampionScoringBreakdown;
+  scoredAt: string;
 };

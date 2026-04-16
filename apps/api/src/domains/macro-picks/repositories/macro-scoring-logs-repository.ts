@@ -1,42 +1,42 @@
 import { firestore } from "../../../server/firebase/firebase-admin";
-import type { StoredMacroScoringLog } from "../types";
+import type { StoredChampionScoringLog } from "../types";
 
-const macroScoringLogsCollection = firestore.collection("macroScoringLogs");
+const championScoringLogsCollection = firestore.collection("championScoringLogs");
 
 function buildLogId(userId: string, tournamentId: string) {
   return `${userId}_${tournamentId}`;
 }
 
-export class MacroScoringLogsRepository {
-  async getByUserIdAndTournamentId(userId: string, tournamentId: string): Promise<StoredMacroScoringLog | null> {
-    const snapshot = await macroScoringLogsCollection.doc(buildLogId(userId, tournamentId)).get();
+export class ChampionScoringLogsRepository {
+  async getByUserIdAndTournamentId(userId: string, tournamentId: string): Promise<StoredChampionScoringLog | null> {
+    const snapshot = await championScoringLogsCollection.doc(buildLogId(userId, tournamentId)).get();
 
     if (!snapshot.exists) {
       return null;
     }
 
-    return snapshot.data() as StoredMacroScoringLog;
+    return snapshot.data() as StoredChampionScoringLog;
   }
 
-  async listByUserId(userId: string): Promise<StoredMacroScoringLog[]> {
-    const snapshot = await macroScoringLogsCollection.where("userId", "==", userId).get();
-    return snapshot.docs.map((doc) => doc.data() as StoredMacroScoringLog);
+  async listByUserId(userId: string): Promise<StoredChampionScoringLog[]> {
+    const snapshot = await championScoringLogsCollection.where("userId", "==", userId).get();
+    return snapshot.docs.map((doc) => doc.data() as StoredChampionScoringLog);
   }
 
-  async listByTournamentId(tournamentId: string): Promise<StoredMacroScoringLog[]> {
-    const snapshot = await macroScoringLogsCollection.where("tournamentId", "==", tournamentId).get();
-    return snapshot.docs.map((doc) => doc.data() as StoredMacroScoringLog);
+  async listByTournamentId(tournamentId: string): Promise<StoredChampionScoringLog[]> {
+    const snapshot = await championScoringLogsCollection.where("tournamentId", "==", tournamentId).get();
+    return snapshot.docs.map((doc) => doc.data() as StoredChampionScoringLog);
   }
 
-  async upsert(log: StoredMacroScoringLog): Promise<void> {
-    await macroScoringLogsCollection.doc(buildLogId(log.userId, log.tournamentId)).set(log, { merge: true });
+  async upsert(log: StoredChampionScoringLog): Promise<void> {
+    await championScoringLogsCollection.doc(buildLogId(log.userId, log.tournamentId)).set(log, { merge: true });
   }
 
   async deleteByTournamentId(tournamentId: string): Promise<number> {
     const logs = await this.listByTournamentId(tournamentId);
-    await Promise.all(logs.map((log) => macroScoringLogsCollection.doc(buildLogId(log.userId, log.tournamentId)).delete()));
+    await Promise.all(logs.map((log) => championScoringLogsCollection.doc(buildLogId(log.userId, log.tournamentId)).delete()));
     return logs.length;
   }
 }
 
-export const macroScoringLogsRepository = new MacroScoringLogsRepository();
+export const championScoringLogsRepository = new ChampionScoringLogsRepository();

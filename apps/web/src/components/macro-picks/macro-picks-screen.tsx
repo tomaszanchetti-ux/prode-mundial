@@ -1,278 +1,151 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import type {
-  ConfirmMacroAdjustmentInput,
-  MacroGroupId,
-  MacroPicksResponse,
-  SaveMacroPicksInput
-} from "@prode/shared";
-import { APP_ROUTES } from "@prode/shared";
-import { Button, Card, ErrorCard, ProgressCompact, SkeletonCard, StatusTag } from "@prode/ui";
+import React, { useEffect, useMemo, useState } from "react";
+import type { ChampionPickResponse } from "@prode/shared";
+import { APP_ROUTES, resolveTeamIdentity } from "@prode/shared";
+import { Button, Card, ErrorCard, SkeletonCard, StatusTag, TeamIdentity } from "@prode/ui";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
-import { ApiClientError, confirmMacroAdjustment, getMacroPicks, saveMacroPicks } from "@/lib/api/client";
-import { MACRO_GROUPS } from "./macro-picks-data";
-import {
-  getMacroAdjustmentValidationMessages,
-  getMacroPicksCompletionHint,
-  getMacroPicksValidationMessages
-} from "./macro-picks-validation";
-import {
-  buildInitialAdjustmentState,
-  buildInitialFormState,
-  formatDeadline,
-  resolveStatusMeta
-} from "./macro-picks-helpers";
-import { MacroSummaryCard, renderTeamSummary } from "./macro-picks-cards";
-import { MacroPicksEditor } from "./macro-picks-editor";
-import { MacroPicksAdjustment } from "./macro-picks-adjustment";
+import { ApiClientError, getChampionPick, saveChampionPick, adjustChampionPick } from "@/lib/api/client";
 
-type MacroPicksScreenViewProps = {
-  data: MacroPicksResponse | null;
-  errorMessage: string | null;
-  formState: SaveMacroPicksInput;
-  adjustmentState: ConfirmMacroAdjustmentInput;
-  feedbackMessage: string | null;
-  completionHint: string | null;
-  validationMessages: string[];
-  adjustmentValidationMessages: string[];
-  isLoading: boolean;
-  isSaving: boolean;
-  isConfirmingAdjustment: boolean;
-  onChangeGroupPick: (groupId: MacroGroupId, slot: "firstTeamId" | "secondTeamId", value: string) => void;
-  onChangeFinalist: (index: 0 | 1, value: string) => void;
-  onChangeChampion: (value: string) => void;
-  onChangeAdjustmentFinalist: (index: 0 | 1, value: string) => void;
-  onChangeAdjustmentChampion: (value: string) => void;
-  onOpenTournament: () => void;
-  onRetry: () => void;
-  onSave: () => void;
-  onConfirmAdjustment: () => void;
-};
+// ── 48 World Cup 2026 teams ─────────────────────────────
 
-export function MacroPicksScreenView({
-  data,
-  errorMessage,
-  formState,
-  adjustmentState,
-  feedbackMessage,
-  completionHint,
-  validationMessages,
-  adjustmentValidationMessages,
-  isLoading,
-  isSaving,
-  isConfirmingAdjustment,
-  onChangeGroupPick,
-  onChangeFinalist,
-  onChangeChampion,
-  onChangeAdjustmentFinalist,
-  onChangeAdjustmentChampion,
-  onOpenTournament,
-  onRetry,
-  onSave,
-  onConfirmAdjustment
-}: MacroPicksScreenViewProps) {
-  const statusMeta = resolveStatusMeta(data?.status ?? "not_started");
-  const isEditable = Boolean(
-    data && (data.status === "not_started" || data.status === "draft_editable" || data.status === "submitted_editable")
-  );
-  const canAdjust = data?.status === "adjustment_available";
-  const hasValidationErrors = validationMessages.length > 0;
+type TeamEntry = { teamId: string; name: string };
 
-  return (
-    <div className="grid gap-4">
-      <Card elevated className="hero-worldcup-bg" style={{ gap: 12, padding: 20 }}>
-        <div className="flex justify-between gap-3 items-start flex-wrap">
-          <div className="grid gap-1.5">
-            <div className="flex items-center gap-3">
-              <img src="/mundial/wc2026-logo.png" alt="" width={32} height={32} className="opacity-70" />
-              <span className="typo-small text-text-muted">MACRO PICKS</span>
-            </div>
-            <h1 className="typo-h2 m-0 text-text-primary">Tu apuesta larga del torneo</h1>
-            <p className="typo-body m-0 text-text-secondary">
-              Completa grupos, finalistas y campeon. Guardas cuando quieras y el backend resuelve estados, cierres y elegibilidad del ajuste.
-            </p>
-          </div>
-          <StatusTag status={statusMeta.tone} label={statusMeta.label} />
-        </div>
+const WORLD_CUP_TEAMS: TeamEntry[] = [
+  { teamId: "ALG", name: "Algeria" },
+  { teamId: "ARG", name: "Argentina" },
+  { teamId: "AUS", name: "Australia" },
+  { teamId: "AUT", name: "Austria" },
+  { teamId: "BEL", name: "Belgium" },
+  { teamId: "BIH", name: "Bosnia and Herzegovina" },
+  { teamId: "BRA", name: "Brazil" },
+  { teamId: "CAN", name: "Canada" },
+  { teamId: "CIV", name: "Ivory Coast" },
+  { teamId: "COD", name: "DR Congo" },
+  { teamId: "COL", name: "Colombia" },
+  { teamId: "CPV", name: "Cape Verde" },
+  { teamId: "CRO", name: "Croatia" },
+  { teamId: "CUW", name: "Curacao" },
+  { teamId: "CZE", name: "Czech Republic" },
+  { teamId: "ECU", name: "Ecuador" },
+  { teamId: "EGY", name: "Egypt" },
+  { teamId: "ENG", name: "England" },
+  { teamId: "ESP", name: "Spain" },
+  { teamId: "FRA", name: "France" },
+  { teamId: "GER", name: "Germany" },
+  { teamId: "GHA", name: "Ghana" },
+  { teamId: "HAI", name: "Haiti" },
+  { teamId: "IRN", name: "Iran" },
+  { teamId: "IRQ", name: "Iraq" },
+  { teamId: "JOR", name: "Jordan" },
+  { teamId: "JPN", name: "Japan" },
+  { teamId: "KOR", name: "South Korea" },
+  { teamId: "KSA", name: "Saudi Arabia" },
+  { teamId: "MAR", name: "Morocco" },
+  { teamId: "MEX", name: "Mexico" },
+  { teamId: "NED", name: "Netherlands" },
+  { teamId: "NOR", name: "Norway" },
+  { teamId: "NZL", name: "New Zealand" },
+  { teamId: "PAN", name: "Panama" },
+  { teamId: "PAR", name: "Paraguay" },
+  { teamId: "POR", name: "Portugal" },
+  { teamId: "QAT", name: "Qatar" },
+  { teamId: "RSA", name: "South Africa" },
+  { teamId: "SCO", name: "Scotland" },
+  { teamId: "SEN", name: "Senegal" },
+  { teamId: "SUI", name: "Switzerland" },
+  { teamId: "SWE", name: "Sweden" },
+  { teamId: "TUN", name: "Tunisia" },
+  { teamId: "TUR", name: "Turkey" },
+  { teamId: "URU", name: "Uruguay" },
+  { teamId: "USA", name: "United States" },
+  { teamId: "UZB", name: "Uzbekistan" }
+];
 
-        <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">{statusMeta.description}</p>
+// ── Helpers ─────────────────────────────────────────────
 
-        <div className="flex gap-2.5 flex-wrap">
-          <Button variant="ghost" onClick={onOpenTournament}>
-            Volver a Tu Mundial
-          </Button>
-          {isEditable ? (
-            <Button onClick={onSave} disabled={isSaving || hasValidationErrors}>
-              {isSaving ? "Guardando..." : "Guardar picks"}
-            </Button>
-          ) : null}
-          {canAdjust ? (
-            <Button
-              onClick={onConfirmAdjustment}
-              disabled={isConfirmingAdjustment || adjustmentValidationMessages.length > 0}
-            >
-              {isConfirmingAdjustment ? "Confirmando..." : "Confirmar ajuste"}
-            </Button>
-          ) : null}
-        </div>
-      </Card>
+function resolveTeamData(teamId: string) {
+  const identity = resolveTeamIdentity(teamId);
+  const entry = WORLD_CUP_TEAMS.find((t) => t.teamId === teamId);
 
-      {data ? (
-        <ProgressCompact
-          items={[
-            {
-              label: "GRUPOS",
-              value: `${data.completion.groupsCompleted}/${data.completion.groupsTotal}`,
-              hint: "grupos completos"
-            },
-            {
-              label: "FINALISTAS",
-              value: data.completion.hasFinalists ? "OK" : "Falta",
-              hint: "dupla final"
-            },
-            {
-              label: "CAMPEON",
-              value: data.completion.hasChampion ? "OK" : "Falta",
-              hint: `${data.completion.percent}% total`
-            }
-          ]}
-        />
-      ) : null}
-
-      {data ? (
-        <Card elevated style={{ gap: 10, padding: 16 }}>
-          <span className="typo-small text-text-muted">VENTANAS OFICIALES</span>
-          <span className="text-[15px] leading-[1.45] text-text-primary">
-            Cierre inicial: {formatDeadline(data.initialDeadlineAt)}
-          </span>
-          <span className="text-[14px] leading-[1.45] text-text-secondary">
-            Ajuste: {formatDeadline(data.adjustmentWindow.opensAt)} → {formatDeadline(data.adjustmentWindow.closesAt)}
-          </span>
-        </Card>
-      ) : null}
-
-      {completionHint ? (
-        <div className="grid gap-2 p-4 rounded-md alert-warning">
-          <strong className="text-[16px]">Que te falta para cerrarlo</strong>
-          <p className="m-0 text-[14px] leading-[1.45]">{completionHint}</p>
-        </div>
-      ) : null}
-
-      {feedbackMessage ? (
-        <div className="grid gap-2 p-4 rounded-md alert-info">
-          <strong className="text-[16px]">Estado actualizado</strong>
-          <p className="m-0 text-[14px] leading-[1.45]">{feedbackMessage}</p>
-        </div>
-      ) : null}
-
-      {!isLoading && isEditable && hasValidationErrors ? (
-        <div className="grid gap-2 p-4 rounded-md alert-warning">
-          <strong className="text-[16px]">Revisa estas combinaciones antes de guardar</strong>
-          <div className="grid gap-1.5">
-            {validationMessages.map((message) => (
-              <p key={message} className="m-0 text-[14px] leading-[1.45]">
-                {message}
-              </p>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {errorMessage ? (
-        <ErrorCard title="No pudimos procesar tus macro picks" message={errorMessage} onRetry={onRetry} />
-      ) : null}
-
-      {isLoading ? <SkeletonCard lines={3} /> : null}
-
-      {!isLoading && isEditable ? (
-        <MacroPicksEditor
-          formState={formState}
-          isSaving={isSaving}
-          onChangeGroupPick={onChangeGroupPick}
-          onChangeFinalist={onChangeFinalist}
-          onChangeChampion={onChangeChampion}
-        />
-      ) : null}
-
-      {!isLoading && data && !isEditable ? (
-        <>
-          <Card elevated style={{ gap: 12, padding: 16 }}>
-            <div className="grid gap-1">
-              <span className="typo-small text-text-muted">PICKS ORIGINALES</span>
-              <strong className="text-[18px] leading-[1.2] text-text-primary">
-                {data.status === "adjustment_available" ? "Tu base inicial ya quedo congelada" : "Asi quedaron tus picks iniciales"}
-              </strong>
-            </div>
-            <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
-              {MACRO_GROUPS.map((group) => {
-                const groupPick = data.groupPicks[group.groupId];
-
-                return (
-                  <div key={group.groupId} className="grid gap-2 p-3 surface-inset">
-                    <span className="typo-small text-text-muted">{group.label}</span>
-                    {renderTeamSummary(groupPick?.firstTeamId, "1° sin definir")}
-                    {renderTeamSummary(groupPick?.secondTeamId, "2° sin definir")}
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
-
-          <MacroSummaryCard
-            title="Original"
-            subtitle="Tus picks finales iniciales"
-            finalists={data.finalists}
-            champion={data.champion}
-          />
-        </>
-      ) : null}
-
-      {!isLoading && canAdjust ? (
-        <MacroPicksAdjustment
-          adjustmentState={adjustmentState}
-          adjustmentValidationMessages={adjustmentValidationMessages}
-          isConfirmingAdjustment={isConfirmingAdjustment}
-          onChangeAdjustmentFinalist={onChangeAdjustmentFinalist}
-          onChangeAdjustmentChampion={onChangeAdjustmentChampion}
-        />
-      ) : null}
-
-      {!isLoading && data?.status === "adjusted_locked" ? (
-        <MacroSummaryCard
-          title="Ajuste confirmado"
-          subtitle="Tu version final ya quedo cerrada"
-          finalists={data.adjustedFinalists ?? []}
-          champion={data.adjustedChampion ?? null}
-        />
-      ) : null}
-    </div>
-  );
+  return {
+    fifaCode: identity.fifaCode,
+    flagAsset: identity.flagAsset,
+    flagUrl: identity.flagUrl,
+    name: entry?.name ?? teamId
+  };
 }
+
+type StatusMeta = { label: string; tone: "editable" | "locked" | "live" | "scored"; description: string };
+
+function resolveStatusMeta(status: ChampionPickResponse["status"]): StatusMeta {
+  switch (status) {
+    case "empty":
+      return { label: "Sin elegir", tone: "editable", description: "Elegi tu campeon antes de que arranque el torneo." };
+    case "picked":
+      return { label: "Elegido", tone: "editable", description: "Tu campeon esta guardado. Podes cambiarlo hasta el inicio del torneo." };
+    case "locked":
+      return { label: "Bloqueado", tone: "locked", description: "El torneo empezo. Tu pick original esta congelado." };
+    case "adjustment_available":
+      return { label: "Ajuste disponible", tone: "live", description: "La fase de grupos termino. Podes cambiar tu campeon, pero suma 10 pts en vez de 25." };
+    case "adjusted":
+      return { label: "Ajustado", tone: "locked", description: "Tu campeon ajustado quedo guardado. Si acertas, sumas 10 pts." };
+    case "scored":
+      return { label: "Puntuado", tone: "scored", description: "Los puntos de tu campeon ya fueron calculados." };
+  }
+}
+
+function formatDeadline(iso: string | null): string {
+  if (!iso) return "Por definir";
+
+  try {
+    return new Date(iso).toLocaleString("es-AR", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  } catch {
+    return iso;
+  }
+}
+
+// ── Screen ──────────────────────────────────────────────
 
 export function MacroPicksScreen() {
   const router = useRouter();
   const { status, user } = useAuth();
-  const [data, setData] = useState<MacroPicksResponse | null>(null);
-  const [formState, setFormState] = useState<SaveMacroPicksInput>(() => buildInitialFormState(null));
-  const [adjustmentState, setAdjustmentState] = useState<ConfirmMacroAdjustmentInput>(() =>
-    buildInitialAdjustmentState(null)
-  );
+  const [data, setData] = useState<ChampionPickResponse | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isConfirmingAdjustment, setIsConfirmingAdjustment] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
-  const validationMessages = getMacroPicksValidationMessages(formState);
-  const adjustmentValidationMessages = getMacroAdjustmentValidationMessages(adjustmentState);
-  const completionHint = getMacroPicksCompletionHint(data);
 
+  // Filter teams by search
+  const filteredTeams = useMemo(() => {
+    if (!searchQuery.trim()) return WORLD_CUP_TEAMS;
+    const query = searchQuery.toLowerCase().trim();
+    return WORLD_CUP_TEAMS.filter(
+      (team) => team.name.toLowerCase().includes(query) || team.teamId.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
+  // Derive UI state
+  const statusMeta = resolveStatusMeta(data?.status ?? "empty");
+  const canEdit = data?.status === "empty" || data?.status === "picked";
+  const canAdjust = data?.status === "adjustment_available";
+  const isFullyLocked = data?.status === "locked" || data?.status === "adjusted" || data?.status === "scored";
+  const currentPick = data?.adjustedChampionTeamId ?? data?.championTeamId ?? null;
+
+  // Load data
   useEffect(() => {
     let cancelled = false;
 
-    async function loadMacroPicks() {
+    async function loadPick() {
       if (status !== "authenticated" || !user) {
         setIsLoading(status === "loading");
         return;
@@ -283,12 +156,11 @@ export function MacroPicksScreen() {
 
       try {
         const token = await user.getIdToken();
-        const nextData = await getMacroPicks(token);
+        const nextData = await getChampionPick(token);
 
         if (!cancelled) {
           setData(nextData);
-          setFormState(buildInitialFormState(nextData));
-          setAdjustmentState(buildInitialAdjustmentState(nextData));
+          setSelectedTeamId(nextData.championTeamId);
         }
       } catch (error) {
         if (!cancelled) {
@@ -297,7 +169,7 @@ export function MacroPicksScreen() {
               ? error.message
               : error instanceof Error
                 ? error.message
-                : "No pudimos cargar tus macro picks."
+                : "No pudimos cargar tu campeon."
           );
         }
       } finally {
@@ -307,22 +179,16 @@ export function MacroPicksScreen() {
       }
     }
 
-    void loadMacroPicks();
+    void loadPick();
 
     return () => {
       cancelled = true;
     };
   }, [reloadKey, status, user]);
 
+  // Save handler (pre-tournament)
   async function handleSave() {
-    if (!user) {
-      return;
-    }
-
-    if (validationMessages.length > 0) {
-      setErrorMessage(validationMessages[0]);
-      return;
-    }
+    if (!user || !selectedTeamId) return;
 
     setIsSaving(true);
     setErrorMessage(null);
@@ -330,45 +196,35 @@ export function MacroPicksScreen() {
 
     try {
       const token = await user.getIdToken();
-      const response = await saveMacroPicks(token, formState);
-      setFeedbackMessage(
-        response.status === "submitted_editable"
-          ? "Tus macro picks iniciales quedaron completos y siguen editables hasta el kickoff."
-          : `Guardamos tu draft. Ya llevas ${response.completionPercent}% del modulo completo.`
-      );
-      setReloadKey((current) => current + 1);
+      await saveChampionPick(token, { championTeamId: selectedTeamId });
+      setFeedbackMessage("Tu campeon quedo guardado. Podes cambiarlo hasta el inicio del torneo.");
+      setReloadKey((k) => k + 1);
     } catch (error) {
       setErrorMessage(
         error instanceof ApiClientError
           ? error.message
           : error instanceof Error
             ? error.message
-            : "No pudimos guardar tus macro picks."
+            : "No pudimos guardar tu campeon."
       );
     } finally {
       setIsSaving(false);
     }
   }
 
-  async function handleConfirmAdjustment() {
-    if (!user) {
-      return;
-    }
+  // Adjustment handler (post-groups)
+  async function handleAdjust() {
+    if (!user || !selectedTeamId) return;
 
-    if (adjustmentValidationMessages.length > 0) {
-      setErrorMessage(adjustmentValidationMessages[0]);
-      return;
-    }
-
-    setIsConfirmingAdjustment(true);
+    setIsSaving(true);
     setErrorMessage(null);
     setFeedbackMessage(null);
 
     try {
       const token = await user.getIdToken();
-      await confirmMacroAdjustment(token, adjustmentState);
-      setFeedbackMessage("El ajuste quedo confirmado. Desde ahora esta bloqueado y cuenta con penalizacion reducida.");
-      setReloadKey((current) => current + 1);
+      const response = await adjustChampionPick(token, { championTeamId: selectedTeamId });
+      setFeedbackMessage(response.penaltyNotice);
+      setReloadKey((k) => k + 1);
     } catch (error) {
       setErrorMessage(
         error instanceof ApiClientError
@@ -378,74 +234,177 @@ export function MacroPicksScreen() {
             : "No pudimos confirmar tu ajuste."
       );
     } finally {
-      setIsConfirmingAdjustment(false);
+      setIsSaving(false);
     }
   }
 
+  const isInteractive = canEdit || canAdjust;
+
   return (
-    <MacroPicksScreenView
-      data={data}
-      errorMessage={errorMessage}
-      formState={formState}
-      adjustmentState={adjustmentState}
-      feedbackMessage={feedbackMessage}
-      completionHint={completionHint}
-      validationMessages={validationMessages}
-      adjustmentValidationMessages={adjustmentValidationMessages}
-      isLoading={isLoading}
-      isSaving={isSaving}
-      isConfirmingAdjustment={isConfirmingAdjustment}
-      onChangeGroupPick={(groupId, slot, value) => {
-        setFormState((current) => ({
-          ...current,
-          groupPicks: {
-            ...current.groupPicks,
-            [groupId]: {
-              firstTeamId: slot === "firstTeamId" ? value : current.groupPicks[groupId]?.firstTeamId ?? "",
-              secondTeamId: slot === "secondTeamId" ? value : current.groupPicks[groupId]?.secondTeamId ?? ""
-            }
-          }
-        }));
-      }}
-      onChangeFinalist={(index, value) => {
-        setFormState((current) => {
-          const finalists = [...current.finalists];
-          finalists[index] = value;
+    <div className="grid gap-4">
+      {/* Hero card */}
+      <Card elevated className="hero-worldcup-bg" style={{ gap: 12, padding: 20 }}>
+        <div className="flex justify-between gap-3 items-start flex-wrap">
+          <div className="grid gap-1.5">
+            <div className="flex items-center gap-3">
+              <img src="/mundial/wc2026-logo.png" alt="" width={32} height={32} className="opacity-70" />
+              <span className="typo-small text-text-muted">TU CAMPEON</span>
+            </div>
+            <h1 className="typo-h2 m-0 text-text-primary">Tu Campeon</h1>
+            <p className="typo-body m-0 text-text-secondary">
+              Elegi la seleccion que levanta la copa.
+            </p>
+          </div>
+          <StatusTag status={statusMeta.tone} label={statusMeta.label} />
+        </div>
 
-          return {
-            ...current,
-            finalists: finalists.filter((teamId) => Boolean(teamId)),
-            champion: current.champion ?? null
-          };
-        });
-      }}
-      onChangeChampion={(value) => {
-        setFormState((current) => ({
-          ...current,
-          champion: value || null
-        }));
-      }}
-      onChangeAdjustmentFinalist={(index, value) => {
-        setAdjustmentState((current) => {
-          const finalists = [...current.finalists];
-          finalists[index] = value;
+        <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">{statusMeta.description}</p>
 
-          return {
-            ...current,
-            finalists: finalists.filter((teamId) => Boolean(teamId))
-          };
-        });
-      }}
-      onChangeAdjustmentChampion={(value) => {
-        setAdjustmentState((current) => ({
-          ...current,
-          champion: value
-        }));
-      }}
-      onOpenTournament={() => router.push(APP_ROUTES.tournament)}
-      onRetry={() => setReloadKey((current) => current + 1)}
-      onSave={() => void handleSave()}
-      onConfirmAdjustment={() => void handleConfirmAdjustment()}
-    />
+        <div className="flex gap-2.5 flex-wrap">
+          <Button variant="ghost" onClick={() => router.push(APP_ROUTES.tournament)}>
+            Volver a Tu Mundial
+          </Button>
+          {canEdit && selectedTeamId ? (
+            <Button onClick={() => void handleSave()} disabled={isSaving}>
+              {isSaving ? "Guardando..." : data?.championTeamId ? "Cambiar campeon" : "Elegir campeon"}
+            </Button>
+          ) : null}
+          {canAdjust && selectedTeamId && selectedTeamId !== data?.championTeamId ? (
+            <Button onClick={() => void handleAdjust()} disabled={isSaving}>
+              {isSaving ? "Confirmando..." : "Confirmar ajuste"}
+            </Button>
+          ) : null}
+        </div>
+      </Card>
+
+      {/* Scoring rules */}
+      <Card elevated style={{ gap: 8, padding: 16 }}>
+        <span className="typo-small text-text-muted">PUNTUACION</span>
+        <p className="m-0 text-[14px] leading-[1.55] text-text-secondary">
+          25 pts si acertas desde el inicio. 10 pts si cambias tras la fase de grupos.
+        </p>
+      </Card>
+
+      {/* Schedule info */}
+      {data ? (
+        <Card elevated style={{ gap: 10, padding: 16 }}>
+          <span className="typo-small text-text-muted">VENTANAS</span>
+          <span className="text-[15px] leading-[1.45] text-text-primary">
+            Cierre inicial: {formatDeadline(data.initialDeadlineAt)}
+          </span>
+          <span className="text-[14px] leading-[1.45] text-text-secondary">
+            Ajuste: {formatDeadline(data.adjustmentWindowOpensAt)} → {formatDeadline(data.adjustmentWindowClosesAt)}
+          </span>
+        </Card>
+      ) : null}
+
+      {/* Current pick display */}
+      {currentPick && !canEdit ? (
+        <Card elevated style={{ gap: 12, padding: 16 }}>
+          <span className="typo-small text-text-muted">
+            {data?.adjustedChampionTeamId ? "CAMPEON AJUSTADO" : "TU CAMPEON"}
+          </span>
+          <div className="flex items-center gap-3">
+            <TeamIdentity team={resolveTeamData(currentPick)} size="lg" showFlag showName emphasis="hero" />
+          </div>
+          {data?.scoringResult ? (
+            <div className="flex items-center gap-2 mt-1">
+              <StatusTag
+                status={data.scoringResult.points > 0 ? "scored" : "locked"}
+                label={`${data.scoringResult.points} pts`}
+              />
+              {data.scoringResult.wasAdjusted ? (
+                <span className="text-[13px] text-text-muted">(campeon ajustado)</span>
+              ) : null}
+            </div>
+          ) : null}
+          {data?.championTeamId && data.adjustedChampionTeamId && data.championTeamId !== data.adjustedChampionTeamId ? (
+            <div className="flex items-center gap-2 mt-1 opacity-60">
+              <span className="text-[13px] text-text-muted">Original:</span>
+              <TeamIdentity team={resolveTeamData(data.championTeamId)} size="sm" showFlag showName emphasis="compact" />
+            </div>
+          ) : null}
+        </Card>
+      ) : null}
+
+      {/* Adjustment notice */}
+      {canAdjust ? (
+        <div className="grid gap-2 p-4 rounded-md alert-warning">
+          <strong className="text-[16px]">Ventana de ajuste abierta</strong>
+          <p className="m-0 text-[14px] leading-[1.45]">
+            Podes cambiar tu campeon, pero si acertas sumas 10 pts en vez de 25.
+          </p>
+        </div>
+      ) : null}
+
+      {/* Feedback */}
+      {feedbackMessage ? (
+        <div className="grid gap-2 p-4 rounded-md alert-info">
+          <strong className="text-[16px]">Listo</strong>
+          <p className="m-0 text-[14px] leading-[1.45]">{feedbackMessage}</p>
+        </div>
+      ) : null}
+
+      {/* Error */}
+      {errorMessage ? (
+        <ErrorCard title="No pudimos procesar tu campeon" message={errorMessage} onRetry={() => setReloadKey((k) => k + 1)} />
+      ) : null}
+
+      {/* Loading */}
+      {isLoading ? <SkeletonCard lines={3} /> : null}
+
+      {/* Team selector (only when interactive) */}
+      {!isLoading && isInteractive ? (
+        <Card elevated style={{ gap: 12, padding: 16 }}>
+          <span className="typo-small text-text-muted">SELECCIONA UNA SELECCION</span>
+
+          {/* Search input */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Buscar seleccion..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-md border border-border-default bg-surface-default px-3 py-2 text-[14px] text-text-primary placeholder:text-text-muted outline-none focus:border-accent-primary"
+            />
+          </div>
+
+          {/* Teams grid */}
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+            {filteredTeams.map((team) => {
+              const isSelected = selectedTeamId === team.teamId;
+              const teamData = resolveTeamData(team.teamId);
+
+              return (
+                <button
+                  key={team.teamId}
+                  type="button"
+                  onClick={() => setSelectedTeamId(team.teamId)}
+                  className={`flex flex-col items-center gap-1.5 rounded-lg p-2.5 transition-colors cursor-pointer border ${
+                    isSelected
+                      ? "border-accent-primary bg-accent-primary/10 ring-2 ring-accent-primary/30"
+                      : "border-border-default bg-surface-default hover:bg-surface-raised"
+                  }`}
+                >
+                  <TeamIdentity team={teamData} size="md" showFlag showName={false} />
+                  <span className={`text-[12px] leading-[1.2] font-medium ${isSelected ? "text-accent-primary" : "text-text-primary"}`}>
+                    {team.teamId}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {filteredTeams.length === 0 ? (
+            <p className="text-[14px] text-text-muted text-center py-4">
+              No se encontraron selecciones.
+            </p>
+          ) : null}
+        </Card>
+      ) : null}
+
+      {/* Locked state - show full team grid (read-only) */}
+      {!isLoading && isFullyLocked && !canAdjust ? null : null}
+    </div>
   );
 }

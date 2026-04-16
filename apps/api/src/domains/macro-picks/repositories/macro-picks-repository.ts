@@ -1,27 +1,27 @@
 import { firestore } from "../../../server/firebase/firebase-admin";
-import type { StoredMacroPrediction } from "../types";
+import type { StoredChampionPick } from "../types";
 
-const macroPredictionsCollection = firestore.collection("macroPredictions");
+const championPicksCollection = firestore.collection("championPicks");
 
-export class MacroPicksRepository {
-  async getByUserId(userId: string): Promise<StoredMacroPrediction | null> {
-    const snapshot = await macroPredictionsCollection.doc(userId).get();
+export class ChampionPicksRepository {
+  async getByUserId(userId: string): Promise<StoredChampionPick | null> {
+    const snapshot = await championPicksCollection.doc(userId).get();
 
     if (!snapshot.exists) {
       return null;
     }
 
-    return snapshot.data() as StoredMacroPrediction;
+    return snapshot.data() as StoredChampionPick;
   }
 
-  async upsert(prediction: StoredMacroPrediction): Promise<void> {
-    await macroPredictionsCollection.doc(prediction.userId).set(prediction, { merge: true });
+  async upsert(pick: StoredChampionPick): Promise<void> {
+    await championPicksCollection.doc(pick.userId).set(pick, { merge: true });
   }
 
-  async listSubmitted(): Promise<StoredMacroPrediction[]> {
-    const snapshot = await macroPredictionsCollection.where("isSubmitted", "==", true).get();
-    return snapshot.docs.map((doc) => doc.data() as StoredMacroPrediction);
+  async listAll(): Promise<StoredChampionPick[]> {
+    const snapshot = await championPicksCollection.get();
+    return snapshot.docs.map((doc) => doc.data() as StoredChampionPick);
   }
 }
 
-export const macroPicksRepository = new MacroPicksRepository();
+export const championPicksRepository = new ChampionPicksRepository();

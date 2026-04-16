@@ -6,7 +6,7 @@ process.env.FIREBASE_CLIENT_EMAIL ??= "firebase-adminsdk@test.local";
 process.env.FIREBASE_PRIVATE_KEY ??=
   "-----BEGIN RSA PRIVATE KEY-----\nMIIBOgIBAAJBAMfe9B1wxxL2Bkwvs71MaSBu5LUirhmHsarDuqsbonKnZuXeQVoc\n+3v6INANIlMAPbyX3IiSTidqwa3JEsmMxtkCAwEAAQJBAKUwcsfmTtIv/jJ3dnEs\ntvI0VNgUKpo1GTUOgbgrpc5lcPAeFlSIId8ZyiBd/KBT2js/ierOgmL/EgzGaMep\nHhECIQDjASMe4DBkuZzyJrDcTREaXmZRr0ZaqRty5SXzR5KpbQIhAOFmkl95xoV5\nW8NoK4k0vvECPV8cKY/KK2IHq3BRUfudAiATkRiG48ooFHu7v6wFATuVK0fkiJgm\n3ma4S5ou0x+ILQIgJFtSItpWnjLsDUHhO9lpLyDIW24EejAG/WH1UkGbsrUCIHS+\n+BtOHeKqgGjtfGbuovhxUIIDnPmB1eKWSrihDXKA\n-----END RSA PRIVATE KEY-----\n";
 
-const [{ rebuildUserAggregates }, { usersRepository }, { predictionsRepository }, { macroScoringLogsRepository }] = await Promise.all([
+const [{ rebuildUserAggregates }, { usersRepository }, { predictionsRepository }, { championScoringLogsRepository }] = await Promise.all([
   import("./user-aggregates"),
   import("../repositories/users-repository"),
   import("../../matches/repositories/predictions-repository"),
@@ -45,7 +45,7 @@ test("rebuildUserAggregates recomputes totalPoints including macro scoring logs"
       scoredAt: "2026-06-12T00:00:00Z"
     }
   ]);
-  const macroLogsMock = mock.method(macroScoringLogsRepository, "listByUserId", async () => [
+  const macroLogsMock = mock.method(championScoringLogsRepository, "listByUserId", async () => [
     {
       userId: "usr_1",
       tournamentId: "wc2026",

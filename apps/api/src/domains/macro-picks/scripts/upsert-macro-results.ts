@@ -1,7 +1,7 @@
 import "../../../env";
 import { readFile } from "node:fs/promises";
-import { macroTournamentResultsSchema } from "@prode/shared";
-import { macroResultsRepository } from "../repositories/macro-results-repository";
+import { championResultSchema } from "@prode/shared";
+import { championResultsRepository } from "../repositories/macro-results-repository";
 
 function getArg(name: string) {
   const prefix = `--${name}=`;
@@ -21,11 +21,11 @@ async function main() {
   }
 
   const raw = await readFile(resultsFile, "utf8");
-  const results = macroTournamentResultsSchema.parse(JSON.parse(raw));
+  const result = championResultSchema.parse(JSON.parse(raw));
 
-  await macroResultsRepository.upsert({
+  await championResultsRepository.upsert({
     tournamentId,
-    ...results,
+    championTeamId: result.championTeamId,
     updatedAt: new Date().toISOString()
   });
 
@@ -33,7 +33,7 @@ async function main() {
 }
 
 main().catch((error: unknown) => {
-  console.error("Failed to upsert macro results.");
+  console.error("Failed to upsert champion results.");
   console.error(error);
   process.exitCode = 1;
 });

@@ -1,4 +1,4 @@
-import { macroScoringLogsRepository } from "../../macro-picks/repositories/macro-scoring-logs-repository";
+import { championScoringLogsRepository } from "../../macro-picks/repositories/macro-scoring-logs-repository";
 import { predictionsRepository } from "../../matches/repositories/predictions-repository";
 import { usersRepository } from "../repositories/users-repository";
 
@@ -6,7 +6,7 @@ export async function rebuildUserAggregates(userId: string) {
   const [profile, predictions, macroScoringLogs] = await Promise.all([
     usersRepository.findByUserId(userId),
     predictionsRepository.listPredictionsByUser(userId),
-    macroScoringLogsRepository.listByUserId(userId)
+    championScoringLogsRepository.listByUserId(userId)
   ]);
 
   if (!profile) {

@@ -8,7 +8,7 @@ process.env.FIREBASE_PRIVATE_KEY ??=
   "-----BEGIN RSA PRIVATE KEY-----\nMIIBOgIBAAJBAMfe9B1wxxL2Bkwvs71MaSBu5LUirhmHsarDuqsbonKnZuXeQVoc\n+3v6INANIlMAPbyX3IiSTidqwa3JEsmMxtkCAwEAAQJBAKUwcsfmTtIv/jJ3dnEs\ntvI0VNgUKpo1GTUOgbgrpc5lcPAeFlSIId8ZyiBd/KBT2js/ierOgmL/EgzGaMep\nHhECIQDjASMe4DBkuZzyJrDcTREaXmZRr0ZaqRty5SXzR5KpbQIhAOFmkl95xoV5\nW8NoK4k0vvECPV8cKY/KK2IHq3BRUfudAiATkRiG48ooFHu7v6wFATuVK0fkiJgm\n3ma4S5ou0x+ILQIgJFtSItpWnjLsDUHhO9lpLyDIW24EejAG/WH1UkGbsrUCIHS+\n+BtOHeKqgGjtfGbuovhxUIIDnPmB1eKWSrihDXKA\n-----END RSA PRIVATE KEY-----\n";
 process.env.NEXT_PUBLIC_WEB_URL ??= "http://localhost:3000";
 
-const [{ createApp }, { firebaseAdminAuth }, { usersRepository }, { predictionsRepository }, { matchesRepository }, { teamsRepository }, { macroScoringLogsRepository }] = await Promise.all([
+const [{ createApp }, { firebaseAdminAuth }, { usersRepository }, { predictionsRepository }, { matchesRepository }, { teamsRepository }, { championScoringLogsRepository }] = await Promise.all([
   import("../../../server/app"),
   import("../../../server/firebase/firebase-admin"),
   import("../../users/repositories/users-repository"),
@@ -107,7 +107,7 @@ test("GET /api/v1/points returns current user points summary", async () => {
     }
   ]);
   const teamsMock = mock.method(teamsRepository, "getTeamsByIds", async () => new Map());
-  const macroLogsMock = mock.method(macroScoringLogsRepository, "listByUserId", async () => [
+  const macroLogsMock = mock.method(championScoringLogsRepository, "listByUserId", async () => [
     {
       userId: "usr_1",
       tournamentId: "wc2026",

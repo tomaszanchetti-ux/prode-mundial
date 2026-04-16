@@ -1,7 +1,8 @@
 import type {
+  AdjustChampionInput,
+  AdjustChampionResponse,
   ApiResponse,
-  ConfirmMacroAdjustmentInput,
-  ConfirmMacroAdjustmentResponse,
+  ChampionPickResponse,
   CreateLeagueInput,
   JoinLeagueInput,
   LeagueDetail,
@@ -11,12 +12,11 @@ import type {
   ListMatchesQuery,
   ListMatchesResponse,
   MatchDetail,
-  MacroPicksResponse,
   PointsResponse,
   PreTournamentSummary,
   PublicBootstrap,
-  SaveMacroPicksInput,
-  SaveMacroPicksResponse,
+  SaveChampionPickInput,
+  SaveChampionPickResponse,
   SaveMatchPredictionInput,
   SaveMatchPredictionResponse,
   TuMundialResponse,
@@ -24,8 +24,9 @@ import type {
   UserProfile
 } from "@prode/shared";
 import {
-  confirmMacroAdjustmentInputSchema,
-  confirmMacroAdjustmentResponseSchema,
+  adjustChampionInputSchema,
+  adjustChampionResponseSchema,
+  championPickResponseSchema,
   createLeagueInputSchema,
   joinLeagueInputSchema,
   leagueDetailSchema,
@@ -34,12 +35,11 @@ import {
   listMyLeaguesResponseSchema,
   listMatchesResponseSchema,
   matchDetailSchema,
-  macroPicksResponseSchema,
   pointsResponseSchema,
   preTournamentSummarySchema,
   publicBootstrapSchema,
-  saveMacroPicksInputSchema,
-  saveMacroPicksResponseSchema,
+  saveChampionPickInputSchema,
+  saveChampionPickResponseSchema,
   saveMatchPredictionResponseSchema,
   tuMundialResponseSchema,
   userProfileSchema
@@ -154,21 +154,21 @@ export async function getTuMundial(token: string): Promise<TuMundialResponse> {
   return tuMundialResponseSchema.parse(await parseJson<TuMundialResponse>(response));
 }
 
-export async function getMacroPicks(token: string): Promise<MacroPicksResponse> {
+export async function getChampionPick(token: string): Promise<ChampionPickResponse> {
   const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks`, {
     cache: "no-store",
     headers: withBearer(token)
   });
 
   if (!response.ok) {
-    throw await buildApiError(response, `Failed to load macro picks (${response.status}).`);
+    throw await buildApiError(response, `Failed to load champion pick (${response.status}).`);
   }
 
-  return macroPicksResponseSchema.parse(await parseJson<MacroPicksResponse>(response));
+  return championPickResponseSchema.parse(await parseJson<ChampionPickResponse>(response));
 }
 
-export async function saveMacroPicks(token: string, input: SaveMacroPicksInput): Promise<SaveMacroPicksResponse> {
-  const payload = saveMacroPicksInputSchema.parse(input);
+export async function saveChampionPick(token: string, input: SaveChampionPickInput): Promise<SaveChampionPickResponse> {
+  const payload = saveChampionPickInputSchema.parse(input);
   const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks`, {
     method: "PUT",
     headers: {
@@ -179,17 +179,17 @@ export async function saveMacroPicks(token: string, input: SaveMacroPicksInput):
   });
 
   if (!response.ok) {
-    throw await buildApiError(response, `Failed to save macro picks (${response.status}).`);
+    throw await buildApiError(response, `Failed to save champion pick (${response.status}).`);
   }
 
-  return saveMacroPicksResponseSchema.parse(await parseJson<SaveMacroPicksResponse>(response));
+  return saveChampionPickResponseSchema.parse(await parseJson<SaveChampionPickResponse>(response));
 }
 
-export async function confirmMacroAdjustment(
+export async function adjustChampionPick(
   token: string,
-  input: ConfirmMacroAdjustmentInput
-): Promise<ConfirmMacroAdjustmentResponse> {
-  const payload = confirmMacroAdjustmentInputSchema.parse(input);
+  input: AdjustChampionInput
+): Promise<AdjustChampionResponse> {
+  const payload = adjustChampionInputSchema.parse(input);
   const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/adjustment`, {
     method: "POST",
     headers: {
@@ -200,10 +200,10 @@ export async function confirmMacroAdjustment(
   });
 
   if (!response.ok) {
-    throw await buildApiError(response, `Failed to confirm macro adjustment (${response.status}).`);
+    throw await buildApiError(response, `Failed to confirm champion adjustment (${response.status}).`);
   }
 
-  return confirmMacroAdjustmentResponseSchema.parse(await parseJson<ConfirmMacroAdjustmentResponse>(response));
+  return adjustChampionResponseSchema.parse(await parseJson<AdjustChampionResponse>(response));
 }
 
 export async function getPoints(token: string): Promise<PointsResponse> {

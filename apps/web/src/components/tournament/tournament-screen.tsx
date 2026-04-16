@@ -73,7 +73,7 @@ export function TournamentScreenView({
             {isPreTournament ? "Continuar mis predicciones" : "Volver al home en vivo"}
           </Button>
           <Button variant="secondary" onClick={onOpenMacroPicks}>
-            Abrir Macro Picks
+            Tu Campeon
           </Button>
           <Button variant="ghost" onClick={onOpenMatches}>
             Ver calendario

@@ -1,22 +1,22 @@
 import { firestore } from "../../../server/firebase/firebase-admin";
-import type { StoredMacroTournamentResults } from "../types";
+import type { StoredChampionResult } from "../types";
 
-const macroResultsCollection = firestore.collection("macroResults");
+const championResultsCollection = firestore.collection("championResults");
 
-export class MacroResultsRepository {
-  async getByTournamentId(tournamentId: string): Promise<StoredMacroTournamentResults | null> {
-    const snapshot = await macroResultsCollection.doc(tournamentId).get();
+export class ChampionResultsRepository {
+  async getByTournamentId(tournamentId: string): Promise<StoredChampionResult | null> {
+    const snapshot = await championResultsCollection.doc(tournamentId).get();
 
     if (!snapshot.exists) {
       return null;
     }
 
-    return snapshot.data() as StoredMacroTournamentResults;
+    return snapshot.data() as StoredChampionResult;
   }
 
-  async upsert(results: StoredMacroTournamentResults): Promise<void> {
-    await macroResultsCollection.doc(results.tournamentId).set(results, { merge: true });
+  async upsert(results: StoredChampionResult): Promise<void> {
+    await championResultsCollection.doc(results.tournamentId).set(results, { merge: true });
   }
 }
 
-export const macroResultsRepository = new MacroResultsRepository();
+export const championResultsRepository = new ChampionResultsRepository();

@@ -1,25 +1,15 @@
-export const MACRO_GROUP_IDS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"] as const;
+export const CHAMPION_SCORING_RULES = {
+  originalCorrectPoints: 25,
+  adjustedCorrectPoints: 10,
+} as const;
 
-export const MACRO_PICKS_STATUSES = [
-  "not_started",
-  "draft_editable",
-  "submitted_editable",
-  "locked_original",
+export const CHAMPION_PICK_STATUSES = [
+  "empty",
+  "picked",
+  "locked",
   "adjustment_available",
-  "adjusted_locked",
-  "fully_scored"
+  "adjusted",
+  "scored",
 ] as const;
 
-export const MACRO_PICKS_ADJUSTMENT_PENALTY_MODEL = {
-  finalistPoints: 5,
-  championPoints: 12
-} as const;
-
-export const MACRO_SCORING_RULES = {
-  groupPositionExactPoints: 10,
-  groupQualifiedWrongOrderPoints: 5,
-  finalistPoints: 10,
-  championPoints: 25,
-  adjustedFinalistPoints: MACRO_PICKS_ADJUSTMENT_PENALTY_MODEL.finalistPoints,
-  adjustedChampionPoints: MACRO_PICKS_ADJUSTMENT_PENALTY_MODEL.championPoints
-} as const;
+export type ChampionPickStatus = (typeof CHAMPION_PICK_STATUSES)[number];

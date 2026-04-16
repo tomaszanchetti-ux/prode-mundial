@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { mock, test } from "node:test";
-import type { MacroTournamentResults } from "./macro-scoring-engine";
 
 process.env.FIREBASE_PROJECT_ID ??= "demo-prode";
 process.env.FIREBASE_CLIENT_EMAIL ??= "firebase-adminsdk@test.local";
@@ -8,9 +7,9 @@ process.env.FIREBASE_PRIVATE_KEY ??=
   "-----BEGIN RSA PRIVATE KEY-----\nMIIBOgIBAAJBAMfe9B1wxxL2Bkwvs71MaSBu5LUirhmHsarDuqsbonKnZuXeQVoc\n+3v6INANIlMAPbyX3IiSTidqwa3JEsmMxtkCAwEAAQJBAKUwcsfmTtIv/jJ3dnEs\ntvI0VNgUKpo1GTUOgbgrpc5lcPAeFlSIId8ZyiBd/KBT2js/ierOgmL/EgzGaMep\nHhECIQDjASMe4DBkuZzyJrDcTREaXmZRr0ZaqRty5SXzR5KpbQIhAOFmkl95xoV5\nW8NoK4k0vvECPV8cKY/KK2IHq3BRUfudAiATkRiG48ooFHu7v6wFATuVK0fkiJgm\n3ma4S5ou0x+ILQIgJFtSItpWnjLsDUHhO9lpLyDIW24EejAG/WH1UkGbsrUCIHS+\n+BtOHeKqgGjtfGbuovhxUIIDnPmB1eKWSrihDXKA\n-----END RSA PRIVATE KEY-----\n";
 
 const [
-  { scoreMacroPredictionForUser },
-  { macroPicksRepository },
-  { macroScoringLogsRepository },
+  { scoreChampionPredictionForUser },
+  { championPicksRepository },
+  { championScoringLogsRepository },
   { leagueMembersRepository },
   { predictionsRepository },
   { usersRepository },
@@ -25,39 +24,27 @@ const [
   import("../../leagues/repositories/league-standings-repository")
 ]);
 
-test("scoreMacroPredictionForUser persists macro points and rebuilds affected standings", async () => {
-  const getPredictionMock = mock.method(macroPicksRepository, "getByUserId", async () => ({
+test("scoreChampionPredictionForUser persists champion points and rebuilds affected standings", async () => {
+  const getPredictionMock = mock.method(championPicksRepository, "getByUserId", async () => ({
     userId: "usr_1",
-    groupPicks: {
-      A: { firstTeamId: "ARG", secondTeamId: "MEX" }
-    },
-    finalists: ["ARG", "BRA"],
-    champion: "ARG",
+    championTeamId: "ARG",
+    adjustedChampionTeamId: null,
     isLocked: true,
-    isSubmitted: true,
     isAdjusted: false,
-    adjustedAt: null,
-    adjustedFinalists: null,
-    adjustedChampion: null,
     createdAt: "2026-06-01T00:00:00Z",
     updatedAt: "2026-06-01T00:00:00Z",
-    lockedAt: "2026-06-11T19:00:00Z"
+    lockedAt: "2026-06-11T19:00:00Z",
+    adjustedAt: null
   }));
-  const upsertLogMock = mock.method(macroScoringLogsRepository, "upsert", async () => undefined);
-  const listMacroLogsMock = mock.method(macroScoringLogsRepository, "listByUserId", async () => [
+  const upsertLogMock = mock.method(championScoringLogsRepository, "upsert", async () => undefined);
+  const listScoringLogsMock = mock.method(championScoringLogsRepository, "listByUserId", async () => [
     {
       userId: "usr_1",
       tournamentId: "wc2026",
-      totalPoints: 65,
-      breakdown: {
-        groupPoints: 20,
-        finalistsPoints: 20,
-        championPoints: 25,
-        adjustmentPenaltyApplied: false,
-        totalPoints: 65
-      },
-      isAdjusted: false,
-      createdAt: "2026-07-20T12:00:00Z"
+      totalPoints: 25,
+      championPoints: 25,
+      wasAdjusted: false,
+      scoredAt: "2026-07-20T12:00:00Z"
     }
   ]);
   const membershipsMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => [
@@ -88,8 +75,8 @@ test("scoreMacroPredictionForUser persists macro points and rebuilds affected st
       email: "tomas@test.dev",
       country: null,
       photoUrl: null,
-      totalPoints: 65,
-      macroPoints: 65,
+      totalPoints: 25,
+      macroPoints: 25,
       exactHits: 0,
       correctSigns: 0,
       leaguesCount: 1,
@@ -99,27 +86,21 @@ test("scoreMacroPredictionForUser persists macro points and rebuilds affected st
   const replaceStandingsMock = mock.method(leagueStandingsRepository, "replaceStandings", async () => undefined);
 
   try {
-    const result = await scoreMacroPredictionForUser(
+    const result = await scoreChampionPredictionForUser(
       "usr_1",
       "wc2026",
-      {
-        groups: {
-          A: { firstTeamId: "ARG", secondTeamId: "MEX" }
-        } as MacroTournamentResults["groups"],
-        finalists: ["ARG", "BRA"],
-        champion: "ARG"
-      },
+      "ARG",
       "2026-07-20T12:00:00Z"
     );
 
-    assert.equal(result.totalPoints, 65);
+    assert.equal(result.totalPoints, 25);
     assert.equal(upsertLogMock.mock.callCount(), 1);
     assert.equal(upsertProfileMock.mock.callCount(), 1);
     assert.equal(replaceStandingsMock.mock.callCount(), 1);
   } finally {
     getPredictionMock.mock.restore();
     upsertLogMock.mock.restore();
-    listMacroLogsMock.mock.restore();
+    listScoringLogsMock.mock.restore();
     membershipsMock.mock.restore();
     membershipsByLeagueMock.mock.restore();
     listPredictionsMock.mock.restore();

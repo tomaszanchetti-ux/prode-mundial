@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { mock, test } from "node:test";
-import type { MacroTournamentResults } from "@prode/shared";
 
 process.env.FIREBASE_PROJECT_ID ??= "demo-prode";
 process.env.FIREBASE_CLIENT_EMAIL ??= "firebase-adminsdk@test.local";
@@ -9,9 +8,9 @@ process.env.FIREBASE_PRIVATE_KEY ??=
 
 const [
   batchModule,
-  { macroPicksRepository },
-  { macroResultsRepository },
-  { macroScoringLogsRepository },
+  { championPicksRepository },
+  { championResultsRepository },
+  { championScoringLogsRepository },
   { leagueMembersRepository },
   { predictionsRepository },
   { usersRepository },
@@ -27,51 +26,26 @@ const [
   import("../../leagues/repositories/league-standings-repository")
 ]);
 
-function buildResults(): MacroTournamentResults {
-  return {
-    groups: {
-      A: { firstTeamId: "ARG", secondTeamId: "MEX" },
-      B: { firstTeamId: "BRA", secondTeamId: "ESP" },
-      C: { firstTeamId: "FRA", secondTeamId: "GER" },
-      D: { firstTeamId: "POR", secondTeamId: "URU" },
-      E: { firstTeamId: "ENG", secondTeamId: "NED" },
-      F: { firstTeamId: "BEL", secondTeamId: "CRO" },
-      G: { firstTeamId: "USA", secondTeamId: "JPN" },
-      H: { firstTeamId: "MEX", secondTeamId: "SUI" },
-      I: { firstTeamId: "ARG", secondTeamId: "COL" },
-      J: { firstTeamId: "BRA", secondTeamId: "PAR" },
-      K: { firstTeamId: "ESP", secondTeamId: "MAR" },
-      L: { firstTeamId: "GER", secondTeamId: "DEN" }
-    },
-    finalists: ["ARG", "BRA"],
-    champion: "ARG"
-  };
-}
-
-test("scoreMacroBatch scores all submitted macro predictions for a tournament", async () => {
-  const listSubmittedMock = mock.method(macroPicksRepository, "listSubmitted", async () => [
+test("scoreMacroBatch scores all champion predictions for a tournament", async () => {
+  const listAllMock = mock.method(championPicksRepository, "listAll", async () => [
     {
       userId: "usr_1",
-      groupPicks: buildResults().groups,
-      finalists: ["ARG", "BRA"],
-      champion: "ARG",
+      championTeamId: "ARG",
+      adjustedChampionTeamId: null,
       isLocked: true,
-      isSubmitted: true,
       isAdjusted: false,
-      adjustedAt: null,
-      adjustedFinalists: null,
-      adjustedChampion: null,
       createdAt: "2026-06-01T00:00:00Z",
       updatedAt: "2026-06-01T00:00:00Z",
-      lockedAt: "2026-06-11T19:00:00Z"
+      lockedAt: "2026-06-11T19:00:00Z",
+      adjustedAt: null
     }
   ]);
-  const getResultsMock = mock.method(macroResultsRepository, "getByTournamentId", async () => ({
+  const getResultsMock = mock.method(championResultsRepository, "getByTournamentId", async () => ({
     tournamentId: "wc2026",
-    ...buildResults(),
+    championTeamId: "ARG",
     updatedAt: "2026-07-20T12:00:00Z"
   }));
-  const upsertLogMock = mock.method(macroScoringLogsRepository, "upsert", async () => undefined);
+  const upsertLogMock = mock.method(championScoringLogsRepository, "upsert", async () => undefined);
   const membershipsByUserMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => [
     { membershipId: "lm_1", leagueId: "league_1", userId: "usr_1", role: "owner", joinedAt: "2026-06-01T00:00:00Z" }
   ]);
@@ -92,20 +66,14 @@ test("scoreMacroBatch scores all submitted macro predictions for a tournament", 
     leaguesCount: 1,
     profileCompleted: true
   }));
-  const listLogsByUserMock = mock.method(macroScoringLogsRepository, "listByUserId", async () => [
+  const listLogsByUserMock = mock.method(championScoringLogsRepository, "listByUserId", async () => [
     {
       userId: "usr_1",
       tournamentId: "wc2026",
-      totalPoints: 165,
-      breakdown: {
-        groupPoints: 120,
-        finalistsPoints: 20,
-        championPoints: 25,
-        adjustmentPenaltyApplied: false,
-        totalPoints: 165
-      },
-      isAdjusted: false,
-      createdAt: "2026-07-20T12:00:00Z"
+      totalPoints: 25,
+      championPoints: 25,
+      wasAdjusted: false,
+      scoredAt: "2026-07-20T12:00:00Z"
     }
   ]);
   const upsertProfileMock = mock.method(usersRepository, "upsertProfile", async () => undefined);
@@ -116,8 +84,8 @@ test("scoreMacroBatch scores all submitted macro predictions for a tournament", 
       email: "tomas@test.dev",
       country: null,
       photoUrl: null,
-      totalPoints: 165,
-      macroPoints: 165,
+      totalPoints: 25,
+      macroPoints: 25,
       exactHits: 0,
       correctSigns: 0,
       leaguesCount: 1,
@@ -135,7 +103,7 @@ test("scoreMacroBatch scores all submitted macro predictions for a tournament", 
     assert.equal(upsertProfileMock.mock.callCount(), 1);
     assert.equal(replaceStandingsMock.mock.callCount(), 1);
   } finally {
-    listSubmittedMock.mock.restore();
+    listAllMock.mock.restore();
     getResultsMock.mock.restore();
     upsertLogMock.mock.restore();
     membershipsByUserMock.mock.restore();
@@ -150,24 +118,18 @@ test("scoreMacroBatch scores all submitted macro predictions for a tournament", 
 });
 
 test("rebuildMacroScoring clears old logs before recomputing the tournament", async () => {
-  const listByTournamentMock = mock.method(macroScoringLogsRepository, "listByTournamentId", async () => [
+  const listByTournamentMock = mock.method(championScoringLogsRepository, "listByTournamentId", async () => [
     {
       userId: "usr_old",
       tournamentId: "wc2026",
-      totalPoints: 12,
-      breakdown: {
-        groupPoints: 0,
-        finalistsPoints: 0,
-        championPoints: 12,
-        adjustmentPenaltyApplied: true,
-        totalPoints: 12
-      },
-      isAdjusted: true,
-      createdAt: "2026-07-19T12:00:00Z"
+      totalPoints: 10,
+      championPoints: 10,
+      wasAdjusted: true,
+      scoredAt: "2026-07-19T12:00:00Z"
     }
   ]);
-  const deleteMock = mock.method(macroScoringLogsRepository, "deleteByTournamentId", async () => 1);
-  const listSubmittedMock = mock.method(macroPicksRepository, "listSubmitted", async () => []);
+  const deleteMock = mock.method(championScoringLogsRepository, "deleteByTournamentId", async () => 1);
+  const listAllMock = mock.method(championPicksRepository, "listAll", async () => []);
   const membershipsByUserMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => []);
   const predictionsMock = mock.method(predictionsRepository, "listPredictionsByUser", async () => []);
   const findByUserIdMock = mock.method(usersRepository, "findByUserId", async () => ({
@@ -183,24 +145,30 @@ test("rebuildMacroScoring clears old logs before recomputing the tournament", as
     leaguesCount: 0,
     profileCompleted: true
   }));
-  const listLogsByUserMock = mock.method(macroScoringLogsRepository, "listByUserId", async () => []);
+  const listLogsByUserMock = mock.method(championScoringLogsRepository, "listByUserId", async () => []);
   const upsertProfileMock = mock.method(usersRepository, "upsertProfile", async () => undefined);
+  const getResultsMock = mock.method(championResultsRepository, "getByTournamentId", async () => ({
+    tournamentId: "wc2026",
+    championTeamId: "ARG",
+    updatedAt: "2026-07-20T12:00:00Z"
+  }));
 
   try {
-    const summary = await batchModule.rebuildMacroScoring("wc2026", buildResults());
+    const summary = await batchModule.rebuildMacroScoring("wc2026");
 
     assert.equal(summary.clearedLogs, 1);
     assert.equal(summary.usersProcessed, 0);
     assert.equal(deleteMock.mock.callCount(), 1);
-    assert.equal(listSubmittedMock.mock.callCount(), 1);
+    assert.equal(listAllMock.mock.callCount(), 1);
   } finally {
     listByTournamentMock.mock.restore();
     deleteMock.mock.restore();
-    listSubmittedMock.mock.restore();
+    listAllMock.mock.restore();
     membershipsByUserMock.mock.restore();
     predictionsMock.mock.restore();
     findByUserIdMock.mock.restore();
     listLogsByUserMock.mock.restore();
     upsertProfileMock.mock.restore();
+    getResultsMock.mock.restore();
   }
 });
