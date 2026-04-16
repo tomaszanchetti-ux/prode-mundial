@@ -10,7 +10,7 @@ function toGroupState(group: TuMundialGroupCard) {
   if (group.completedMatches === 0) {
     return {
       label: "Abierto",
-      tone: "locked" as const
+      tone: "neutral" as const
     };
   }
 

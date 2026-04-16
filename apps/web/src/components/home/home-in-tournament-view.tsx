@@ -78,7 +78,7 @@ export function HomeInTournamentView({
           }}
           metaLabel={`${toStageLabel(priorityMatch, locale)} · ${toKickoffLabel(priorityMatch.kickoffAt, locale)}`}
           onAction={() => onOpenMatch(priorityMatch.matchId)}
-          status={canEditPrediction(priorityMatch) ? "editable" : "locked"}
+          status={canEditPrediction(priorityMatch) ? "editable" : "neutral"}
           statusLabel={canEditPrediction(priorityMatch) ? copyForLocale(locale, "Pendiente", "Pending") : copyForLocale(locale, "Cerrado", "Locked")}
           title={`${priorityMatch.homeTeam.name} vs ${priorityMatch.awayTeam.name}`}
         />
@@ -100,7 +100,7 @@ export function HomeInTournamentView({
             <span className="text-[14px] leading-[1.4] text-text-secondary">
               {copyForLocale(locale, "Se habilita", "It opens")} {toKickoffLabel(nextOpeningMatch.predictionOpensAt, locale)}
             </span>
-            <StatusTag status="locked" label={toCountdownLabel(nextOpeningMatch.predictionOpensAt, locale)} />
+            <StatusTag status="neutral" label={toCountdownLabel(nextOpeningMatch.predictionOpensAt, locale)} />
           </div>
 
           <Button variant="secondary" onClick={onOpenMatches}>

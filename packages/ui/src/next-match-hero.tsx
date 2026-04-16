@@ -22,12 +22,12 @@ export function NextMatchHero({
   return (
     <Card
       elevated
-      className={status === "locked" ? "hero-locked-bg" : "hero-editable-bg"}
+      className={status === "editable" ? "hero-editable-bg" : "hero-locked-bg"}
       style={{ padding: 0, overflow: "hidden" }}
     >
       {/* ── Eyebrow + Status ── */}
       <div className="flex justify-between items-center px-5 pt-5 pb-0">
-        <span className={`typo-eyebrow uppercase ${status === "locked" ? "text-gold" : "text-primary-500"}`}>
+        <span className={`typo-eyebrow uppercase ${status === "editable" ? "text-primary-500" : "text-gold"}`}>
           {eyebrow}
         </span>
         <StatusTag status={status} label={statusLabel} />

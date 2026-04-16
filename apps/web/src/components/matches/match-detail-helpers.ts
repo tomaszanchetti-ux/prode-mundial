@@ -48,7 +48,15 @@ export function toKickoffLabel(iso: string) {
   }).format(new Date(iso));
 }
 
-export function toStatusLabel(detail: MatchDetail) {
+// WS50: umbral de urgencia para tone "closing-soon" (2h antes del cierre).
+const CLOSING_SOON_THRESHOLD_MS = 2 * 60 * 60 * 1000;
+
+function isClosingSoon(deadlineIso: string, now = new Date()) {
+  const diffMs = new Date(deadlineIso).getTime() - now.getTime();
+  return diffMs > 0 && diffMs <= CLOSING_SOON_THRESHOLD_MS;
+}
+
+export function toStatusLabel(detail: MatchDetail, now = new Date()) {
   if (detail.predictionStatus === "scored") {
     return "Puntuado";
   }
@@ -58,7 +66,7 @@ export function toStatusLabel(detail: MatchDetail) {
   }
 
   if (!canEditPrediction(detail)) {
-    if (isPredictionWindowNotOpen(detail)) {
+    if (isPredictionWindowNotOpen(detail, now)) {
       return "Abre pronto";
     }
 
@@ -69,10 +77,14 @@ export function toStatusLabel(detail: MatchDetail) {
     return "Guardado";
   }
 
+  if (isClosingSoon(detail.deadlineAt, now)) {
+    return "Cierra pronto";
+  }
+
   return "Pendiente";
 }
 
-export function toStatusTone(detail: MatchDetail) {
+export function toStatusTone(detail: MatchDetail, now = new Date()) {
   if (detail.predictionStatus === "scored") {
     return "scored" as const;
   }
@@ -82,7 +94,15 @@ export function toStatusTone(detail: MatchDetail) {
   }
 
   if (!canEditPrediction(detail)) {
-    return "locked" as const;
+    return "neutral" as const;
+  }
+
+  if (detail.userPrediction) {
+    return "saved" as const;
+  }
+
+  if (isClosingSoon(detail.deadlineAt, now)) {
+    return "closing-soon" as const;
   }
 
   return "editable" as const;

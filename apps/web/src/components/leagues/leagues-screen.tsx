@@ -137,7 +137,7 @@ export function LeaguesScreenView({
                     {league.membersCount}/{league.memberLimit} jugadores · {league.inviteCode}
                   </span>
                 </div>
-                <StatusTag status={league.isActive ? "editable" : "locked"} label={league.isActive ? "Activa" : "Cerrada"} />
+                <StatusTag status={league.isActive ? "editable" : "neutral"} label={league.isActive ? "Activa" : "Cerrada"} />
               </div>
 
               <div className="flex items-center gap-3 py-1">

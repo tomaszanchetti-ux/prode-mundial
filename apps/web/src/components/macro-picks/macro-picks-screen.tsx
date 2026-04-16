@@ -77,7 +77,7 @@ function resolveTeamData(teamId: string) {
   };
 }
 
-type StatusMeta = { label: string; tone: "editable" | "locked" | "live" | "scored"; description: string };
+type StatusMeta = { label: string; tone: "editable" | "saved" | "closing-soon" | "live" | "scored" | "neutral"; description: string };
 
 function resolveStatusMeta(status: ChampionPickResponse["status"]): StatusMeta {
   switch (status) {
@@ -86,11 +86,11 @@ function resolveStatusMeta(status: ChampionPickResponse["status"]): StatusMeta {
     case "picked":
       return { label: "Elegido", tone: "editable", description: "Tu campeon esta guardado. Podes cambiarlo hasta el inicio del torneo." };
     case "locked":
-      return { label: "Bloqueado", tone: "locked", description: "El torneo empezo. Tu pick original esta congelado." };
+      return { label: "Bloqueado", tone: "neutral", description: "El torneo empezo. Tu pick original esta congelado." };
     case "adjustment_available":
       return { label: "Ajuste disponible", tone: "live", description: "La fase de grupos termino. Podes cambiar tu campeon, pero suma 10 pts en vez de 25." };
     case "adjusted":
-      return { label: "Ajustado", tone: "locked", description: "Tu campeon ajustado quedo guardado. Si acertas, sumas 10 pts." };
+      return { label: "Ajustado", tone: "neutral", description: "Tu campeon ajustado quedo guardado. Si acertas, sumas 10 pts." };
     case "scored":
       return { label: "Puntuado", tone: "scored", description: "Los puntos de tu campeon ya fueron calculados." };
   }
@@ -310,7 +310,7 @@ export function MacroPicksScreen() {
           {data?.scoringResult ? (
             <div className="flex items-center gap-2 mt-1">
               <StatusTag
-                status={data.scoringResult.points > 0 ? "scored" : "locked"}
+                status={data.scoringResult.points > 0 ? "scored" : "neutral"}
                 label={`${data.scoringResult.points} pts`}
               />
               {data.scoringResult.wasAdjusted ? (

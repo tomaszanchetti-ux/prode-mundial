@@ -138,14 +138,21 @@
     letter-spacing: 0.04em;
     transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
   }
-  .status-pending  { background: rgba(0, 82, 204, 0.06); color: var(--color-primary-500); border: 1px solid rgba(0, 82, 204, 0.10); }
-  .status-editable { background: var(--color-primary-soft); color: var(--color-primary-600); border: 1px solid rgba(0, 82, 204, 0.18); }
-  .status-partial  { background: rgba(245, 166, 35, 0.10); color: #92650A; border: 1px solid rgba(245, 166, 35, 0.20); }
-  .status-live     { background: rgba(229, 72, 77, 0.10); color: #B42318; border: 1px solid rgba(229, 72, 77, 0.24); }
-  .status-settled  { background: rgba(24, 169, 87, 0.08); color: #0F7A3F; border: 1px solid rgba(24, 169, 87, 0.18); }
-  .status-scored   { background: rgba(24, 169, 87, 0.08); color: #0F7A3F; border: 1px solid rgba(24, 169, 87, 0.18); }
-  .status-closed   { background: var(--color-bg-muted); color: var(--color-text-muted); border: 1px solid var(--color-border-subtle); }
-  .status-locked   { background: var(--color-bg-muted); color: var(--color-text-muted); border: 1px solid var(--color-border-subtle); }
+  /*
+   * Sistema semántico (WS50 / Fase 2 ronda 2):
+   *   editable      → azul (acción disponible)
+   *   saved         → verde (hecho)
+   *   scored        → verde (ya puntuado; mismo verde que saved, se diferencia por label)
+   *   closing-soon  → amarillo (urgencia: empty + editable + deadline ≤ 2h)
+   *   live          → rojo (en curso)
+   *   neutral       → gris (no accionable: opens-later, locked sin predecir, etc.)
+   */
+  .status-editable     { background: var(--color-primary-soft); color: var(--color-primary-600); border: 1px solid rgba(0, 82, 204, 0.18); }
+  .status-saved        { background: rgba(24, 169, 87, 0.10); color: #0F7A3F; border: 1px solid rgba(24, 169, 87, 0.24); }
+  .status-scored       { background: rgba(24, 169, 87, 0.10); color: #0F7A3F; border: 1px solid rgba(24, 169, 87, 0.24); }
+  .status-closing-soon { background: rgba(245, 166, 35, 0.12); color: #8A5A00; border: 1px solid rgba(245, 166, 35, 0.30); }
+  .status-live         { background: rgba(229, 72, 77, 0.10); color: #B42318; border: 1px solid rgba(229, 72, 77, 0.24); }
+  .status-neutral      { background: var(--color-bg-muted); color: var(--color-text-muted); border: 1px solid var(--color-border-subtle); }
 
   /* ── Card ── */
   .card-base {

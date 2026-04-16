@@ -95,7 +95,15 @@ export function toStageLabel(stage: MatchStage, groupId: string | null, locale: 
   return labels[locale][stage as keyof (typeof labels)["es"]] ?? stage;
 }
 
-export function toCardTone(match: MatchSummary) {
+// WS50: umbral de urgencia para tone "closing-soon" (2h antes del cierre de predicciones).
+export const CLOSING_SOON_THRESHOLD_MS = 2 * 60 * 60 * 1000;
+
+function isClosingSoon(deadlineIso: string, now = new Date()) {
+  const diffMs = new Date(deadlineIso).getTime() - now.getTime();
+  return diffMs > 0 && diffMs <= CLOSING_SOON_THRESHOLD_MS;
+}
+
+export function toCardTone(match: MatchSummary, now = new Date()) {
   if (match.isScored || match.predictionStatus === "scored") {
     return "scored" as const;
   }
@@ -105,13 +113,22 @@ export function toCardTone(match: MatchSummary) {
   }
 
   if (!canEditPrediction(match)) {
-    return "locked" as const;
+    return "neutral" as const;
+  }
+
+  // Editable: si hay predicción guardada → verde; si empty y cierra pronto → amarillo; si no → azul.
+  if (match.predictionStatus === "saved_editable") {
+    return "saved" as const;
+  }
+
+  if (isClosingSoon(match.deadlineAt, now)) {
+    return "closing-soon" as const;
   }
 
   return "editable" as const;
 }
 
-export function toStatusLabel(match: MatchSummary) {
+export function toStatusLabel(match: MatchSummary, now = new Date()) {
   if (match.predictionStatus === "scored") {
     return "Puntuado";
   }
@@ -120,7 +137,7 @@ export function toStatusLabel(match: MatchSummary) {
     return "En vivo";
   }
 
-  if (isPredictionWindowNotOpen(match)) {
+  if (isPredictionWindowNotOpen(match, now)) {
     return "Abre despues";
   }
 
@@ -130,6 +147,10 @@ export function toStatusLabel(match: MatchSummary) {
 
   if (match.predictionStatus === "saved_editable") {
     return "Guardado";
+  }
+
+  if (isClosingSoon(match.deadlineAt, now)) {
+    return "Cierra pronto";
   }
 
   return "Pendiente";

@@ -110,7 +110,7 @@ export function HomePreTournamentView({
           }}
           metaLabel={`${toStageLabel(heroMatch, locale)} · ${toKickoffLabel(heroMatch.kickoffAt, locale)}`}
           onAction={() => onOpenMatch(heroMatch.matchId)}
-          status={heroIsEditable ? "editable" : "locked"}
+          status={heroIsEditable ? "editable" : "neutral"}
           statusLabel={heroStatusLabel}
           title={`${heroMatch.homeTeam.name} vs ${heroMatch.awayTeam.name}`}
         />

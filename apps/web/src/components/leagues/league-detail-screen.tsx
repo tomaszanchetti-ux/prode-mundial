@@ -99,7 +99,7 @@ export function LeagueDetailScreen() {
                   {league.membersCount}/{league.memberLimit} jugadores
                 </p>
               </div>
-              <StatusTag status={league.isActive ? "editable" : "locked"} label={league.isActive ? "Activa" : "Inactiva"} />
+              <StatusTag status={league.isActive ? "editable" : "neutral"} label={league.isActive ? "Activa" : "Inactiva"} />
             </div>
             <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(120px,1fr))]">
               <Metric label="Codigo" value={league.inviteCode} />

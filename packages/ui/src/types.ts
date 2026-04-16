@@ -9,7 +9,20 @@ import type {
 // ── Primitives ────────────────────────────────────────
 
 export type ButtonVariant = "primary" | "secondary" | "ghost";
-export type StatusTone = "editable" | "locked" | "live" | "scored";
+// Sistema semántico estricto (WS50 / Fase 2 ronda 2):
+//   editable      → acción disponible (azul)
+//   saved         → predicción guardada (verde)
+//   closing-soon  → empty + editable con deadline ≤ 2h (amarillo, urgencia)
+//   live          → partido en curso (rojo)
+//   scored        → partido ya puntuado (verde, se diferencia por label tipo "+12 pts")
+//   neutral       → cualquier estado no accionable (gris): opens-later, locked sin predecir, etc.
+export type StatusTone =
+  | "editable"
+  | "saved"
+  | "closing-soon"
+  | "live"
+  | "scored"
+  | "neutral";
 export type MatchCardStatus = StatusTone;
 
 // ── Component Props ───────────────────────────────────
