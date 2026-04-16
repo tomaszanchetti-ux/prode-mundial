@@ -16,3 +16,4 @@ export type { StageBadgeProps, TournamentStage } from "./stage-badge";
 export { SectionDivider } from "./section-divider";
 export type { SectionDividerProps } from "./section-divider";
 export { Skeleton, SkeletonCard, SkeletonMatchCard, SkeletonStandingRow } from "./skeleton";
+export { ErrorCard } from "./error-card";

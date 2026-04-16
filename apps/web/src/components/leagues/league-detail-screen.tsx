@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, SkeletonCard, StatusTag } from "@prode/ui";
+import { Button, Card, ErrorCard, SkeletonCard, StatusTag } from "@prode/ui";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getLeagueDetail } from "@/lib/api/client";
@@ -83,10 +83,7 @@ export function LeagueDetailScreen() {
       </Card>
 
       {errorMessage ? (
-        <Card elevated style={{ gap: 12 }}>
-          <p className="typo-body m-0 text-text-primary">{errorMessage}</p>
-          <Button onClick={() => setReloadKey((value) => value + 1)}>Reintentar</Button>
-        </Card>
+        <ErrorCard message={errorMessage} onRetry={() => setReloadKey((v) => v + 1)} />
       ) : null}
 
       {isLoading ? <SkeletonCard lines={3} /> : null}

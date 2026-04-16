@@ -4,7 +4,7 @@ import React from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useState } from "react";
 import type { LeagueDetail, LeagueSummary } from "@prode/shared";
-import { Button, Card, SkeletonCard, StatusTag } from "@prode/ui";
+import { Button, Card, ErrorCard, SkeletonCard, StatusTag } from "@prode/ui";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, createLeague, getMyLeagues, joinLeague } from "@/lib/api/client";
@@ -107,10 +107,7 @@ export function LeaguesScreenView({
       ) : null}
 
       {errorMessage ? (
-        <Card elevated style={{ gap: 12 }}>
-          <p className="typo-body m-0 text-text-primary">{errorMessage}</p>
-          <Button onClick={onRetry}>Reintentar</Button>
-        </Card>
+        <ErrorCard message={errorMessage} onRetry={onRetry} />
       ) : null}
 
       {isLoading ? (

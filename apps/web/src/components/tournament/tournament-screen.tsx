@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES, type MatchSummary, type PreTournamentSummary, type TuMundialGroupCard, type TuMundialResponse } from "@prode/shared";
-import { Button, Card, ProgressCompact, SkeletonCard, StatusTag } from "@prode/ui";
+import { Button, Card, ErrorCard, ProgressCompact, SkeletonCard, StatusTag } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MarathonPredictionModal } from "@/components/matches/marathon-prediction-modal";
 import { ApiClientError, getMatches, getPreTournamentSummary, getTuMundial } from "@/lib/api/client";
@@ -130,13 +130,7 @@ export function TournamentScreenView({
       ) : null}
 
       {errorMessage ? (
-        <div className="grid gap-2 p-4 rounded-md alert-error">
-          <strong className="text-[16px]">No pudimos cargar Tu Mundial</strong>
-          <p className="m-0 text-[14px] leading-[1.45]">{errorMessage}</p>
-          <Button variant="secondary" onClick={onRetry}>
-            Reintentar
-          </Button>
-        </div>
+        <ErrorCard title="No pudimos cargar Tu Mundial" message={errorMessage} onRetry={onRetry} />
       ) : null}
 
       <div className="grid gap-3">

@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Card, Skeleton, SkeletonMatchCard } from "@prode/ui";
+import { ErrorCard, Skeleton, SkeletonMatchCard } from "@prode/ui";
 
 type HomeErrorCardProps = {
   message: string;
@@ -7,15 +7,7 @@ type HomeErrorCardProps = {
 };
 
 export function HomeErrorCard({ message, onRetry }: HomeErrorCardProps) {
-  return (
-    <Card className="alert-error" style={{ gap: 8, padding: 16 }}>
-      <strong className="text-[16px]">No pudimos cargar tu home</strong>
-      <p className="m-0 text-[14px] leading-[1.45]">{message}</p>
-      <Button variant="secondary" onClick={onRetry}>
-        Reintentar
-      </Button>
-    </Card>
-  );
+  return <ErrorCard title="No pudimos cargar tu home" message={message} onRetry={onRetry} />;
 }
 
 export function HomeSkeletonCard() {

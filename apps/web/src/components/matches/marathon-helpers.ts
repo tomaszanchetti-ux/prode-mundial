@@ -66,12 +66,24 @@ export function toErrorMessage(error: unknown) {
     return error.message;
   }
 
+  if (error instanceof TypeError && error.message === "Failed to fetch") {
+    return "Sin conexion. Revisa tu internet e intentalo de nuevo.";
+  }
+
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return "La solicitud tardo demasiado. Intentalo de nuevo.";
+  }
+
   return error instanceof Error ? error.message : "No pudimos guardar tu prediccion.";
 }
 
 export function toLoadErrorMessage(error: unknown) {
   if (error instanceof ApiClientError && error.status === 404) {
     return "No encontramos este partido.";
+  }
+
+  if (error instanceof TypeError && error.message === "Failed to fetch") {
+    return "Sin conexion. Revisa tu internet e intentalo de nuevo.";
   }
 
   return error instanceof Error ? error.message : "No pudimos cargar el partido.";

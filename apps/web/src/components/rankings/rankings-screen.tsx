@@ -3,7 +3,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import type { LeagueStandingsResponse, LeagueSummary, PointsResponse } from "@prode/shared";
-import { Button, Card, SkeletonStandingRow, StatusTag } from "@prode/ui";
+import { Button, Card, ErrorCard, SkeletonStandingRow, StatusTag } from "@prode/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getLeagueStandings, getMyLeagues, getPoints } from "@/lib/api/client";
@@ -56,10 +56,7 @@ export function RankingsScreenView({
       </Card>
 
       {errorMessage ? (
-        <Card elevated style={{ gap: 12 }}>
-          <p className="typo-body m-0 text-text-primary">{errorMessage}</p>
-          <Button onClick={onRetry}>Reintentar</Button>
-        </Card>
+        <ErrorCard message={errorMessage} onRetry={onRetry} />
       ) : null}
 
       {points ? (

@@ -8,7 +8,7 @@ import type {
   SaveMacroPicksInput
 } from "@prode/shared";
 import { APP_ROUTES } from "@prode/shared";
-import { Button, Card, ProgressCompact, SkeletonCard, StatusTag } from "@prode/ui";
+import { Button, Card, ErrorCard, ProgressCompact, SkeletonCard, StatusTag } from "@prode/ui";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, confirmMacroAdjustment, getMacroPicks, saveMacroPicks } from "@/lib/api/client";
@@ -181,13 +181,7 @@ export function MacroPicksScreenView({
       ) : null}
 
       {errorMessage ? (
-        <div className="grid gap-2 p-4 rounded-md alert-error">
-          <strong className="text-[16px]">No pudimos cargar o guardar tus macro picks</strong>
-          <p className="m-0 text-[14px] leading-[1.45]">{errorMessage}</p>
-          <Button variant="secondary" onClick={onRetry}>
-            Reintentar
-          </Button>
-        </div>
+        <ErrorCard title="No pudimos procesar tus macro picks" message={errorMessage} onRetry={onRetry} />
       ) : null}
 
       {isLoading ? <SkeletonCard lines={3} /> : null}
