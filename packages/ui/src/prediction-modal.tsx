@@ -31,7 +31,7 @@ export function PredictionModal({
       aria-modal="true"
       className="fixed inset-0 modal-overlay flex items-end justify-center z-50"
     >
-      <div className="w-full max-w-[560px] max-h-[92vh] overflow-y-auto card-base grid gap-4 shadow-modal rounded-t-xl modal-content-bg">
+      <div className="w-full max-w-[560px] max-h-[92vh] overflow-y-auto card-base grid gap-4 shadow-modal rounded-t-xl modal-content-bg modal-sheet-enter">
         {/* ── Header: close + progress ── */}
         <div className="sticky top-0 z-10 modal-content-bg px-5 pt-4 pb-0 grid gap-3">
           <div className="flex justify-between items-center">

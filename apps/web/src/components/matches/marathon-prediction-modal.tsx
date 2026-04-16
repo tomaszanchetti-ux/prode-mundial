@@ -101,7 +101,7 @@ export function MarathonPredictionModalView({
     >
       <Card
         elevated
-        className="marathon-modal-bg w-full max-w-[620px] gap-3.5 rounded-t-[28px] rounded-b-lg"
+        className="marathon-modal-bg modal-sheet-enter w-full max-w-[620px] gap-3.5 rounded-t-[28px] rounded-b-lg"
       >
         <div className="flex justify-between items-start gap-3">
           <div className="grid gap-2">

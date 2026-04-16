@@ -136,6 +136,7 @@
     font-weight: 600;
     line-height: 1.35;
     letter-spacing: 0.04em;
+    transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
   }
   .status-pending  { background: rgba(0, 82, 204, 0.06); color: var(--color-primary-500); border: 1px solid rgba(0, 82, 204, 0.10); }
   .status-editable { background: var(--color-primary-soft); color: var(--color-primary-600); border: 1px solid rgba(0, 82, 204, 0.18); }
@@ -518,9 +519,13 @@
   .modal-overlay {
     background: var(--color-overlay);
     backdrop-filter: blur(4px);
+    animation: fade-in 200ms ease-out;
   }
   .modal-content-bg {
     background: var(--color-bg-elevated);
+  }
+  .modal-sheet-enter {
+    animation: slide-up 280ms cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   /* ── Matchup Panel ── */
@@ -659,4 +664,25 @@
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0.8; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes score-bump {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

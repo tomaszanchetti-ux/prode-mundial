@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { ScoreInputProps, TeamData } from "./types";
 import { normalizeScoreValue, resolveFlag, stepScoreValue } from "./helpers";
 
@@ -17,6 +17,17 @@ function ScoreStepper({
 }) {
   const safeValue = normalizeScoreValue(value);
   const disabledCls = disabled ? "cursor-not-allowed opacity-70" : "";
+  const [bumping, setBumping] = useState(false);
+  const prevValue = useRef(safeValue);
+
+  useEffect(() => {
+    if (safeValue !== prevValue.current) {
+      prevValue.current = safeValue;
+      setBumping(true);
+      const t = setTimeout(() => setBumping(false), 180);
+      return () => clearTimeout(t);
+    }
+  }, [safeValue]);
 
   const resolvedFlag = team ? resolveFlag(team) : null;
   const teamName = team?.teamName ?? team?.name ?? label;
@@ -33,6 +44,7 @@ function ScoreStepper({
       <div
         aria-live="polite"
         className="w-[88px] h-[88px] rounded-[22px] score-display-bg grid place-items-center text-[44px] font-extrabold leading-none select-none"
+        style={bumping ? { animation: "score-bump 180ms ease-out" } : undefined}
       >
         {safeValue === "" ? "0" : safeValue}
       </div>
