@@ -583,31 +583,6 @@
       linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%);
   }
 
-  /* ── Marathon Modal ── */
-  .marathon-modal-bg {
-    background:
-      radial-gradient(circle at top right, var(--color-gold-soft), transparent 32%),
-      radial-gradient(circle at left center, var(--color-primary-surface), transparent 36%),
-      #FFFFFF;
-    border: 1px solid var(--color-border-default);
-    box-shadow: var(--shadow-modal);
-  }
-  .marathon-progress-track {
-    width: 100%;
-    height: 8px;
-    border-radius: var(--radius-pill);
-    background: var(--color-bg-muted);
-    overflow: hidden;
-  }
-  .marathon-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--color-primary-500) 0%, var(--color-gold) 100%);
-  }
-  .marathon-matchup-panel {
-    background: var(--color-bg-muted);
-    border: 1px solid var(--color-border-default);
-  }
-
   /* ── Copy Button (inline) ── */
   .copy-btn {
     display: inline-flex;

@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES, type LeagueSummary, type MatchSummary, type PreTournamentSummary } from "@prode/shared";
 import { useAuth } from "@/components/auth/auth-provider";
-import { MarathonPredictionModal } from "@/components/matches/marathon-prediction-modal";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getMatches, getMyLeagues, getPreTournamentSummary } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
@@ -50,7 +49,6 @@ export function HomeScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
-  const [marathonStartMatchId, setMarathonStartMatchId] = useState<string | null>(null);
   const [dismissedCycle, setDismissedCycle] = useState(false);
 
   useEffect(() => {
@@ -105,14 +103,6 @@ export function HomeScreen() {
   }, [reloadKey, status, user]);
 
   const priorityMatch = useMemo(() => pickPriorityMatch(items), [items]);
-  const pendingGroupMatches = useMemo(
-    () =>
-      items
-        .filter((match) => match.stage === "group" && match.status === "scheduled" && !match.isFinished && match.predictionStatus !== "scored" && canEditPrediction(match))
-        .sort(compareMatchesChronologically),
-    [items]
-  );
-  const matchesById = useMemo(() => new Map(items.map((match) => [match.matchId, match])), [items]);
 
   useEffect(() => {
     if (isLoading || dismissedCycle || activeMatchId || !priorityMatch || preTournamentSummary?.isPreTournament) {
@@ -132,14 +122,7 @@ export function HomeScreen() {
         isLoading={isLoading}
         errorMessage={errorMessage}
         onRetry={() => setReloadKey((current) => current + 1)}
-        onOpenMatch={(matchId) => {
-          if (preTournamentSummary?.isPreTournament) {
-            setMarathonStartMatchId(matchId);
-            return;
-          }
-
-          setActiveMatchId(matchId);
-        }}
+        onOpenMatch={(matchId) => setActiveMatchId(matchId)}
         onOpenMatches={() => router.push(APP_ROUTES.matches)}
         onOpenLeagues={() => router.push(APP_ROUTES.leagues)}
         onOpenRankings={() => router.push(APP_ROUTES.rankings)}
@@ -171,15 +154,6 @@ export function HomeScreen() {
         }}
       />
 
-      <MarathonPredictionModal
-        isOpen={marathonStartMatchId !== null}
-        initialMatchId={marathonStartMatchId}
-        matchIds={pendingGroupMatches.map((match) => match.matchId)}
-        matchesById={matchesById}
-        preTournamentSummary={preTournamentSummary}
-        onClose={() => setMarathonStartMatchId(null)}
-        onSaved={() => setReloadKey((current) => current + 1)}
-      />
     </>
   );
 }

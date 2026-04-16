@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { APP_ROUTES, type MatchSummary, type PreTournamentSummary, type TuMundialGroupCard, type TuMundialResponse } from "@prode/shared";
 import { Button, Card, ErrorCard, ProgressCompact, SkeletonCard, StatusTag } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
-import { MarathonPredictionModal } from "@/components/matches/marathon-prediction-modal";
+import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getMatches, getPreTournamentSummary, getTuMundial } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
 import { GroupStandingsCard } from "./group-standings-card";
@@ -152,7 +152,7 @@ export function TournamentScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
-  const [marathonStartMatchId, setMarathonStartMatchId] = useState<string | null>(null);
+  const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -200,15 +200,14 @@ export function TournamentScreen() {
     };
   }, [reloadKey, status, user]);
 
-  const pendingGroupMatches = useMemo(
+  const editableMatches = useMemo(
     () =>
       items
-        .filter((match) => match.stage === "group" && match.predictionStatus !== "scored" && canEditPrediction(match))
+        .filter((match) => canEditPrediction(match))
         .sort(compareMatchesChronologically),
     [items]
   );
-  const matchesById = useMemo(() => new Map(items.map((match) => [match.matchId, match])), [items]);
-  const firstPendingMatchId = preTournamentSummary?.nextPendingMatchId ?? pendingGroupMatches[0]?.matchId ?? null;
+  const firstPendingMatchId = preTournamentSummary?.nextPendingMatchId ?? editableMatches[0]?.matchId ?? null;
 
   return (
     <>
@@ -218,7 +217,7 @@ export function TournamentScreen() {
         isLoading={isLoading}
         onContinuePredictions={() => {
           if (firstPendingMatchId) {
-            setMarathonStartMatchId(firstPendingMatchId);
+            setActiveMatchId(firstPendingMatchId);
             return;
           }
 
@@ -232,14 +231,23 @@ export function TournamentScreen() {
         profileDisplayName={profile?.displayName ?? null}
       />
 
-      <MarathonPredictionModal
-        isOpen={marathonStartMatchId !== null}
-        initialMatchId={marathonStartMatchId}
-        matchIds={pendingGroupMatches.map((match) => match.matchId)}
-        matchesById={matchesById}
-        preTournamentSummary={preTournamentSummary}
-        onClose={() => setMarathonStartMatchId(null)}
-        onSaved={() => setReloadKey((current) => current + 1)}
+      <QuickPredictionModal
+        matchId={activeMatchId}
+        isOpen={activeMatchId !== null}
+        hasNextPending={editableMatches.filter((m) => m.matchId !== activeMatchId).length > 0}
+        onClose={() => setActiveMatchId(null)}
+        onSaved={() => {
+          const remaining = editableMatches
+            .filter((m) => m.matchId !== activeMatchId);
+          const nextMatch = remaining.find((m) => m.predictionStatus === "empty") ?? remaining[0] ?? null;
+
+          if (nextMatch) {
+            setActiveMatchId(nextMatch.matchId);
+          } else {
+            setActiveMatchId(null);
+          }
+          setReloadKey((current) => current + 1);
+        }}
       />
     </>
   );
