@@ -4,6 +4,7 @@ import { AdSlotCard, Button, Card, NextMatchHero, ProgressCompact } from "@prode
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
 import {
+  pickPriorityMatch,
   toCompletionCopy,
   toCountdownLabel,
   toKickoffLabel,
@@ -42,8 +43,10 @@ export function HomePreTournamentView({
   onOpenTournament
 }: HomePreTournamentViewProps) {
   const { locale } = useLocale();
-  const nextPreTournamentMatch =
-    items.find((match) => match.matchId === preTournamentSummary.nextPendingMatchId) ?? null;
+  // Usa pickPriorityMatch (ordena por kickoff, considera todos los partidos editables)
+  // en vez de preTournamentSummary.nextPendingMatchId del backend, que solo mira grupos
+  // sin ordenar cronológicamente.
+  const nextPreTournamentMatch = pickPriorityMatch(items);
 
   return (
     <div className="grid gap-4">

@@ -174,7 +174,7 @@ export function MatchesScreenView({
                 flagUrl: match.homeTeam.flagUrl
               }}
               kickoffLabel={toLocalKickoffLabel(match.kickoffAt, locale)}
-              onAction={() => onOpenMatch(match.matchId)}
+              onAction={() => onOpenQuickPredict(match.matchId)}
               predictionSummary={toPredictionCopy(match, locale)}
               resultSummary={toResultCopy(match, locale)}
               stage={match.stage}
