@@ -468,6 +468,13 @@
     border: 1px dashed var(--color-border-default);
   }
 
+  /* ── Group Table ── */
+  .group-row-qualified {
+    background: var(--color-primary-soft);
+    border: 1px solid rgba(0, 82, 204, 0.18);
+    border-left: 3px solid var(--color-primary-500);
+  }
+
   /* ── Standings ── */
   .standing-me { background: rgba(47, 107, 255, 0.14); border: 1px solid var(--color-primary-500); }
   .standing-leader { background: rgba(231, 198, 106, 0.14); border: 1px solid var(--color-gold); }
