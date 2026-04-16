@@ -1,7 +1,7 @@
 import React from "react";
 import type { PredictionModalProps } from "./types";
 import { Button } from "./button";
-import { TeamIdentityRow } from "./team";
+import { TeamIdentity } from "./team";
 
 export function PredictionModal({
   awayTeam,
@@ -40,9 +40,9 @@ export function PredictionModal({
         </div>
 
         <div className="grid gap-3 p-4.5 rounded-lg matchup-panel-bg">
-          <TeamIdentityRow {...homeTeam} align="center" size="lg" weight={700} />
+          <TeamIdentity team={homeTeam} align="center" size="lg" emphasis="hero" />
           <div className="text-center text-text-muted text-[12px] font-bold tracking-[0.08em]">VS</div>
-          <TeamIdentityRow {...awayTeam} align="center" size="lg" weight={700} />
+          <TeamIdentity team={awayTeam} align="center" size="lg" emphasis="hero" />
         </div>
 
         {helperText ? (

@@ -3,7 +3,7 @@ import type { MatchCardProps } from "./types";
 import { Button } from "./button";
 import { Card } from "./card";
 import { StatusTag } from "./status-tag";
-import { TeamIdentityRow } from "./team";
+import { TeamIdentity } from "./team";
 
 export function MatchCard({
   awayTeam,
@@ -30,8 +30,8 @@ export function MatchCard({
       </div>
 
       <div className="grid gap-2">
-        <TeamIdentityRow {...homeTeam} size="md" weight={700} />
-        <TeamIdentityRow {...awayTeam} size="md" weight={700} />
+        <TeamIdentity team={homeTeam} size="md" emphasis="hero" />
+        <TeamIdentity team={awayTeam} size="md" emphasis="hero" />
       </div>
 
       <div className="flex justify-between items-start gap-2.5 py-2.5 px-3 rounded-md prediction-row-bg flex-wrap">

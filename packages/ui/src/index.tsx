@@ -3,7 +3,7 @@ export * from "./types";
 export { Card, SectionHeader } from "./card";
 export { Button } from "./button";
 export { StatusTag } from "./status-tag";
-export { TeamFlag, TeamIdentityRow, TeamDisplay } from "./team";
+export { TeamIdentity, TeamFlag, TeamIdentityRow, TeamDisplay } from "./team";
 export { MatchCard } from "./match-card";
 export { NextMatchHero } from "./next-match-hero";
 export { ScoreInput } from "./score-input";

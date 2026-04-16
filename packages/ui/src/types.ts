@@ -34,6 +34,33 @@ export type StatusTagProps = {
   label?: string;
 };
 
+// ── Team ─────────────────────────────────────────────
+
+export type TeamData = {
+  fifaCode?: string | null;
+  flagUrl?: string | null;
+  flagAsset?: string | null;
+  iso2?: string | null;
+  iso3?: string | null;
+  name?: string;
+  teamName?: string;
+};
+
+export type TeamIdentitySize = "sm" | "md" | "lg";
+export type TeamIdentityEmphasis = "compact" | "default" | "hero";
+
+export type TeamIdentityProps = {
+  team: TeamData;
+  size?: TeamIdentitySize;
+  showFlag?: boolean;
+  showName?: boolean;
+  showCode?: boolean;
+  emphasis?: TeamIdentityEmphasis;
+  align?: "start" | "center";
+};
+
+// ── Legacy aliases (backward compat) ────────────────
+
 export type TeamFlagProps = {
   fifaCode?: string | null;
   flagUrl?: string | null;
@@ -42,7 +69,7 @@ export type TeamFlagProps = {
   iso3?: string | null;
   name?: string;
   teamName?: string;
-  size?: "sm" | "md" | "lg";
+  size?: TeamIdentitySize;
 };
 
 export type TeamIdentityRowProps = TeamFlagProps & {
@@ -51,16 +78,10 @@ export type TeamIdentityRowProps = TeamFlagProps & {
   weight?: 500 | 600 | 700;
 };
 
-export type TeamDisplayProps = {
-  fifaCode?: string | null;
-  flagUrl?: string | null;
-  flagAsset?: string | null;
-  iso2?: string | null;
-  iso3?: string | null;
-  name?: string;
-  teamName?: string;
+export type TeamDisplayProps = TeamFlagProps & {
   align?: "start" | "center";
-  size?: "sm" | "md" | "lg";
+  code?: string | null;
+  size?: TeamIdentitySize;
   weight?: 500 | 600 | 700;
 };
 
@@ -73,11 +94,11 @@ export type SectionHeaderProps = {
 };
 
 export type NextMatchHeroProps = {
-  awayTeam: TeamDisplayProps;
+  awayTeam: TeamData;
   ctaLabel: string;
   eyebrow: string;
   helperText?: string;
-  homeTeam: TeamDisplayProps;
+  homeTeam: TeamData;
   metaLabel: string;
   onAction?: () => void;
   onSecondaryAction?: () => void;
@@ -101,9 +122,9 @@ export type AdSlotCardProps = {
 };
 
 export type MatchCardProps = {
-  awayTeam: TeamDisplayProps;
+  awayTeam: TeamData;
   ctaLabel: string;
-  homeTeam: TeamDisplayProps;
+  homeTeam: TeamData;
   kickoffLabel: string;
   onAction?: () => void;
   predictionSummary?: string;
@@ -129,10 +150,10 @@ export type ScoreInputProps = {
 };
 
 export type PredictionModalProps = {
-  awayTeam: TeamDisplayProps;
+  awayTeam: TeamData;
   children?: ReactNode;
   helperText?: string;
-  homeTeam: TeamDisplayProps;
+  homeTeam: TeamData;
   isOpen: boolean;
   kickoffLabel: string;
   onClose?: () => void;

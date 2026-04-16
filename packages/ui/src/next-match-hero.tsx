@@ -3,7 +3,7 @@ import type { NextMatchHeroProps } from "./types";
 import { Button } from "./button";
 import { Card } from "./card";
 import { StatusTag } from "./status-tag";
-import { TeamIdentityRow } from "./team";
+import { TeamIdentity } from "./team";
 
 export function NextMatchHero({
   awayTeam,
@@ -35,9 +35,9 @@ export function NextMatchHero({
       </div>
 
       <div className="grid gap-3">
-        <TeamIdentityRow {...homeTeam} size="lg" weight={700} />
+        <TeamIdentity team={homeTeam} size="lg" emphasis="hero" />
         <div className="pl-[44px] text-[12px] text-text-muted font-bold tracking-[0.08em]">VS</div>
-        <TeamIdentityRow {...awayTeam} size="lg" weight={700} />
+        <TeamIdentity team={awayTeam} size="lg" emphasis="hero" />
       </div>
 
       {helperText ? (

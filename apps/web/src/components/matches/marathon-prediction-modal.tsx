@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import type { MatchDetail, MatchSummary, PreTournamentSummary, SaveMatchPredictionInput } from "@prode/shared";
-import { Button, Card, ScoreInput, StatusTag, TeamDisplay } from "@prode/ui";
+import { Button, Card, ScoreInput, StatusTag, TeamIdentity } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
 import { copyForLocale, formatDateTime, useLocale } from "@/lib/i18n/locale-provider";
@@ -223,23 +223,9 @@ export function MarathonPredictionModalView({
         </div>
 
         <div className="marathon-matchup-panel grid gap-3 p-4 rounded-lg">
-          <TeamDisplay
-            teamName={currentSummary.homeTeam.name}
-            fifaCode={currentSummary.homeTeam.fifaCode}
-            flagAsset={currentSummary.homeTeam.flagAsset}
-            flagUrl={currentSummary.homeTeam.flagUrl}
-            size="lg"
-            weight={700}
-          />
+          <TeamIdentity team={currentSummary.homeTeam} size="lg" emphasis="hero" />
           <span className="typo-small text-text-muted pl-[46px]">VS</span>
-          <TeamDisplay
-            teamName={currentSummary.awayTeam.name}
-            fifaCode={currentSummary.awayTeam.fifaCode}
-            flagAsset={currentSummary.awayTeam.flagAsset}
-            flagUrl={currentSummary.awayTeam.flagUrl}
-            size="lg"
-            weight={700}
-          />
+          <TeamIdentity team={currentSummary.awayTeam} size="lg" emphasis="hero" />
         </div>
 
         {notice ? (

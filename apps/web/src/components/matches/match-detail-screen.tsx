@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MatchDetail, SaveMatchPredictionInput } from "@prode/shared";
-import { Button, Card, ScoreInput, StatusTag, TeamDisplay } from "@prode/ui";
+import { Button, Card, ScoreInput, StatusTag, TeamIdentity } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
 import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/editability";
@@ -237,23 +237,9 @@ export function MatchDetailScreenView({
         </div>
 
         <div className="grid gap-2.5">
-          <TeamDisplay
-            teamName={detail.homeTeam.name}
-            fifaCode={detail.homeTeam.fifaCode}
-            flagAsset={detail.homeTeam.flagAsset}
-            flagUrl={detail.homeTeam.flagUrl}
-            size="lg"
-            weight={700}
-          />
+          <TeamIdentity team={detail.homeTeam} size="lg" emphasis="hero" />
           <div className="pl-[46px] text-[12px] text-text-muted font-bold tracking-[0.08em]">VS</div>
-          <TeamDisplay
-            teamName={detail.awayTeam.name}
-            fifaCode={detail.awayTeam.fifaCode}
-            flagAsset={detail.awayTeam.flagAsset}
-            flagUrl={detail.awayTeam.flagUrl}
-            size="lg"
-            weight={700}
-          />
+          <TeamIdentity team={detail.awayTeam} size="lg" emphasis="hero" />
         </div>
 
         <div className="grid gap-1.5">

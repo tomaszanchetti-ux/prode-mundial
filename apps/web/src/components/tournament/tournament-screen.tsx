@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES, type MatchSummary, type PreTournamentSummary, type TuMundialGroupCard, type TuMundialResponse } from "@prode/shared";
-import { Button, Card, ProgressCompact, StatusTag, TeamDisplay } from "@prode/ui";
+import { Button, Card, ProgressCompact, StatusTag, TeamIdentity } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MarathonPredictionModal } from "@/components/matches/marathon-prediction-modal";
 import { ApiClientError, getMatches, getPreTournamentSummary, getTuMundial } from "@/lib/api/client";
@@ -102,13 +102,10 @@ function GroupStandingsCard({ group }: GroupStandingsCardProps) {
               >
                 #{item.position} {item.isProjectedQualified ? "clasifica" : ""}
               </span>
-              <TeamDisplay
-                teamName={item.teamName}
-                fifaCode={item.fifaCode}
-                flagAsset={item.flagAsset}
-                flagUrl={item.flagUrl}
+              <TeamIdentity
+                team={item}
                 size="sm"
-                weight={item.isProjectedQualified ? 700 : 600}
+                emphasis={item.isProjectedQualified ? "hero" : "default"}
               />
             </div>
             <span className="text-[14px] leading-[1.2] text-text-primary text-center">{item.played}</span>
