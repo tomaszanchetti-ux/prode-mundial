@@ -35,6 +35,8 @@ function buildMatchDetail(overrides: Partial<MatchDetail> = {}): MatchDetail {
     userPredictionSummary: null,
     isEditable: true,
     ctaLabel: "Predecir",
+    homeScore90: null,
+    awayScore90: null,
     requiresQualifierIfDraw: true,
     officialResult: null,
     userPrediction: null,

@@ -120,6 +120,69 @@ function compareStandings(left: StandingAccumulator, right: StandingAccumulator)
   return left.teamName.localeCompare(right.teamName);
 }
 
+export type FullGroupStandingRow = {
+  position: number;
+  teamId: string;
+  teamName: string;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
+};
+
+export type FullGroupStandings = {
+  groupId: string;
+  rows: FullGroupStandingRow[];
+};
+
+export function computeFullGroupStandings(
+  groups: GroupDefinition[],
+  results: GroupMatchResult[]
+): FullGroupStandings[] {
+  const resultsByGroupId = new Map<string, GroupMatchResult[]>();
+
+  for (const result of results) {
+    const existing = resultsByGroupId.get(result.groupId);
+    if (existing) {
+      existing.push(result);
+    } else {
+      resultsByGroupId.set(result.groupId, [result]);
+    }
+  }
+
+  return groups.map((group) => {
+    const accumulators = new Map<string, StandingAccumulator>(
+      group.teams.map((team) => [team.teamId, createAccumulator(team)])
+    );
+
+    for (const match of resultsByGroupId.get(group.groupId) ?? []) {
+      applyMatch(accumulators, match);
+    }
+
+    const rows: FullGroupStandingRow[] = [...accumulators.values()]
+      .sort(compareStandings)
+      .map((row, index) => ({
+        position: index + 1,
+        teamId: row.teamId,
+        teamName: row.teamName,
+        played: row.played,
+        won: row.won,
+        drawn: row.drawn,
+        lost: row.lost,
+        goalsFor: row.goalsFor,
+        goalsAgainst: row.goalsAgainst,
+        goalDifference: row.goalDifference,
+        points: row.points
+      }));
+
+    return { groupId: group.groupId, rows };
+  });
+}
+
 export function computeGroupStandings(
   groups: GroupDefinition[],
   results: GroupMatchResult[]

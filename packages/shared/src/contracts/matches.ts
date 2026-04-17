@@ -42,6 +42,8 @@ export type MatchSummary = {
   userPredictionSummary: UserPredictionSummary;
   isEditable: boolean;
   ctaLabel: string;
+  homeScore90: number | null;
+  awayScore90: number | null;
 };
 
 export type MatchOfficialResult = {

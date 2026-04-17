@@ -101,6 +101,8 @@ function buildQuickMatch(overrides: Partial<MatchSummary> = {}): MatchSummary {
     userPredictionSummary: null,
     isEditable: true,
     ctaLabel: "Predecir",
+    homeScore90: null,
+    awayScore90: null,
     ...overrides
   };
 }

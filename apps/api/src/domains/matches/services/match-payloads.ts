@@ -184,7 +184,9 @@ export function toMatchSummary(
     predictionStatus: state.predictionStatus,
     userPredictionSummary: state.userPredictionSummary,
     isEditable: state.isEditable,
-    ctaLabel: state.ctaLabel
+    ctaLabel: state.ctaLabel,
+    homeScore90: match.homeScore90,
+    awayScore90: match.awayScore90
   };
 }
 
