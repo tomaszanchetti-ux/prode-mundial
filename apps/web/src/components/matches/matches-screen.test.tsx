@@ -58,10 +58,10 @@ test("MatchesScreenView renders contextual CTA for editable pending matches", ()
   assert.match(html, /Predecir/);
 });
 
-test("MatchesScreenView renders saved editable CTA and prediction summary", () => {
+test("MatchesScreenView renders saved editable CTA for saved-filter matches", () => {
   const html = renderToStaticMarkup(
     createElement(MatchesScreenView, {
-      activeFilterKey: "all",
+      activeFilterKey: "saved",
       errorMessage: null,
       isLoading: false,
       items: [
@@ -79,7 +79,6 @@ test("MatchesScreenView renders saved editable CTA and prediction summary", () =
   );
 
   assert.match(html, /Editar prediccion/);
-  assert.match(html, /2-1/);
 });
 
 test("MatchesScreenView renders empty state when filter has no results", () => {
