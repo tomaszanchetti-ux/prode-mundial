@@ -1,39 +1,38 @@
-import type { ListMatchesQuery, MatchStage, MatchSummary } from "@prode/shared";
+import type { MatchStage, MatchSummary } from "@prode/shared";
 import { copyForLocale, formatDateTime, type AppLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/editability";
 
 export type FilterChip = {
   key: string;
   label: string;
-  query: ListMatchesQuery;
 };
 
 export const filterChips: FilterChip[] = [
-  { key: "today", label: "Hoy", query: { filter: "today" } },
-  { key: "pending", label: "Pendientes", query: { filter: "upcoming" } },
-  { key: "upcoming", label: "Proximos", query: { filter: "upcoming" } },
-  { key: "group", label: "Grupos", query: { stage: "group" } },
-  { key: "R32", label: "Octavos", query: { stage: "R32" } },
-  { key: "QF", label: "Cuartos", query: { stage: "QF" } },
-  { key: "SF", label: "Semis", query: { stage: "SF" } },
-  { key: "FINAL", label: "Final", query: { stage: "FINAL" } },
-  { key: "all", label: "Todos", query: {} }
+  { key: "pending", label: "Pendientes" },
+  { key: "saved", label: "Guardados" },
+  { key: "closed", label: "Cerrados" }
 ];
 
 export function toFilterLabel(key: string, locale: AppLocale) {
   const labels = {
-    today: copyForLocale(locale, "Hoy", "Today"),
     pending: copyForLocale(locale, "Pendientes", "Pending"),
-    upcoming: copyForLocale(locale, "Proximos", "Upcoming"),
-    group: copyForLocale(locale, "Grupos", "Groups"),
-    R32: copyForLocale(locale, "Octavos", "R32"),
-    QF: copyForLocale(locale, "Cuartos", "Quarterfinals"),
-    SF: copyForLocale(locale, "Semis", "Semis"),
-    FINAL: copyForLocale(locale, "Final", "Final"),
-    all: copyForLocale(locale, "Todos", "All")
+    saved: copyForLocale(locale, "Guardados", "Saved"),
+    closed: copyForLocale(locale, "Cerrados", "Closed")
   } as const;
 
   return labels[key as keyof typeof labels] ?? key;
+}
+
+export function applyClientFilter(items: MatchSummary[], filterKey: string) {
+  if (filterKey === "saved") {
+    return items.filter((m) => m.predictionStatus === "saved_editable");
+  }
+
+  if (filterKey === "closed") {
+    return items.filter((m) => !canEditPrediction(m) || m.predictionStatus === "scored");
+  }
+
+  return items.filter((m) => canEditPrediction(m) && m.predictionStatus === "empty");
 }
 
 export function toLocalKickoffLabel(iso: string, locale: AppLocale) {
@@ -156,64 +155,8 @@ export function toStatusLabel(match: MatchSummary, now = new Date()) {
   return "Pendiente";
 }
 
-export function summarizeActiveFilter(query: ListMatchesQuery, locale: AppLocale) {
-  if (query.filter === "today") {
-    return copyForLocale(locale, "Tus partidos de hoy, listos para resolver rapido.", "Today's matches, ready to solve quickly.");
-  }
-
-  if (query.filter === "upcoming") {
-    return copyForLocale(locale, "Los siguientes cruces abiertos para predecir o editar.", "The next open matches to predict or edit.");
-  }
-
-  if (query.stage === "group") {
-    return copyForLocale(locale, "Todo lo que sigue vivo en fase de grupos.", "Everything still alive in the group stage.");
-  }
-
-  if (query.stage === "R32") {
-    return copyForLocale(locale, "Cruces directos listos para escanear.", "Direct knockout matchups ready to scan.");
-  }
-
-  if (query.stage === "QF") {
-    return copyForLocale(locale, "Cuartos con foco total en cada llave.", "Quarterfinals with total focus on every bracket.");
-  }
-
-  if (query.stage === "SF") {
-    return copyForLocale(locale, "Semifinales para ajustar lo importante.", "Semifinals to fine-tune the important part.");
-  }
-
-  if (query.stage === "FINAL") {
-    return copyForLocale(locale, "La definicion del torneo en una sola vista.", "The tournament decider in one single view.");
-  }
-
-  return copyForLocale(locale, "Todos tus partidos disponibles en una sola pasada.", "All your available matches in one pass.");
-}
-
-export function toPredictionCopy(match: MatchSummary, locale: AppLocale) {
-  if (match.predictionStatus === "scored") {
-    return match.userPredictionSummary ? copyForLocale(locale, `Tu prediccion: ${match.userPredictionSummary}`, `Your prediction: ${match.userPredictionSummary}`) : copyForLocale(locale, "Partido puntuado", "Scored match");
-  }
-
-  if (!match.userPredictionSummary) {
-    return copyForLocale(locale, "Aun no predijiste este partido", "You haven't predicted this match yet");
-  }
-
-  return copyForLocale(locale, `Tu prediccion: ${match.userPredictionSummary}`, `Your prediction: ${match.userPredictionSummary}`);
-}
-
-export function toResultCopy(match: MatchSummary, locale: AppLocale) {
-  if (match.predictionStatus === "scored") {
-    return copyForLocale(locale, "Abre el detalle para ver resultado y puntos.", "Open the detail to see the result and points.");
-  }
-
-  if (isPredictionWindowNotOpen(match)) {
-    return copyForLocale(locale, `Se habilita ${toLocalKickoffLabel(match.predictionOpensAt, locale)}.`, `Opens ${toLocalKickoffLabel(match.predictionOpensAt, locale)}.`);
-  }
-
-  if (!canEditPrediction(match)) {
-    return copyForLocale(locale, "Prediccion cerrada. Solo queda seguir el partido.", "Prediction locked. You can only follow the match now.");
-  }
-
-  return copyForLocale(locale, `Deadline exacto: ${toLocalKickoffLabel(match.deadlineAt, locale)}`, `Exact deadline: ${toLocalKickoffLabel(match.deadlineAt, locale)}`);
+export function toPredictionCopy(match: MatchSummary, _locale: AppLocale) {
+  return match.userPredictionSummary ?? null;
 }
 
 export function pickQuickMatch(matches: MatchSummary[]) {

@@ -8,6 +8,8 @@ import { TeamIdentity } from "./team";
 
 const KNOWN_STAGES = new Set(["group", "R32", "R16", "QF", "SF", "BRONZE", "FINAL"]);
 
+const ACTIONABLE_STATUSES: ReadonlyArray<MatchCardProps["status"]> = ["editable", "saved", "closing-soon", "live"];
+
 export function MatchCard({
   awayTeam,
   ctaLabel,
@@ -16,16 +18,15 @@ export function MatchCard({
   kickoffLabel,
   onAction,
   predictionSummary,
-  resultSummary,
   stage,
   stageLabel,
   status,
   statusLabel
 }: MatchCardProps) {
-  const isActionable = status === "editable" || status === "live";
+  const isActionable = ACTIONABLE_STATUSES.includes(status);
 
   return (
-    <Card elevated style={{ gap: 8, padding: 10 }}>
+    <Card elevated style={{ gap: 8, padding: 12 }}>
       <div className="flex justify-between items-center gap-2">
         <div className="flex items-center gap-2">
           {stage && KNOWN_STAGES.has(stage) ? (
@@ -44,22 +45,22 @@ export function MatchCard({
         <TeamIdentity team={awayTeam} size="sm" emphasis="default" />
       </div>
 
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <span className="text-[13px] leading-[1.3] text-text-secondary">
-          {predictionSummary ?? "Sin predicción"}
-        </span>
+      <div className="flex items-center justify-between gap-2">
+        {predictionSummary ? (
+          <span className="text-[16px] leading-[1.1] font-bold text-text-primary tabular-nums">
+            {predictionSummary}
+          </span>
+        ) : (
+          <span />
+        )}
         {isActionable ? (
           <Button variant="primary" onClick={onAction} style={{ minHeight: 36, fontSize: 13, padding: "0 14px" }}>
             {ctaLabel}
           </Button>
         ) : (
-          <button
-            type="button"
-            onClick={onAction}
-            className="text-[12px] leading-[1.3] font-semibold text-text-muted px-2.5 py-1 rounded-md bg-bg-muted border border-border-default"
-          >
+          <Button variant="ghost" onClick={onAction} style={{ minHeight: 36, fontSize: 13, padding: "0 12px" }}>
             {ctaLabel}
-          </button>
+          </Button>
         )}
       </div>
     </Card>

@@ -144,8 +144,7 @@ export type MatchCardProps = {
   homeTeam: TeamData;
   kickoffLabel: string;
   onAction?: () => void;
-  predictionSummary?: string;
-  resultSummary?: string;
+  predictionSummary?: string | null;
   stage?: string;
   stageLabel: string;
   status: MatchCardStatus;

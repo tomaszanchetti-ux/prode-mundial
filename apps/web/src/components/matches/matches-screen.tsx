@@ -11,16 +11,15 @@ import { ApiClientError, getMatches } from "@/lib/api/client";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
 import {
+  applyClientFilter,
   filterChips,
   pickNextOpeningMatch,
   pickQuickMatch,
-  summarizeActiveFilter,
   toCardTone,
   toCountdownLabel,
   toFilterLabel,
   toLocalKickoffLabel,
   toPredictionCopy,
-  toResultCopy,
   toStageLabel,
   toStatusLabel
 } from "./matches-helpers";
@@ -48,6 +47,7 @@ export function MatchesScreenView({
 }: MatchesScreenViewProps) {
   const { locale } = useLocale();
   const activeFilter = filterChips.find((chip) => chip.key === activeFilterKey) ?? filterChips[0];
+  const visibleItems = applyClientFilter(items, activeFilter.key);
   const quickMatch = pickQuickMatch(items);
   const nextOpeningMatch = pickNextOpeningMatch(items);
 
@@ -56,9 +56,6 @@ export function MatchesScreenView({
       <div className="grid gap-3">
         <div className="grid gap-2">
           <h1 className="typo-h1 m-0 text-text-primary">{copyForLocale(locale, "Partidos", "Matches")}</h1>
-          <p className="typo-body m-0 text-text-secondary max-w-[560px]">
-            {summarizeActiveFilter(activeFilter.query, locale)}
-          </p>
         </div>
 
         {quickMatch ? (
@@ -69,13 +66,8 @@ export function MatchesScreenView({
               flagAsset: quickMatch.awayTeam.flagAsset,
               flagUrl: quickMatch.awayTeam.flagUrl
             }}
-            ctaLabel={quickMatch.userPredictionSummary ? copyForLocale(locale, "Editar prediccion", "Edit prediction") : copyForLocale(locale, "Predecir ahora", "Predict now")}
-            eyebrow={copyForLocale(locale, "TU PROXIMO PENDIENTE", "YOUR NEXT PENDING MATCH")}
-            helperText={
-              quickMatch.userPredictionSummary
-                ? copyForLocale(locale, `Ya dejaste ${quickMatch.userPredictionSummary}. Puedes retocarla antes del kickoff.`, `You already left ${quickMatch.userPredictionSummary}. You can still tweak it before kickoff.`)
-                : copyForLocale(locale, "Entra directo y carga el marcador sin pasar por la lista.", "Jump in and set the score without going through the list.")
-            }
+            ctaLabel={quickMatch.userPredictionSummary ? copyForLocale(locale, "Editar", "Edit") : copyForLocale(locale, "Predecir", "Predict")}
+            eyebrow={copyForLocale(locale, "TU PROXIMO", "YOUR NEXT")}
             homeTeam={{
               teamName: quickMatch.homeTeam.name,
               fifaCode: quickMatch.homeTeam.fifaCode,
@@ -108,13 +100,14 @@ export function MatchesScreenView({
         <div className="flex gap-1.5 overflow-x-auto sticky top-0 z-[2] filter-bar-bg px-[2px]">
           {filterChips.map((chip) => {
             const isActive = chip.key === activeFilter.key;
+            const activeClass = chip.key === "saved" ? "filter-chip-active-saved" : "filter-chip-active";
 
             return (
               <button
                 key={chip.key}
                 type="button"
                 onClick={() => onFilterSelect(chip.key)}
-                className={`filter-chip ${isActive ? "filter-chip-active" : "filter-chip-inactive"}`}
+                className={`filter-chip ${isActive ? activeClass : "filter-chip-inactive"}`}
               >
                 {toFilterLabel(chip.key, locale)}
               </button>
@@ -139,19 +132,16 @@ export function MatchesScreenView({
         </section>
       ) : null}
 
-      {!isLoading && !errorMessage && items.length === 0 ? (
+      {!isLoading && !errorMessage && visibleItems.length === 0 ? (
         <Card elevated style={{ gap: 8, textAlign: "center", justifyItems: "center", padding: 24 }}>
           <span className="typo-small text-text-muted">{copyForLocale(locale, "SIN PARTIDOS", "NO MATCHES")}</span>
           <h2 className="typo-h2 m-0 text-text-primary">{copyForLocale(locale, "No encontramos cruces para este filtro", "We couldn't find matches for this filter")}</h2>
-          <p className="typo-body m-0 text-text-secondary max-w-[420px]">
-            {copyForLocale(locale, "Cambia de vista para seguir avanzando o revisar otra fase del torneo.", "Switch views to keep going or review another phase of the tournament.")}
-          </p>
         </Card>
       ) : null}
 
-      {!isLoading && items.length > 0 ? (
+      {!isLoading && visibleItems.length > 0 ? (
         <section className="grid gap-[14px]">
-          {items.map((match) => (
+          {visibleItems.map((match) => (
             <MatchCard
               key={match.matchId}
               awayTeam={{
@@ -176,7 +166,6 @@ export function MatchesScreenView({
               kickoffLabel={toLocalKickoffLabel(match.kickoffAt, locale)}
               onAction={() => onOpenQuickPredict(match.matchId)}
               predictionSummary={toPredictionCopy(match, locale)}
-              resultSummary={toResultCopy(match, locale)}
               stage={match.stage}
               groupId={match.groupId}
               stageLabel={toStageLabel(match.stage, match.groupId, locale)}
@@ -201,8 +190,6 @@ export function MatchesScreen() {
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
   const [dismissedCycle, setDismissedCycle] = useState(false);
 
-  const activeFilter = useMemo(() => filterChips.find((chip) => chip.key === activeFilterKey) ?? filterChips[0], [activeFilterKey]);
-
   useEffect(() => {
     let cancelled = false;
 
@@ -219,7 +206,7 @@ export function MatchesScreen() {
 
       try {
         const token = await user.getIdToken();
-        const response = await getMatches(token, { ...activeFilter.query, limit: 200 });
+        const response = await getMatches(token, { limit: 200 });
 
         if (!cancelled) {
           setItems(response.items);
@@ -250,7 +237,7 @@ export function MatchesScreen() {
     return () => {
       cancelled = true;
     };
-  }, [activeFilter, reloadKey, status, user]);
+  }, [reloadKey, status, user]);
 
   const quickMatch = useMemo(() => pickQuickMatch(items), [items]);
 
