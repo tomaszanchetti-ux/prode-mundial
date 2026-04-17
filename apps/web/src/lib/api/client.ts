@@ -19,6 +19,7 @@ import type {
   SaveChampionPickResponse,
   SaveMatchPredictionInput,
   SaveMatchPredictionResponse,
+  TournamentProjectionResponse,
   TuMundialResponse,
   UpdateProfileInput,
   UserProfile
@@ -41,6 +42,7 @@ import {
   saveChampionPickInputSchema,
   saveChampionPickResponseSchema,
   saveMatchPredictionResponseSchema,
+  tournamentProjectionResponseSchema,
   tuMundialResponseSchema,
   userProfileSchema
 } from "@prode/shared";
@@ -152,6 +154,19 @@ export async function getTuMundial(token: string): Promise<TuMundialResponse> {
   }
 
   return tuMundialResponseSchema.parse(await parseJson<TuMundialResponse>(response));
+}
+
+export async function getTournamentProjection(token: string): Promise<TournamentProjectionResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/me/tournament/projection`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load tournament projection (${response.status}).`);
+  }
+
+  return tournamentProjectionResponseSchema.parse(await parseJson<TournamentProjectionResponse>(response));
 }
 
 export async function getChampionPick(token: string): Promise<ChampionPickResponse> {

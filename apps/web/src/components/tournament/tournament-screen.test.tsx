@@ -132,6 +132,8 @@ function renderView(
       onRetry: () => undefined,
       phaseItems: buildPhaseItems(),
       preTournamentSummary: overrides.preTournamentSummary ?? buildPreTournamentSummary(),
+      projection: null,
+      championPick: null,
       quickMatch
     })
   );

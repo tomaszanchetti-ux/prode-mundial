@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { matchStageSchema, teamRefSchema } from "./matches";
 
 export const tournamentModeSchema = z.enum(["pre_tournament", "live_tournament"]);
 
@@ -43,5 +44,38 @@ export const tuMundialGroupCardSchema = z.object({
 export const tuMundialResponseSchema = z.object({
   mode: tournamentModeSchema,
   groups: z.array(tuMundialGroupCardSchema),
+  updatedAt: z.string().min(1)
+});
+
+export const tournamentProjectionSideSchema = z.object({
+  team: teamRefSchema.nullable(),
+  slot: z.string().min(1),
+  slotLabel: z.string().min(1)
+});
+
+export const tournamentProjectionMatchSchema = z.object({
+  matchId: z.string().min(1),
+  stage: matchStageSchema,
+  kickoffAt: z.string().min(1),
+  kickoffAtEt: z.string().min(1).nullable(),
+  venueId: z.string().min(1).nullable(),
+  home: tournamentProjectionSideSchema,
+  away: tournamentProjectionSideSchema
+});
+
+export const tournamentProjectionReadinessSchema = z.object({
+  groupMatchesTotal: z.number().int().nonnegative(),
+  groupMatchesWithPrediction: z.number().int().nonnegative(),
+  isGroupsComplete: z.boolean(),
+  unresolvedSlots: z.array(z.string().min(1))
+});
+
+export const tournamentProjectionResponseSchema = z.object({
+  mode: tournamentModeSchema,
+  groups: z.array(tuMundialGroupCardSchema),
+  bracket: z.object({
+    round32: z.array(tournamentProjectionMatchSchema)
+  }),
+  readiness: tournamentProjectionReadinessSchema,
   updatedAt: z.string().min(1)
 });

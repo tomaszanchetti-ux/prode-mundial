@@ -2,7 +2,16 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { APP_ROUTES, type MatchStage, type MatchSummary, type PreTournamentSummary, type TuMundialGroupCard, type TuMundialResponse } from "@prode/shared";
+import {
+  APP_ROUTES,
+  type ChampionPickResponse,
+  type MatchStage,
+  type MatchSummary,
+  type PreTournamentSummary,
+  type TournamentProjectionResponse,
+  type TuMundialGroupCard,
+  type TuMundialResponse
+} from "@prode/shared";
 import { Card, ErrorCard, NextMatchHero, SkeletonCard } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useLocale } from "@/lib/i18n/locale-provider";
@@ -14,8 +23,10 @@ import {
   toStageLabel,
   toStatusLabel
 } from "@/components/matches/matches-helpers";
-import { ApiClientError, getMatches, getPreTournamentSummary, getTuMundial } from "@/lib/api/client";
+import { ApiClientError, getChampionPick, getMatches, getPreTournamentSummary, getTournamentProjection, getTuMundial } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
+import { BracketRound32 } from "./bracket-round-32";
+import { ChampionPickerCard } from "./champion-picker-card";
 import { ModeToggle, type TournamentMode } from "./mode-toggle";
 import { PhaseKnockoutView } from "./phase-knockout-view";
 import { PhaseTabs, type PhaseStatus, type PhaseTabItem, type TournamentPhase } from "./phase-tabs";
@@ -82,6 +93,7 @@ function countCompletedInPhase(phaseMatches: MatchSummary[]) {
 type TournamentScreenViewProps = {
   activeMode: TournamentMode;
   activePhase: TournamentPhase;
+  championPick: ChampionPickResponse | null;
   errorMessage: string | null;
   groups: TuMundialGroupCard[];
   isLoading: boolean;
@@ -95,12 +107,14 @@ type TournamentScreenViewProps = {
   onRetry: () => void;
   phaseItems: PhaseTabItem[];
   preTournamentSummary: PreTournamentSummary | null;
+  projection: TournamentProjectionResponse | null;
   quickMatch: MatchSummary | null;
 };
 
 export function TournamentScreenView({
   activeMode,
   activePhase,
+  championPick,
   errorMessage,
   groups,
   isLoading,
@@ -113,6 +127,7 @@ export function TournamentScreenView({
   onPredictNext,
   onRetry,
   phaseItems,
+  projection,
   quickMatch
 }: TournamentScreenViewProps) {
   const { locale } = useLocale();
@@ -155,6 +170,8 @@ export function TournamentScreenView({
         </Card>
       )}
 
+      <ChampionPickerCard data={championPick} onOpen={onOpenChampionPicker} />
+
       <ModeToggle activeMode={activeMode} onSelect={onModeSelect} />
 
       <PhaseTabs items={phaseItems} activePhase={activePhase} onSelect={onPhaseSelect} />
@@ -176,6 +193,12 @@ export function TournamentScreenView({
             <PredictionsGroupsView
               groups={groups}
               matchesByGroupId={matchesByGroupId}
+              onOpenMatch={onOpenMatch}
+            />
+          ) : activePhase === "r32" && projection ? (
+            <BracketRound32
+              matches={projection.bracket.round32}
+              readiness={projection.readiness}
               onOpenMatch={onOpenMatch}
             />
           ) : (
@@ -203,6 +226,8 @@ export function TournamentScreen() {
   const router = useRouter();
   const { status, user } = useAuth();
   const [data, setData] = useState<TuMundialResponse | null>(null);
+  const [projection, setProjection] = useState<TournamentProjectionResponse | null>(null);
+  const [championPick, setChampionPick] = useState<ChampionPickResponse | null>(null);
   const [preTournamentSummary, setPreTournamentSummary] = useState<PreTournamentSummary | null>(null);
   const [items, setItems] = useState<MatchSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -218,6 +243,8 @@ export function TournamentScreen() {
     async function loadTournament() {
       if (status !== "authenticated" || !user) {
         setData(null);
+        setProjection(null);
+        setChampionPick(null);
         setPreTournamentSummary(null);
         setItems([]);
         setIsLoading(status === "loading");
@@ -229,14 +256,18 @@ export function TournamentScreen() {
 
       try {
         const token = await user.getIdToken();
-        const [nextData, nextSummary, matchesResponse] = await Promise.all([
+        const [nextData, nextProjection, nextChampion, nextSummary, matchesResponse] = await Promise.all([
           getTuMundial(token),
+          getTournamentProjection(token),
+          getChampionPick(token),
           getPreTournamentSummary(token),
           getMatches(token, { limit: 200 })
         ]);
 
         if (!cancelled) {
           setData(nextData);
+          setProjection(nextProjection);
+          setChampionPick(nextChampion);
           setPreTournamentSummary(nextSummary);
           setItems(matchesResponse.items);
         }
@@ -314,6 +345,7 @@ export function TournamentScreen() {
       <TournamentScreenView
         activeMode={activeMode}
         activePhase={activePhase}
+        championPick={championPick}
         errorMessage={errorMessage}
         groups={data?.groups ?? []}
         isLoading={isLoading}
@@ -331,6 +363,7 @@ export function TournamentScreen() {
         onRetry={() => setReloadKey((current) => current + 1)}
         phaseItems={phaseItems}
         preTournamentSummary={preTournamentSummary}
+        projection={projection}
         quickMatch={quickMatch}
       />
 
