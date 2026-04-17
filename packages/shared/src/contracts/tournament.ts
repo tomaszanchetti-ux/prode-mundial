@@ -1,4 +1,4 @@
-import type { TeamIdentity } from "./matches";
+import type { MatchStage, TeamIdentity, TeamRef } from "./matches";
 
 export type TournamentMode = "pre_tournament" | "live_tournament";
 
@@ -38,5 +38,38 @@ export type TuMundialGroupCard = {
 export type TuMundialResponse = {
   mode: TournamentMode;
   groups: TuMundialGroupCard[];
+  updatedAt: string;
+};
+
+export type TournamentProjectionSide = {
+  team: TeamRef | null;
+  slot: string;
+  slotLabel: string;
+};
+
+export type TournamentProjectionMatch = {
+  matchId: string;
+  stage: MatchStage;
+  kickoffAt: string;
+  kickoffAtEt: string | null;
+  venueId: string | null;
+  home: TournamentProjectionSide;
+  away: TournamentProjectionSide;
+};
+
+export type TournamentProjectionReadiness = {
+  groupMatchesTotal: number;
+  groupMatchesWithPrediction: number;
+  isGroupsComplete: boolean;
+  unresolvedSlots: string[];
+};
+
+export type TournamentProjectionResponse = {
+  mode: TournamentMode;
+  groups: TuMundialGroupCard[];
+  bracket: {
+    round32: TournamentProjectionMatch[];
+  };
+  readiness: TournamentProjectionReadiness;
   updatedAt: string;
 };

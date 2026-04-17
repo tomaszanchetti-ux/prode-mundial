@@ -16,6 +16,7 @@ import { putMatchPredictionController } from "../domains/matches/controllers/put
 import { getPointsController } from "../domains/points/controllers/get-points-controller";
 import { getBootstrapController } from "../domains/public/controllers/get-bootstrap-controller";
 import { getPreTournamentSummaryController } from "../domains/tournament/controllers/get-pre-tournament-summary-controller";
+import { getTournamentProjectionController } from "../domains/tournament/controllers/get-tournament-projection-controller";
 import { getTuMundialController } from "../domains/tournament/controllers/get-tu-mundial-controller";
 import { getMeController } from "../domains/users/controllers/get-me-controller";
 import { patchMeController } from "../domains/users/controllers/patch-me-controller";
@@ -60,6 +61,7 @@ export function createApp() {
   app.get("/api/v1/me", requireAuth, getMeController);
   app.get("/api/v1/me/pre-tournament", requireAuth, getPreTournamentSummaryController);
   app.get("/api/v1/me/tournament", requireAuth, getTuMundialController);
+  app.get("/api/v1/me/tournament/projection", requireAuth, getTournamentProjectionController);
   app.get("/api/v1/points", requireAuth, getPointsController);
   app.get("/api/v1/macro-picks", requireAuth, getMacroPicksController);
   app.put("/api/v1/macro-picks", requireAuth, putMacroPicksController);

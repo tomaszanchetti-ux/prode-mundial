@@ -1,4 +1,5 @@
 import "./env";
+import { runBracketHydration } from "./domains/bracket-hydration/run-bracket-hydration";
 import { runMatchLockEnforcement } from "./domains/match-lock/run-match-lock-enforcement";
 import { runMatchSync } from "./domains/match-sync/run-match-sync";
 import { runRebuildMacroJob } from "./domains/score-macro/run-rebuild-macro-job";
@@ -45,6 +46,18 @@ async function main() {
 
   if (jobName === "rebuild-macro") {
     const summary = await runRebuildMacroJob();
+    console.log(
+      JSON.stringify({
+        ok: true,
+        jobName,
+        summary
+      })
+    );
+    return;
+  }
+
+  if (jobName === "bracket-hydration") {
+    const summary = await runBracketHydration();
     console.log(
       JSON.stringify({
         ok: true,

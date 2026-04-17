@@ -1,6 +1,9 @@
 export type SyncStoredMatch = {
   matchId: string;
   stage: string;
+  groupId?: string | null;
+  homeSlot?: string | null;
+  awaySlot?: string | null;
   homeTeamId: string | null;
   awayTeamId: string | null;
   kickoffAt: string;
@@ -42,4 +45,13 @@ export type MatchSyncExecutionSummary = {
   matchesScored: number;
   skipped: Array<{ externalId: number; reason: string }>;
   errors: Array<{ matchId: string; error: string }>;
+  groupMatchesFinalized?: number;
+  bracketHydration?: {
+    isReady: boolean;
+    groupMatchesTotal: number;
+    groupMatchesFinalized: number;
+    patchesApplied: number;
+    unresolvedSlots: string[];
+    appliedMatchIds: string[];
+  };
 };

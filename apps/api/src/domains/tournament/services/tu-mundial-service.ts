@@ -1,4 +1,18 @@
-import { resolveTeamIdentity, type PredictedGroupStandingRow, type TournamentMode, type TuMundialGroupCard, type TuMundialResponse } from "@prode/shared";
+import {
+  resolveR32Bracket,
+  resolveTeamIdentity,
+  type PredictedGroupStandingRow,
+  type R32SlotDefinition,
+  type ResolvedGroupStandings,
+  type TeamRef,
+  type TournamentMode,
+  type TournamentProjectionMatch,
+  type TournamentProjectionReadiness,
+  type TournamentProjectionResponse,
+  type TournamentProjectionSide,
+  type TuMundialGroupCard,
+  type TuMundialResponse
+} from "@prode/shared";
 import { matchesRepository } from "../../matches/repositories/matches-repository";
 import { predictionsRepository } from "../../matches/repositories/predictions-repository";
 import { teamsRepository } from "../../matches/repositories/teams-repository";
@@ -124,6 +138,141 @@ function resolveTournamentMode(isPreTournament: boolean): TournamentMode {
   return isPreTournament ? "pre_tournament" : "live_tournament";
 }
 
+type ProjectedGroup = {
+  groupId: string;
+  groupName: string;
+  completedMatches: number;
+  totalMatches: number;
+  rows: PredictedGroupStandingRow[];
+};
+
+function buildProjectedGroups(
+  groupMatches: StoredMatch[],
+  predictionsByMatchId: Map<string, StoredPrediction>,
+  teamsById: Map<string, StoredTeam>
+): ProjectedGroup[] {
+  return WORLD_CUP_2026_GROUPS.map((group) => {
+    const matchesForGroup = groupMatches.filter((match) => match.groupId === group.groupId);
+    const completedMatches = matchesForGroup.filter((match) => predictionsByMatchId.has(match.matchId)).length;
+    const tableByTeamId = new Map(
+      group.teamIds.map((teamId) => [teamId, buildGroupAccumulator(teamsById.get(teamId), teamId)])
+    );
+
+    for (const match of matchesForGroup) {
+      const prediction = predictionsByMatchId.get(match.matchId);
+
+      if (!prediction) {
+        continue;
+      }
+
+      applyPredictionToTable(tableByTeamId, match, prediction);
+    }
+
+    return {
+      groupId: group.groupId,
+      groupName: `Grupo ${group.name}`,
+      completedMatches,
+      totalMatches: matchesForGroup.length,
+      rows: toProjectedRows(tableByTeamId)
+    };
+  });
+}
+
+function toTuMundialGroupCard(group: ProjectedGroup): TuMundialGroupCard {
+  return {
+    groupId: group.groupId,
+    groupName: group.groupName,
+    completedMatches: group.completedMatches,
+    totalMatches: group.totalMatches,
+    isComplete: group.completedMatches === group.totalMatches,
+    items: group.rows
+  };
+}
+
+function toResolvedGroupStandings(group: ProjectedGroup): ResolvedGroupStandings {
+  return {
+    groupId: group.groupId,
+    positions: group.rows.slice(0, 3).map((row, index) => ({
+      position: (index + 1) as 1 | 2 | 3,
+      teamId: row.teamId,
+      teamName: row.teamName,
+      points: row.points,
+      goalDifference: row.goalDifference,
+      goalsFor: row.goalsFor
+    }))
+  };
+}
+
+function buildTeamRefFromRow(row: PredictedGroupStandingRow): TeamRef {
+  return {
+    teamId: row.teamId,
+    name: row.teamName,
+    fifaCode: row.fifaCode,
+    iso2: row.iso2,
+    iso3: row.iso3,
+    flagAsset: row.flagAsset,
+    flagUrl: row.flagUrl
+  };
+}
+
+function buildTeamRefById(teamId: string, teamsById: Map<string, StoredTeam>): TeamRef {
+  const team = teamsById.get(teamId);
+  const identity = resolveTeamIdentity(team?.fifaCode ?? teamId, team?.flagUrl);
+
+  return {
+    teamId,
+    name: team?.name ?? teamId,
+    fifaCode: identity.fifaCode,
+    iso2: identity.iso2,
+    iso3: identity.iso3,
+    flagAsset: identity.flagAsset,
+    flagUrl: identity.flagUrl
+  };
+}
+
+function buildSlotLabel(slot: string): string {
+  const prefix = slot.slice(0, 1);
+  const tail = slot.slice(1);
+
+  if (prefix === "1") {
+    return `Ganador Grupo ${tail}`;
+  }
+
+  if (prefix === "2") {
+    return `Segundo Grupo ${tail}`;
+  }
+
+  if (prefix === "3") {
+    return `Mejor 3ero (${tail.split("").join(", ")})`;
+  }
+
+  return slot;
+}
+
+function buildProjectionSide(
+  slot: string,
+  resolvedTeamId: string | null,
+  rowsByTeamId: Map<string, PredictedGroupStandingRow>,
+  teamsById: Map<string, StoredTeam>
+): TournamentProjectionSide {
+  if (!resolvedTeamId) {
+    return {
+      team: null,
+      slot,
+      slotLabel: buildSlotLabel(slot)
+    };
+  }
+
+  const row = rowsByTeamId.get(resolvedTeamId);
+  const team = row ? buildTeamRefFromRow(row) : buildTeamRefById(resolvedTeamId, teamsById);
+
+  return {
+    team,
+    slot,
+    slotLabel: buildSlotLabel(slot)
+  };
+}
+
 export class TuMundialService {
   async getTuMundialForUser(userId: string, now = new Date()): Promise<TuMundialResponse> {
     const summary = await preTournamentSummaryService.getSummaryForUser(userId, now);
@@ -136,36 +285,85 @@ export class TuMundialService {
       WORLD_CUP_2026_GROUPS.flatMap((group) => group.teamIds)
     );
 
-    const groups = WORLD_CUP_2026_GROUPS.map<TuMundialGroupCard>((group) => {
-      const matchesForGroup = groupMatches.filter((match) => match.groupId === group.groupId);
-      const completedMatches = matchesForGroup.filter((match) => predictionsByMatchId.has(match.matchId)).length;
-      const tableByTeamId = new Map(
-        group.teamIds.map((teamId) => [teamId, buildGroupAccumulator(teamsById.get(teamId), teamId)])
-      );
-
-      for (const match of matchesForGroup) {
-        const prediction = predictionsByMatchId.get(match.matchId);
-
-        if (!prediction) {
-          continue;
-        }
-
-        applyPredictionToTable(tableByTeamId, match, prediction);
-      }
-
-      return {
-        groupId: group.groupId,
-        groupName: `Grupo ${group.name}`,
-        completedMatches,
-        totalMatches: matchesForGroup.length,
-        isComplete: completedMatches === matchesForGroup.length,
-        items: toProjectedRows(tableByTeamId)
-      };
-    });
+    const projectedGroups = buildProjectedGroups(groupMatches, predictionsByMatchId, teamsById);
 
     return {
       mode: resolveTournamentMode(summary.isPreTournament),
-      groups,
+      groups: projectedGroups.map(toTuMundialGroupCard),
+      updatedAt: now.toISOString()
+    };
+  }
+
+  async getTournamentProjectionForUser(userId: string, now = new Date()): Promise<TournamentProjectionResponse> {
+    const summary = await preTournamentSummaryService.getSummaryForUser(userId, now);
+    const groupMatches = await matchesRepository.listMatches({ stage: "group" });
+    const r32Matches = await matchesRepository.listMatches({ stage: "R32" });
+    const predictionsByMatchId = await predictionsRepository.listPredictionsByUserForMatches(
+      userId,
+      groupMatches.map((match) => match.matchId)
+    );
+    const teamsById = await teamsRepository.getTeamsByIds(
+      WORLD_CUP_2026_GROUPS.flatMap((group) => group.teamIds)
+    );
+
+    const projectedGroups = buildProjectedGroups(groupMatches, predictionsByMatchId, teamsById);
+    const standings = projectedGroups.map(toResolvedGroupStandings);
+
+    const rowsByTeamId = new Map<string, PredictedGroupStandingRow>();
+    for (const group of projectedGroups) {
+      for (const row of group.rows) {
+        rowsByTeamId.set(row.teamId, row);
+      }
+    }
+
+    const slotDefinitions: R32SlotDefinition[] = r32Matches
+      .filter((match): match is StoredMatch & { homeSlot: string; awaySlot: string } =>
+        Boolean(match.homeSlot && match.awaySlot)
+      )
+      .map((match) => ({
+        matchId: match.matchId,
+        homeSlot: match.homeSlot,
+        awaySlot: match.awaySlot
+      }));
+
+    const { matches: resolvedR32, unresolvedSlots } = resolveR32Bracket(standings, slotDefinitions);
+    const resolvedByMatchId = new Map(resolvedR32.map((match) => [match.matchId, match]));
+
+    const round32: TournamentProjectionMatch[] = r32Matches.map((match) => {
+      const resolved = resolvedByMatchId.get(match.matchId);
+      const homeSlot = match.homeSlot ?? "?";
+      const awaySlot = match.awaySlot ?? "?";
+
+      return {
+        matchId: match.matchId,
+        stage: match.stage,
+        kickoffAt: match.kickoffAt,
+        kickoffAtEt: match.kickoffAtEt ?? null,
+        venueId: match.venueId ?? null,
+        home: buildProjectionSide(homeSlot, resolved?.homeTeamId ?? null, rowsByTeamId, teamsById),
+        away: buildProjectionSide(awaySlot, resolved?.awayTeamId ?? null, rowsByTeamId, teamsById)
+      };
+    });
+
+    const groupMatchesTotal = groupMatches.length;
+    const groupMatchesWithPrediction = groupMatches.filter((match) =>
+      predictionsByMatchId.has(match.matchId)
+    ).length;
+
+    const readiness: TournamentProjectionReadiness = {
+      groupMatchesTotal,
+      groupMatchesWithPrediction,
+      isGroupsComplete: groupMatchesTotal > 0 && groupMatchesWithPrediction === groupMatchesTotal,
+      unresolvedSlots
+    };
+
+    return {
+      mode: resolveTournamentMode(summary.isPreTournament),
+      groups: projectedGroups.map(toTuMundialGroupCard),
+      bracket: {
+        round32
+      },
+      readiness,
       updatedAt: now.toISOString()
     };
   }

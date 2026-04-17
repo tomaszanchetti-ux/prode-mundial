@@ -1,3 +1,4 @@
+import { runBracketHydration } from "../bracket-hydration/run-bracket-hydration";
 import { matchSyncMatchesRepository } from "./repositories/matches-repository";
 import { fetchSyncableMatches, mapExternalStatus } from "./services/football-data-client";
 import { findInternalMatch, needsUpdate, resolveWinnerTeamId } from "./services/match-sync-logic";
@@ -46,6 +47,9 @@ export async function runMatchSync(
     if (internal.isScored) continue;
     if (!needsUpdate(internal, external)) continue;
 
+    const wasGroupFinalization =
+      internal.stage === "group" && mappedStatus === "finished" && internal.status !== "finished";
+
     // Aplicar update
     const winnerTeamId = resolveWinnerTeamId(internal, external, mappedStatus);
 
@@ -85,6 +89,34 @@ export async function runMatchSync(
           error: err instanceof Error ? err.message : String(err)
         });
       }
+
+      if (wasGroupFinalization) {
+        result.groupMatchesFinalized = (result.groupMatchesFinalized ?? 0) + 1;
+      }
+    }
+  }
+
+  if ((result.groupMatchesFinalized ?? 0) > 0) {
+    try {
+      const hydration = await runBracketHydration(nowIso);
+      result.bracketHydration = {
+        isReady: hydration.isReady,
+        groupMatchesTotal: hydration.groupMatchesTotal,
+        groupMatchesFinalized: hydration.groupMatchesFinalized,
+        patchesApplied: hydration.patchesApplied,
+        unresolvedSlots: hydration.unresolvedSlots,
+        appliedMatchIds: hydration.appliedMatchIds
+      };
+      if (hydration.patchesApplied > 0) {
+        console.log(
+          `Bracket hydration applied ${hydration.patchesApplied} R32 patches: ${hydration.appliedMatchIds.join(", ")}`
+        );
+      }
+    } catch (err) {
+      result.errors.push({
+        matchId: "bracket-hydration",
+        error: err instanceof Error ? err.message : String(err)
+      });
     }
   }
 
