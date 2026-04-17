@@ -4,12 +4,15 @@ import { AdSlotCard, Button, Card, NextMatchHero } from "@prode/ui";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
 import {
+  pickFinalIfFinished,
   pickNextChronologicalMatch,
   pickPriorityMatch,
+  resolveChampionFromFinal,
   toEditWindowLabel,
   toKickoffLabel,
   toStageLabel
 } from "./home-helpers";
+import { HomeChampionHero } from "./home-champion-hero";
 import { HomeErrorCard, HomeSkeletonCard } from "./home-states";
 
 type HomeInTournamentViewProps = {
@@ -46,6 +49,12 @@ export function HomeInTournamentView({
   const scoredMatches = useMemo(() => items.filter((match) => match.predictionStatus === "scored"), [items]);
   const priorityMatch = useMemo(() => pickPriorityMatch(items), [items]);
   const upcomingMatch = useMemo(() => pickNextChronologicalMatch(items), [items]);
+  const finalMatch = useMemo(() => pickFinalIfFinished(items), [items]);
+  const champion = useMemo(
+    () => (finalMatch ? resolveChampionFromFinal(finalMatch) : null),
+    [finalMatch]
+  );
+  const isPostTournament = finalMatch !== null;
   const heroMatch = priorityMatch ?? upcomingMatch;
   const heroIsEditable = heroMatch ? canEditPrediction(heroMatch) : false;
   const heroHasPrediction = Boolean(heroMatch?.userPredictionSummary);
@@ -101,7 +110,15 @@ export function HomeInTournamentView({
 
   return (
     <div className="grid gap-4">
-      {heroMatch ? (
+      {isPostTournament ? (
+        <HomeChampionHero
+          champion={champion}
+          eyebrow={copyForLocale(locale, "CAMPEÓN DEL MUNDIAL 2026", "WORLD CUP 2026 CHAMPION")}
+          fallbackText={copyForLocale(locale, "Torneo finalizado", "Tournament finished")}
+          ctaLabel={copyForLocale(locale, "Ver resumen del torneo", "See tournament summary")}
+          onAction={onOpenTournament}
+        />
+      ) : heroMatch ? (
         <NextMatchHero
           awayTeam={{
             teamName: heroMatch.awayTeam.name,

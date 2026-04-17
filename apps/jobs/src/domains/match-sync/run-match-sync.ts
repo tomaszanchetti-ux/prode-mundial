@@ -1,3 +1,4 @@
+import { rebuildAggregatesForUsers } from "../aggregates/run-aggregates-rebuild";
 import { runBracketHydration } from "../bracket-hydration/run-bracket-hydration";
 import { matchSyncMatchesRepository } from "./repositories/matches-repository";
 import { fetchSyncableMatches, mapExternalStatus } from "./services/football-data-client";
@@ -25,6 +26,7 @@ export async function runMatchSync(
   }
 
   const internalMatches = await matchSyncMatchesRepository.listAllMatches();
+  const affectedUserIds = new Set<string>();
 
   for (const external of externalMatches) {
     const mappedStatus = mapExternalStatus(external.status);
@@ -82,7 +84,10 @@ export async function runMatchSync(
 
         const scored = await scoreMatchPredictions(updatedMatch, nowIso);
         result.matchesScored++;
-        console.log(`Scored ${scored} predictions for ${internal.matchId}`);
+        for (const userId of scored.affectedUserIds) {
+          affectedUserIds.add(userId);
+        }
+        console.log(`Scored ${scored.scoredCount} predictions for ${internal.matchId}`);
       } catch (err) {
         result.errors.push({
           matchId: internal.matchId,
@@ -115,6 +120,28 @@ export async function runMatchSync(
     } catch (err) {
       result.errors.push({
         matchId: "bracket-hydration",
+        error: err instanceof Error ? err.message : String(err)
+      });
+    }
+  }
+
+  if (affectedUserIds.size > 0) {
+    try {
+      const rebuild = await rebuildAggregatesForUsers([...affectedUserIds], nowIso);
+      result.aggregatesRebuild = rebuild;
+
+      if (rebuild.errors.length > 0) {
+        for (const err of rebuild.errors) {
+          result.errors.push({ matchId: err.scope, error: err.error });
+        }
+      }
+
+      console.log(
+        `Aggregates rebuilt: ${rebuild.usersRebuilt} users, ${rebuild.leaguesRebuilt} leagues`
+      );
+    } catch (err) {
+      result.errors.push({
+        matchId: "aggregates-rebuild",
         error: err instanceof Error ? err.message : String(err)
       });
     }

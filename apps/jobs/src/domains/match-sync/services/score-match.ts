@@ -44,16 +44,25 @@ function scorePrediction(match: SyncStoredMatch, prediction: SyncStoredPredictio
   };
 }
 
+export type ScoreMatchResult = {
+  scoredCount: number;
+  affectedUserIds: string[];
+};
+
 /**
  * Score all predictions for a finished match.
- * Returns number of predictions scored.
+ * Returns count of predictions scored + userIds whose totals need rebuild.
  */
-export async function scoreMatchPredictions(match: SyncStoredMatch, nowIso: string): Promise<number> {
+export async function scoreMatchPredictions(
+  match: SyncStoredMatch,
+  nowIso: string
+): Promise<ScoreMatchResult> {
   if (match.homeScore90 === null || match.awayScore90 === null) {
     throw new Error(`Cannot score match ${match.matchId} without official scores.`);
   }
 
   const predictions = await matchSyncPredictionsRepository.listPredictionsByMatch(match.matchId);
+  const scoredUserIds: string[] = [];
 
   for (const prediction of predictions) {
     if (prediction.isScored) continue;
@@ -68,6 +77,8 @@ export async function scoreMatchPredictions(match: SyncStoredMatch, nowIso: stri
       scoredAt: nowIso,
       updatedAt: nowIso
     });
+
+    scoredUserIds.push(prediction.userId);
   }
 
   await matchSyncMatchesRepository.updateMatch(match.matchId, {
@@ -75,5 +86,8 @@ export async function scoreMatchPredictions(match: SyncStoredMatch, nowIso: stri
     updatedAt: nowIso
   });
 
-  return predictions.filter((p) => !p.isScored).length;
+  return {
+    scoredCount: scoredUserIds.length,
+    affectedUserIds: [...new Set(scoredUserIds)]
+  };
 }

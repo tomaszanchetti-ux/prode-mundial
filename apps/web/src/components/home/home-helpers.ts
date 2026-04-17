@@ -117,3 +117,24 @@ export function compareMatchesChronologically(left: MatchSummary, right: MatchSu
 
   return left.matchId.localeCompare(right.matchId);
 }
+
+export function pickFinalIfFinished(matches: MatchSummary[]): MatchSummary | null {
+  return (
+    matches.find(
+      (match) => match.stage === "FINAL" && match.isFinished && match.isScored
+    ) ?? null
+  );
+}
+
+export function resolveChampionFromFinal(match: MatchSummary): MatchSummary["homeTeam"] | null {
+  if (match.homeScore90 === null || match.awayScore90 === null) {
+    return null;
+  }
+  if (match.homeScore90 > match.awayScore90) {
+    return match.homeTeam;
+  }
+  if (match.awayScore90 > match.homeScore90) {
+    return match.awayTeam;
+  }
+  return null;
+}

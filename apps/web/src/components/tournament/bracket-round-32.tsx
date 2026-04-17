@@ -40,6 +40,34 @@ function BracketSide({ side }: { side: TournamentProjectionMatch["home"] }) {
   );
 }
 
+function MatchCard({
+  match,
+  kickoffLabel,
+  onOpen
+}: {
+  match: TournamentProjectionMatch;
+  kickoffLabel: string;
+  onOpen: () => void;
+}) {
+  return (
+    <button
+      key={match.matchId}
+      type="button"
+      onClick={onOpen}
+      className="text-left rounded-lg border border-border-default bg-surface-default hover:bg-surface-raised transition-colors p-3 cursor-pointer grid gap-2"
+    >
+      <div className="flex items-center justify-between">
+        <span className="typo-small text-text-muted">16vos</span>
+        <span className="text-[12px] text-text-muted">{kickoffLabel}</span>
+      </div>
+      <div className="grid gap-1.5">
+        <BracketSide side={match.home} />
+        <BracketSide side={match.away} />
+      </div>
+    </button>
+  );
+}
+
 export function BracketRound32({ matches, readiness, onOpenMatch }: BracketRound32Props) {
   const { locale } = useLocale();
   const sortedMatches = [...matches].sort((left, right) =>
@@ -57,6 +85,10 @@ export function BracketRound32({ matches, readiness, onOpenMatch }: BracketRound
     );
   }
 
+  const midpoint = Math.ceil(sortedMatches.length / 2);
+  const leftColumn = sortedMatches.slice(0, midpoint);
+  const rightColumn = sortedMatches.slice(midpoint);
+
   return (
     <div className="grid gap-3">
       {!readiness.isGroupsComplete ? (
@@ -69,24 +101,29 @@ export function BracketRound32({ matches, readiness, onOpenMatch }: BracketRound
         </Card>
       ) : null}
 
-      <section className="grid gap-[10px]">
-        {sortedMatches.map((match) => (
-          <button
-            key={match.matchId}
-            type="button"
-            onClick={() => onOpenMatch(match.matchId)}
-            className="text-left rounded-lg border border-border-default bg-surface-default hover:bg-surface-raised transition-colors p-3 cursor-pointer grid gap-2"
-          >
-            <div className="flex items-center justify-between">
-              <span className="typo-small text-text-muted">16vos</span>
-              <span className="text-[12px] text-text-muted">{toLocalKickoffLabel(match.kickoffAt, locale)}</span>
-            </div>
-            <div className="grid gap-1.5">
-              <BracketSide side={match.home} />
-              <BracketSide side={match.away} />
-            </div>
-          </button>
-        ))}
+      <section className="grid gap-[10px] md:grid-cols-2 md:gap-x-6">
+        <div className="grid gap-[10px] content-start">
+          <span className="typo-small text-text-muted hidden md:block">LLAVE A</span>
+          {leftColumn.map((match) => (
+            <MatchCard
+              key={match.matchId}
+              match={match}
+              kickoffLabel={toLocalKickoffLabel(match.kickoffAt, locale)}
+              onOpen={() => onOpenMatch(match.matchId)}
+            />
+          ))}
+        </div>
+        <div className="grid gap-[10px] content-start">
+          <span className="typo-small text-text-muted hidden md:block">LLAVE B</span>
+          {rightColumn.map((match) => (
+            <MatchCard
+              key={match.matchId}
+              match={match}
+              kickoffLabel={toLocalKickoffLabel(match.kickoffAt, locale)}
+              onOpen={() => onOpenMatch(match.matchId)}
+            />
+          ))}
+        </div>
       </section>
     </div>
   );

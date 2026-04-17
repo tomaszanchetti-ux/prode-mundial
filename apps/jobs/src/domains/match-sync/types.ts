@@ -54,4 +54,9 @@ export type MatchSyncExecutionSummary = {
     unresolvedSlots: string[];
     appliedMatchIds: string[];
   };
+  aggregatesRebuild?: {
+    usersRebuilt: number;
+    leaguesRebuilt: number;
+    errors: Array<{ scope: string; error: string }>;
+  };
 };
