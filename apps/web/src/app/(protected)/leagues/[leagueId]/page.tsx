@@ -1,5 +1,6 @@
-import { LeagueDetailScreen } from "@/components/leagues/league-detail-screen";
+import { redirect } from "next/navigation";
 
-export default function LeagueDetailPage() {
-  return <LeagueDetailScreen />;
+export default async function LeagueDetailPage({ params }: { params: Promise<{ leagueId: string }> }) {
+  const { leagueId } = await params;
+  redirect(`/leagues?leagueId=${leagueId}`);
 }

@@ -21,8 +21,7 @@ type JoinLeagueFormProps = {
 type ActionResultCardProps = {
   actionMessage: string | null;
   league: LeagueDetail;
-  onOpenLeagueDetail: (leagueId: string) => void;
-  onOpenRankings: () => void;
+  onOpenLeague: (leagueId: string) => void;
 };
 
 export function CreateLeagueForm({ formState, isSubmitting, onFieldChange, onSubmit }: CreateLeagueFormProps) {
@@ -89,7 +88,7 @@ export function JoinLeagueForm({ formState, isSubmitting, onFieldChange, onSubmi
   );
 }
 
-export function ActionResultCard({ actionMessage, league, onOpenLeagueDetail, onOpenRankings }: ActionResultCardProps) {
+export function ActionResultCard({ actionMessage, league, onOpenLeague }: ActionResultCardProps) {
   return (
     <Card elevated className="league-action-bg" style={{ gap: 12 }}>
       <span className="typo-small text-primary-500">ACCION COMPLETADA</span>
@@ -103,10 +102,7 @@ export function ActionResultCard({ actionMessage, league, onOpenLeagueDetail, on
         <Metric label="Tu rol" value={league.membershipRole === "owner" ? "Creador" : "Miembro"} />
       </div>
       <div className="flex gap-2 flex-wrap">
-        <Button onClick={() => onOpenLeagueDetail(league.leagueId)}>Ver detalle de liga</Button>
-        <Button variant="ghost" onClick={onOpenRankings}>
-          Ir a posiciones
-        </Button>
+        <Button onClick={() => onOpenLeague(league.leagueId)}>Abrir liga</Button>
       </div>
       {league.inviteLink ? (
         <div className="grid gap-1.5 p-3 rounded-[16px] surface-inset">
