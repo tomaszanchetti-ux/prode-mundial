@@ -2,26 +2,34 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { APP_ROUTES, type MatchSummary, type PreTournamentSummary, type TuMundialGroupCard, type TuMundialResponse } from "@prode/shared";
-import { Button, Card, ErrorCard, ProgressCompact, SkeletonCard, StatusTag } from "@prode/ui";
+import { APP_ROUTES, type MatchStage, type MatchSummary, type PreTournamentSummary, type TuMundialGroupCard, type TuMundialResponse } from "@prode/shared";
+import { Card, ErrorCard, NextMatchHero, SkeletonCard } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useLocale } from "@/lib/i18n/locale-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
+import {
+  pickQuickMatch,
+  toCardTone,
+  toLocalKickoffLabel,
+  toStageLabel,
+  toStatusLabel
+} from "@/components/matches/matches-helpers";
 import { ApiClientError, getMatches, getPreTournamentSummary, getTuMundial } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
-import { GroupStandingsCard } from "./group-standings-card";
+import { ModeToggle, type TournamentMode } from "./mode-toggle";
+import { PhaseKnockoutView } from "./phase-knockout-view";
+import { PhaseTabs, type PhaseStatus, type PhaseTabItem, type TournamentPhase } from "./phase-tabs";
+import { PredictionsGroupsView } from "./predictions-groups-view";
+import { ResultsGroupsView } from "./results-groups-view";
 
-type TournamentScreenViewProps = {
-  errorMessage: string | null;
-  groups: TuMundialGroupCard[];
-  isLoading: boolean;
-  onContinuePredictions: () => void;
-  onOpenHome: () => void;
-  onOpenMacroPicks: () => void;
-  onOpenMatches: () => void;
-  onRetry: () => void;
-  preTournamentSummary: PreTournamentSummary | null;
-  profileDisplayName: string | null;
-};
+const PHASE_DEFINITIONS: Array<{ phase: TournamentPhase; label: string; stages: MatchStage[] }> = [
+  { phase: "groups", label: "Grupos", stages: ["group"] },
+  { phase: "r32", label: "16vos", stages: ["R32"] },
+  { phase: "r16", label: "8vos", stages: ["R16"] },
+  { phase: "qf", label: "QF", stages: ["QF"] },
+  { phase: "sf", label: "SF", stages: ["SF"] },
+  { phase: "final", label: "Final", stages: ["BRONZE", "FINAL"] }
+];
 
 function compareMatchesChronologically(left: MatchSummary, right: MatchSummary) {
   const kickoffDifference = new Date(left.kickoffAt).getTime() - new Date(right.kickoffAt).getTime();
@@ -33,95 +41,123 @@ function compareMatchesChronologically(left: MatchSummary, right: MatchSummary) 
   return left.matchId.localeCompare(right.matchId);
 }
 
+function resolvePhaseStatus(phaseMatches: MatchSummary[]): PhaseStatus {
+  if (phaseMatches.length === 0) {
+    return "locked";
+  }
+
+  const allScored = phaseMatches.every((m) => m.isScored || m.predictionStatus === "scored");
+
+  if (allScored) {
+    return "scored";
+  }
+
+  const savedOrScored = phaseMatches.filter(
+    (m) =>
+      m.predictionStatus === "saved_editable" ||
+      m.predictionStatus === "scored" ||
+      m.predictionStatus === "locked_unscored"
+  ).length;
+
+  if (savedOrScored === phaseMatches.length) {
+    return "complete";
+  }
+
+  if (savedOrScored > 0) {
+    return "partial";
+  }
+
+  return "empty";
+}
+
+function countCompletedInPhase(phaseMatches: MatchSummary[]) {
+  return phaseMatches.filter(
+    (m) =>
+      m.predictionStatus === "saved_editable" ||
+      m.predictionStatus === "scored" ||
+      m.predictionStatus === "locked_unscored"
+  ).length;
+}
+
+type TournamentScreenViewProps = {
+  activeMode: TournamentMode;
+  activePhase: TournamentPhase;
+  errorMessage: string | null;
+  groups: TuMundialGroupCard[];
+  isLoading: boolean;
+  matchesByPhase: Map<TournamentPhase, MatchSummary[]>;
+  matchesByGroupId: Map<string, MatchSummary[]>;
+  onModeSelect: (mode: TournamentMode) => void;
+  onOpenChampionPicker: () => void;
+  onOpenMatch: (matchId: string) => void;
+  onPhaseSelect: (phase: TournamentPhase) => void;
+  onPredictNext: () => void;
+  onRetry: () => void;
+  phaseItems: PhaseTabItem[];
+  preTournamentSummary: PreTournamentSummary | null;
+  quickMatch: MatchSummary | null;
+};
+
 export function TournamentScreenView({
+  activeMode,
+  activePhase,
   errorMessage,
   groups,
   isLoading,
-  onContinuePredictions,
-  onOpenHome,
-  onOpenMacroPicks,
-  onOpenMatches,
+  matchesByPhase,
+  matchesByGroupId,
+  onModeSelect,
+  onOpenChampionPicker,
+  onOpenMatch,
+  onPhaseSelect,
+  onPredictNext,
   onRetry,
-  preTournamentSummary,
-  profileDisplayName
+  phaseItems,
+  quickMatch
 }: TournamentScreenViewProps) {
-  const completedGroups = groups.filter((group) => group.isComplete).length;
-  const partialGroups = groups.filter((group) => group.completedMatches > 0 && !group.isComplete).length;
-  const emptyGroups = groups.filter((group) => group.completedMatches === 0).length;
-  const isPreTournament = preTournamentSummary?.isPreTournament ?? false;
+  const { locale } = useLocale();
+  const activePhaseDefinition = PHASE_DEFINITIONS.find((p) => p.phase === activePhase) ?? PHASE_DEFINITIONS[0];
+  const activePhaseMatches = matchesByPhase.get(activePhase) ?? [];
 
   return (
     <div className="grid gap-4">
-      <Card elevated className="hero-worldcup-bg" style={{ gap: 12, padding: 20 }}>
-        <div className="flex items-center gap-3">
-          <img src="/mundial/wc2026-logo.png" alt="" width={36} height={36} className="opacity-70" />
+      {quickMatch ? (
+        <NextMatchHero
+          awayTeam={{
+            teamName: quickMatch.awayTeam.name,
+            fifaCode: quickMatch.awayTeam.fifaCode,
+            flagAsset: quickMatch.awayTeam.flagAsset,
+            flagUrl: quickMatch.awayTeam.flagUrl
+          }}
+          ctaLabel={quickMatch.userPredictionSummary ? "Editar prediccion" : "Predecir"}
+          eyebrow="TU PROXIMO"
+          homeTeam={{
+            teamName: quickMatch.homeTeam.name,
+            fifaCode: quickMatch.homeTeam.fifaCode,
+            flagAsset: quickMatch.homeTeam.flagAsset,
+            flagUrl: quickMatch.homeTeam.flagUrl
+          }}
+          metaLabel={`${toStageLabel(quickMatch.stage, quickMatch.groupId, locale)} · ${toLocalKickoffLabel(quickMatch.kickoffAt, locale)}`}
+          onAction={onPredictNext}
+          onSecondaryAction={onOpenChampionPicker}
+          secondaryCtaLabel="Elegir campeon"
+          status={toCardTone(quickMatch)}
+          statusLabel={toStatusLabel(quickMatch)}
+          title={`${quickMatch.homeTeam.name} vs ${quickMatch.awayTeam.name}`}
+        />
+      ) : (
+        <Card elevated className="hero-worldcup-bg" style={{ gap: 8, padding: 20 }}>
           <span className="typo-small text-text-muted">TU MUNDIAL</span>
-        </div>
-        <div className="grid gap-2">
-          <h1 className="typo-h1 m-0 text-text-primary">
-            {profileDisplayName ? `${profileDisplayName}, asi se mueve tu Mundial` : "Asi se mueve tu Mundial"}
-          </h1>
-          <p className="typo-body m-0 text-text-secondary max-w-[620px]">
-            {isPreTournament
-              ? "Cada prediccion empuja la tabla de su grupo. Aqui ves rapido quienes estarian clasificando segun tu simulacion."
-              : "Tus grupos proyectados siguen disponibles aunque el producto ya este priorizando el loop diario del torneo en vivo."}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2.5">
-          <Button onClick={isPreTournament ? onContinuePredictions : onOpenHome}>
-            {isPreTournament ? "Continuar mis predicciones" : "Volver al home en vivo"}
-          </Button>
-          <Button variant="secondary" onClick={onOpenMacroPicks}>
-            Tu Campeon
-          </Button>
-          <Button variant="ghost" onClick={onOpenMatches}>
-            Ver calendario
-          </Button>
-        </div>
-      </Card>
-
-      <ProgressCompact
-        items={[
-          {
-            label: "CERRADOS",
-            value: String(completedGroups),
-            hint: "grupos ya definidos"
-          },
-          {
-            label: "EN PELEA",
-            value: String(partialGroups),
-            hint: "grupos todavia vivos"
-          },
-          {
-            label: "PENDIENTES",
-            value: String(emptyGroups),
-            hint: "todavia sin mover"
-          }
-        ]}
-      />
-
-      {preTournamentSummary ? (
-        <Card elevated style={{ gap: 8, padding: 16 }}>
-          <div className="flex justify-between gap-3 items-center">
-            <div className="grid gap-1">
-              <span className="typo-small text-text-muted">TU AVANCE GLOBAL</span>
-              <strong className="text-[20px] leading-[1.2] text-text-primary">
-                {preTournamentSummary.completedMatches} / {preTournamentSummary.totalMatches} partidos
-              </strong>
-            </div>
-            <StatusTag
-              status={preTournamentSummary.remainingMatches === 0 ? "scored" : "editable"}
-              label={`${preTournamentSummary.completionPercentage}%`}
-            />
-          </div>
+          <h1 className="typo-h2 m-0 text-text-primary">Todo al dia</h1>
           <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">
-            {preTournamentSummary.remainingMatches === 0
-              ? "Ya completaste toda la fase de grupos."
-              : `Todavia te faltan ${preTournamentSummary.remainingMatches} partidos para cerrar tu simulacion grupo por grupo.`}
+            No tenes predicciones pendientes ahora. Aprovecha para revisar tus tablas o elegir a tu campeon.
           </p>
         </Card>
-      ) : null}
+      )}
+
+      <ModeToggle activeMode={activeMode} onSelect={onModeSelect} />
+
+      <PhaseTabs items={phaseItems} activePhase={activePhase} onSelect={onPhaseSelect} />
 
       {isLoading ? (
         <div className="grid gap-3">
@@ -134,18 +170,38 @@ export function TournamentScreenView({
         <ErrorCard title="No pudimos cargar Tu Mundial" message={errorMessage} onRetry={onRetry} />
       ) : null}
 
-      <div className="grid gap-3">
-        {groups.map((group) => (
-          <GroupStandingsCard key={group.groupId} group={group} />
-        ))}
-      </div>
+      {!isLoading && !errorMessage ? (
+        activeMode === "predictions" ? (
+          activePhase === "groups" ? (
+            <PredictionsGroupsView
+              groups={groups}
+              matchesByGroupId={matchesByGroupId}
+              onOpenMatch={onOpenMatch}
+            />
+          ) : (
+            <PhaseKnockoutView
+              matches={activePhaseMatches}
+              phaseLabel={activePhaseDefinition.label}
+              onOpenMatch={onOpenMatch}
+            />
+          )
+        ) : activePhase === "groups" ? (
+          <ResultsGroupsView groups={groups} />
+        ) : (
+          <PhaseKnockoutView
+            matches={activePhaseMatches}
+            phaseLabel={activePhaseDefinition.label}
+            onOpenMatch={onOpenMatch}
+          />
+        )
+      ) : null}
     </div>
   );
 }
 
 export function TournamentScreen() {
   const router = useRouter();
-  const { profile, status, user } = useAuth();
+  const { status, user } = useAuth();
   const [data, setData] = useState<TuMundialResponse | null>(null);
   const [preTournamentSummary, setPreTournamentSummary] = useState<PreTournamentSummary | null>(null);
   const [items, setItems] = useState<MatchSummary[]>([]);
@@ -153,6 +209,8 @@ export function TournamentScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
+  const [activePhase, setActivePhase] = useState<TournamentPhase>("groups");
+  const [activeMode, setActiveMode] = useState<TournamentMode>("predictions");
 
   useEffect(() => {
     let cancelled = false;
@@ -174,7 +232,7 @@ export function TournamentScreen() {
         const [nextData, nextSummary, matchesResponse] = await Promise.all([
           getTuMundial(token),
           getPreTournamentSummary(token),
-          getMatches(token, { limit: 120 })
+          getMatches(token, { limit: 200 })
         ]);
 
         if (!cancelled) {
@@ -200,35 +258,80 @@ export function TournamentScreen() {
     };
   }, [reloadKey, status, user]);
 
-  const editableMatches = useMemo(
+  const sortedItems = useMemo(() => [...items].sort(compareMatchesChronologically), [items]);
+
+  const matchesByPhase = useMemo(() => {
+    const map = new Map<TournamentPhase, MatchSummary[]>();
+
+    for (const def of PHASE_DEFINITIONS) {
+      map.set(def.phase, sortedItems.filter((m) => def.stages.includes(m.stage)));
+    }
+
+    return map;
+  }, [sortedItems]);
+
+  const matchesByGroupId = useMemo(() => {
+    const map = new Map<string, MatchSummary[]>();
+    const groupMatches = matchesByPhase.get("groups") ?? [];
+
+    for (const match of groupMatches) {
+      if (!match.groupId) {
+        continue;
+      }
+
+      const bucket = map.get(match.groupId) ?? [];
+      bucket.push(match);
+      map.set(match.groupId, bucket);
+    }
+
+    return map;
+  }, [matchesByPhase]);
+
+  const phaseItems = useMemo<PhaseTabItem[]>(
     () =>
-      items
-        .filter((match) => canEditPrediction(match))
-        .sort(compareMatchesChronologically),
-    [items]
+      PHASE_DEFINITIONS.map((def) => {
+        const phaseMatches = matchesByPhase.get(def.phase) ?? [];
+
+        return {
+          phase: def.phase,
+          label: def.label,
+          completed: countCompletedInPhase(phaseMatches),
+          total: phaseMatches.length,
+          status: resolvePhaseStatus(phaseMatches)
+        };
+      }),
+    [matchesByPhase]
   );
-  const firstPendingMatchId = preTournamentSummary?.nextPendingMatchId ?? editableMatches[0]?.matchId ?? null;
+
+  const quickMatch = useMemo(() => pickQuickMatch(sortedItems), [sortedItems]);
+  const editableMatches = useMemo(
+    () => sortedItems.filter((match) => canEditPrediction(match)),
+    [sortedItems]
+  );
 
   return (
     <>
       <TournamentScreenView
+        activeMode={activeMode}
+        activePhase={activePhase}
         errorMessage={errorMessage}
         groups={data?.groups ?? []}
         isLoading={isLoading}
-        onContinuePredictions={() => {
-          if (firstPendingMatchId) {
-            setActiveMatchId(firstPendingMatchId);
-            return;
+        matchesByPhase={matchesByPhase}
+        matchesByGroupId={matchesByGroupId}
+        onModeSelect={setActiveMode}
+        onOpenChampionPicker={() => router.push(APP_ROUTES.macroPicks)}
+        onOpenMatch={(matchId) => setActiveMatchId(matchId)}
+        onPhaseSelect={setActivePhase}
+        onPredictNext={() => {
+          if (quickMatch) {
+            setActiveMatchId(quickMatch.matchId);
           }
-
-          router.push(APP_ROUTES.home);
         }}
-        onOpenHome={() => router.push(APP_ROUTES.home)}
-        onOpenMacroPicks={() => router.push(APP_ROUTES.macroPicks)}
-        onOpenMatches={() => router.push(APP_ROUTES.matches)}
         onRetry={() => setReloadKey((current) => current + 1)}
+        phaseItems={phaseItems}
         preTournamentSummary={preTournamentSummary}
-        profileDisplayName={profile?.displayName ?? null}
+        quickMatch={quickMatch}
       />
 
       <QuickPredictionModal
@@ -237,8 +340,7 @@ export function TournamentScreen() {
         hasNextPending={editableMatches.filter((m) => m.matchId !== activeMatchId).length > 0}
         onClose={() => setActiveMatchId(null)}
         onSaved={() => {
-          const remaining = editableMatches
-            .filter((m) => m.matchId !== activeMatchId);
+          const remaining = editableMatches.filter((m) => m.matchId !== activeMatchId);
           const nextMatch = remaining.find((m) => m.predictionStatus === "empty") ?? remaining[0] ?? null;
 
           if (nextMatch) {
