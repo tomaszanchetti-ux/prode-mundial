@@ -1,16 +1,13 @@
 import React from "react";
 import type { LeagueSummary, MatchSummary, PreTournamentSummary } from "@prode/shared";
-import { AdSlotCard, Button, Card, NextMatchHero, ProgressCompact } from "@prode/ui";
+import { AdSlotCard, Button, Card, NextMatchHero } from "@prode/ui";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
 import {
   pickNextChronologicalMatch,
   pickPriorityMatch,
-  toCompletionCopy,
-  toCountdownLabel,
   toEditWindowLabel,
   toKickoffLabel,
-  toLeagueSummaryCopy,
   toStageLabel
 } from "./home-helpers";
 import { HomeErrorCard, HomeSkeletonCard } from "./home-states";
@@ -81,12 +78,18 @@ export function HomePreTournamentView({
           )
     : undefined;
 
+  const heroStatus: "saved" | "editable" | "neutral" = heroIsEditable
+    ? heroHasPrediction
+      ? "saved"
+      : "editable"
+    : "neutral";
+
   const heroStatusLabel = heroMatch
-    ? heroIsEditable
-      ? heroHasPrediction
-        ? copyForLocale(locale, "Editable", "Editable")
-        : copyForLocale(locale, "Pendiente", "Pending")
-      : copyForLocale(locale, "Cerrado", "Locked")
+    ? heroStatus === "saved"
+      ? copyForLocale(locale, "Guardado", "Saved")
+      : heroStatus === "editable"
+        ? copyForLocale(locale, "Pendiente", "Pending")
+        : copyForLocale(locale, "Cerrado", "Locked")
     : "";
 
   return (
@@ -108,9 +111,8 @@ export function HomePreTournamentView({
             flagAsset: heroMatch.homeTeam.flagAsset,
             flagUrl: heroMatch.homeTeam.flagUrl
           }}
-          metaLabel={`${toStageLabel(heroMatch, locale)} · ${toKickoffLabel(heroMatch.kickoffAt, locale)}`}
           onAction={() => onOpenMatch(heroMatch.matchId)}
-          status={heroIsEditable ? "editable" : "neutral"}
+          status={heroStatus}
           statusLabel={heroStatusLabel}
           title={`${heroMatch.homeTeam.name} vs ${heroMatch.awayTeam.name}`}
         />
@@ -120,7 +122,6 @@ export function HomePreTournamentView({
           <h1 className="typo-h1 m-0 text-text-primary">
             {copyForLocale(locale, "Completa tu Mundial", "Complete your World Cup")}
           </h1>
-          <p className="typo-body m-0 text-text-secondary max-w-[560px]">{toCompletionCopy(preTournamentSummary, locale)}</p>
           <div className="flex gap-2.5 flex-wrap">
             <Button onClick={onOpenMatches}>{copyForLocale(locale, "Ver calendario", "See schedule")}</Button>
             <Button variant="ghost" onClick={onOpenTournament}>
@@ -130,44 +131,45 @@ export function HomePreTournamentView({
         </Card>
       )}
 
-      <ProgressCompact
-        items={[
-          {
-            label: copyForLocale(locale, "CARGADOS", "FILLED"),
-            value: String(preTournamentSummary.completedMatches),
-            tone: "success"
-          },
-          {
-            label: copyForLocale(locale, "PENDIENTES", "PENDING"),
-            value: String(preTournamentSummary.remainingMatches),
-            tone: "primary"
-          },
-          {
-            label: copyForLocale(locale, "AVANCE", "PROGRESS"),
-            value: `${preTournamentSummary.completionPercentage}%`,
-            tone: "warning"
-          }
-        ]}
-      />
+      <Card elevated style={{ gap: 8, padding: 12 }}>
+        <div className="h-1.5 w-full rounded-pill bg-bg-muted overflow-hidden">
+          <div
+            className="h-full bg-primary-500 rounded-pill transition-[width] duration-300"
+            style={{ width: `${preTournamentSummary.completionPercentage}%` }}
+          />
+        </div>
+        <div className="flex items-baseline justify-between gap-2 typo-small">
+          <span className="text-text-primary font-semibold">
+            {preTournamentSummary.completedMatches} {copyForLocale(locale, "hechos", "filled")}
+            <span className="text-text-muted font-normal"> · {preTournamentSummary.remainingMatches} {copyForLocale(locale, "pendientes", "pending")}</span>
+          </span>
+          <span className="text-text-muted">{preTournamentSummary.completionPercentage}%</span>
+        </div>
+      </Card>
 
       {leagues.length > 0 ? (
-        <Card elevated style={{ gap: 12, padding: 16 }}>
+        <Card elevated style={{ gap: 10, padding: 16 }}>
           <span className="typo-eyebrow text-text-muted uppercase">
             {copyForLocale(locale, "TU LIGA HOY", "YOUR LEAGUE TODAY")}
           </span>
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="typo-h3 m-0 text-text-primary">{leagues[0].name}</h2>
-            <span className="typo-small text-text-muted">
-              {leagues[0].membersCount} {copyForLocale(locale, "jugadores", "players")}
+          <h2 className="typo-h3 m-0 text-text-primary">{leagues[0].name}</h2>
+          <p className="typo-small text-text-secondary m-0">
+            {leagues[0].position != null ? (
+              <>
+                <span className="text-text-primary font-semibold">#{leagues[0].position}</span>
+                <span className="text-text-muted"> · {leagues[0].userPoints} {copyForLocale(locale, "pts", "pts")}</span>
+              </>
+            ) : null}
+            <span className="text-text-muted">
+              {leagues[0].position != null ? " · " : ""}{leagues[0].membersCount} {copyForLocale(locale, "jugadores", "players")}
             </span>
-          </div>
-          <p className="typo-body m-0 text-text-secondary">{toLeagueSummaryCopy(preTournamentSummary, locale)}</p>
+          </p>
           <div className="flex gap-2.5 flex-wrap">
             <Button variant="secondary" onClick={onOpenRankings}>
               {copyForLocale(locale, "Ver tabla", "See table")}
             </Button>
             <Button variant="ghost" onClick={onOpenLeagues}>
-              {copyForLocale(locale, "Invitar amigos", "Invite friends")}
+              {copyForLocale(locale, "Invitar", "Invite")}
             </Button>
           </div>
         </Card>
@@ -176,25 +178,11 @@ export function HomePreTournamentView({
           <span className="typo-eyebrow text-text-muted uppercase">
             {copyForLocale(locale, "TU LIGA HOY", "YOUR LEAGUE TODAY")}
           </span>
-          <p className="typo-body m-0 text-text-secondary">
-            {copyForLocale(locale, "Crea una liga e invita amigos para competir.", "Create a league and invite friends to compete.")}
-          </p>
           <Button variant="secondary" onClick={onOpenLeagues}>
             {copyForLocale(locale, "Crear liga", "Create league")}
           </Button>
         </Card>
       )}
-
-      <Card elevated style={{ gap: 8, padding: 16 }}>
-        <div className="flex justify-between items-center">
-          <span className="typo-eyebrow text-text-muted uppercase">
-            {copyForLocale(locale, "TU MUNDIAL", "YOUR WORLD CUP")}
-          </span>
-          <Button variant="ghost" onClick={onOpenTournament}>
-            {copyForLocale(locale, "Ver grupos y llaves", "See groups & bracket")}
-          </Button>
-        </div>
-      </Card>
 
       <AdSlotCard description={copyForLocale(locale, "Espacio reservado para patrocinio nativo, ubicado despues de la accion principal.", "Reserved slot for native sponsorship, placed after the main action.")} />
 

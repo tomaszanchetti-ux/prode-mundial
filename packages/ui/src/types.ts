@@ -112,7 +112,7 @@ export type NextMatchHeroProps = {
   eyebrow: string;
   helperText?: string;
   homeTeam: TeamData;
-  metaLabel: string;
+  metaLabel?: string;
   onAction?: () => void;
   onSecondaryAction?: () => void;
   secondaryCtaLabel?: string;

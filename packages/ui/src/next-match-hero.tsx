@@ -19,26 +19,32 @@ export function NextMatchHero({
   statusLabel,
   title
 }: NextMatchHeroProps) {
+  const isActionable = status === "editable" || status === "saved";
+  const eyebrowTone =
+    status === "saved"
+      ? "text-success"
+      : status === "editable"
+        ? "text-primary-500"
+        : "text-gold";
+
   return (
     <Card
       elevated
-      className={status === "editable" ? "hero-editable-bg" : "hero-locked-bg"}
+      className={isActionable ? "hero-editable-bg" : "hero-locked-bg"}
       style={{ padding: 0, overflow: "hidden" }}
     >
       {/* ── Eyebrow + Status ── */}
       <div className="flex justify-between items-center px-5 pt-5 pb-0">
-        <span className={`typo-eyebrow uppercase ${status === "editable" ? "text-primary-500" : "text-gold"}`}>
-          {eyebrow}
-        </span>
+        <span className={`typo-eyebrow uppercase ${eyebrowTone}`}>{eyebrow}</span>
         <StatusTag status={status} label={statusLabel} />
       </div>
 
       {/* ── Matchup (centered duel) ── */}
-      <div className="flex items-center justify-center gap-5 px-5 py-4">
+      <div className="flex items-center justify-center gap-6 px-5 py-6">
         <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
           <TeamIdentity team={homeTeam} size="lg" emphasis="hero" align="center" />
         </div>
-        <span className="text-[13px] font-bold tracking-[0.1em] text-text-muted shrink-0">VS</span>
+        <span className="text-[18px] font-black tracking-[0.14em] text-text-muted shrink-0">VS</span>
         <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
           <TeamIdentity team={awayTeam} size="lg" emphasis="hero" align="center" />
         </div>
@@ -46,7 +52,9 @@ export function NextMatchHero({
 
       {/* ── Meta + CTA ── */}
       <div className="grid gap-3 px-5 pb-5">
-        <span className="typo-body text-text-secondary text-center">{metaLabel}</span>
+        {metaLabel ? (
+          <span className="typo-body text-text-secondary text-center">{metaLabel}</span>
+        ) : null}
 
         {helperText ? (
           <span className="typo-small text-text-muted text-center">{helperText}</span>
