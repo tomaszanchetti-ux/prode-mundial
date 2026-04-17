@@ -123,9 +123,9 @@ export function HomeScreen() {
         errorMessage={errorMessage}
         onRetry={() => setReloadKey((current) => current + 1)}
         onOpenMatch={(matchId) => setActiveMatchId(matchId)}
-        onOpenMatches={() => router.push(APP_ROUTES.matches)}
+        onOpenMatches={() => router.push(APP_ROUTES.tournament)}
         onOpenLeagues={() => router.push(APP_ROUTES.leagues)}
-        onOpenRankings={() => router.push(APP_ROUTES.rankings)}
+        onOpenRankings={() => router.push(APP_ROUTES.leagues)}
         onOpenTournament={() => router.push(APP_ROUTES.tournament)}
       />
 
@@ -136,9 +136,9 @@ export function HomeScreen() {
         onClose={() => {
           setActiveMatchId(null);
           setDismissedCycle(true);
+          router.push(APP_ROUTES.tournament);
         }}
         onSaved={() => {
-          // Auto-advance: find next pending match after the current one
           const editableMatches = items
             .filter((m) => canEditPrediction(m) && m.matchId !== activeMatchId)
             .sort(compareMatchesChronologically);
@@ -146,11 +146,12 @@ export function HomeScreen() {
 
           if (nextMatch) {
             setActiveMatchId(nextMatch.matchId);
+            setReloadKey((current) => current + 1);
           } else {
             setActiveMatchId(null);
             setDismissedCycle(true);
+            router.push(APP_ROUTES.tournament);
           }
-          setReloadKey((current) => current + 1);
         }}
       />
 

@@ -1,5 +1,6 @@
-import { RankingsScreen } from "@/components/rankings/rankings-screen";
+import { redirect } from "next/navigation";
+import { APP_ROUTES } from "@prode/shared";
 
 export default function RankingsPage() {
-  return <RankingsScreen />;
+  redirect(APP_ROUTES.leagues);
 }

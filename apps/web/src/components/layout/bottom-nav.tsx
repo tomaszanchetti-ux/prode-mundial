@@ -10,10 +10,9 @@ export function BottomNav() {
   const { locale } = useLocale();
   const labels = {
     home: copyForLocale(locale, "Inicio", "Home"),
-    matches: copyForLocale(locale, "Partidos", "Matches"),
     tournament: copyForLocale(locale, "Tu Mundial", "Your World Cup"),
-    rankings: copyForLocale(locale, "Posiciones", "Standings"),
-    leagues: copyForLocale(locale, "Ligas", "Leagues")
+    worldCup: copyForLocale(locale, "El Mundial", "World Cup"),
+    leagues: copyForLocale(locale, "Tus Ligas", "Your Leagues")
   } as const;
 
   return (
@@ -28,7 +27,7 @@ export function BottomNav() {
       }}
     >
       {MAIN_TABS.map((tab) => {
-        const isActive = tab.href === "/matches" ? pathname === tab.href || pathname.startsWith("/matches/") : pathname === tab.href;
+        const isActive = pathname === tab.href;
 
         return (
           <Link

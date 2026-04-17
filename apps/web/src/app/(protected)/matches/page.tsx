@@ -1,5 +1,6 @@
-import { MatchesScreen } from "@/components/matches/matches-screen";
+import { redirect } from "next/navigation";
+import { APP_ROUTES } from "@prode/shared";
 
 export default function MatchesPage() {
-  return <MatchesScreen />;
+  redirect(APP_ROUTES.tournament);
 }
