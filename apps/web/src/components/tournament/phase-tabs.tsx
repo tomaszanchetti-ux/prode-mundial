@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export type TournamentPhase = "groups" | "r32" | "r16" | "qf" | "sf" | "final";
+export type TournamentPhase = "groups" | "bracket" | "r32" | "r16" | "qf" | "sf" | "final";
 
 export type PhaseStatus = "scored" | "complete" | "partial" | "empty" | "locked";
 

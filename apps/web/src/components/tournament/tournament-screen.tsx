@@ -25,21 +25,16 @@ import {
 } from "@/components/matches/matches-helpers";
 import { ApiClientError, getChampionPick, getMatches, getPreTournamentSummary, getTournamentProjection, getTuMundial } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
-import { BracketRound32 } from "./bracket-round-32";
 import { ChampionPickerCard } from "./champion-picker-card";
 import { ModeToggle, type TournamentMode } from "./mode-toggle";
-import { PhaseKnockoutView } from "./phase-knockout-view";
 import { PhaseTabs, type PhaseStatus, type PhaseTabItem, type TournamentPhase } from "./phase-tabs";
 import { PredictionsGroupsView } from "./predictions-groups-view";
 import { ResultsGroupsView } from "./results-groups-view";
+import { TournamentBracket } from "./tournament-bracket";
 
 const PHASE_DEFINITIONS: Array<{ phase: TournamentPhase; label: string; stages: MatchStage[] }> = [
   { phase: "groups", label: "Grupos", stages: ["group"] },
-  { phase: "r32", label: "16vos", stages: ["R32"] },
-  { phase: "r16", label: "8vos", stages: ["R16"] },
-  { phase: "qf", label: "QF", stages: ["QF"] },
-  { phase: "sf", label: "SF", stages: ["SF"] },
-  { phase: "final", label: "Final", stages: ["BRONZE", "FINAL"] }
+  { phase: "bracket", label: "Bracket", stages: ["R32", "R16", "QF", "SF", "BRONZE", "FINAL"] }
 ];
 
 function compareMatchesChronologically(left: MatchSummary, right: MatchSummary) {
@@ -131,8 +126,6 @@ export function TournamentScreenView({
   quickMatch
 }: TournamentScreenViewProps) {
   const { locale } = useLocale();
-  const activePhaseDefinition = PHASE_DEFINITIONS.find((p) => p.phase === activePhase) ?? PHASE_DEFINITIONS[0];
-  const activePhaseMatches = matchesByPhase.get(activePhase) ?? [];
 
   return (
     <div className="grid gap-4">
@@ -188,35 +181,23 @@ export function TournamentScreenView({
       ) : null}
 
       {!isLoading && !errorMessage ? (
-        activeMode === "predictions" ? (
-          activePhase === "groups" ? (
+        activePhase === "groups" ? (
+          activeMode === "predictions" ? (
             <PredictionsGroupsView
               groups={groups}
               matchesByGroupId={matchesByGroupId}
               onOpenMatch={onOpenMatch}
             />
-          ) : activePhase === "r32" && projection ? (
-            <BracketRound32
-              matches={projection.bracket.round32}
-              readiness={projection.readiness}
-              onOpenMatch={onOpenMatch}
-            />
           ) : (
-            <PhaseKnockoutView
-              matches={activePhaseMatches}
-              phaseLabel={activePhaseDefinition.label}
-              onOpenMatch={onOpenMatch}
-            />
+            <ResultsGroupsView groups={groups} />
           )
-        ) : activePhase === "groups" ? (
-          <ResultsGroupsView groups={groups} />
-        ) : (
-          <PhaseKnockoutView
-            matches={activePhaseMatches}
-            phaseLabel={activePhaseDefinition.label}
+        ) : projection ? (
+          <TournamentBracket
+            bracket={projection.bracket}
+            readiness={projection.readiness}
             onOpenMatch={onOpenMatch}
           />
-        )
+        ) : null
       ) : null}
     </div>
   );
