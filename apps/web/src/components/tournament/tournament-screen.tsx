@@ -27,15 +27,31 @@ import { ApiClientError, getChampionPick, getMatches, getPreTournamentSummary, g
 import { canEditPrediction } from "@/lib/matches/editability";
 import { ChampionPickerCard } from "./champion-picker-card";
 import { ModeToggle, type TournamentMode } from "./mode-toggle";
+import { PhaseKnockoutView } from "./phase-knockout-view";
 import { PhaseTabs, type PhaseStatus, type PhaseTabItem, type TournamentPhase } from "./phase-tabs";
 import { PredictionsGroupsView } from "./predictions-groups-view";
 import { ResultsGroupsView } from "./results-groups-view";
 import { TournamentBracket } from "./tournament-bracket";
 
-const PHASE_DEFINITIONS: Array<{ phase: TournamentPhase; label: string; stages: MatchStage[] }> = [
+type PhaseDefinition = { phase: TournamentPhase; label: string; stages: MatchStage[] };
+
+const PREDICTION_PHASE_DEFINITIONS: PhaseDefinition[] = [
+  { phase: "groups", label: "Grupos", stages: ["group"] },
+  { phase: "r32", label: "16vos", stages: ["R32"] },
+  { phase: "r16", label: "8vos", stages: ["R16"] },
+  { phase: "qf", label: "QF", stages: ["QF"] },
+  { phase: "sf", label: "SF", stages: ["SF"] },
+  { phase: "final", label: "Final", stages: ["BRONZE", "FINAL"] }
+];
+
+const RESULT_PHASE_DEFINITIONS: PhaseDefinition[] = [
   { phase: "groups", label: "Grupos", stages: ["group"] },
   { phase: "bracket", label: "Bracket", stages: ["R32", "R16", "QF", "SF", "BRONZE", "FINAL"] }
 ];
+
+function resolvePhaseDefinitions(mode: TournamentMode): PhaseDefinition[] {
+  return mode === "predictions" ? PREDICTION_PHASE_DEFINITIONS : RESULT_PHASE_DEFINITIONS;
+}
 
 function compareMatchesChronologically(left: MatchSummary, right: MatchSummary) {
   const kickoffDifference = new Date(left.kickoffAt).getTime() - new Date(right.kickoffAt).getTime();
@@ -181,16 +197,24 @@ export function TournamentScreenView({
       ) : null}
 
       {!isLoading && !errorMessage ? (
-        activePhase === "groups" ? (
-          activeMode === "predictions" ? (
+        activeMode === "predictions" ? (
+          activePhase === "groups" ? (
             <PredictionsGroupsView
               groups={groups}
               matchesByGroupId={matchesByGroupId}
               onOpenMatch={onOpenMatch}
             />
           ) : (
-            <ResultsGroupsView groups={groups} />
+            <PhaseKnockoutView
+              matches={matchesByPhase.get(activePhase) ?? []}
+              phaseLabel={
+                resolvePhaseDefinitions("predictions").find((def) => def.phase === activePhase)?.label ?? ""
+              }
+              onOpenMatch={onOpenMatch}
+            />
           )
+        ) : activePhase === "groups" ? (
+          <ResultsGroupsView groups={groups} />
         ) : projection ? (
           <TournamentBracket
             bracket={projection.bracket}
@@ -272,15 +296,17 @@ export function TournamentScreen() {
 
   const sortedItems = useMemo(() => [...items].sort(compareMatchesChronologically), [items]);
 
+  const phaseDefinitions = useMemo(() => resolvePhaseDefinitions(activeMode), [activeMode]);
+
   const matchesByPhase = useMemo(() => {
     const map = new Map<TournamentPhase, MatchSummary[]>();
 
-    for (const def of PHASE_DEFINITIONS) {
+    for (const def of phaseDefinitions) {
       map.set(def.phase, sortedItems.filter((m) => def.stages.includes(m.stage)));
     }
 
     return map;
-  }, [sortedItems]);
+  }, [sortedItems, phaseDefinitions]);
 
   const matchesByGroupId = useMemo(() => {
     const map = new Map<string, MatchSummary[]>();
@@ -301,7 +327,7 @@ export function TournamentScreen() {
 
   const phaseItems = useMemo<PhaseTabItem[]>(
     () =>
-      PHASE_DEFINITIONS.map((def) => {
+      phaseDefinitions.map((def) => {
         const phaseMatches = matchesByPhase.get(def.phase) ?? [];
 
         return {
@@ -312,8 +338,17 @@ export function TournamentScreen() {
           status: resolvePhaseStatus(phaseMatches)
         };
       }),
-    [matchesByPhase]
+    [matchesByPhase, phaseDefinitions]
   );
+
+  const handleModeSelect = (nextMode: TournamentMode) => {
+    setActiveMode(nextMode);
+    const validPhases = resolvePhaseDefinitions(nextMode).map((def) => def.phase);
+
+    if (!validPhases.includes(activePhase)) {
+      setActivePhase("groups");
+    }
+  };
 
   const quickMatch = useMemo(() => pickQuickMatch(sortedItems), [sortedItems]);
   const editableMatches = useMemo(
@@ -332,7 +367,7 @@ export function TournamentScreen() {
         isLoading={isLoading}
         matchesByPhase={matchesByPhase}
         matchesByGroupId={matchesByGroupId}
-        onModeSelect={setActiveMode}
+        onModeSelect={handleModeSelect}
         onOpenChampionPicker={() => router.push(APP_ROUTES.macroPicks)}
         onOpenMatch={(matchId) => setActiveMatchId(matchId)}
         onPhaseSelect={setActivePhase}
