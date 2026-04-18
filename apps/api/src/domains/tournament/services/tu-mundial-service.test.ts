@@ -77,6 +77,136 @@ function buildTeam(teamId: string, name: string, groupId = "A"): StoredTeam {
   };
 }
 
+test("getTournamentProjectionForUser exposes R16/QF/SF/BRONZE/FINAL with simulator sources", async () => {
+  const service = new TuMundialService();
+
+  const groupA = [
+    buildMatch({
+      matchId: "mg_a1",
+      groupId: "A",
+      stage: "group",
+      homeTeamId: "MEX",
+      awayTeamId: "RSA"
+    }),
+    buildMatch({
+      matchId: "mg_a2",
+      groupId: "A",
+      stage: "group",
+      homeTeamId: "KOR",
+      awayTeamId: "CZE",
+      kickoffAt: "2026-06-12T19:00:00Z"
+    })
+  ];
+
+  const knockoutMatches = [
+    buildMatch({
+      matchId: "m_073",
+      stage: "R32",
+      groupId: null,
+      homeTeamId: null,
+      awayTeamId: null,
+      homeSlot: "1A",
+      awaySlot: "2B",
+      kickoffAt: "2026-06-27T19:00:00Z",
+      officialMatchNumber: 73
+    }),
+    buildMatch({
+      matchId: "m_089",
+      stage: "R16",
+      groupId: null,
+      homeTeamId: null,
+      awayTeamId: null,
+      homeSlot: "W73",
+      awaySlot: "W74",
+      kickoffAt: "2026-07-03T21:00:00Z",
+      officialMatchNumber: 89
+    }),
+    buildMatch({
+      matchId: "m_104",
+      stage: "FINAL",
+      groupId: null,
+      homeTeamId: null,
+      awayTeamId: null,
+      homeSlot: "WINNER_SF_1",
+      awaySlot: "WINNER_SF_2",
+      kickoffAt: "2026-07-18T19:00:00Z",
+      officialMatchNumber: 104
+    })
+  ];
+
+  const matchesMock = mock.method(matchesRepository, "listMatches", async () => [
+    ...groupA,
+    ...knockoutMatches
+  ]);
+  const predictionsMock = mock.method(
+    predictionsRepository,
+    "listPredictionsByUserForMatches",
+    async () =>
+      new Map<string, StoredPrediction>([
+        [
+          "mg_a1",
+          buildPrediction({ matchId: "mg_a1", homeScorePred: 3, awayScorePred: 0 })
+        ],
+        [
+          "mg_a2",
+          buildPrediction({ matchId: "mg_a2", homeScorePred: 0, awayScorePred: 2 })
+        ]
+      ])
+  );
+  const teamsMock = mock.method(
+    teamsRepository,
+    "getTeamsByIds",
+    async () =>
+      new Map<string, StoredTeam>([
+        ["MEX", buildTeam("MEX", "Mexico")],
+        ["RSA", buildTeam("RSA", "South Africa")],
+        ["KOR", buildTeam("KOR", "Korea Republic")],
+        ["CZE", buildTeam("CZE", "Czechia")]
+      ])
+  );
+  const preTournamentMock = mock.method(preTournamentSummaryService, "getSummaryForUser", async () => ({
+    isPreTournament: true,
+    completedMatches: 2,
+    totalMatches: 72,
+    remainingMatches: 70,
+    completionPercentage: 3,
+    nextPendingMatchId: null
+  }));
+
+  try {
+    const response = await service.getTournamentProjectionForUser(
+      "usr_1",
+      new Date("2026-06-01T12:00:00Z")
+    );
+
+    assert.equal(response.bracket.round32.length, 1);
+    assert.equal(response.bracket.round16.length, 1);
+    assert.equal(response.bracket.final.length, 1);
+    assert.equal(response.bracket.quarterfinals.length, 0);
+    assert.equal(response.bracket.semifinals.length, 0);
+    assert.equal(response.bracket.bronze.length, 0);
+
+    // R16 slot label uses the W73 grammar.
+    const r16 = response.bracket.round16[0];
+    assert.equal(r16?.home.slotLabel, "Ganador del M73");
+    assert.equal(r16?.source, "unresolved"); // no prediction for R32, so R16 can't be projected
+
+    // FINAL slot label uses WINNER_SF_N grammar.
+    const final = response.bracket.final[0];
+    assert.equal(final?.home.slotLabel, "Ganador SF1");
+    assert.equal(final?.away.slotLabel, "Ganador SF2");
+
+    // officialMatchNumber is propagated.
+    assert.equal(response.bracket.round32[0]?.officialMatchNumber, 73);
+    assert.equal(final?.officialMatchNumber, 104);
+  } finally {
+    matchesMock.mock.restore();
+    predictionsMock.mock.restore();
+    teamsMock.mock.restore();
+    preTournamentMock.mock.restore();
+  }
+});
+
 test("getTuMundialForUser builds projected standings grouped by user predictions", async () => {
   const service = new TuMundialService();
   const matchesMock = mock.method(matchesRepository, "listMatches", async (input?: { stage?: string }) => {

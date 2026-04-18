@@ -1,11 +1,18 @@
 import {
+  buildSlotLabel,
   resolveR32Bracket,
   resolveTeamIdentity,
+  simulateKnockoutBracket,
+  type BracketSimulatorMatch,
+  type BracketSimulatorPrediction,
+  type KnockoutStage,
   type PredictedGroupStandingRow,
   type R32SlotDefinition,
   type ResolvedGroupStandings,
+  type SimulatedKnockoutMatch,
   type TeamRef,
   type TournamentMode,
+  type TournamentProjectionBracket,
   type TournamentProjectionMatch,
   type TournamentProjectionReadiness,
   type TournamentProjectionResponse,
@@ -230,25 +237,6 @@ function buildTeamRefById(teamId: string, teamsById: Map<string, StoredTeam>): T
   };
 }
 
-function buildSlotLabel(slot: string): string {
-  const prefix = slot.slice(0, 1);
-  const tail = slot.slice(1);
-
-  if (prefix === "1") {
-    return `Ganador Grupo ${tail}`;
-  }
-
-  if (prefix === "2") {
-    return `Segundo Grupo ${tail}`;
-  }
-
-  if (prefix === "3") {
-    return `Mejor 3ero (${tail.split("").join(", ")})`;
-  }
-
-  return slot;
-}
-
 function buildProjectionSide(
   slot: string,
   resolvedTeamId: string | null,
@@ -296,11 +284,13 @@ export class TuMundialService {
 
   async getTournamentProjectionForUser(userId: string, now = new Date()): Promise<TournamentProjectionResponse> {
     const summary = await preTournamentSummaryService.getSummaryForUser(userId, now);
-    const groupMatches = await matchesRepository.listMatches({ stage: "group" });
-    const r32Matches = await matchesRepository.listMatches({ stage: "R32" });
+    const allMatches = await matchesRepository.listMatches();
+    const groupMatches = allMatches.filter((match) => match.stage === "group");
+    const knockoutMatches = allMatches.filter((match) => match.stage !== "group");
+
     const predictionsByMatchId = await predictionsRepository.listPredictionsByUserForMatches(
       userId,
-      groupMatches.map((match) => match.matchId)
+      allMatches.map((match) => match.matchId)
     );
     const teamsById = await teamsRepository.getTeamsByIds(
       WORLD_CUP_2026_GROUPS.flatMap((group) => group.teamIds)
@@ -316,6 +306,7 @@ export class TuMundialService {
       }
     }
 
+    const r32Matches = knockoutMatches.filter((match) => match.stage === "R32");
     const slotDefinitions: R32SlotDefinition[] = r32Matches
       .filter((match): match is StoredMatch & { homeSlot: string; awaySlot: string } =>
         Boolean(match.homeSlot && match.awaySlot)
@@ -327,23 +318,88 @@ export class TuMundialService {
       }));
 
     const { matches: resolvedR32, unresolvedSlots } = resolveR32Bracket(standings, slotDefinitions);
-    const resolvedByMatchId = new Map(resolvedR32.map((match) => [match.matchId, match]));
+    const resolvedR32ByMatchId = new Map(resolvedR32.map((match) => [match.matchId, match]));
 
-    const round32: TournamentProjectionMatch[] = r32Matches.map((match) => {
-      const resolved = resolvedByMatchId.get(match.matchId);
+    const simulatorInputMatches: BracketSimulatorMatch[] = knockoutMatches.map((match) => {
+      const stage = match.stage as KnockoutStage;
+      const officialMatchNumber = match.officialMatchNumber ?? 0;
+
+      if (stage === "R32") {
+        const resolved = resolvedR32ByMatchId.get(match.matchId);
+
+        return {
+          matchId: match.matchId,
+          stage,
+          officialMatchNumber,
+          homeSlot: match.homeSlot ?? null,
+          awaySlot: match.awaySlot ?? null,
+          homeTeamId: resolved?.homeTeamId ?? null,
+          awayTeamId: resolved?.awayTeamId ?? null
+        };
+      }
+
+      return {
+        matchId: match.matchId,
+        stage,
+        officialMatchNumber,
+        homeSlot: match.homeSlot ?? null,
+        awaySlot: match.awaySlot ?? null,
+        homeTeamId: match.homeTeamId,
+        awayTeamId: match.awayTeamId
+      };
+    });
+
+    const simulatorPredictions: BracketSimulatorPrediction[] = [];
+
+    for (const knockoutMatch of knockoutMatches) {
+      const prediction = predictionsByMatchId.get(knockoutMatch.matchId);
+
+      if (!prediction) {
+        continue;
+      }
+
+      simulatorPredictions.push({
+        matchId: knockoutMatch.matchId,
+        homeScorePred: prediction.homeScorePred,
+        awayScorePred: prediction.awayScorePred,
+        predictedQualifierTeamId: prediction.predictedQualifierTeamId ?? null
+      });
+    }
+
+    const { matches: simulated } = simulateKnockoutBracket({
+      matches: simulatorInputMatches,
+      predictions: simulatorPredictions
+    });
+
+    const simulatedByMatchId = new Map(simulated.map((match) => [match.matchId, match]));
+
+    const buildProjectionMatch = (match: StoredMatch): TournamentProjectionMatch => {
+      const simulation: SimulatedKnockoutMatch | undefined = simulatedByMatchId.get(match.matchId);
       const homeSlot = match.homeSlot ?? "?";
       const awaySlot = match.awaySlot ?? "?";
 
       return {
         matchId: match.matchId,
+        officialMatchNumber: match.officialMatchNumber ?? 0,
         stage: match.stage,
         kickoffAt: match.kickoffAt,
         kickoffAtEt: match.kickoffAtEt ?? null,
         venueId: match.venueId ?? null,
-        home: buildProjectionSide(homeSlot, resolved?.homeTeamId ?? null, rowsByTeamId, teamsById),
-        away: buildProjectionSide(awaySlot, resolved?.awayTeamId ?? null, rowsByTeamId, teamsById)
+        home: buildProjectionSide(homeSlot, simulation?.homeTeamId ?? null, rowsByTeamId, teamsById),
+        away: buildProjectionSide(awaySlot, simulation?.awayTeamId ?? null, rowsByTeamId, teamsById),
+        winnerTeamId: simulation?.winnerTeamId ?? null,
+        source: simulation?.source ?? "unresolved"
       };
-    });
+    };
+
+    const bracket: TournamentProjectionBracket = {
+      round32: knockoutMatches.filter((match) => match.stage === "R32").map(buildProjectionMatch),
+      round16: knockoutMatches.filter((match) => match.stage === "R16").map(buildProjectionMatch),
+      quarterfinals: knockoutMatches.filter((match) => match.stage === "QF").map(buildProjectionMatch),
+      semifinals: knockoutMatches.filter((match) => match.stage === "SF").map(buildProjectionMatch),
+      bronze: knockoutMatches.filter((match) => match.stage === "BRONZE").map(buildProjectionMatch),
+      final: knockoutMatches.filter((match) => match.stage === "FINAL").map(buildProjectionMatch)
+    };
 
     const groupMatchesTotal = groupMatches.length;
     const groupMatchesWithPrediction = groupMatches.filter((match) =>
@@ -360,9 +416,7 @@ export class TuMundialService {
     return {
       mode: resolveTournamentMode(summary.isPreTournament),
       groups: projectedGroups.map(toTuMundialGroupCard),
-      bracket: {
-        round32
-      },
+      bracket,
       readiness,
       updatedAt: now.toISOString()
     };

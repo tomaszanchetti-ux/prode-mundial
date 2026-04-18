@@ -39,7 +39,11 @@ export const matchSummarySchema = z.object({
   isEditable: z.boolean(),
   ctaLabel: z.string().min(1),
   homeScore90: z.number().int().nonnegative().nullable(),
-  awayScore90: z.number().int().nonnegative().nullable()
+  awayScore90: z.number().int().nonnegative().nullable(),
+  officialMatchNumber: z.number().int().positive().nullable(),
+  homeSlot: z.string().min(1).nullable(),
+  awaySlot: z.string().min(1).nullable(),
+  winnerTeamId: z.string().min(1).nullable()
 });
 
 export const matchOfficialResultSchema = z.object({

@@ -103,6 +103,10 @@ function buildQuickMatch(overrides: Partial<MatchSummary> = {}): MatchSummary {
     ctaLabel: "Predecir",
     homeScore90: null,
     awayScore90: null,
+    officialMatchNumber: null,
+    homeSlot: null,
+    awaySlot: null,
+    winnerTeamId: null,
     ...overrides
   };
 }

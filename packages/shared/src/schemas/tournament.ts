@@ -53,14 +53,28 @@ export const tournamentProjectionSideSchema = z.object({
   slotLabel: z.string().min(1)
 });
 
+export const tournamentProjectionMatchSourceSchema = z.enum(["anchored", "projected", "unresolved"]);
+
 export const tournamentProjectionMatchSchema = z.object({
   matchId: z.string().min(1),
+  officialMatchNumber: z.number().int().positive(),
   stage: matchStageSchema,
   kickoffAt: z.string().min(1),
   kickoffAtEt: z.string().min(1).nullable(),
   venueId: z.string().min(1).nullable(),
   home: tournamentProjectionSideSchema,
-  away: tournamentProjectionSideSchema
+  away: tournamentProjectionSideSchema,
+  winnerTeamId: z.string().min(1).nullable(),
+  source: tournamentProjectionMatchSourceSchema
+});
+
+export const tournamentProjectionBracketSchema = z.object({
+  round32: z.array(tournamentProjectionMatchSchema),
+  round16: z.array(tournamentProjectionMatchSchema),
+  quarterfinals: z.array(tournamentProjectionMatchSchema),
+  semifinals: z.array(tournamentProjectionMatchSchema),
+  bronze: z.array(tournamentProjectionMatchSchema),
+  final: z.array(tournamentProjectionMatchSchema)
 });
 
 export const tournamentProjectionReadinessSchema = z.object({
@@ -73,9 +87,7 @@ export const tournamentProjectionReadinessSchema = z.object({
 export const tournamentProjectionResponseSchema = z.object({
   mode: tournamentModeSchema,
   groups: z.array(tuMundialGroupCardSchema),
-  bracket: z.object({
-    round32: z.array(tournamentProjectionMatchSchema)
-  }),
+  bracket: tournamentProjectionBracketSchema,
   readiness: tournamentProjectionReadinessSchema,
   updatedAt: z.string().min(1)
 });
