@@ -74,8 +74,8 @@ export function toStageLabel(stage: MatchStage, groupId: string | null, locale: 
 
   const labels = {
     es: {
-      R32: "Octavos",
-      R16: "R16",
+      R32: "16vos",
+      R16: "Octavos",
       QF: "Cuartos",
       SF: "Semifinal",
       BRONZE: "Tercer puesto",

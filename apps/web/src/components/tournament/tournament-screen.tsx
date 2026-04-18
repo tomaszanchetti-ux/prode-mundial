@@ -46,7 +46,7 @@ const PREDICTION_PHASE_DEFINITIONS: PhaseDefinition[] = [
 
 const RESULT_PHASE_DEFINITIONS: PhaseDefinition[] = [
   { phase: "groups", label: "Grupos", stages: ["group"] },
-  { phase: "bracket", label: "Bracket", stages: ["R32", "R16", "QF", "SF", "BRONZE", "FINAL"] }
+  { phase: "bracket", label: "Knock-outs", stages: ["R32", "R16", "QF", "SF", "BRONZE", "FINAL"] }
 ];
 
 function resolvePhaseDefinitions(mode: TournamentMode): PhaseDefinition[] {
