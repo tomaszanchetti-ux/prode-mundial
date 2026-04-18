@@ -47,14 +47,28 @@ export type TournamentProjectionSide = {
   slotLabel: string;
 };
 
+export type TournamentProjectionMatchSource = "anchored" | "projected" | "unresolved";
+
 export type TournamentProjectionMatch = {
   matchId: string;
+  officialMatchNumber: number;
   stage: MatchStage;
   kickoffAt: string;
   kickoffAtEt: string | null;
   venueId: string | null;
   home: TournamentProjectionSide;
   away: TournamentProjectionSide;
+  winnerTeamId: string | null;
+  source: TournamentProjectionMatchSource;
+};
+
+export type TournamentProjectionBracket = {
+  round32: TournamentProjectionMatch[];
+  round16: TournamentProjectionMatch[];
+  quarterfinals: TournamentProjectionMatch[];
+  semifinals: TournamentProjectionMatch[];
+  bronze: TournamentProjectionMatch[];
+  final: TournamentProjectionMatch[];
 };
 
 export type TournamentProjectionReadiness = {
@@ -67,9 +81,7 @@ export type TournamentProjectionReadiness = {
 export type TournamentProjectionResponse = {
   mode: TournamentMode;
   groups: TuMundialGroupCard[];
-  bracket: {
-    round32: TournamentProjectionMatch[];
-  };
+  bracket: TournamentProjectionBracket;
   readiness: TournamentProjectionReadiness;
   updatedAt: string;
 };
