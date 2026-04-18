@@ -34,3 +34,106 @@ jobs:
       - name: Test
         run: pnpm test
 
+  # Detecta qué paths cambiaron para decidir qué deploy correr.
+  # Solo corre en push a main; en PRs se salta (no deployamos desde PR).
+  changes:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      jobs: ${{ steps.filter.outputs.jobs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'packages/**'
+              - 'infra/gcp/deploy-api.sh'
+              - '.github/workflows/ci.yml'
+            jobs:
+              - 'apps/jobs/**'
+              - 'packages/**'
+              - 'infra/gcp/deploy-jobs.sh'
+              - '.github/workflows/ci.yml'
+
+  deploy-api:
+    needs: [validate, changes]
+    if: needs.changes.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Auth to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy API
+        run: ./infra/gcp/deploy-api.sh
+
+      - name: Smoke test /health
+        run: |
+          API_URL=$(gcloud run services describe prode-api \
+            --project=prode-mundial-4e419 \
+            --region=europe-west1 \
+            --format='value(status.url)')
+          REVISION=$(gcloud run services describe prode-api \
+            --project=prode-mundial-4e419 \
+            --region=europe-west1 \
+            --format='value(status.latestReadyRevisionName)')
+          echo "🚀 Deployed revision: $REVISION"
+          echo "🌐 URL: $API_URL"
+          echo ""
+          for attempt in 1 2 3 4 5 6 7 8; do
+            if curl -sSfo /dev/null "$API_URL/health"; then
+              echo "✅ Smoke test OK (attempt $attempt)"
+              exit 0
+            fi
+            echo "⏳ /health not ready yet (attempt $attempt/8)…"
+            sleep 5
+          done
+          echo "❌ Smoke test failed after 8 attempts (~40s) — revisa logs de Cloud Run"
+          echo "   Rollback rápido:"
+          echo "   gcloud run services update-traffic prode-api --region=europe-west1 \\"
+          echo "     --to-revisions=<revision-anterior>=100"
+          exit 1
+
+  deploy-jobs:
+    needs: [validate, changes]
+    if: needs.changes.outputs.jobs == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Auth to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy Jobs
+        run: ./infra/gcp/deploy-jobs.sh
+
+      - name: List deployed jobs
+        run: |
+          echo "🚀 Cloud Run Jobs actualizados:"
+          gcloud run jobs list \
+            --project=prode-mundial-4e419 \
+            --region=europe-west1 \
+            --filter='metadata.name:prode-job-' \
+            --format='table(name, updateTime)'
