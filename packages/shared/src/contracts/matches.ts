@@ -44,6 +44,15 @@ export type MatchSummary = {
   ctaLabel: string;
   homeScore90: number | null;
   awayScore90: number | null;
+  // Bracket metadata del SOT oficial. Expuestos para que consumers (ej. /world-cup)
+  // puedan armar bracket visuals sin consultas adicionales. Null para matches
+  // legacy sin seed oficial (fuera del World Cup 2026).
+  officialMatchNumber: number | null;
+  homeSlot: string | null;
+  awaySlot: string | null;
+  // Ganador oficial para resolver empates 90' en knockouts (penales). Null si el
+  // match no terminó o es de grupos (empate válido sin ganador).
+  winnerTeamId: string | null;
 };
 
 export type MatchOfficialResult = {

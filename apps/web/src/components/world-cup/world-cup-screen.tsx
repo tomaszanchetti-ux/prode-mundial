@@ -7,7 +7,6 @@ import {
   computeFullGroupStandings,
   type FullGroupStandings,
   type GroupMatchResult,
-  type MatchStage,
   type MatchSummary
 } from "@prode/shared";
 import { Card, ErrorCard, NextMatchHero, SkeletonCard } from "@prode/ui";
@@ -16,18 +15,20 @@ import { useLocale, copyForLocale } from "@/lib/i18n/locale-provider";
 import { ApiClientError, getMatches } from "@/lib/api/client";
 import { toLocalKickoffLabel, toStageLabel } from "@/components/matches/matches-helpers";
 import { WORLD_CUP_2026_OFFICIAL_GROUPS } from "@/lib/world-cup/groups";
+import { buildOfficialBracket } from "@/lib/world-cup/build-official-bracket";
 import { PhaseTabs, type PhaseStatus, type PhaseTabItem, type TournamentPhase } from "@/components/tournament/phase-tabs";
+import { TournamentBracket } from "@/components/tournament/tournament-bracket";
 import { WorldCupGroupCard } from "./world-cup-group-card";
-import { WorldCupMatchList } from "./world-cup-match-list";
 
-const PHASE_DEFINITIONS: Array<{ phase: TournamentPhase; label: string; stages: MatchStage[] }> = [
-  { phase: "groups", label: "Grupos", stages: ["group"] },
-  { phase: "r32", label: "16vos", stages: ["R32"] },
-  { phase: "r16", label: "8vos", stages: ["R16"] },
-  { phase: "qf", label: "QF", stages: ["QF"] },
-  { phase: "sf", label: "SF", stages: ["SF"] },
-  { phase: "final", label: "Final", stages: ["BRONZE", "FINAL"] }
-];
+// World Cup uses 2 tabs (mirror of `/tournament` Mis Resultados): official
+// groups + official knockout bracket. Both are read-only projections of the
+// SOT — no simulator, no predictions.
+type WorldCupTab = Extract<TournamentPhase, "groups" | "bracket">;
+
+const TAB_LABELS: Record<WorldCupTab, string> = {
+  groups: "Grupos",
+  bracket: "Knock-outs"
+};
 
 function compareMatchesChronologically(left: MatchSummary, right: MatchSummary) {
   const kickoffDifference = new Date(left.kickoffAt).getTime() - new Date(right.kickoffAt).getTime();
@@ -81,44 +82,48 @@ function toGroupMatchResults(groupMatches: MatchSummary[]): GroupMatchResult[] {
     }));
 }
 
+function groupDisplayName(groupId: string) {
+  return `Grupo ${groupId}`;
+}
+
 type WorldCupScreenViewProps = {
-  activePhase: TournamentPhase;
+  activeTab: WorldCupTab;
+  bracket: ReturnType<typeof buildOfficialBracket>["bracket"];
+  bracketReadiness: ReturnType<typeof buildOfficialBracket>["readiness"];
   errorMessage: string | null;
   groups: FullGroupStandings[];
   groupMatchCountsByGroupId: Map<string, { played: number; total: number }>;
   heroMatch: MatchSummary | null;
   isLoading: boolean;
-  matchesByPhase: Map<TournamentPhase, MatchSummary[]>;
+  knockoutsFinished: number;
+  knockoutsTotal: number;
   onOpenMatch: (matchId: string) => void;
-  onPhaseSelect: (phase: TournamentPhase) => void;
   onRetry: () => void;
+  onTabSelect: (tab: WorldCupTab) => void;
   phaseItems: PhaseTabItem[];
   totalMatchesFinished: number;
   totalMatches: number;
 };
 
-function groupDisplayName(groupId: string) {
-  return `Grupo ${groupId}`;
-}
-
 export function WorldCupScreenView({
-  activePhase,
+  activeTab,
+  bracket,
+  bracketReadiness,
   errorMessage,
   groups,
   groupMatchCountsByGroupId,
   heroMatch,
   isLoading,
-  matchesByPhase,
+  knockoutsFinished,
+  knockoutsTotal,
   onOpenMatch,
-  onPhaseSelect,
   onRetry,
+  onTabSelect,
   phaseItems,
   totalMatchesFinished,
   totalMatches
 }: WorldCupScreenViewProps) {
   const { locale } = useLocale();
-  const activePhaseDefinition = PHASE_DEFINITIONS.find((p) => p.phase === activePhase) ?? PHASE_DEFINITIONS[0];
-  const activePhaseMatches = matchesByPhase.get(activePhase) ?? [];
 
   return (
     <div className="grid gap-4">
@@ -165,7 +170,7 @@ export function WorldCupScreenView({
         </Card>
       )}
 
-      <PhaseTabs items={phaseItems} activePhase={activePhase} onSelect={onPhaseSelect} />
+      <PhaseTabs items={phaseItems} activePhase={activeTab} onSelect={(phase) => onTabSelect(phase as WorldCupTab)} />
 
       {isLoading ? (
         <div className="grid gap-3">
@@ -179,7 +184,7 @@ export function WorldCupScreenView({
       ) : null}
 
       {!isLoading && !errorMessage ? (
-        activePhase === "groups" ? (
+        activeTab === "groups" ? (
           <section className="grid gap-3">
             {groups.map((group) => {
               const counts = groupMatchCountsByGroupId.get(group.groupId) ?? { played: 0, total: 0 };
@@ -195,14 +200,24 @@ export function WorldCupScreenView({
             })}
           </section>
         ) : (
-          <WorldCupMatchList
-            matches={activePhaseMatches}
-            emptyCopy={copyForLocale(
-              locale,
-              `${activePhaseDefinition.label} todavía no está disponible.`,
-              `${activePhaseDefinition.label} is not available yet.`
-            )}
-          />
+          <section className="grid gap-3">
+            <Card elevated style={{ gap: 4, padding: 12 }}>
+              <span className="typo-small text-text-muted">CRUCES OFICIALES</span>
+              <p className="m-0 text-[13px] leading-[1.4] text-text-secondary">
+                {copyForLocale(
+                  locale,
+                  `${knockoutsFinished} de ${knockoutsTotal} partidos de knock-out disputados. Los cruces se completan a medida que cierra cada fase.`,
+                  `${knockoutsFinished} of ${knockoutsTotal} knockout matches played. Matchups fill in as each round closes.`
+                )}
+              </p>
+            </Card>
+            <TournamentBracket
+              bracket={bracket}
+              readiness={bracketReadiness}
+              onOpenMatch={onOpenMatch}
+              showReadinessBanner={false}
+            />
+          </section>
         )
       ) : null}
     </div>
@@ -216,7 +231,7 @@ export function WorldCupScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
-  const [activePhase, setActivePhase] = useState<TournamentPhase>("groups");
+  const [activeTab, setActiveTab] = useState<WorldCupTab>("groups");
 
   useEffect(() => {
     let cancelled = false;
@@ -264,15 +279,8 @@ export function WorldCupScreen() {
 
   const sortedItems = useMemo(() => [...items].sort(compareMatchesChronologically), [items]);
 
-  const matchesByPhase = useMemo(() => {
-    const map = new Map<TournamentPhase, MatchSummary[]>();
-    for (const def of PHASE_DEFINITIONS) {
-      map.set(def.phase, sortedItems.filter((m) => def.stages.includes(m.stage)));
-    }
-    return map;
-  }, [sortedItems]);
-
-  const groupMatches = useMemo(() => matchesByPhase.get("groups") ?? [], [matchesByPhase]);
+  const groupMatches = useMemo(() => sortedItems.filter((m) => m.stage === "group"), [sortedItems]);
+  const knockoutMatches = useMemo(() => sortedItems.filter((m) => m.stage !== "group"), [sortedItems]);
 
   const groups = useMemo(
     () => computeFullGroupStandings(WORLD_CUP_2026_OFFICIAL_GROUPS, toGroupMatchResults(groupMatches)),
@@ -291,19 +299,29 @@ export function WorldCupScreen() {
     return map;
   }, [groupMatches]);
 
+  const { bracket, readiness: bracketReadiness } = useMemo(
+    () => buildOfficialBracket(sortedItems),
+    [sortedItems]
+  );
+
   const phaseItems = useMemo<PhaseTabItem[]>(
-    () =>
-      PHASE_DEFINITIONS.map((def) => {
-        const phaseMatches = matchesByPhase.get(def.phase) ?? [];
-        return {
-          phase: def.phase,
-          label: def.label,
-          completed: phaseMatches.filter((m) => m.status === "finished").length,
-          total: phaseMatches.length,
-          status: resolveOfficialPhaseStatus(phaseMatches)
-        };
-      }),
-    [matchesByPhase]
+    () => [
+      {
+        phase: "groups",
+        label: TAB_LABELS.groups,
+        completed: groupMatches.filter((m) => m.status === "finished").length,
+        total: groupMatches.length,
+        status: resolveOfficialPhaseStatus(groupMatches)
+      },
+      {
+        phase: "bracket",
+        label: TAB_LABELS.bracket,
+        completed: knockoutMatches.filter((m) => m.status === "finished").length,
+        total: knockoutMatches.length,
+        status: resolveOfficialPhaseStatus(knockoutMatches)
+      }
+    ],
+    [groupMatches, knockoutMatches]
   );
 
   const heroMatch = useMemo(() => pickHeroMatch(sortedItems), [sortedItems]);
@@ -313,18 +331,23 @@ export function WorldCupScreen() {
     [sortedItems]
   );
 
+  const knockoutsFinished = knockoutMatches.filter((m) => m.status === "finished").length;
+
   return (
     <WorldCupScreenView
-      activePhase={activePhase}
+      activeTab={activeTab}
+      bracket={bracket}
+      bracketReadiness={bracketReadiness}
       errorMessage={errorMessage}
       groups={groups}
       groupMatchCountsByGroupId={groupMatchCountsByGroupId}
       heroMatch={heroMatch}
       isLoading={isLoading}
-      matchesByPhase={matchesByPhase}
+      knockoutsFinished={knockoutsFinished}
+      knockoutsTotal={knockoutMatches.length}
       onOpenMatch={(matchId) => router.push(`${APP_ROUTES.matches}/${matchId}`)}
-      onPhaseSelect={setActivePhase}
       onRetry={() => setReloadKey((k) => k + 1)}
+      onTabSelect={setActiveTab}
       phaseItems={phaseItems}
       totalMatchesFinished={totalMatchesFinished}
       totalMatches={sortedItems.length}

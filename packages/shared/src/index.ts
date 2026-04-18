@@ -17,6 +17,7 @@ export * from "./tournament/bracket-hydration";
 export * from "./tournament/bracket-simulator";
 export * from "./tournament/official-standings";
 export * from "./tournament/r32-bracket-resolver";
+export * from "./tournament/slot-label";
 export * from "./schemas/bootstrap";
 export * from "./schemas/leagues";
 export * from "./schemas/macro-results";

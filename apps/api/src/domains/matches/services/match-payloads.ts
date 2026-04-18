@@ -186,7 +186,11 @@ export function toMatchSummary(
     isEditable: state.isEditable,
     ctaLabel: state.ctaLabel,
     homeScore90: match.homeScore90,
-    awayScore90: match.awayScore90
+    awayScore90: match.awayScore90,
+    officialMatchNumber: match.officialMatchNumber ?? null,
+    homeSlot: match.homeSlot ?? null,
+    awaySlot: match.awaySlot ?? null,
+    winnerTeamId: match.winnerTeamId
   };
 }
 

@@ -14,6 +14,13 @@ type TournamentBracketProps = {
   bracket: TournamentProjectionBracket;
   readiness: TournamentProjectionReadiness;
   onOpenMatch: (matchId: string) => void;
+  /**
+   * When true (default), shows the "Complete your group predictions" banner
+   * while `readiness.isGroupsComplete` is false. `/world-cup` passes false
+   * because it reads the SOT directly — there are no user predictions to
+   * complete, only official hydration pending.
+   */
+  showReadinessBanner?: boolean;
 };
 
 type RoundKey = "round32" | "round16" | "quarterfinals" | "semifinals" | "final";
@@ -81,7 +88,9 @@ function MatchCard({
       className="text-left rounded-lg border border-border-default bg-surface-default hover:bg-surface-raised transition-colors p-2.5 cursor-pointer grid gap-1.5 w-full"
     >
       <div className="flex items-center justify-between">
-        <span className="text-[10px] tracking-wide uppercase text-text-muted">M{match.officialMatchNumber}</span>
+        <span className="text-[10px] tracking-wide uppercase text-text-muted">
+          {match.officialMatchNumber ? `M${match.officialMatchNumber}` : ""}
+        </span>
         <span className="text-[10px] text-text-muted">{kickoffLabel}</span>
       </div>
       <div className="grid gap-1">
@@ -135,7 +144,12 @@ function RoundColumn({
   );
 }
 
-export function TournamentBracket({ bracket, readiness, onOpenMatch }: TournamentBracketProps) {
+export function TournamentBracket({
+  bracket,
+  readiness,
+  onOpenMatch,
+  showReadinessBanner = true
+}: TournamentBracketProps) {
   const { locale } = useLocale();
   const kickoffLabeler = (iso: string) => toLocalKickoffLabel(iso, locale);
 
@@ -170,7 +184,7 @@ export function TournamentBracket({ bracket, readiness, onOpenMatch }: Tournamen
 
   return (
     <div className="grid gap-3">
-      {!readiness.isGroupsComplete ? (
+      {showReadinessBanner && !readiness.isGroupsComplete ? (
         <Card elevated style={{ gap: 6, padding: 12 }}>
           <span className="typo-small text-text-muted">BRACKET PROYECTADO</span>
           <p className="m-0 text-[13px] leading-[1.4] text-text-secondary">
