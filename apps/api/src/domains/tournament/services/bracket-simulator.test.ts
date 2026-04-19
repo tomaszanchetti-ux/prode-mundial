@@ -42,8 +42,8 @@ function buildPrediction(
  *   - 4 R16 matches (m_089..m_092) using "W73"..."W80".
  *   - 2 QF matches (m_097, m_098) using "W89"..."W92".
  *   - 2 SF matches (m_101, m_102) using "W97", "W98".
- *   - 1 BRONZE match using "LOSER_SF_1" / "LOSER_SF_2".
- *   - 1 FINAL match using "WINNER_SF_1" / "WINNER_SF_2".
+ *   - 1 BRONZE match using "L101" / "L102".
+ *   - 1 FINAL match using "W101" / "W102".
  *
  * Match numbers don't cover the full 73..104 span but the grammar is valid:
  * each downstream slot points to an existing upstream match.
@@ -79,8 +79,8 @@ function buildMinimalBracket(): BracketSimulatorMatch[] {
     buildMatch("m_102", 102, "SF", "W97", "W98")
   ];
 
-  const bronze = buildMatch("m_103", 103, "BRONZE", "LOSER_SF_1", "LOSER_SF_2");
-  const final = buildMatch("m_104", 104, "FINAL", "WINNER_SF_1", "WINNER_SF_2");
+  const bronze = buildMatch("m_103", 103, "BRONZE", "L101", "L102");
+  const final = buildMatch("m_104", 104, "FINAL", "W101", "W102");
 
   return [...r32, ...r16, ...qf, ...sf, bronze, final];
 }
@@ -132,13 +132,13 @@ describe("simulateKnockoutBracket", () => {
     assert.equal(r16First?.winnerTeamId, "T01");
     assert.equal(r16First?.source, "projected");
 
-    // Final is WINNER_SF_1 vs WINNER_SF_2.
+    // Final is W101 vs W102.
     const final = byId.get("m_104");
     assert.equal(final?.homeTeamId, byId.get("m_101")?.winnerTeamId);
     assert.equal(final?.awayTeamId, byId.get("m_102")?.winnerTeamId);
     assert.equal(final?.winnerTeamId, final?.homeTeamId);
 
-    // Bronze is LOSER_SF_1 vs LOSER_SF_2.
+    // Bronze is L101 vs L102.
     const bronze = byId.get("m_103");
     assert.equal(bronze?.homeTeamId, byId.get("m_101")?.loserTeamId);
     assert.equal(bronze?.awayTeamId, byId.get("m_102")?.loserTeamId);
@@ -279,13 +279,14 @@ describe("simulateKnockoutBracket", () => {
     assert.ok(!unresolvedMatchIds.includes("m_074"));
   });
 
-  it("orders SF matches by officialMatchNumber for WINNER_SF_N / LOSER_SF_N resolution", () => {
+  it("resolves W{N} / L{N} slots against the referenced officialMatchNumber", () => {
     const matches = [
-      // SF matches anchored directly for isolation.
+      // SF matches anchored directly for isolation, listed out of order
+      // to prove resolution goes by officialMatchNumber, not array order.
       buildMatch("m_102", 102, "SF", null, null, "S2_HOME", "S2_AWAY"),
       buildMatch("m_101", 101, "SF", null, null, "S1_HOME", "S1_AWAY"),
-      buildMatch("m_103", 103, "BRONZE", "LOSER_SF_1", "LOSER_SF_2"),
-      buildMatch("m_104", 104, "FINAL", "WINNER_SF_1", "WINNER_SF_2")
+      buildMatch("m_103", 103, "BRONZE", "L101", "L102"),
+      buildMatch("m_104", 104, "FINAL", "W101", "W102")
     ];
 
     const { matches: simulated } = simulateKnockoutBracket({
@@ -299,11 +300,11 @@ describe("simulateKnockoutBracket", () => {
     const bronze = simulated.find((match) => match.matchId === "m_103");
     const final = simulated.find((match) => match.matchId === "m_104");
 
-    assert.equal(bronze?.homeTeamId, "S1_AWAY"); // loser of m_101 (SF_1)
-    assert.equal(bronze?.awayTeamId, "S2_HOME"); // loser of m_102 (SF_2)
+    assert.equal(bronze?.homeTeamId, "S1_AWAY"); // loser of m_101
+    assert.equal(bronze?.awayTeamId, "S2_HOME"); // loser of m_102
 
-    assert.equal(final?.homeTeamId, "S1_HOME"); // winner of m_101 (SF_1)
-    assert.equal(final?.awayTeamId, "S2_AWAY"); // winner of m_102 (SF_2)
+    assert.equal(final?.homeTeamId, "S1_HOME"); // winner of m_101
+    assert.equal(final?.awayTeamId, "S2_AWAY"); // winner of m_102
   });
 
   it("leaves a match unresolved if its slot references a non-existent upstream match", () => {

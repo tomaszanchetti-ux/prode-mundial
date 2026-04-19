@@ -6,8 +6,7 @@
  *   - "2A", "2B", …         → "Segundo Grupo A"
  *   - "3ABCDF", "3CDEF", …  → "Mejor 3ero (A, B, C, D, F)"
  *   - "W<num>" (ej "W73")   → "Ganador del M73"
- *   - "WINNER_SF_1|2"       → "Ganador SF1"
- *   - "LOSER_SF_1|2"        → "Perdedor SF1"
+ *   - "L<num>" (ej "L101")  → "Perdedor del M101" (usado por BRONZE)
  *
  * Falls back to the raw slot string if the pattern is not recognized.
  *
@@ -33,11 +32,8 @@ export function buildSlotLabel(slot: string): string {
     return `Ganador del M${tail}`;
   }
 
-  const semifinalReference = /^(WINNER|LOSER)_SF_(1|2)$/.exec(slot);
-
-  if (semifinalReference) {
-    const kind = semifinalReference[1] === "WINNER" ? "Ganador" : "Perdedor";
-    return `${kind} SF${semifinalReference[2]}`;
+  if (prefix === "L" && /^\d+$/.test(tail)) {
+    return `Perdedor del M${tail}`;
   }
 
   return slot;

@@ -127,8 +127,8 @@ test("getTournamentProjectionForUser exposes R16/QF/SF/BRONZE/FINAL with simulat
       groupId: null,
       homeTeamId: null,
       awayTeamId: null,
-      homeSlot: "WINNER_SF_1",
-      awaySlot: "WINNER_SF_2",
+      homeSlot: "W101",
+      awaySlot: "W102",
       kickoffAt: "2026-07-18T19:00:00Z",
       officialMatchNumber: 104
     })
@@ -191,10 +191,10 @@ test("getTournamentProjectionForUser exposes R16/QF/SF/BRONZE/FINAL with simulat
     assert.equal(r16?.home.slotLabel, "Ganador del M73");
     assert.equal(r16?.source, "unresolved"); // no prediction for R32, so R16 can't be projected
 
-    // FINAL slot label uses WINNER_SF_N grammar.
+    // FINAL slot label uses W{N} grammar pointing at the SF matches.
     const final = response.bracket.final[0];
-    assert.equal(final?.home.slotLabel, "Ganador SF1");
-    assert.equal(final?.away.slotLabel, "Ganador SF2");
+    assert.equal(final?.home.slotLabel, "Ganador del M101");
+    assert.equal(final?.away.slotLabel, "Ganador del M102");
 
     // officialMatchNumber is propagated.
     assert.equal(response.bracket.round32[0]?.officialMatchNumber, 73);

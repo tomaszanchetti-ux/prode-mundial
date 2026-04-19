@@ -10,10 +10,9 @@
  *
  * Supported slot grammar:
  *   - "W<officialMatchNumber>"             → winner of the referenced match
- *   - "WINNER_SF_1" / "WINNER_SF_2"        → winner of the Nth SF match
- *                                             (ordered by officialMatchNumber
- *                                             ascending, 1-indexed)
- *   - "LOSER_SF_1"  / "LOSER_SF_2"         → loser of the Nth SF match
+ *   - "L<officialMatchNumber>"             → loser of the referenced match
+ *                                             (used by BRONZE, which pulls
+ *                                             the two SF losers)
  *   - R32 seed slots ("1A", "2B", "3ABCDF"): NOT resolved here. Anchor R32
  *     via homeTeamId/awayTeamId in the input; otherwise the match stays
  *     unresolved and downstream rounds cannot advance beyond it.
@@ -117,31 +116,19 @@ function resolveWinnerFromPrediction(
   return null;
 }
 
-function parseWinnerSlot(slot: string): number | null {
-  if (!slot.startsWith("W")) {
-    return null;
-  }
-
-  const remainder = slot.slice(1);
-
-  if (!/^\d+$/.test(remainder)) {
-    return null;
-  }
-
-  return Number.parseInt(remainder, 10);
-}
-
-function parseSemifinalReferenceSlot(slot: string): { kind: "winner" | "loser"; ordinal: 1 | 2 } | null {
-  const match = /^(WINNER|LOSER)_SF_(1|2)$/.exec(slot);
+function parseOrdinalReferenceSlot(
+  slot: string
+): { kind: "winner" | "loser"; matchNumber: number } | null {
+  const match = /^([WL])(\d+)$/.exec(slot);
 
   if (!match) {
     return null;
   }
 
-  const kind = match[1] === "WINNER" ? "winner" : "loser";
-  const ordinal = match[2] === "1" ? 1 : 2;
+  const kind = match[1] === "W" ? "winner" : "loser";
+  const matchNumber = Number.parseInt(match[2], 10);
 
-  return { kind, ordinal };
+  return { kind, matchNumber };
 }
 
 export function simulateKnockoutBracket(params: {
@@ -162,10 +149,6 @@ export function simulateKnockoutBracket(params: {
     matchByOfficialNumber.set(match.officialMatchNumber, match);
   }
 
-  const semifinalMatchesOrdered = matches
-    .filter((match) => match.stage === "SF")
-    .sort((left, right) => left.officialMatchNumber - right.officialMatchNumber);
-
   const winnerByMatchId = new Map<string, string>();
   const loserByMatchId = new Map<string, string>();
 
@@ -174,33 +157,21 @@ export function simulateKnockoutBracket(params: {
       return null;
     }
 
-    const winnerMatchNumber = parseWinnerSlot(slot);
+    const ordinalReference = parseOrdinalReferenceSlot(slot);
 
-    if (winnerMatchNumber !== null) {
-      const sourceMatch = matchByOfficialNumber.get(winnerMatchNumber);
-
-      if (!sourceMatch) {
-        return null;
-      }
-
-      return winnerByMatchId.get(sourceMatch.matchId) ?? null;
+    if (!ordinalReference) {
+      return null;
     }
 
-    const semifinalReference = parseSemifinalReferenceSlot(slot);
+    const sourceMatch = matchByOfficialNumber.get(ordinalReference.matchNumber);
 
-    if (semifinalReference) {
-      const sourceMatch = semifinalMatchesOrdered[semifinalReference.ordinal - 1];
-
-      if (!sourceMatch) {
-        return null;
-      }
-
-      const map = semifinalReference.kind === "winner" ? winnerByMatchId : loserByMatchId;
-
-      return map.get(sourceMatch.matchId) ?? null;
+    if (!sourceMatch) {
+      return null;
     }
 
-    return null;
+    const map = ordinalReference.kind === "winner" ? winnerByMatchId : loserByMatchId;
+
+    return map.get(sourceMatch.matchId) ?? null;
   }
 
   const simulated: SimulatedKnockoutMatch[] = [];
