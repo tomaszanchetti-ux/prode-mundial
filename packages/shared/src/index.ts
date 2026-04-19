@@ -15,6 +15,7 @@ export * from "./contracts/tournament";
 export * from "./tournament/best-thirds-resolver";
 export * from "./tournament/bracket-hydration";
 export * from "./tournament/bracket-simulator";
+export * from "./tournament/knockout-hydration-resolver";
 export * from "./tournament/official-standings";
 export * from "./tournament/r32-bracket-resolver";
 export * from "./tournament/slot-label";

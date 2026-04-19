@@ -25,6 +25,7 @@ import { computeGroupStandings, type GroupDefinition, type GroupMatchResult } fr
 export type HydrationMatch = {
   matchId: string;
   stage: string;
+  officialMatchNumber?: number;
   groupId: string | null;
   homeTeamId: string | null;
   awayTeamId: string | null;
@@ -32,6 +33,7 @@ export type HydrationMatch = {
   awaySlot?: string | null;
   homeScore90: number | null;
   awayScore90: number | null;
+  winnerTeamId?: string | null;
   status: string;
 };
 
