@@ -1,6 +1,8 @@
 import {
+  resolvePickWindow,
   type ChampionPickResponse,
   type ChampionPickStatus,
+  type PickWindowResolution,
   type SaveChampionPickInput,
   type SaveChampionPickResponse,
   type AdjustChampionInput,
@@ -14,13 +16,23 @@ import { championScoringLogsRepository } from "../repositories/macro-scoring-log
 import type { StoredChampionPick } from "../types";
 
 // ── Schedule helpers ────────────────────────────────────
+//
+// The timestamps here describe match kickoffs ("when does X play"). Whether
+// a pick window is open is NOT driven by these directly — that's the job of
+// `resolvePickWindow` (shared), which applies the 1h pre-kickoff offset and
+// the groups-closed event gate.
 
 type ChampionSchedule = {
+  /** Window A closes at inaugural − 1h. */
   initialDeadlineAt: string | null;
+  /** Displayed as "B opens around this time" — actually driven by the groups-closed event. */
   adjustmentWindowOpensAt: string | null;
+  /** Window B closes at R16 − 1h. */
   adjustmentWindowClosesAt: string | null;
   initialLocked: boolean;
   adjustmentWindowOpen: boolean;
+  /** EPIC 17 — full pick-window resolution passed through to the API response. */
+  pickWindow: PickWindowResolution;
 };
 
 function compareKickoff(left: StoredMatch, right: StoredMatch) {
@@ -37,39 +49,49 @@ function getChampionSchedule(matches: StoredMatch[], now: Date): ChampionSchedul
   const sortedMatches = [...matches].sort(compareKickoff);
   const firstMatch = sortedMatches[0];
 
+  const emptyResolution: PickWindowResolution = { window: "closed", closesAt: null, pointValue: 0 };
+
   if (!firstMatch) {
     return {
       initialDeadlineAt: null,
       adjustmentWindowOpensAt: null,
       adjustmentWindowClosesAt: null,
       initialLocked: false,
-      adjustmentWindowOpen: false
+      adjustmentWindowOpen: false,
+      pickWindow: emptyResolution
     };
   }
 
   const groupMatches = sortedMatches.filter((match) => match.stage === "group");
   const knockoutMatches = sortedMatches.filter((match) => match.stage !== "group");
-  const lastGroupMatch = [...groupMatches].sort(compareKickoff).at(-1) ?? null;
+  const lastGroupMatch = groupMatches.at(-1) ?? null;
   const firstKnockoutMatch = knockoutMatches[0] ?? null;
-  const groupStageCompleted =
+  const areGroupsOfficiallyClosed =
     groupMatches.length > 0 && groupMatches.every((match) => match.status === "finished" || match.status === "corrected");
 
-  const initialDeadlineAt = firstMatch.kickoffAt;
-  const adjustmentWindowOpensAt = lastGroupMatch?.kickoffAt ?? null;
-  const adjustmentWindowClosesAt = firstKnockoutMatch?.kickoffAt ?? null;
-  const initialLocked = now.getTime() >= new Date(initialDeadlineAt).getTime();
-  const adjustmentWindowOpen = Boolean(
-    groupStageCompleted &&
-      adjustmentWindowClosesAt &&
-      now.getTime() < new Date(adjustmentWindowClosesAt).getTime()
-  );
+  const pickWindow = resolvePickWindow({
+    now,
+    inauguralKickoffAt: firstMatch.kickoffAt,
+    firstKnockoutKickoffAt: firstKnockoutMatch?.kickoffAt ?? null,
+    areGroupsOfficiallyClosed
+  });
+
+  // initialDeadlineAt and adjustmentWindowClosesAt always represent the real
+  // lock times (inaugural − 1h and first-knock-out − 1h), independent of
+  // which window is currently open.
+  const LOCK_OFFSET_MS = 60 * 60 * 1000;
+  const initialDeadlineAt = new Date(new Date(firstMatch.kickoffAt).getTime() - LOCK_OFFSET_MS).toISOString();
+  const adjustmentWindowClosesAt = firstKnockoutMatch
+    ? new Date(new Date(firstKnockoutMatch.kickoffAt).getTime() - LOCK_OFFSET_MS).toISOString()
+    : null;
 
   return {
     initialDeadlineAt,
-    adjustmentWindowOpensAt,
+    adjustmentWindowOpensAt: lastGroupMatch?.kickoffAt ?? null,
     adjustmentWindowClosesAt,
-    initialLocked,
-    adjustmentWindowOpen
+    initialLocked: pickWindow.window !== "A",
+    adjustmentWindowOpen: pickWindow.window === "B",
+    pickWindow
   };
 }
 
@@ -125,7 +147,10 @@ function toResponse(
     isAdjustmentWindowOpen: schedule.adjustmentWindowOpen,
     scoringResult: hasScoringLog && scoringPoints !== null
       ? { points: scoringPoints, wasAdjusted: scoringWasAdjusted ?? false }
-      : null
+      : null,
+    pickWindow: schedule.pickWindow.window,
+    pickWindowClosesAt: schedule.pickWindow.closesAt,
+    pickWindowPointValue: schedule.pickWindow.pointValue
   };
 }
 

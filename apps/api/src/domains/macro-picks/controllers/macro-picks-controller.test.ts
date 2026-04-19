@@ -52,12 +52,15 @@ test("GET /api/v1/macro-picks returns the authenticated champion pick state", as
       status: "empty",
       championTeamId: null,
       adjustedChampionTeamId: null,
-      initialDeadlineAt: "2026-06-11T19:00:00Z",
+      initialDeadlineAt: "2026-06-11T18:00:00Z",
       adjustmentWindowOpensAt: "2026-06-26T19:00:00Z",
-      adjustmentWindowClosesAt: "2026-06-28T19:00:00Z",
+      adjustmentWindowClosesAt: "2026-06-30T18:00:00Z",
       isLocked: false,
       isAdjustmentWindowOpen: false,
-      scoringResult: null
+      scoringResult: null,
+      pickWindow: "A",
+      pickWindowClosesAt: "2026-06-11T18:00:00Z",
+      pickWindowPointValue: 25
     };
   });
 

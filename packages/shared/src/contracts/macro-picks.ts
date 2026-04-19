@@ -1,4 +1,5 @@
 import type { ChampionPickStatus } from "../constants/macro-picks";
+import type { PickWindowResolution, TournamentPickWindow } from "../tournament/pick-window";
 
 export type ChampionPickResponse = {
   status: ChampionPickStatus;
@@ -10,6 +11,14 @@ export type ChampionPickResponse = {
   isLocked: boolean;
   isAdjustmentWindowOpen: boolean;
   scoringResult: ChampionScoringResult | null;
+  /**
+   * EPIC 17 — tournament pick window resolution. Derived server-side from the
+   * fixture + groups-closed flag. `window` is the source of truth for whether
+   * the user can submit/adjust the pick right now.
+   */
+  pickWindow: TournamentPickWindow;
+  pickWindowClosesAt: PickWindowResolution["closesAt"];
+  pickWindowPointValue: PickWindowResolution["pointValue"];
 };
 
 export type ChampionScoringResult = {

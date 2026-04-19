@@ -8,6 +8,8 @@ export const championScoringResultSchema = z.object({
   wasAdjusted: z.boolean()
 });
 
+export const pickWindowSchema = z.enum(["A", "B", "closed"]);
+
 export const championPickResponseSchema = z.object({
   status: championPickStatusSchema,
   championTeamId: z.string().min(1).nullable(),
@@ -17,7 +19,10 @@ export const championPickResponseSchema = z.object({
   adjustmentWindowClosesAt: z.string().min(1).nullable(),
   isLocked: z.boolean(),
   isAdjustmentWindowOpen: z.boolean(),
-  scoringResult: championScoringResultSchema.nullable()
+  scoringResult: championScoringResultSchema.nullable(),
+  pickWindow: pickWindowSchema,
+  pickWindowClosesAt: z.string().min(1).nullable(),
+  pickWindowPointValue: z.union([z.literal(25), z.literal(10), z.literal(0)])
 });
 
 export const saveChampionPickInputSchema = z.object({
