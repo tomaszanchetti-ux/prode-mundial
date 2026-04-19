@@ -155,7 +155,7 @@ function buildProjection(
   teamsByR32Number: Record<number, [string | null, string | null]> = {}
 ): TournamentProjectionResponse {
   return {
-    mode: "predictions",
+    mode: "pre_tournament",
     groups: [],
     bracket: buildBracket(teamsByR32Number),
     readiness: {
