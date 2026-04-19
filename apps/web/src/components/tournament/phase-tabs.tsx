@@ -12,6 +12,8 @@ export type PhaseTabItem = {
   completed: number;
   total: number;
   status: PhaseStatus;
+  isDisabled?: boolean;
+  disabledReason?: string;
 };
 
 type PhaseTabsProps = {
@@ -48,6 +50,7 @@ export function PhaseTabs({ items, activePhase, onSelect }: PhaseTabsProps) {
         const activeClass = item.status === "complete" || item.status === "scored"
           ? "filter-chip-active-saved"
           : "filter-chip-active";
+        const disabledClass = item.isDisabled ? "opacity-60 cursor-not-allowed" : "";
 
         return (
           <button
@@ -55,15 +58,24 @@ export function PhaseTabs({ items, activePhase, onSelect }: PhaseTabsProps) {
             type="button"
             role="tab"
             aria-selected={isActive}
-            onClick={() => onSelect(item.phase)}
-            className={`filter-chip whitespace-nowrap ${isActive ? activeClass : "filter-chip-inactive"}`}
+            disabled={item.isDisabled}
+            aria-disabled={item.isDisabled}
+            title={item.isDisabled ? item.disabledReason : undefined}
+            onClick={() => {
+              if (!item.isDisabled) {
+                onSelect(item.phase);
+              }
+            }}
+            className={`filter-chip whitespace-nowrap ${isActive ? activeClass : "filter-chip-inactive"} ${disabledClass}`.trim()}
           >
             <span className="inline-flex items-center gap-1.5">
               {toStatusDot(item.status)}
               <span>{item.label}</span>
-              <span className="typo-small text-text-muted">
-                {item.completed}/{item.total}
-              </span>
+              {!item.isDisabled && (
+                <span className="typo-small text-text-muted">
+                  {item.completed}/{item.total}
+                </span>
+              )}
             </span>
           </button>
         );

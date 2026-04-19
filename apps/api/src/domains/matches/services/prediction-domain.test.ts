@@ -167,6 +167,56 @@ test("assertMatchPredictionEditable rejects matches exactly at the prediction de
   );
 });
 
+test("assertMatchPredictionEditable rejects knock-out match with unresolved teams (PHASE_LOCKED)", () => {
+  const unresolvedR16 = buildMatch({
+    matchId: "m_089",
+    stage: "R16",
+    groupId: null,
+    homeTeamId: null,
+    awayTeamId: null,
+    homeSlot: "W73",
+    awaySlot: "W74",
+    kickoffAt: "2026-07-03T21:00:00Z"
+  });
+
+  assert.throws(
+    () => assertMatchPredictionEditable(unresolvedR16, new Date("2026-06-20T10:00:00Z")),
+    (error: unknown) => error instanceof ApiError && error.code === "PHASE_LOCKED"
+  );
+});
+
+test("assertMatchPredictionEditable allows knock-out match once both teams are hydrated", () => {
+  const hydratedR16 = buildMatch({
+    matchId: "m_089",
+    stage: "R16",
+    groupId: null,
+    homeTeamId: "ARG",
+    awayTeamId: "FRA",
+    homeSlot: "W73",
+    awaySlot: "W74",
+    kickoffAt: "2026-07-03T21:00:00Z"
+  });
+
+  assert.doesNotThrow(() =>
+    assertMatchPredictionEditable(hydratedR16, new Date("2026-06-20T10:00:00Z"))
+  );
+});
+
+test("assertMatchPredictionEditable never applies PHASE_LOCKED to group-stage matches", () => {
+  // Group-stage predictions are always unlocked before their own kickoff —
+  // the PHASE_LOCKED guard must be stage-aware and skip groups even when
+  // teamIds are null (pathological but defensive).
+  const groupMatch = buildMatch({
+    stage: "group",
+    homeTeamId: null,
+    awayTeamId: null
+  });
+
+  assert.doesNotThrow(() =>
+    assertMatchPredictionEditable(groupMatch, new Date("2026-04-01T00:00:00Z"))
+  );
+});
+
 test("assertPredictionOwnership rejects prediction from another user", () => {
   assert.throws(
     () => assertPredictionOwnership(buildPrediction({ userId: "usr_2" }), "usr_1"),

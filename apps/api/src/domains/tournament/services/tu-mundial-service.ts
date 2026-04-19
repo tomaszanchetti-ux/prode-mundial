@@ -1,10 +1,13 @@
 import {
   buildSlotLabel,
+  planFullHydration,
   resolveR32Bracket,
   resolveTeamIdentity,
   simulateKnockoutBracket,
   type BracketSimulatorMatch,
   type BracketSimulatorPrediction,
+  type GroupDefinition,
+  type HydrationMatch,
   type KnockoutStage,
   type PredictedGroupStandingRow,
   type R32SlotDefinition,
@@ -12,6 +15,7 @@ import {
   type SimulatedKnockoutMatch,
   type TeamRef,
   type TournamentMode,
+  type TournamentPhaseUnlocks,
   type TournamentProjectionBracket,
   type TournamentProjectionMatch,
   type TournamentProjectionReadiness,
@@ -24,8 +28,37 @@ import { matchesRepository } from "../../matches/repositories/matches-repository
 import { predictionsRepository } from "../../matches/repositories/predictions-repository";
 import { teamsRepository } from "../../matches/repositories/teams-repository";
 import type { StoredMatch, StoredPrediction, StoredTeam } from "../../matches/types";
-import { WORLD_CUP_2026_GROUPS } from "../../matches/data/world-cup-2026";
+import { WORLD_CUP_2026_GROUPS, WORLD_CUP_2026_TEAMS } from "../../matches/data/world-cup-2026";
 import { preTournamentSummaryService } from "./pre-tournament-summary-service";
+
+const TEAM_NAMES_BY_ID = new Map<string, string>(
+  WORLD_CUP_2026_TEAMS.map((team) => [team.teamId, team.name])
+);
+
+const HYDRATION_GROUP_DEFINITIONS: GroupDefinition[] = WORLD_CUP_2026_GROUPS.map((group) => ({
+  groupId: group.groupId,
+  teams: group.teamIds.map((teamId) => ({
+    teamId,
+    teamName: TEAM_NAMES_BY_ID.get(teamId) ?? teamId
+  }))
+}));
+
+function toHydrationMatch(match: StoredMatch): HydrationMatch {
+  return {
+    matchId: match.matchId,
+    stage: match.stage,
+    officialMatchNumber: match.officialMatchNumber,
+    groupId: match.groupId,
+    homeTeamId: match.homeTeamId,
+    awayTeamId: match.awayTeamId,
+    homeSlot: match.homeSlot ?? null,
+    awaySlot: match.awaySlot ?? null,
+    homeScore90: match.homeScore90,
+    awayScore90: match.awayScore90,
+    winnerTeamId: match.winnerTeamId,
+    status: match.status
+  };
+}
 
 type GroupTableAccumulator = {
   teamId: string;
@@ -413,11 +446,15 @@ export class TuMundialService {
       unresolvedSlots
     };
 
+    const hydrationPlan = planFullHydration(allMatches.map(toHydrationMatch), HYDRATION_GROUP_DEFINITIONS);
+    const phaseUnlocks: TournamentPhaseUnlocks = hydrationPlan.phaseUnlocks;
+
     return {
       mode: resolveTournamentMode(summary.isPreTournament),
       groups: projectedGroups.map(toTuMundialGroupCard),
       bracket,
       readiness,
+      phaseUnlocks,
       updatedAt: now.toISOString()
     };
   }

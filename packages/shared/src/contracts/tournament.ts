@@ -78,10 +78,25 @@ export type TournamentProjectionReadiness = {
   unresolvedSlots: string[];
 };
 
+/**
+ * Which prediction phases the user is allowed to fill in. Derived from the
+ * official hydration plan: each phase unlocks once the upstream round has
+ * fully closed (every match has a winnerTeamId).
+ */
+export type TournamentPhaseUnlocks = {
+  groups: true;
+  r32: boolean;
+  r16: boolean;
+  qf: boolean;
+  sf: boolean;
+  bronzeFinal: boolean;
+};
+
 export type TournamentProjectionResponse = {
   mode: TournamentMode;
   groups: TuMundialGroupCard[];
   bracket: TournamentProjectionBracket;
   readiness: TournamentProjectionReadiness;
+  phaseUnlocks: TournamentPhaseUnlocks;
   updatedAt: string;
 };

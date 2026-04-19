@@ -123,12 +123,12 @@ def normalize_match(row: dict[str, object]) -> dict[str, object]:
         home_slot, away_slot = normalize_slot_tokens(tokens)
 
     if stage == "BRONZE":
-        home_slot = "LOSER_SF_1"
-        away_slot = "LOSER_SF_2"
+        home_slot = "L101"
+        away_slot = "L102"
 
     if stage == "FINAL":
-        home_slot = "WINNER_SF_1"
-        away_slot = "WINNER_SF_2"
+        home_slot = "W101"
+        away_slot = "W102"
 
     return {
         "matchId": f"m_{official_match_number:03d}",

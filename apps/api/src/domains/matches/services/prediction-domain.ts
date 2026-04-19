@@ -76,6 +76,27 @@ export function assertMatchPredictionEditable(match: StoredMatch, now = new Date
       predictionDeadlineAt: getPredictionDeadlineAt(match).toISOString()
     });
   }
+
+  // Progressive phase unlock: a knock-out match is predictable only once its
+  // upstream round has closed officially (at which point bracket-hydration
+  // backfills homeTeamId / awayTeamId from the prior round's winners). If the
+  // teams are still unresolved, the phase is gated regardless of kickoff.
+  const isKnockoutStage = match.stage !== "group";
+  const hasBothTeams = match.homeTeamId !== null && match.awayTeamId !== null;
+
+  if (isKnockoutStage && !hasBothTeams) {
+    throw new ApiError(
+      409,
+      "PHASE_LOCKED",
+      "This phase has not unlocked yet — the upstream round must close first.",
+      {
+        matchId: match.matchId,
+        stage: match.stage,
+        homeSlot: match.homeSlot ?? null,
+        awaySlot: match.awaySlot ?? null
+      }
+    );
+  }
 }
 
 export function assertPredictionOwnership(prediction: StoredPrediction, userId: string) {
