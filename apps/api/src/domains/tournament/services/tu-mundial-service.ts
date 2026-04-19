@@ -32,7 +32,7 @@ import { WORLD_CUP_2026_GROUPS, WORLD_CUP_2026_TEAMS } from "../../matches/data/
 import { preTournamentSummaryService } from "./pre-tournament-summary-service";
 
 const TEAM_NAMES_BY_ID = new Map<string, string>(
-  WORLD_CUP_2026_TEAMS.map((team) => [team.teamId, team.teamId])
+  WORLD_CUP_2026_TEAMS.map((team) => [team.teamId, team.name])
 );
 
 const HYDRATION_GROUP_DEFINITIONS: GroupDefinition[] = WORLD_CUP_2026_GROUPS.map((group) => ({
