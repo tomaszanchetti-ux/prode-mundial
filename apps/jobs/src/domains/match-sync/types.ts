@@ -1,5 +1,6 @@
 export type SyncStoredMatch = {
   matchId: string;
+  officialMatchNumber?: number;
   stage: string;
   groupId?: string | null;
   homeSlot?: string | null;
@@ -47,10 +48,20 @@ export type MatchSyncExecutionSummary = {
   errors: Array<{ matchId: string; error: string }>;
   groupMatchesFinalized?: number;
   bracketHydration?: {
-    isReady: boolean;
+    isR32Ready: boolean;
     groupMatchesTotal: number;
     groupMatchesFinalized: number;
+    r32PatchesApplied: number;
+    knockoutPatchesApplied: number;
     patchesApplied: number;
+    phaseUnlocks: {
+      groups: true;
+      r32: boolean;
+      r16: boolean;
+      qf: boolean;
+      sf: boolean;
+      bronzeFinal: boolean;
+    };
     unresolvedSlots: string[];
     appliedMatchIds: string[];
   };
