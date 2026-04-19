@@ -27,54 +27,81 @@ type BracketHalf = "A" | "B" | "neutral";
 
 type RoundKey = "round32" | "round16" | "quarterfinals" | "semifinals" | "final";
 
-type RoundColumnConfig = {
-  key: RoundKey;
-  label: string;
-  matches: TournamentProjectionMatch[];
+const ROUND_ORDER: RoundKey[] = ["round32", "round16", "quarterfinals", "semifinals", "final"];
+
+const ROUND_LABEL: Record<RoundKey, string> = {
+  round32: "16avos",
+  round16: "8vos",
+  quarterfinals: "QF",
+  semifinals: "SF",
+  final: "Final"
 };
 
-/**
- * Classifies each match into bracket half A (route to SF1 = home-of-final) or
- * B (route to SF2 = away-of-final). Final and Bronze are cross-half (neutral).
- *
- * Starts from Final and walks upstream through "M{N}" references in slotLabels.
- * Fallback: all-neutral if topology can't be resolved.
- *
- * NOTE: does NOT reorder matches — that belongs to a future iteration where
- * we draw full "Y" connectors. For now cards stay in chronological order.
- */
-function classifyBracketHalves(bracket: TournamentProjectionBracket): Map<string, BracketHalf> {
-  const sideById = new Map<string, BracketHalf>();
-  const byNumber = new Map<number, TournamentProjectionMatch>();
-  for (const m of [
+const STAGE_TO_ROUND: Record<string, RoundKey> = {
+  R32: "round32",
+  R16: "round16",
+  QF: "quarterfinals",
+  SF: "semifinals",
+  FINAL: "final"
+};
+
+function parseSrc(label: string): number | null {
+  const m = /M(\d+)/.exec(label);
+  return m ? Number.parseInt(m[1], 10) : null;
+}
+
+function buildByNumber(bracket: TournamentProjectionBracket): Map<number, TournamentProjectionMatch> {
+  const map = new Map<number, TournamentProjectionMatch>();
+  const all = [
     ...bracket.round32,
     ...bracket.round16,
     ...bracket.quarterfinals,
     ...bracket.semifinals,
     ...bracket.bronze,
     ...bracket.final
-  ]) {
-    if (typeof m.officialMatchNumber === "number") byNumber.set(m.officialMatchNumber, m);
+  ];
+  for (const m of all) {
+    if (typeof m.officialMatchNumber === "number") {
+      map.set(m.officialMatchNumber, m);
+    }
   }
+  return map;
+}
 
-  const parseSrc = (label: string): number | null => {
-    const m = /M(\d+)/.exec(label);
-    return m ? Number.parseInt(m[1], 10) : null;
-  };
+function parentsOf(
+  match: TournamentProjectionMatch,
+  byNumber: Map<number, TournamentProjectionMatch>
+): TournamentProjectionMatch[] {
+  const out: TournamentProjectionMatch[] = [];
+  const h = parseSrc(match.home.slotLabel);
+  if (h !== null) {
+    const p = byNumber.get(h);
+    if (p) out.push(p);
+  }
+  const a = parseSrc(match.away.slotLabel);
+  if (a !== null) {
+    const p = byNumber.get(a);
+    if (p) out.push(p);
+  }
+  return out;
+}
+
+/**
+ * Classifies each knock-out match into bracket half A (route to SF1 =
+ * home-of-final) or B (route to SF2 = away-of-final). Final and Bronze are
+ * cross-half (neutral).
+ *
+ * Starts from Final and walks upstream through "M{N}" references in
+ * slotLabels. Fallback: all-neutral if topology can't be resolved.
+ */
+function classifyBracketHalves(bracket: TournamentProjectionBracket): Map<string, BracketHalf> {
+  const sideById = new Map<string, BracketHalf>();
+  const byNumber = buildByNumber(bracket);
 
   const finalMatch = bracket.final[0];
   if (!finalMatch) return sideById;
 
-  const parentsOf = (match: TournamentProjectionMatch): TournamentProjectionMatch[] => {
-    const h = parseSrc(match.home.slotLabel);
-    const a = parseSrc(match.away.slotLabel);
-    const out: TournamentProjectionMatch[] = [];
-    if (h && byNumber.has(h)) out.push(byNumber.get(h)!);
-    if (a && byNumber.has(a)) out.push(byNumber.get(a)!);
-    return out;
-  };
-
-  const sfs = parentsOf(finalMatch);
+  const sfs = parentsOf(finalMatch, byNumber);
   if (sfs.length === 2) {
     sideById.set(sfs[0].matchId, "A");
     sideById.set(sfs[1].matchId, "B");
@@ -84,7 +111,7 @@ function classifyBracketHalves(bracket: TournamentProjectionBracket): Map<string
     const nextLevel: TournamentProjectionMatch[] = [];
     for (const parent of parents) {
       const side = sideById.get(parent.matchId) ?? "neutral";
-      for (const child of parentsOf(parent)) {
+      for (const child of parentsOf(parent, byNumber)) {
         if (side !== "neutral") sideById.set(child.matchId, side);
         nextLevel.push(child);
       }
@@ -101,6 +128,76 @@ function classifyBracketHalves(bracket: TournamentProjectionBracket): Map<string
   for (const b of bracket.bronze) sideById.set(b.matchId, "neutral");
 
   return sideById;
+}
+
+/**
+ * DFS from the Final backwards: orders each round so that siblings feeding the
+ * same parent match are **adjacent**. That adjacency is what makes the Y
+ * connectors line up without having to measure DOM positions.
+ *
+ * Per-round fallback: if DFS can't populate a round fully (e.g. partially
+ * hydrated bracket, no Final yet), fall back to officialMatchNumber order so
+ * the column still renders sensibly.
+ */
+function resolveBracketOrder(
+  bracket: TournamentProjectionBracket
+): Record<RoundKey, TournamentProjectionMatch[]> {
+  const byNumber = buildByNumber(bracket);
+  const dfs: Record<RoundKey, TournamentProjectionMatch[]> = {
+    round32: [],
+    round16: [],
+    quarterfinals: [],
+    semifinals: [],
+    final: []
+  };
+
+  const pushUnique = (match: TournamentProjectionMatch, key: RoundKey) => {
+    if (!dfs[key].some((m) => m.matchId === match.matchId)) dfs[key].push(match);
+  };
+
+  const walk = (match: TournamentProjectionMatch) => {
+    for (const parent of parentsOf(match, byNumber)) {
+      const key = STAGE_TO_ROUND[parent.stage];
+      if (!key) continue;
+      pushUnique(parent, key);
+      walk(parent);
+    }
+  };
+
+  const finalMatch = bracket.final[0];
+  if (finalMatch) {
+    pushUnique(finalMatch, "final");
+    walk(finalMatch);
+  }
+
+  const byNum = (a: TournamentProjectionMatch, b: TournamentProjectionMatch) =>
+    a.officialMatchNumber - b.officialMatchNumber;
+
+  const sources: Record<RoundKey, TournamentProjectionMatch[]> = {
+    round32: bracket.round32,
+    round16: bracket.round16,
+    quarterfinals: bracket.quarterfinals,
+    semifinals: bracket.semifinals,
+    final: bracket.final
+  };
+
+  const result = {} as Record<RoundKey, TournamentProjectionMatch[]>;
+  for (const key of ROUND_ORDER) {
+    const source = sources[key];
+    result[key] =
+      dfs[key].length === source.length && source.length > 0
+        ? dfs[key]
+        : [...source].sort(byNum);
+  }
+  return result;
+}
+
+function chunkIntoPairs<T>(items: T[]): T[][] {
+  const pairs: T[][] = [];
+  for (let i = 0; i < items.length; i += 2) {
+    pairs.push(items.slice(i, i + 2));
+  }
+  return pairs;
 }
 
 function BracketSideRow({
@@ -149,15 +246,12 @@ function MatchCard({
   match,
   kickoffLabel,
   onOpen,
-  showConnector = false,
   bracketHalf = "neutral",
   accentTone = "neutral"
 }: {
   match: TournamentProjectionMatch;
   kickoffLabel: string;
   onOpen: () => void;
-  /** Short horizontal line from the right edge into the next-column gap. */
-  showConnector?: boolean;
   /** Which half of the bracket this match feeds. */
   bracketHalf?: BracketHalf;
   /** Visual accent for special-case cards (e.g. bronze = gold). */
@@ -166,10 +260,6 @@ function MatchCard({
   const homeIsWinner = match.winnerTeamId !== null && match.winnerTeamId === match.home.team?.teamId;
   const awayIsWinner = match.winnerTeamId !== null && match.winnerTeamId === match.away.team?.teamId;
   const hasWinnerDecided = match.winnerTeamId !== null;
-
-  const connectorClass = showConnector
-    ? "after:content-[''] after:absolute after:top-1/2 after:right-0 after:h-[2px] after:w-6 md:after:w-10 lg:after:w-14 xl:after:w-20 after:translate-x-full after:-translate-y-1/2 after:bg-primary-500 after:pointer-events-none"
-    : "";
 
   const sideBgClass =
     accentTone === "bronze"
@@ -189,7 +279,7 @@ function MatchCard({
     <button
       type="button"
       onClick={onOpen}
-      className={`relative text-left rounded-lg border-2 ${accentClass} ${sideBgClass} shadow-card hover:shadow-modal transition-all p-3 cursor-pointer grid gap-2 w-full ${connectorClass}`.trim()}
+      className={`relative z-[1] text-left rounded-lg border-2 ${accentClass} ${sideBgClass} shadow-card hover:shadow-modal transition-all p-3 cursor-pointer grid gap-2 w-full`.trim()}
     >
       <div className="flex items-center justify-between">
         <span
@@ -212,7 +302,7 @@ function MatchCard({
 function RoundLabel({ label, tone = "primary" }: { label: string; tone?: "primary" | "gold" }) {
   const toneClass = tone === "gold" ? "bg-gold text-white" : "bg-primary-500 text-white";
   return (
-    <div className="sticky top-0 z-[1] bg-bg-main py-1.5 flex justify-center">
+    <div className="sticky top-0 z-[2] bg-bg-main py-1.5 flex justify-center">
       <span
         className={`inline-block px-3 py-1 rounded-pill text-[11px] font-bold uppercase tracking-widest shadow-card ${toneClass}`}
       >
@@ -222,22 +312,68 @@ function RoundLabel({ label, tone = "primary" }: { label: string; tone?: "primar
   );
 }
 
-function RoundColumn({
-  label,
+/**
+ * Pair wrapper: contains two sibling matches that feed the same child in the
+ * next round. Uses `flex: 1 1 0` + `justify-around` so the two cards sit at
+ * 25% / 75% of the wrapper height. The Y connector is drawn by the
+ * `.bracket-pair` pseudo-elements defined in globals.css:
+ *   - ::before = the `]` shape (top + right + bottom borders) spanning 25%→75%
+ *   - ::after  = a horizontal tail from the midpoint into the next column
+ *
+ * Because pair-midpoint in round N equals card-center in round N+1 (both
+ * evaluate to (i+0.5)·H/N_pairs), the tail lands exactly on the child card's
+ * vertical center — no measurement needed.
+ */
+function PairGroup({
   matches,
   sideById,
   onOpenMatch,
   kickoffLabeler,
-  isLastColumn = false
+  drawConnector
 }: {
-  label: string;
   matches: TournamentProjectionMatch[];
   sideById: Map<string, BracketHalf>;
   onOpenMatch: (matchId: string) => void;
   kickoffLabeler: (iso: string) => string;
-  isLastColumn?: boolean;
+  drawConnector: boolean;
 }) {
-  const columnWidthClass = "min-w-[180px] md:min-w-[200px] lg:flex-1 lg:min-w-0";
+  const showConnector = drawConnector && matches.length === 2;
+  return (
+    <div
+      className={`relative flex flex-col justify-around flex-1 min-h-0 ${
+        showConnector ? "bracket-pair" : ""
+      }`.trim()}
+    >
+      {matches.map((match) => (
+        <MatchCard
+          key={match.matchId}
+          match={match}
+          kickoffLabel={kickoffLabeler(match.kickoffAt)}
+          onOpen={() => onOpenMatch(match.matchId)}
+          bracketHalf={sideById.get(match.matchId) ?? "neutral"}
+        />
+      ))}
+    </div>
+  );
+}
+
+function RoundColumn({
+  roundKey,
+  matches,
+  sideById,
+  onOpenMatch,
+  kickoffLabeler,
+  hasNextRound
+}: {
+  roundKey: RoundKey;
+  matches: TournamentProjectionMatch[];
+  sideById: Map<string, BracketHalf>;
+  onOpenMatch: (matchId: string) => void;
+  kickoffLabeler: (iso: string) => string;
+  hasNextRound: boolean;
+}) {
+  const label = ROUND_LABEL[roundKey];
+  const columnWidthClass = "min-w-[200px] md:min-w-[220px] lg:flex-1 lg:min-w-0";
 
   if (matches.length === 0) {
     return (
@@ -250,22 +386,38 @@ function RoundColumn({
     );
   }
 
-  const sortedMatches = [...matches].sort(
-    (left, right) => (left.officialMatchNumber ?? 0) - (right.officialMatchNumber ?? 0)
-  );
+  // Final: single card, no pair grouping.
+  if (roundKey === "final") {
+    const match = matches[0];
+    return (
+      <div className={`flex flex-col gap-2 ${columnWidthClass}`}>
+        <RoundLabel label={label} />
+        <div className="flex-1 flex flex-col justify-around">
+          <MatchCard
+            match={match}
+            kickoffLabel={kickoffLabeler(match.kickoffAt)}
+            onOpen={() => onOpenMatch(match.matchId)}
+            bracketHalf={sideById.get(match.matchId) ?? "neutral"}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const pairs = chunkIntoPairs(matches);
 
   return (
     <div className={`flex flex-col gap-2 ${columnWidthClass}`}>
       <RoundLabel label={label} />
-      <div className="flex-1 flex flex-col justify-around gap-2">
-        {sortedMatches.map((match) => (
-          <MatchCard
-            key={match.matchId}
-            match={match}
-            kickoffLabel={kickoffLabeler(match.kickoffAt)}
-            onOpen={() => onOpenMatch(match.matchId)}
-            showConnector={!isLastColumn}
-            bracketHalf={sideById.get(match.matchId) ?? "neutral"}
+      <div className="flex-1 flex flex-col">
+        {pairs.map((pair, idx) => (
+          <PairGroup
+            key={pair.map((m) => m.matchId).join("-") || `pair-${idx}`}
+            matches={pair}
+            sideById={sideById}
+            onOpenMatch={onOpenMatch}
+            kickoffLabeler={kickoffLabeler}
+            drawConnector={hasNextRound}
           />
         ))}
       </div>
@@ -317,14 +469,15 @@ export function TournamentBracket({
   }
 
   const sideById = classifyBracketHalves(bracket);
+  const ordered = resolveBracketOrder(bracket);
 
-  const columns: RoundColumnConfig[] = [
-    { key: "round32", label: "16vos", matches: bracket.round32 },
-    { key: "round16", label: "8vos", matches: bracket.round16 },
-    { key: "quarterfinals", label: "QF", matches: bracket.quarterfinals },
-    { key: "semifinals", label: "SF", matches: bracket.semifinals },
-    { key: "final", label: "Final", matches: bracket.final }
-  ];
+  const hasMatches: Record<RoundKey, boolean> = {
+    round32: ordered.round32.length > 0,
+    round16: ordered.round16.length > 0,
+    quarterfinals: ordered.quarterfinals.length > 0,
+    semifinals: ordered.semifinals.length > 0,
+    final: ordered.final.length > 0
+  };
 
   const bronzeMatch = bracket.bronze[0] ?? null;
 
@@ -343,18 +496,21 @@ export function TournamentBracket({
       <BracketLegend />
 
       <div className="overflow-x-auto lg:overflow-visible -mx-2 px-2 pb-1">
-        <section className="flex gap-3 lg:gap-6 xl:gap-8 min-w-max lg:min-w-0 items-stretch">
-          {columns.map((column, index) => (
-            <RoundColumn
-              key={column.key}
-              label={column.label}
-              matches={column.matches}
-              sideById={sideById}
-              onOpenMatch={onOpenMatch}
-              kickoffLabeler={kickoffLabeler}
-              isLastColumn={index === columns.length - 1}
-            />
-          ))}
+        <section className="bracket-section flex min-w-max lg:min-w-0 items-stretch">
+          {ROUND_ORDER.map((key, idx) => {
+            const nextKey = ROUND_ORDER[idx + 1];
+            return (
+              <RoundColumn
+                key={key}
+                roundKey={key}
+                matches={ordered[key]}
+                sideById={sideById}
+                onOpenMatch={onOpenMatch}
+                kickoffLabeler={kickoffLabeler}
+                hasNextRound={nextKey ? hasMatches[nextKey] : false}
+              />
+            );
+          })}
         </section>
       </div>
 

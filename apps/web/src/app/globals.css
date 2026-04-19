@@ -737,3 +737,54 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/*
+ * Bracket Y-connectors (TournamentBracket)
+ * ----------------------------------------
+ * Each `.bracket-pair` wraps two sibling matches that feed the same child
+ * match in the next round. The wrapper uses `flex: 1 + justify-around` so
+ * cards sit at 25% / 75% of its height. The Y is drawn as two pseudo-elements
+ * that live in the horizontal gap to the right of the wrapper:
+ *
+ *   ::before = the `]` (top horizontal stub + right vertical + bottom stub)
+ *              spans from 25% to 75% of the pair — exactly from card center
+ *              to card center.
+ *
+ *   ::after  = a horizontal tail from the midpoint of the `]` to the left
+ *              edge of the next column, landing on the child card's center.
+ *
+ * The section uses gap: 32px, split 16+16 between the two pseudo-elements so
+ * the Y lands flush with the next card. Adjust both the gap and the widths
+ * together if you change this.
+ */
+.bracket-section {
+  gap: 32px;
+}
+
+.bracket-pair::before,
+.bracket-pair::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bracket-pair::before {
+  top: 25%;
+  bottom: 25%;
+  left: 100%;
+  width: 16px;
+  border-top: 2px solid rgba(7, 71, 166, 0.35);
+  border-right: 2px solid rgba(7, 71, 166, 0.35);
+  border-bottom: 2px solid rgba(7, 71, 166, 0.35);
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.bracket-pair::after {
+  top: calc(50% - 1px);
+  left: calc(100% + 16px);
+  width: 16px;
+  height: 2px;
+  background: rgba(7, 71, 166, 0.35);
+}
