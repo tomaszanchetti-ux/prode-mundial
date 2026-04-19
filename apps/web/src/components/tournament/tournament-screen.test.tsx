@@ -140,6 +140,7 @@ function renderView(
       preTournamentSummary: overrides.preTournamentSummary ?? buildPreTournamentSummary(),
       projection: null,
       championPick: null,
+      subChampionPick: null,
       quickMatch
     })
   );

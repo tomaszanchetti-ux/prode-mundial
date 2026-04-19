@@ -8,6 +8,7 @@ import {
   type MatchStage,
   type MatchSummary,
   type PreTournamentSummary,
+  type SubChampionPickResponse,
   type TournamentProjectionResponse,
   type TuMundialGroupCard,
   type TuMundialResponse
@@ -23,9 +24,11 @@ import {
   toStageLabel,
   toStatusLabel
 } from "@/components/matches/matches-helpers";
-import { ApiClientError, getChampionPick, getMatches, getPreTournamentSummary, getTournamentProjection, getTuMundial } from "@/lib/api/client";
+import { ApiClientError, getChampionPick, getMatches, getPreTournamentSummary, getSubChampionPick, getTournamentProjection, getTuMundial } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
 import { ChampionPickerCard } from "./champion-picker-card";
+import { GoldenBallCard } from "./golden-ball-card";
+import { SubChampionPickerCard } from "./sub-champion-picker-card";
 import { ModeToggle, type TournamentMode } from "./mode-toggle";
 import { PhaseKnockoutView } from "./phase-knockout-view";
 import { PhaseTabs, type PhaseStatus, type PhaseTabItem, type TournamentPhase } from "./phase-tabs";
@@ -143,6 +146,7 @@ type TournamentScreenViewProps = {
   activeMode: TournamentMode;
   activePhase: TournamentPhase;
   championPick: ChampionPickResponse | null;
+  subChampionPick: SubChampionPickResponse | null;
   errorMessage: string | null;
   groups: TuMundialGroupCard[];
   isLoading: boolean;
@@ -164,6 +168,7 @@ export function TournamentScreenView({
   activeMode,
   activePhase,
   championPick,
+  subChampionPick,
   errorMessage,
   groups,
   isLoading,
@@ -219,6 +224,14 @@ export function TournamentScreenView({
 
       <ChampionPickerCard data={championPick} onOpen={onOpenChampionPicker} />
 
+      <SubChampionPickerCard
+        data={subChampionPick}
+        championPick={championPick}
+        onOpen={onOpenChampionPicker}
+      />
+
+      <GoldenBallCard />
+
       <ModeToggle activeMode={activeMode} onSelect={onModeSelect} />
 
       <PhaseTabs items={phaseItems} activePhase={activePhase} onSelect={onPhaseSelect} />
@@ -271,6 +284,7 @@ export function TournamentScreen() {
   const [data, setData] = useState<TuMundialResponse | null>(null);
   const [projection, setProjection] = useState<TournamentProjectionResponse | null>(null);
   const [championPick, setChampionPick] = useState<ChampionPickResponse | null>(null);
+  const [subChampionPick, setSubChampionPick] = useState<SubChampionPickResponse | null>(null);
   const [preTournamentSummary, setPreTournamentSummary] = useState<PreTournamentSummary | null>(null);
   const [items, setItems] = useState<MatchSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -288,6 +302,7 @@ export function TournamentScreen() {
         setData(null);
         setProjection(null);
         setChampionPick(null);
+        setSubChampionPick(null);
         setPreTournamentSummary(null);
         setItems([]);
         setIsLoading(status === "loading");
@@ -299,10 +314,11 @@ export function TournamentScreen() {
 
       try {
         const token = await user.getIdToken();
-        const [nextData, nextProjection, nextChampion, nextSummary, matchesResponse] = await Promise.all([
+        const [nextData, nextProjection, nextChampion, nextSubChampion, nextSummary, matchesResponse] = await Promise.all([
           getTuMundial(token),
           getTournamentProjection(token),
           getChampionPick(token),
+          getSubChampionPick(token),
           getPreTournamentSummary(token),
           getMatches(token, { limit: 200 })
         ]);
@@ -311,6 +327,7 @@ export function TournamentScreen() {
           setData(nextData);
           setProjection(nextProjection);
           setChampionPick(nextChampion);
+          setSubChampionPick(nextSubChampion);
           setPreTournamentSummary(nextSummary);
           setItems(matchesResponse.items);
         }
@@ -412,6 +429,7 @@ export function TournamentScreen() {
         activeMode={activeMode}
         activePhase={activePhase}
         championPick={championPick}
+        subChampionPick={subChampionPick}
         errorMessage={errorMessage}
         groups={data?.groups ?? []}
         isLoading={isLoading}

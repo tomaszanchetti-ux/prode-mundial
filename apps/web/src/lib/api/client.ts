@@ -1,6 +1,8 @@
 import type {
   AdjustChampionInput,
   AdjustChampionResponse,
+  AdjustSubChampionInput,
+  AdjustSubChampionResponse,
   ApiResponse,
   ChampionPickResponse,
   CreateLeagueInput,
@@ -19,6 +21,9 @@ import type {
   SaveChampionPickResponse,
   SaveMatchPredictionInput,
   SaveMatchPredictionResponse,
+  SaveSubChampionPickInput,
+  SaveSubChampionPickResponse,
+  SubChampionPickResponse,
   TournamentProjectionResponse,
   TuMundialResponse,
   UpdateProfileInput,
@@ -27,6 +32,8 @@ import type {
 import {
   adjustChampionInputSchema,
   adjustChampionResponseSchema,
+  adjustSubChampionInputSchema,
+  adjustSubChampionResponseSchema,
   championPickResponseSchema,
   createLeagueInputSchema,
   joinLeagueInputSchema,
@@ -42,6 +49,9 @@ import {
   saveChampionPickInputSchema,
   saveChampionPickResponseSchema,
   saveMatchPredictionResponseSchema,
+  saveSubChampionPickInputSchema,
+  saveSubChampionPickResponseSchema,
+  subChampionPickResponseSchema,
   tournamentProjectionResponseSchema,
   tuMundialResponseSchema,
   userProfileSchema
@@ -219,6 +229,61 @@ export async function adjustChampionPick(
   }
 
   return adjustChampionResponseSchema.parse(await parseJson<AdjustChampionResponse>(response));
+}
+
+export async function getSubChampionPick(token: string): Promise<SubChampionPickResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/sub-champion`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load sub-champion pick (${response.status}).`);
+  }
+
+  return subChampionPickResponseSchema.parse(await parseJson<SubChampionPickResponse>(response));
+}
+
+export async function saveSubChampionPick(
+  token: string,
+  input: SaveSubChampionPickInput
+): Promise<SaveSubChampionPickResponse> {
+  const payload = saveSubChampionPickInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/sub-champion`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to save sub-champion pick (${response.status}).`);
+  }
+
+  return saveSubChampionPickResponseSchema.parse(await parseJson<SaveSubChampionPickResponse>(response));
+}
+
+export async function adjustSubChampionPick(
+  token: string,
+  input: AdjustSubChampionInput
+): Promise<AdjustSubChampionResponse> {
+  const payload = adjustSubChampionInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/sub-champion/adjustment`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to confirm sub-champion adjustment (${response.status}).`);
+  }
+
+  return adjustSubChampionResponseSchema.parse(await parseJson<AdjustSubChampionResponse>(response));
 }
 
 export async function getPoints(token: string): Promise<PointsResponse> {
