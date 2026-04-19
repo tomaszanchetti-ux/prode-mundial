@@ -7,8 +7,11 @@ import { getLeaguesController } from "../domains/leagues/controllers/get-leagues
 import { postJoinLeagueController } from "../domains/leagues/controllers/post-join-league-controller";
 import { postLeaguesController } from "../domains/leagues/controllers/post-leagues-controller";
 import { getMacroPicksController } from "../domains/macro-picks/controllers/get-macro-picks-controller";
+import { getSubChampionController } from "../domains/macro-picks/controllers/get-sub-champion-controller";
 import { postMacroAdjustmentController } from "../domains/macro-picks/controllers/post-macro-adjustment-controller";
+import { postSubChampionAdjustmentController } from "../domains/macro-picks/controllers/post-sub-champion-adjustment-controller";
 import { putMacroPicksController } from "../domains/macro-picks/controllers/put-macro-picks-controller";
+import { putSubChampionController } from "../domains/macro-picks/controllers/put-sub-champion-controller";
 import { getMatchDetailController } from "../domains/matches/controllers/get-match-detail-controller";
 import { getMatchesController } from "../domains/matches/controllers/get-matches-controller";
 import { postMatchResultController } from "../domains/matches/controllers/post-match-result-controller";
@@ -66,6 +69,9 @@ export function createApp() {
   app.get("/api/v1/macro-picks", requireAuth, getMacroPicksController);
   app.put("/api/v1/macro-picks", requireAuth, putMacroPicksController);
   app.post("/api/v1/macro-picks/adjustment", requireAuth, postMacroAdjustmentController);
+  app.get("/api/v1/macro-picks/sub-champion", requireAuth, getSubChampionController);
+  app.put("/api/v1/macro-picks/sub-champion", requireAuth, putSubChampionController);
+  app.post("/api/v1/macro-picks/sub-champion/adjustment", requireAuth, postSubChampionAdjustmentController);
   app.get("/api/v1/leagues", requireAuth, getLeaguesController);
   app.post("/api/v1/leagues", requireAuth, postLeaguesController);
   app.post("/api/v1/leagues/join", requireAuth, postJoinLeagueController);

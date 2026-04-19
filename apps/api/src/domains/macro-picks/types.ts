@@ -24,3 +24,15 @@ export type StoredChampionResult = {
   championTeamId: string;
   updatedAt: string;
 };
+
+export type StoredSubChampionPick = {
+  userId: string;
+  subChampionTeamId: string | null;
+  adjustedSubChampionTeamId: string | null;
+  isLocked: boolean;
+  isAdjusted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lockedAt: string | null;
+  adjustedAt: string | null;
+};
