@@ -53,6 +53,44 @@ function resolvePhaseDefinitions(mode: TournamentMode): PhaseDefinition[] {
   return mode === "predictions" ? PREDICTION_PHASE_DEFINITIONS : RESULT_PHASE_DEFINITIONS;
 }
 
+const PHASE_UNLOCK_REASON: Record<Exclude<TournamentPhase, "groups" | "bracket">, string> = {
+  r32: "Se habilita al cerrar la fase de grupos",
+  r16: "Se habilita al cerrar los 16vos de final",
+  qf: "Se habilita al cerrar los 8vos de final",
+  sf: "Se habilita al cerrar los cuartos de final",
+  final: "Se habilita al cerrar las semifinales"
+};
+
+function isPhaseUnlocked(
+  phase: TournamentPhase,
+  phaseUnlocks: TournamentProjectionResponse["phaseUnlocks"] | null
+): boolean {
+  if (!phaseUnlocks) {
+    // No projection loaded yet → treat everything as unlocked to avoid a
+    // flash of locked tabs on first render.
+    return true;
+  }
+
+  switch (phase) {
+    case "groups":
+      return true;
+    case "bracket":
+      return true;
+    case "r32":
+      return phaseUnlocks.r32;
+    case "r16":
+      return phaseUnlocks.r16;
+    case "qf":
+      return phaseUnlocks.qf;
+    case "sf":
+      return phaseUnlocks.sf;
+    case "final":
+      return phaseUnlocks.bronzeFinal;
+    default:
+      return true;
+  }
+}
+
 function compareMatchesChronologically(left: MatchSummary, right: MatchSummary) {
   const kickoffDifference = new Date(left.kickoffAt).getTime() - new Date(right.kickoffAt).getTime();
 
@@ -329,16 +367,28 @@ export function TournamentScreen() {
     () =>
       phaseDefinitions.map((def) => {
         const phaseMatches = matchesByPhase.get(def.phase) ?? [];
+        const unlocked =
+          activeMode === "predictions"
+            ? isPhaseUnlocked(def.phase, projection?.phaseUnlocks ?? null)
+            : true;
+        const baseStatus = resolvePhaseStatus(phaseMatches);
+        const gated = !unlocked;
+        const disabledReason =
+          gated && def.phase !== "groups" && def.phase !== "bracket"
+            ? PHASE_UNLOCK_REASON[def.phase]
+            : undefined;
 
         return {
           phase: def.phase,
           label: def.label,
           completed: countCompletedInPhase(phaseMatches),
           total: phaseMatches.length,
-          status: resolvePhaseStatus(phaseMatches)
+          status: gated ? "locked" : baseStatus,
+          isDisabled: gated,
+          disabledReason
         };
       }),
-    [matchesByPhase, phaseDefinitions]
+    [matchesByPhase, phaseDefinitions, activeMode, projection]
   );
 
   const handleModeSelect = (nextMode: TournamentMode) => {

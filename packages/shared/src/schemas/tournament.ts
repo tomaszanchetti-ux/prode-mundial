@@ -84,10 +84,20 @@ export const tournamentProjectionReadinessSchema = z.object({
   unresolvedSlots: z.array(z.string().min(1))
 });
 
+export const tournamentPhaseUnlocksSchema = z.object({
+  groups: z.literal(true),
+  r32: z.boolean(),
+  r16: z.boolean(),
+  qf: z.boolean(),
+  sf: z.boolean(),
+  bronzeFinal: z.boolean()
+});
+
 export const tournamentProjectionResponseSchema = z.object({
   mode: tournamentModeSchema,
   groups: z.array(tuMundialGroupCardSchema),
   bracket: tournamentProjectionBracketSchema,
   readiness: tournamentProjectionReadinessSchema,
+  phaseUnlocks: tournamentPhaseUnlocksSchema,
   updatedAt: z.string().min(1)
 });
