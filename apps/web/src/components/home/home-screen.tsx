@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES, type ChampionPickResponse, type LeagueSummary, type MatchSummary, type PointsResponse, type PreTournamentSummary, type SubChampionPickResponse } from "@prode/shared";
 import { useAuth } from "@/components/auth/auth-provider";
+import { EnableNotificationsBanner } from "@/components/notifications/enable-notifications-banner";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getChampionPick, getMatches, getMyLeagues, getPoints, getPreTournamentSummary, getSubChampionPick } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
@@ -126,7 +127,9 @@ export function HomeScreen() {
 
   return (
     <>
-      <HomeScreenView
+      <div className="grid gap-4">
+        <EnableNotificationsBanner user={user} />
+        <HomeScreenView
         profileDisplayName={profile?.displayName ?? null}
         items={items}
         leagues={leagues}
@@ -143,6 +146,7 @@ export function HomeScreen() {
         onOpenTournament={() => router.push(APP_ROUTES.tournament)}
         onOpenPicks={() => router.push(APP_ROUTES.picks)}
       />
+      </div>
 
       <QuickPredictionModal
         matchId={activeMatchId}

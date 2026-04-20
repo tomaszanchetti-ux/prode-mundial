@@ -44,7 +44,12 @@ export type TrackEvent =
   | "sub_champion_saved"
   | "league_created"
   | "league_joined"
-  | "invite_shared";
+  | "invite_shared"
+  | "fcm_prompt_shown"
+  | "fcm_prompt_accepted"
+  | "fcm_prompt_dismissed"
+  | "fcm_permission_denied"
+  | "fcm_token_registered";
 
 export function track(
   event: TrackEvent,
