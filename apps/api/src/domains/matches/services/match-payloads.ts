@@ -72,11 +72,17 @@ function formatPredictionSummary(prediction: StoredPrediction | null) {
   return baseSummary;
 }
 
+// Slots up to 4 chars (1A, 2B, W49, L73) fit nicely between parens and give
+// useful context. Longer slots (legacy WINNER_SF_N, 3ABCDF, etc.) overflow
+// the modal/card layout, so we drop the suffix and just say "Por definir".
+const SLOT_NAME_HINT_MAX_LENGTH = 4;
+
 function buildSlotTeamRef(slot: string | null | undefined, fallbackKey: string): TeamRef {
   if (slot) {
+    const showHint = slot.length <= SLOT_NAME_HINT_MAX_LENGTH;
     return {
       teamId: `slot:${slot}`,
-      name: `Por definir (${slot})`,
+      name: showHint ? `Por definir (${slot})` : "Por definir",
       ...resolveTeamIdentity(null)
     };
   }
