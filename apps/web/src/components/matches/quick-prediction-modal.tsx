@@ -29,8 +29,8 @@ function toStageLabel(detail: MatchDetail) {
   }
 
   const labels: Record<string, string> = {
-    R32: "Octavos",
-    R16: "R16",
+    R32: "16vos",
+    R16: "Octavos",
     QF: "Cuartos",
     SF: "Semifinal",
     BRONZE: "Tercer puesto",

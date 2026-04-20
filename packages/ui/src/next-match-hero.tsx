@@ -7,6 +7,7 @@ import { TeamIdentity } from "./team";
 
 export function NextMatchHero({
   awayTeam,
+  ctaDisabled,
   ctaLabel,
   eyebrow,
   helperText,
@@ -62,7 +63,7 @@ export function NextMatchHero({
           <span className="typo-small text-text-muted text-center">{helperText}</span>
         ) : null}
 
-        <Button fullWidth onClick={onAction}>
+        <Button fullWidth onClick={onAction} disabled={ctaDisabled}>
           {ctaLabel}
         </Button>
 

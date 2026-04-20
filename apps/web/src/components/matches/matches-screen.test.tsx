@@ -53,7 +53,6 @@ test("MatchesScreenView renders contextual CTA for editable pending matches", ()
       isLoading: false,
       items: [buildMatchSummary()],
       onFilterSelect: () => undefined,
-      onOpenMatch: () => undefined,
       onOpenQuickPredict: () => undefined,
       onRetry: () => undefined
     })
@@ -78,7 +77,6 @@ test("MatchesScreenView renders saved editable CTA for saved-filter matches", ()
         })
       ],
       onFilterSelect: () => undefined,
-      onOpenMatch: () => undefined,
       onOpenQuickPredict: () => undefined,
       onRetry: () => undefined
     })
@@ -95,7 +93,6 @@ test("MatchesScreenView renders empty state when filter has no results", () => {
       isLoading: false,
       items: [],
       onFilterSelect: () => undefined,
-      onOpenMatch: () => undefined,
       onOpenQuickPredict: () => undefined,
       onRetry: () => undefined
     })

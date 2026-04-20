@@ -2,9 +2,8 @@
 
 import React from "react";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import type { MatchSummary } from "@prode/shared";
-import { Button, Card, ErrorCard, MatchCard, NextMatchHero, SkeletonMatchCard } from "@prode/ui";
+import { Card, ErrorCard, MatchCard, NextMatchHero, SkeletonMatchCard } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getMatches } from "@/lib/api/client";
@@ -30,7 +29,6 @@ type MatchesScreenViewProps = {
   isLoading: boolean;
   items: MatchSummary[];
   onFilterSelect: (key: string) => void;
-  onOpenMatch: (matchId: string) => void;
   onOpenQuickPredict: (matchId: string) => void;
   onRetry: () => void;
 };
@@ -41,7 +39,6 @@ export function MatchesScreenView({
   isLoading,
   items,
   onFilterSelect,
-  onOpenMatch,
   onOpenQuickPredict,
   onRetry
 }: MatchesScreenViewProps) {
@@ -91,9 +88,6 @@ export function MatchesScreenView({
             <span className="text-[14px] leading-[1.4] text-text-secondary">
               {copyForLocale(locale, "Se habilita", "Opens")} {toLocalKickoffLabel(nextOpeningMatch.predictionOpensAt, locale)} · {toCountdownLabel(nextOpeningMatch.predictionOpensAt, locale)}
             </span>
-            <Button variant="secondary" onClick={() => onOpenMatch(nextOpeningMatch.matchId)}>
-              {copyForLocale(locale, "Ver detalle", "View detail")}
-            </Button>
           </Card>
         ) : null}
 
@@ -180,7 +174,6 @@ export function MatchesScreenView({
 }
 
 export function MatchesScreen() {
-  const router = useRouter();
   const { status, user } = useAuth();
   const [activeFilterKey, setActiveFilterKey] = useState<string>("pending");
   const [items, setItems] = useState<MatchSummary[]>([]);
@@ -260,7 +253,6 @@ export function MatchesScreen() {
           setDismissedCycle(false);
           setActiveFilterKey(nextKey);
         }}
-        onOpenMatch={(matchId) => router.push(`/matches/${matchId}`)}
         onOpenQuickPredict={(matchId) => {
           setDismissedCycle(false);
           setActiveMatchId(matchId);

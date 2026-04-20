@@ -404,11 +404,7 @@ export function TournamentScreen() {
 
   const handleHeroAction = () => {
     if (!hero) return;
-    if (canEditPrediction(hero.match)) {
-      setActiveMatchId(hero.match.matchId);
-    } else {
-      router.push(`${APP_ROUTES.matches}/${hero.match.matchId}`);
-    }
+    setActiveMatchId(hero.match.matchId);
   };
 
   return (
