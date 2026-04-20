@@ -3,12 +3,11 @@
 import React, { useEffect, useState } from "react";
 import type { ChampionPickResponse, SubChampionPickResponse, TournamentPickWindow } from "@prode/shared";
 import { resolveTeamIdentity } from "@prode/shared";
-import { Card, StatusTag, TeamIdentity } from "@prode/ui";
+import { Button, Card, StatusTag, TeamIdentity } from "@prode/ui";
 import type { StatusTone } from "@prode/ui";
 
 type SubChampionPickerCardProps = {
   data: SubChampionPickResponse | null;
-  /** Needed to decide whether the card is usable: sub-champion requires champion first. */
   championPick: ChampionPickResponse | null;
   onOpen: () => void;
 };
@@ -21,7 +20,7 @@ type StatusMeta = {
 function resolveStatusMeta(status: SubChampionPickResponse["status"] | null | undefined): StatusMeta {
   switch (status) {
     case "picked":
-      return { label: "Elegido", tone: "saved" };
+      return { label: "Guardado", tone: "saved" };
     case "locked":
       return { label: "Bloqueado", tone: "neutral" };
     case "adjustment_available":
@@ -32,7 +31,7 @@ function resolveStatusMeta(status: SubChampionPickResponse["status"] | null | un
       return { label: "Puntuado", tone: "scored" };
     case "empty":
     default:
-      return { label: "Sin elegir", tone: "editable" };
+      return { label: "Pendiente", tone: "editable" };
   }
 }
 
@@ -40,17 +39,10 @@ function resolveCtaLabel(
   status: SubChampionPickResponse["status"] | null | undefined,
   requiresChampion: boolean
 ) {
-  if (requiresChampion) return "Elegi tu campeon primero";
-  switch (status) {
-    case "empty":
-      return "Elegir sub-campeon";
-    case "picked":
-      return "Cambiar sub-campeon";
-    case "adjustment_available":
-      return "Ajustar pick";
-    default:
-      return "Ver tu sub-campeon";
+  if (requiresChampion || status === "empty" || status == null) {
+    return "Elegir";
   }
+  return "Modificar";
 }
 
 function formatRemaining(closesAtMs: number, nowMs: number): string | null {
@@ -130,47 +122,36 @@ export function SubChampionPickerCard({ data, championPick, onOpen }: SubChampio
     : null;
 
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="text-left cursor-pointer w-full"
-      aria-label={ctaLabel}
-      // Still clickable even when requiresChampion — the target page shows the "elegi tu campeon primero" message.
-    >
-      <Card elevated style={{ padding: 14, gap: 10 }}>
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="typo-small text-text-muted">TU SUB-CAMPEON</span>
-          </div>
-          <StatusTag status={statusMeta.tone} label={statusMeta.label} />
-        </div>
+    <Card elevated style={{ padding: 14, gap: 10 }}>
+      <div className="flex items-center justify-between gap-3">
+        <span className="typo-small text-text-muted">MI SUB-CAMPEON</span>
+        <StatusTag status={statusMeta.tone} label={statusMeta.label} />
+      </div>
 
-        <div className="flex items-center justify-between gap-3">
-          {teamData ? (
-            <TeamIdentity
-              team={{
-                teamName: teamData.name,
-                fifaCode: teamData.fifaCode,
-                flagAsset: teamData.flagAsset,
-                flagUrl: teamData.flagUrl
-              }}
-              size="md"
-              showFlag
-              showName
-              emphasis="compact"
-            />
-          ) : (
-            <span className="text-[14px] leading-[1.4] text-text-secondary">
-              {requiresChampion
-                ? "Primero elegi tu campeon; el sub-campeon va en la mitad opuesta."
-                : "Elegi el finalista que pierde contra tu campeon."}
-            </span>
-          )}
-          <span className="text-[13px] text-accent-primary whitespace-nowrap">{ctaLabel} →</span>
-        </div>
+      {teamData ? (
+        <TeamIdentity
+          team={{
+            teamName: teamData.name,
+            fifaCode: teamData.fifaCode,
+            flagAsset: teamData.flagAsset,
+            flagUrl: teamData.flagUrl
+          }}
+          size="md"
+          showFlag
+          showName
+          emphasis="compact"
+        />
+      ) : (
+        <span className="text-[14px] leading-[1.4] text-text-secondary">
+          {requiresChampion
+            ? "Primero elegi tu campeon; el sub-campeon va en la mitad opuesta."
+            : "Elegi el finalista que pierde contra tu campeon."}
+        </span>
+      )}
 
+      <div className="flex items-center justify-between gap-3 pt-1 border-t border-border-subtle">
         {windowMeta ? (
-          <div className="flex items-center gap-2 pt-1 border-t border-border-subtle">
+          <div className="grid gap-0.5">
             <StatusTag status={windowMeta.badgeTone} label={windowMeta.badgeLabel} />
             {windowMeta.helperText ? (
               <span className="text-[12px] leading-[1.3] text-text-muted tabular-nums">
@@ -178,8 +159,13 @@ export function SubChampionPickerCard({ data, championPick, onOpen }: SubChampio
               </span>
             ) : null}
           </div>
-        ) : null}
-      </Card>
-    </button>
+        ) : (
+          <span />
+        )}
+        <Button variant="primary" onClick={onOpen}>
+          {ctaLabel}
+        </Button>
+      </div>
+    </Card>
   );
 }

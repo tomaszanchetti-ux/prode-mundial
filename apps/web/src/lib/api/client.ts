@@ -160,7 +160,7 @@ export async function getTuMundial(token: string): Promise<TuMundialResponse> {
   });
 
   if (!response.ok) {
-    throw await buildApiError(response, `Failed to load Tu Mundial (${response.status}).`);
+    throw await buildApiError(response, `Failed to load Mi Mundial (${response.status}).`);
   }
 
   return tuMundialResponseSchema.parse(await parseJson<TuMundialResponse>(response));

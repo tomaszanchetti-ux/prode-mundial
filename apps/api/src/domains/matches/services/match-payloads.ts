@@ -1,9 +1,12 @@
 import {
   MATCH_SCORING_RULES,
+  computeStageCompletion,
   type MatchDetail,
   type MatchStatus,
   type MatchSummary,
+  type PhaseCompletionMatch,
   type SaveMatchPredictionResponse,
+  type StageCompletionMap,
   resolveTeamIdentity,
   type TeamRef,
   type UserMatchPrediction
@@ -16,6 +19,33 @@ import type {
   StoredTeam
 } from "../types";
 import { deriveMatchState, getPredictionDeadlineAt, getPredictionOpensAt } from "./match-state";
+
+/**
+ * Optional phase-aware context for derive helpers. Callers that have access
+ * to the full tournament match list should compute and pass this so that
+ * `isEditable` reflects phase locks (CLOSE gate when a stage is fully
+ * finished, plus the existing OPEN gate for knockout matches with
+ * unresolved slots).
+ */
+export type TournamentContext = {
+  stageCompletion: StageCompletionMap;
+};
+
+export function buildTournamentContext(matches: PhaseCompletionMatch[]): TournamentContext {
+  return { stageCompletion: computeStageCompletion(matches) };
+}
+
+function isPhaseLockedForMatch(match: StoredMatch, context?: TournamentContext): boolean {
+  // (a) Knockout match with unresolved slots → upstream phase not yet hydrated.
+  if (match.stage !== "group" && (match.homeTeamId === null || match.awayTeamId === null)) {
+    return true;
+  }
+  // (b) The match's own stage is fully finished → no point editing.
+  if (context?.stageCompletion?.[match.stage]) {
+    return true;
+  }
+  return false;
+}
 
 const CURSOR_SEPARATOR = "::";
 
@@ -42,11 +72,17 @@ function formatPredictionSummary(prediction: StoredPrediction | null) {
   return baseSummary;
 }
 
+// Slots up to 4 chars (1A, 2B, W49, L73) fit nicely between parens and give
+// useful context. Longer slots (legacy WINNER_SF_N, 3ABCDF, etc.) overflow
+// the modal/card layout, so we drop the suffix and just say "Por definir".
+const SLOT_NAME_HINT_MAX_LENGTH = 4;
+
 function buildSlotTeamRef(slot: string | null | undefined, fallbackKey: string): TeamRef {
   if (slot) {
+    const showHint = slot.length <= SLOT_NAME_HINT_MAX_LENGTH;
     return {
       teamId: `slot:${slot}`,
-      name: `Por definir (${slot})`,
+      name: showHint ? `Por definir (${slot})` : "Por definir",
       ...resolveTeamIdentity(null)
     };
   }
@@ -90,15 +126,38 @@ export function resolveMatchTeams(match: StoredMatch, teamsById: Map<string, Sto
   };
 }
 
-export function deriveMatchViewState(match: StoredMatch, prediction: StoredPrediction | null, now = new Date()): DerivedMatchViewState {
-  const derivedState = deriveMatchState(match, prediction, now);
+export function deriveMatchViewState(
+  match: StoredMatch,
+  prediction: StoredPrediction | null,
+  now = new Date(),
+  context?: TournamentContext
+): DerivedMatchViewState {
+  const baseState = deriveMatchState(match, prediction, now);
+  const phaseLocked = isPhaseLockedForMatch(match, context);
+
+  // Phase lock override: when the match's stage is closed (or its slots
+  // unresolved), force isEditable=false and downgrade saved_editable preds
+  // to locked_unscored so the rest of the pipeline (ctaLabel, UI gating)
+  // reacts coherently.
+  const derivedState = phaseLocked
+    ? {
+        ...baseState,
+        isEditable: false,
+        isLocked: true,
+        predictionStatus:
+          baseState.predictionStatus === "saved_editable"
+            ? ("locked_unscored" as const)
+            : baseState.predictionStatus
+      }
+    : baseState;
+
   const requiresQualifierIfDraw = match.stage !== "group";
   const qualifier = resolvePredictedQualifierTeamId(prediction);
   const userPredictionSummary = formatPredictionSummary(prediction);
-  let ctaLabel = "Predecir";
 
+  let ctaLabel: string;
   if (derivedState.predictionStatus === "saved_editable") {
-    ctaLabel = "Editar prediccion";
+    ctaLabel = "Editar";
   } else if (derivedState.predictionStatus === "scored") {
     ctaLabel = "Ver puntos";
   } else if (derivedState.predictionStatus === "locked_unscored") {
@@ -106,7 +165,10 @@ export function deriveMatchViewState(match: StoredMatch, prediction: StoredPredi
   } else if (derivedState.predictionStatus === "void") {
     ctaLabel = "Ver resultado";
   } else if (!derivedState.isEditable) {
+    // empty + non-editable: phase locked or future match unreachable.
     ctaLabel = derivedState.publicStatus === "finished" ? "Ver resultado" : "Bloqueado";
+  } else {
+    ctaLabel = "Predecir";
   }
 
   if (
@@ -116,7 +178,7 @@ export function deriveMatchViewState(match: StoredMatch, prediction: StoredPredi
     !qualifier &&
     derivedState.isEditable
   ) {
-    ctaLabel = "Editar prediccion";
+    ctaLabel = "Editar";
   }
 
   return {
@@ -127,12 +189,17 @@ export function deriveMatchViewState(match: StoredMatch, prediction: StoredPredi
   };
 }
 
-export function toUserMatchPrediction(match: StoredMatch, prediction: StoredPrediction | null, now = new Date()): UserMatchPrediction | null {
+export function toUserMatchPrediction(
+  match: StoredMatch,
+  prediction: StoredPrediction | null,
+  now = new Date(),
+  context?: TournamentContext
+): UserMatchPrediction | null {
   if (!prediction) {
     return null;
   }
 
-  const state = deriveMatchViewState(match, prediction, now);
+  const state = deriveMatchViewState(match, prediction, now, context);
   const qualifier = resolvePredictedQualifierTeamId(prediction);
   const scoringBreakdown = prediction.isScored && prediction.scoringBreakdown
     ? {
@@ -163,9 +230,10 @@ export function toMatchSummary(
   match: StoredMatch,
   prediction: StoredPrediction | null,
   teamsById: Map<string, StoredTeam>,
-  now = new Date()
+  now = new Date(),
+  context?: TournamentContext
 ): MatchSummary {
-  const state = deriveMatchViewState(match, prediction, now);
+  const state = deriveMatchViewState(match, prediction, now, context);
   const teams = resolveMatchTeams(match, teamsById);
 
   return {
@@ -198,10 +266,11 @@ export function toMatchDetail(
   match: StoredMatch,
   prediction: StoredPrediction | null,
   teamsById: Map<string, StoredTeam>,
-  now = new Date()
+  now = new Date(),
+  context?: TournamentContext
 ): MatchDetail {
-  const summary = toMatchSummary(match, prediction, teamsById, now);
-  const state = deriveMatchViewState(match, prediction, now);
+  const summary = toMatchSummary(match, prediction, teamsById, now, context);
+  const state = deriveMatchViewState(match, prediction, now, context);
   const officialResult =
     summary.status === "finished" && match.homeScore90 !== null && match.awayScore90 !== null
       ? {
@@ -216,7 +285,7 @@ export function toMatchDetail(
     ...summary,
     requiresQualifierIfDraw: state.requiresQualifierIfDraw,
     officialResult,
-    userPrediction: toUserMatchPrediction(match, prediction, now),
+    userPrediction: toUserMatchPrediction(match, prediction, now, context),
     scoringRules: MATCH_SCORING_RULES
   };
 }
@@ -224,9 +293,10 @@ export function toMatchDetail(
 export function toSaveMatchPredictionResponse(
   match: StoredMatch,
   prediction: StoredPrediction,
-  now = new Date()
+  now = new Date(),
+  context?: TournamentContext
 ): SaveMatchPredictionResponse {
-  const state = deriveMatchViewState(match, prediction, now);
+  const state = deriveMatchViewState(match, prediction, now, context);
 
   return {
     predictionId: prediction.predictionId,

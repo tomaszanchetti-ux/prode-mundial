@@ -1,21 +1,20 @@
 import React from "react";
-import type { LeagueSummary, MatchSummary, PreTournamentSummary } from "@prode/shared";
+import type { ChampionPickResponse, LeagueSummary, MatchSummary, PointsResponse, PreTournamentSummary, SubChampionPickResponse } from "@prode/shared";
 import { AdSlotCard, Button, Card, NextMatchHero } from "@prode/ui";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
-import { canEditPrediction } from "@/lib/matches/editability";
-import {
-  pickNextChronologicalMatch,
-  pickPriorityMatch,
-  toEditWindowLabel,
-  toKickoffLabel,
-  toStageLabel
-} from "./home-helpers";
+import { pickContextualHeroMatch } from "@/lib/hero/pick-contextual-hero";
+import { toHeroProps } from "@/lib/hero/to-hero-props";
 import { HomeErrorCard, HomeSkeletonCard } from "./home-states";
+import { MiScoreWidget } from "./mi-score-widget";
+import { MisPicksWidget } from "./mis-picks-widget";
 
 type HomePreTournamentViewProps = {
   profileDisplayName: string | null;
   items: MatchSummary[];
   leagues: LeagueSummary[];
+  points: PointsResponse | null;
+  championPick: ChampionPickResponse | null;
+  subChampionPick: SubChampionPickResponse | null;
   preTournamentSummary: PreTournamentSummary;
   isLoading: boolean;
   errorMessage: string | null;
@@ -23,14 +22,17 @@ type HomePreTournamentViewProps = {
   onOpenMatch: (matchId: string) => void;
   onOpenMatches: () => void;
   onOpenLeagues: () => void;
-  onOpenRankings: () => void;
   onOpenTournament: () => void;
+  onOpenPicks: () => void;
 };
 
 export function HomePreTournamentView({
   profileDisplayName,
   items,
   leagues,
+  points,
+  championPick,
+  subChampionPick,
   preTournamentSummary,
   isLoading,
   errorMessage,
@@ -38,94 +40,34 @@ export function HomePreTournamentView({
   onOpenMatch,
   onOpenMatches,
   onOpenLeagues,
-  onOpenRankings,
-  onOpenTournament
+  onOpenTournament,
+  onOpenPicks
 }: HomePreTournamentViewProps) {
   const { locale } = useLocale();
-  // Hero: prioriza el próximo pendiente (empty/saved_editable). Si no hay, muestra el
-  // próximo partido cronológico (ya predicho o no) para que el hero siempre tenga valor.
-  const priorityMatch = pickPriorityMatch(items);
-  const upcomingMatch = pickNextChronologicalMatch(items);
-  const heroMatch = priorityMatch ?? upcomingMatch;
-  const heroIsEditable = heroMatch ? canEditPrediction(heroMatch) : false;
-  const heroHasPrediction = Boolean(heroMatch?.userPredictionSummary);
-
-  const heroCtaLabel = heroMatch
-    ? heroHasPrediction
-      ? copyForLocale(locale, "Editar prediccion", "Edit prediction")
-      : copyForLocale(locale, "Seguir completando", "Continue filling")
-    : "";
-
-  const heroHelperText = heroMatch
-    ? heroHasPrediction
-      ? heroIsEditable
-        ? copyForLocale(
-            locale,
-            `Tu prediccion: ${heroMatch.userPredictionSummary} · ${toEditWindowLabel(heroMatch.deadlineAt, locale)}`,
-            `Your prediction: ${heroMatch.userPredictionSummary} · ${toEditWindowLabel(heroMatch.deadlineAt, locale)}`
-          )
-        : copyForLocale(
-            locale,
-            `Tu prediccion: ${heroMatch.userPredictionSummary} · Ventana cerrada`,
-            `Your prediction: ${heroMatch.userPredictionSummary} · Edit window closed`
-          )
-      : heroIsEditable
-        ? undefined
-        : copyForLocale(
-            locale,
-            `Abre ${toKickoffLabel(heroMatch.predictionOpensAt, locale)}`,
-            `Opens ${toKickoffLabel(heroMatch.predictionOpensAt, locale)}`
-          )
-    : undefined;
-
-  const heroStatus: "saved" | "editable" | "neutral" = heroIsEditable
-    ? heroHasPrediction
-      ? "saved"
-      : "editable"
-    : "neutral";
-
-  const heroStatusLabel = heroMatch
-    ? heroStatus === "saved"
-      ? copyForLocale(locale, "Guardado", "Saved")
-      : heroStatus === "editable"
-        ? copyForLocale(locale, "Pendiente", "Pending")
-        : copyForLocale(locale, "Cerrado", "Locked")
-    : "";
+  const hero = pickContextualHeroMatch(items, "predictions-first");
+  const heroProps = hero
+    ? toHeroProps({
+        match: hero.match,
+        state: hero.state,
+        locale,
+        onAction: () => onOpenMatch(hero.match.matchId)
+      })
+    : null;
 
   return (
     <div className="grid gap-4">
-      {heroMatch ? (
-        <NextMatchHero
-          awayTeam={{
-            teamName: heroMatch.awayTeam.name,
-            fifaCode: heroMatch.awayTeam.fifaCode,
-            flagAsset: heroMatch.awayTeam.flagAsset,
-            flagUrl: heroMatch.awayTeam.flagUrl
-          }}
-          ctaLabel={heroCtaLabel}
-          eyebrow={`${toStageLabel(heroMatch, locale)} · ${toKickoffLabel(heroMatch.kickoffAt, locale)}`}
-          helperText={heroHelperText}
-          homeTeam={{
-            teamName: heroMatch.homeTeam.name,
-            fifaCode: heroMatch.homeTeam.fifaCode,
-            flagAsset: heroMatch.homeTeam.flagAsset,
-            flagUrl: heroMatch.homeTeam.flagUrl
-          }}
-          onAction={() => onOpenMatch(heroMatch.matchId)}
-          status={heroStatus}
-          statusLabel={heroStatusLabel}
-          title={`${heroMatch.homeTeam.name} vs ${heroMatch.awayTeam.name}`}
-        />
+      {heroProps ? (
+        <NextMatchHero {...heroProps} />
       ) : (
         <Card elevated className="hero-worldcup-bg" style={{ gap: 12, padding: 20 }}>
-          <span className="typo-small text-text-muted">TU MUNDIAL</span>
+          <span className="typo-small text-text-muted">MI MUNDIAL</span>
           <h1 className="typo-h1 m-0 text-text-primary">
             {copyForLocale(locale, "Completa tu Mundial", "Complete your World Cup")}
           </h1>
           <div className="flex gap-2.5 flex-wrap">
             <Button onClick={onOpenMatches}>{copyForLocale(locale, "Ver calendario", "See schedule")}</Button>
             <Button variant="ghost" onClick={onOpenTournament}>
-              {copyForLocale(locale, "Ir a Tu Mundial", "Go to Your World Cup")}
+              {copyForLocale(locale, "Ir a Mi Mundial", "Go to My World Cup")}
             </Button>
           </div>
         </Card>
@@ -147,42 +89,13 @@ export function HomePreTournamentView({
         </div>
       </Card>
 
-      {leagues.length > 0 ? (
-        <Card elevated style={{ gap: 10, padding: 16 }}>
-          <span className="typo-eyebrow text-text-muted uppercase">
-            {copyForLocale(locale, "TU LIGA HOY", "YOUR LEAGUE TODAY")}
-          </span>
-          <h2 className="typo-h3 m-0 text-text-primary">{leagues[0].name}</h2>
-          <p className="typo-small text-text-secondary m-0">
-            {leagues[0].position != null ? (
-              <>
-                <span className="text-text-primary font-semibold">#{leagues[0].position}</span>
-                <span className="text-text-muted"> · {leagues[0].userPoints} {copyForLocale(locale, "pts", "pts")}</span>
-              </>
-            ) : null}
-            <span className="text-text-muted">
-              {leagues[0].position != null ? " · " : ""}{leagues[0].membersCount} {copyForLocale(locale, "jugadores", "players")}
-            </span>
-          </p>
-          <div className="flex gap-2.5 flex-wrap">
-            <Button variant="secondary" onClick={onOpenRankings}>
-              {copyForLocale(locale, "Ver tabla", "See table")}
-            </Button>
-            <Button variant="ghost" onClick={onOpenLeagues}>
-              {copyForLocale(locale, "Invitar", "Invite")}
-            </Button>
-          </div>
-        </Card>
-      ) : (
-        <Card elevated style={{ gap: 10, padding: 16 }}>
-          <span className="typo-eyebrow text-text-muted uppercase">
-            {copyForLocale(locale, "TU LIGA HOY", "YOUR LEAGUE TODAY")}
-          </span>
-          <Button variant="secondary" onClick={onOpenLeagues}>
-            {copyForLocale(locale, "Crear liga", "Create league")}
-          </Button>
-        </Card>
-      )}
+      <MiScoreWidget points={points} leagues={leagues} onOpenLeagues={onOpenLeagues} />
+
+      <MisPicksWidget
+        championPick={championPick}
+        subChampionPick={subChampionPick}
+        onOpenPicks={onOpenPicks}
+      />
 
       <AdSlotCard description={copyForLocale(locale, "Espacio reservado para patrocinio nativo, ubicado despues de la accion principal.", "Reserved slot for native sponsorship, placed after the main action.")} />
 

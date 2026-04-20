@@ -141,12 +141,9 @@ export function LeagueInviteScreen() {
           </div>
 
           {status === "authenticated" ? (
-            <div className="flex gap-2 flex-wrap">
+            <div>
               <Button onClick={() => void handleJoin()} disabled={isJoining}>
                 {isJoining ? "Uniendome..." : "Unirme a esta liga"}
-              </Button>
-              <Button variant="ghost" onClick={() => router.push("/leagues")}>
-                Ir a mis ligas
               </Button>
             </div>
           ) : (

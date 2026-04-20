@@ -2,33 +2,6 @@ import type { MatchSummary } from "@prode/shared";
 import { copyForLocale, formatDateTime, type AppLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
 
-export function toStageLabel(match: MatchSummary, locale: AppLocale) {
-  if (match.stage === "group" && match.groupId) {
-    return copyForLocale(locale, `Grupo ${match.groupId}`, `Group ${match.groupId}`);
-  }
-
-  const labels = {
-    es: {
-      R32: "Octavos",
-      R16: "R16",
-      QF: "Cuartos",
-      SF: "Semifinal",
-      BRONZE: "Tercer puesto",
-      FINAL: "Final"
-    },
-    en: {
-      R32: "Round of 32",
-      R16: "Round of 16",
-      QF: "Quarterfinal",
-      SF: "Semifinal",
-      BRONZE: "Third place",
-      FINAL: "Final"
-    }
-  };
-
-  return labels[locale][match.stage as keyof (typeof labels)["es"]] ?? match.stage;
-}
-
 export function toKickoffLabel(iso: string, locale: AppLocale) {
   return formatDateTime(locale, iso, {
     weekday: "short",

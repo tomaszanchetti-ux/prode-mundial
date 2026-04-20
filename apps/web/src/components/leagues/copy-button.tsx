@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { Button } from "@prode/ui";
 
 type CopyButtonProps = {
   value: string;
@@ -22,13 +23,8 @@ export function CopyButton({ value, label = "Copiar", copiedLabel = "Copiado" }:
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className={`copy-btn${copied ? " copy-btn-copied" : ""}`}
-      aria-label={`${label} ${value}`}
-    >
+    <Button variant="primary" onClick={handleCopy} aria-label={`${label} ${value}`}>
       {copied ? copiedLabel : label}
-    </button>
+    </Button>
   );
 }

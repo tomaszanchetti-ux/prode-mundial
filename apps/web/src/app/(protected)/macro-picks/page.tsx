@@ -1,5 +1,6 @@
-import { MacroPicksScreen } from "@/components/macro-picks/macro-picks-screen";
+import { redirect } from "next/navigation";
+import { APP_ROUTES } from "@prode/shared";
 
 export default function MacroPicksPage() {
-  return <MacroPicksScreen />;
+  redirect(APP_ROUTES.picks);
 }

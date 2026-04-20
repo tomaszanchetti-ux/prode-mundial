@@ -6,6 +6,7 @@ import type { MatchSummary, PreTournamentSummary, PredictedGroupStandingRow, TuM
 import { TournamentScreenView } from "./tournament-screen";
 import type { TournamentMode } from "./mode-toggle";
 import type { PhaseTabItem, TournamentPhase } from "./phase-tabs";
+import type { ContextualHero } from "@/lib/hero/pick-contextual-hero";
 
 function buildProjectedRow(teamId: string, teamName: string, points: number, position: number): PredictedGroupStandingRow {
   return {
@@ -116,10 +117,11 @@ function renderView(
     activeMode?: TournamentMode;
     activePhase?: TournamentPhase;
     preTournamentSummary?: PreTournamentSummary;
-    quickMatch?: MatchSummary | null;
+    hero?: ContextualHero | null;
   } = {}
 ) {
-  const quickMatch = "quickMatch" in overrides ? overrides.quickMatch! : buildQuickMatch();
+  const hero: ContextualHero | null =
+    "hero" in overrides ? overrides.hero! : { match: buildQuickMatch(), state: "pending" };
 
   return renderToStaticMarkup(
     createElement(TournamentScreenView, {
@@ -127,33 +129,32 @@ function renderView(
       activePhase: overrides.activePhase ?? "groups",
       errorMessage: null,
       groups: [buildGroup()],
+      hero,
       isLoading: false,
       matchesByPhase: new Map(),
       matchesByGroupId: new Map(),
+      onHeroAction: () => undefined,
       onModeSelect: () => undefined,
-      onOpenChampionPicker: () => undefined,
+      onOpenPicks: () => undefined,
       onOpenMatch: () => undefined,
       onPhaseSelect: () => undefined,
-      onPredictNext: () => undefined,
       onRetry: () => undefined,
       phaseItems: buildPhaseItems(),
       preTournamentSummary: overrides.preTournamentSummary ?? buildPreTournamentSummary(),
       projection: null,
       championPick: null,
-      subChampionPick: null,
-      quickMatch
+      subChampionPick: null
     })
   );
 }
 
-test("TournamentScreenView renders next-match hero with predict + champion CTAs", () => {
+test("TournamentScreenView renders next-match hero with predict CTA only", () => {
   const html = renderView();
 
   assert.match(html, /TU PROXIMO/);
   assert.match(html, /Mexico/);
   assert.match(html, /South Africa/);
   assert.match(html, /Predecir/);
-  assert.match(html, /Elegir campeon/);
 });
 
 test("TournamentScreenView shows mode toggle and phase tabs", () => {
@@ -181,8 +182,8 @@ test("TournamentScreenView renders results standings cards when mode is results"
   assert.match(html, /Mexico/);
 });
 
-test("TournamentScreenView shows fallback hero when no quick match is pending", () => {
-  const html = renderView({ quickMatch: null });
+test("TournamentScreenView shows fallback hero when no hero match is available", () => {
+  const html = renderView({ hero: null });
 
   assert.match(html, /Todo al dia/);
 });

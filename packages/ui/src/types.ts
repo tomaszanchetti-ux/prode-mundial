@@ -108,6 +108,7 @@ export type SectionHeaderProps = {
 
 export type NextMatchHeroProps = {
   awayTeam: TeamData;
+  ctaDisabled?: boolean;
   ctaLabel: string;
   eyebrow: string;
   helperText?: string;

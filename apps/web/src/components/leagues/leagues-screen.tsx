@@ -10,6 +10,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, createLeague, getLeagueStandings, getMyLeagues, getPoints, joinLeague } from "@/lib/api/client";
 import { CopyButton } from "./copy-button";
 import { HighlightsCard } from "./highlights-card";
+import { MiScoreSection } from "@/components/home/mi-score-widget";
 import {
   GLOBAL_LEAGUE_ID,
   GLOBAL_LEAGUE_NAME,
@@ -81,13 +82,13 @@ export function LeaguesScreenView({
   return (
     <div className="grid gap-4">
       <Card elevated style={{ gap: 10 }}>
-        <h1 className="typo-h2 m-0 text-text-primary">Tus Ligas</h1>
+        <h1 className="typo-h2 m-0 text-text-primary">Mis Ligas</h1>
         <div className="flex gap-2 flex-wrap">
           <Button variant={mode === "create" ? "secondary" : "primary"} onClick={() => onChangeMode(mode === "create" ? null : "create")}>
             {mode === "create" ? "Cancelar" : "Crear liga"}
           </Button>
           <Button variant={mode === "join" ? "secondary" : "ghost"} onClick={() => onChangeMode(mode === "join" ? null : "join")}>
-            {mode === "join" ? "Cancelar" : "Unirme con codigo"}
+            {mode === "join" ? "Cancelar" : "Unirme"}
           </Button>
         </div>
       </Card>
@@ -146,19 +147,26 @@ export function LeaguesScreenView({
         })}
       </div>
 
-      <Card elevated style={{ gap: 10 }}>
-        <span className="typo-small text-text-muted">TU RESUMEN</span>
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <strong className="text-[22px] leading-[1.1] text-text-primary font-black">{summary.positionLabel}</strong>
-          <span className="text-[18px] leading-[1.2] text-text-primary font-bold">· {summary.pointsLabel}</span>
-          {summary.gapLabel ? (
-            <span className="text-[13px] leading-[1.35] text-text-muted">· {summary.gapLabel}</span>
-          ) : null}
-        </div>
-        {!isGlobal && selectedLeague ? (
-          <span className="text-[13px] leading-[1.35] text-text-muted">
-            {selectedLeague.membersCount}/{selectedLeague.memberLimit} jugadores · {selectedLeague.inviteCode}
-          </span>
+      <Card elevated style={{ gap: 14 }}>
+        <MiScoreSection points={points} />
+
+        {!isGlobal || summary.gapLabel ? (
+          <>
+            <div className="h-px bg-border-subtle" />
+            <div className="grid gap-1">
+              <div className="flex items-baseline gap-2 flex-wrap typo-small">
+                <strong className="text-text-primary font-bold">{summary.positionLabel}</strong>
+                {summary.gapLabel ? (
+                  <span className="text-text-muted">· {summary.gapLabel}</span>
+                ) : null}
+              </div>
+              {!isGlobal && selectedLeague ? (
+                <span className="text-[12px] leading-[1.35] text-text-muted">
+                  {selectedLeague.membersCount}/{selectedLeague.memberLimit} jugadores · {selectedLeague.inviteCode}
+                </span>
+              ) : null}
+            </div>
+          </>
         ) : null}
       </Card>
 
@@ -208,14 +216,9 @@ export function LeaguesScreenView({
 
       <HighlightsCard highlights={highlights} />
 
-      {!isGlobal && selectedLeague ? (
-        <div className="flex gap-2 flex-wrap">
-          {selectedLeague.inviteLink ? (
-            <CopyButton value={selectedLeague.inviteLink} label="Invitar" />
-          ) : null}
-          <Button variant="ghost" onClick={() => onSelectLeague(GLOBAL_LEAGUE_ID)}>
-            Volver a Global
-          </Button>
+      {!isGlobal && selectedLeague?.inviteLink ? (
+        <div>
+          <CopyButton value={selectedLeague.inviteLink} label="Invitar" />
         </div>
       ) : null}
 
@@ -231,7 +234,7 @@ export function LeaguesScreenView({
 
       {isGlobal && items.length > 0 ? (
         <div className="grid gap-3">
-          <span className="typo-small text-text-muted">TUS LIGAS PRIVADAS</span>
+          <span className="typo-small text-text-muted">MIS LIGAS PRIVADAS</span>
           {items.map((league) => (
             <Card key={league.leagueId} elevated style={{ gap: 10 }}>
               <div className="flex justify-between gap-2 items-center">
@@ -245,7 +248,7 @@ export function LeaguesScreenView({
               </div>
               <div className="flex gap-2 flex-wrap">
                 <Button variant="secondary" onClick={() => onSelectLeague(league.leagueId)}>
-                  Abrir
+                  Ver detalle
                 </Button>
                 {league.inviteLink ? (
                   <CopyButton value={league.inviteLink} label="Invitar" />

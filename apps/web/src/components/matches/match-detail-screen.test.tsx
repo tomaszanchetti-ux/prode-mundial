@@ -70,7 +70,6 @@ test("MatchDetailScreenView renders qualifier selector only on knockout draw", (
       onHomeChange: () => undefined,
       onRetryLoad: () => undefined,
       onSave: () => undefined,
-      onBackToMatches: () => undefined,
       saveNotice: null
     })
   );
@@ -96,7 +95,6 @@ test("MatchDetailScreenView renders save success toast", () => {
       onHomeChange: () => undefined,
       onRetryLoad: () => undefined,
       onSave: () => undefined,
-      onBackToMatches: () => undefined,
       saveNotice: {
         tone: "success",
         message: "Predicción guardada."
@@ -129,7 +127,6 @@ test("MatchDetailScreenView renders locked state copy and disables editing inten
       onHomeChange: () => undefined,
       onRetryLoad: () => undefined,
       onSave: () => undefined,
-      onBackToMatches: () => undefined,
       saveNotice: null
     })
   );
@@ -155,7 +152,6 @@ test("MatchDetailScreenView renders retry save UI on actionable error", () => {
       onHomeChange: () => undefined,
       onRetryLoad: () => undefined,
       onSave: () => undefined,
-      onBackToMatches: () => undefined,
       saveNotice: {
         tone: "error",
         message: "Si predices empate, debes elegir quién clasifica."

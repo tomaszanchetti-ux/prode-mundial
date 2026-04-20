@@ -7,6 +7,7 @@ import {
   assertPredictionOwnership,
   validatePredictionInput
 } from "./prediction-domain";
+import { buildTournamentContext } from "./match-payloads";
 
 function buildMatch(overrides: Partial<StoredMatch> = {}): StoredMatch {
   return {
@@ -214,6 +215,33 @@ test("assertMatchPredictionEditable never applies PHASE_LOCKED to group-stage ma
 
   assert.doesNotThrow(() =>
     assertMatchPredictionEditable(groupMatch, new Date("2026-04-01T00:00:00Z"))
+  );
+});
+
+test("assertMatchPredictionEditable rejects predictions when the match's stage is fully closed (PHASE_CLOSED)", () => {
+  // Group match still scheduled with a far kickoff, but every group match in
+  // the context is finished → CLOSE gate kicks in.
+  const lateGroupMatch = buildMatch({ matchId: "m_001", stage: "group", kickoffAt: "2026-06-30T19:00:00Z" });
+  const context = buildTournamentContext([
+    { stage: "group", status: "finished" },
+    { stage: "group", status: "finished" }
+  ]);
+
+  assert.throws(
+    () => assertMatchPredictionEditable(lateGroupMatch, new Date("2026-04-15T00:00:00Z"), context),
+    (error: unknown) => error instanceof ApiError && error.code === "PHASE_CLOSED"
+  );
+});
+
+test("assertMatchPredictionEditable allows predictions when the stage still has scheduled matches", () => {
+  const groupMatch = buildMatch({ matchId: "m_001", stage: "group" });
+  const context = buildTournamentContext([
+    { stage: "group", status: "finished" },
+    { stage: "group", status: "scheduled" }
+  ]);
+
+  assert.doesNotThrow(() =>
+    assertMatchPredictionEditable(groupMatch, new Date("2026-04-15T00:00:00Z"), context)
   );
 });
 

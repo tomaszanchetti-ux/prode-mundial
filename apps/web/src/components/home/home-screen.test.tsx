@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { MatchSummary, PreTournamentSummary, TeamRef } from "@prode/shared";
+import type { MatchSummary, PointsResponse, PreTournamentSummary, TeamRef } from "@prode/shared";
 import { HomeScreenView } from "./home-screen";
 
 function buildTeamRef(teamId: string, name: string): TeamRef {
@@ -57,12 +57,27 @@ function buildPreTournamentSummary(overrides: Partial<PreTournamentSummary> = {}
   };
 }
 
+function buildPoints(overrides: Partial<PointsResponse> = {}): PointsResponse {
+  return {
+    totalPoints: 28,
+    macroPoints: 0,
+    exactHits: 3,
+    correctSigns: 8,
+    matchPoints: 28,
+    totals: { totalPoints: 28, macroPoints: 0, exactHits: 3, correctSigns: 8, matchPoints: 28 },
+    byStage: { group: 28, R32: 0, R16: 0, QF: 0, SF: 0, BRONZE: 0, FINAL: 0, macro: 0 },
+    recentMatches: [],
+    ...overrides
+  };
+}
+
 test("HomeScreenView renders pre-tournament next-match hero and follow-up CTAs", () => {
   const html = renderToStaticMarkup(
     createElement(HomeScreenView, {
       profileDisplayName: "Tomas",
       items: [buildMatchSummary()],
       leagues: [],
+      points: buildPoints({ totalPoints: 0, exactHits: 0, correctSigns: 0, macroPoints: 0, matchPoints: 0 }),
       preTournamentSummary: buildPreTournamentSummary(),
       isLoading: false,
       errorMessage: null,
@@ -70,16 +85,18 @@ test("HomeScreenView renders pre-tournament next-match hero and follow-up CTAs",
       onOpenMatch: () => undefined,
       onOpenMatches: () => undefined,
       onOpenLeagues: () => undefined,
-      onOpenRankings: () => undefined,
-      onOpenTournament: () => undefined
+      championPick: null,
+      subChampionPick: null,
+      onOpenTournament: () => undefined,
+      onOpenPicks: () => undefined
     })
   );
 
   assert.match(html, /Grupo A/);
   assert.match(html, /Argentina/);
   assert.match(html, /Brasil/);
-  assert.match(html, /TU LIGA HOY/);
   assert.match(html, /Crear liga/);
+  assert.match(html, /MI SCORE/);
 });
 
 test("HomeScreenView keeps live-tournament priority match card when pre-tournament is inactive", () => {
@@ -88,6 +105,7 @@ test("HomeScreenView keeps live-tournament priority match card when pre-tourname
       profileDisplayName: "Tomas",
       items: [buildMatchSummary()],
       leagues: [],
+      points: buildPoints(),
       preTournamentSummary: buildPreTournamentSummary({ isPreTournament: false }),
       isLoading: false,
       errorMessage: null,
@@ -95,14 +113,17 @@ test("HomeScreenView keeps live-tournament priority match card when pre-tourname
       onOpenMatch: () => undefined,
       onOpenMatches: () => undefined,
       onOpenLeagues: () => undefined,
-      onOpenRankings: () => undefined,
-      onOpenTournament: () => undefined
+      championPick: null,
+      subChampionPick: null,
+      onOpenTournament: () => undefined,
+      onOpenPicks: () => undefined
     })
   );
 
   assert.match(html, /Grupo A/);
   assert.match(html, /Argentina/);
   assert.match(html, /Brasil/);
-  assert.match(html, /Predecir ahora/);
-  assert.match(html, /TU LIGA HOY/);
+  assert.match(html, /Predecir/);
+  assert.match(html, /MI SCORE/);
+  assert.match(html, /28/);
 });

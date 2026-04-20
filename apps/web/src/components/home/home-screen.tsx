@@ -2,10 +2,10 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { APP_ROUTES, type LeagueSummary, type MatchSummary, type PreTournamentSummary } from "@prode/shared";
+import { APP_ROUTES, type ChampionPickResponse, type LeagueSummary, type MatchSummary, type PointsResponse, type PreTournamentSummary, type SubChampionPickResponse } from "@prode/shared";
 import { useAuth } from "@/components/auth/auth-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
-import { ApiClientError, getMatches, getMyLeagues, getPreTournamentSummary } from "@/lib/api/client";
+import { ApiClientError, getChampionPick, getMatches, getMyLeagues, getPoints, getPreTournamentSummary, getSubChampionPick } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
 import { compareMatchesChronologically, pickPriorityMatch } from "./home-helpers";
 import { HomeInTournamentView } from "./home-in-tournament-view";
@@ -15,6 +15,9 @@ export type HomeScreenViewProps = {
   profileDisplayName: string | null;
   items: MatchSummary[];
   leagues: LeagueSummary[];
+  points: PointsResponse | null;
+  championPick: ChampionPickResponse | null;
+  subChampionPick: SubChampionPickResponse | null;
   preTournamentSummary: PreTournamentSummary | null;
   isLoading: boolean;
   errorMessage: string | null;
@@ -22,8 +25,8 @@ export type HomeScreenViewProps = {
   onOpenMatch: (matchId: string) => void;
   onOpenMatches: () => void;
   onOpenLeagues: () => void;
-  onOpenRankings: () => void;
   onOpenTournament: () => void;
+  onOpenPicks: () => void;
 };
 
 export function HomeScreenView(props: HomeScreenViewProps) {
@@ -44,6 +47,9 @@ export function HomeScreen() {
   const { profile, status, user } = useAuth();
   const [items, setItems] = useState<MatchSummary[]>([]);
   const [leagues, setLeagues] = useState<LeagueSummary[]>([]);
+  const [points, setPoints] = useState<PointsResponse | null>(null);
+  const [championPick, setChampionPick] = useState<ChampionPickResponse | null>(null);
+  const [subChampionPick, setSubChampionPick] = useState<SubChampionPickResponse | null>(null);
   const [preTournamentSummary, setPreTournamentSummary] = useState<PreTournamentSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -67,15 +73,21 @@ export function HomeScreen() {
 
       try {
         const token = await user.getIdToken();
-        const [matchesResponse, summaryResponse, leaguesResponse] = await Promise.all([
+        const [matchesResponse, summaryResponse, leaguesResponse, pointsResponse, championResponse, subChampionResponse] = await Promise.all([
           getMatches(token, { limit: 120 }),
           getPreTournamentSummary(token),
-          getMyLeagues(token).catch(() => ({ items: [] as LeagueSummary[] }))
+          getMyLeagues(token).catch(() => ({ items: [] as LeagueSummary[] })),
+          getPoints(token).catch(() => null),
+          getChampionPick(token).catch(() => null),
+          getSubChampionPick(token).catch(() => null)
         ]);
 
         if (!cancelled) {
           setItems(matchesResponse.items);
           setLeagues(leaguesResponse.items);
+          setPoints(pointsResponse);
+          setChampionPick(championResponse);
+          setSubChampionPick(subChampionResponse);
           setPreTournamentSummary(summaryResponse);
         }
       } catch (error) {
@@ -118,6 +130,9 @@ export function HomeScreen() {
         profileDisplayName={profile?.displayName ?? null}
         items={items}
         leagues={leagues}
+        points={points}
+        championPick={championPick}
+        subChampionPick={subChampionPick}
         preTournamentSummary={preTournamentSummary}
         isLoading={isLoading}
         errorMessage={errorMessage}
@@ -125,24 +140,28 @@ export function HomeScreen() {
         onOpenMatch={(matchId) => setActiveMatchId(matchId)}
         onOpenMatches={() => router.push(APP_ROUTES.tournament)}
         onOpenLeagues={() => router.push(APP_ROUTES.leagues)}
-        onOpenRankings={() => router.push(APP_ROUTES.leagues)}
         onOpenTournament={() => router.push(APP_ROUTES.tournament)}
+        onOpenPicks={() => router.push(APP_ROUTES.picks)}
       />
 
       <QuickPredictionModal
         matchId={activeMatchId}
         isOpen={activeMatchId !== null}
-        hasNextPending={items.filter((m) => canEditPrediction(m) && m.matchId !== activeMatchId).length > 0}
+        hasNextPending={
+          items.filter(
+            (m) => canEditPrediction(m) && m.predictionStatus === "empty" && m.matchId !== activeMatchId
+          ).length > 0
+        }
         onClose={() => {
           setActiveMatchId(null);
           setDismissedCycle(true);
           router.push(APP_ROUTES.tournament);
         }}
         onSaved={() => {
-          const editableMatches = items
-            .filter((m) => canEditPrediction(m) && m.matchId !== activeMatchId)
+          const pendingMatches = items
+            .filter((m) => canEditPrediction(m) && m.predictionStatus === "empty" && m.matchId !== activeMatchId)
             .sort(compareMatchesChronologically);
-          const nextMatch = editableMatches.find((m) => m.predictionStatus === "empty") ?? editableMatches[0] ?? null;
+          const nextMatch = pendingMatches[0] ?? null;
 
           if (nextMatch) {
             setActiveMatchId(nextMatch.matchId);

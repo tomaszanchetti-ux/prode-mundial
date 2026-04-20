@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
-  APP_ROUTES,
   computeFullGroupStandings,
   type FullGroupStandings,
   type GroupMatchResult,
@@ -13,11 +11,14 @@ import { Card, ErrorCard, NextMatchHero, SkeletonCard } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useLocale, copyForLocale } from "@/lib/i18n/locale-provider";
 import { ApiClientError, getMatches } from "@/lib/api/client";
-import { toLocalKickoffLabel, toStageLabel } from "@/components/matches/matches-helpers";
+import { pickContextualHeroMatch, type ContextualHero } from "@/lib/hero/pick-contextual-hero";
+import { toHeroProps } from "@/lib/hero/to-hero-props";
 import { WORLD_CUP_2026_OFFICIAL_GROUPS } from "@/lib/world-cup/groups";
 import { buildOfficialBracket } from "@/lib/world-cup/build-official-bracket";
 import { PhaseTabs, type PhaseStatus, type PhaseTabItem, type TournamentPhase } from "@/components/tournament/phase-tabs";
 import { TournamentBracket } from "@/components/tournament/tournament-bracket";
+import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
+import { canEditPrediction } from "@/lib/matches/editability";
 import { WorldCupGroupCard } from "./world-cup-group-card";
 
 // World Cup uses 2 tabs (mirror of `/tournament` Mis Resultados): official
@@ -45,19 +46,6 @@ function resolveOfficialPhaseStatus(matches: MatchSummary[]): PhaseStatus {
   if (finished > 0) return "partial";
   if (matches.some((m) => m.status === "live")) return "partial";
   return "empty";
-}
-
-function pickHeroMatch(matches: MatchSummary[], now = new Date()): MatchSummary | null {
-  const live = matches.find((m) => m.status === "live");
-  if (live) return live;
-
-  const nowTs = now.getTime();
-  const upcoming = matches
-    .filter((m) => m.status === "scheduled" && new Date(m.kickoffAt).getTime() > nowTs)
-    .sort(compareMatchesChronologically);
-  if (upcoming[0]) return upcoming[0];
-
-  return null;
 }
 
 function toGroupMatchResults(groupMatches: MatchSummary[]): GroupMatchResult[] {
@@ -93,10 +81,11 @@ type WorldCupScreenViewProps = {
   errorMessage: string | null;
   groups: FullGroupStandings[];
   groupMatchCountsByGroupId: Map<string, { played: number; total: number }>;
-  heroMatch: MatchSummary | null;
+  hero: ContextualHero | null;
   isLoading: boolean;
   knockoutsFinished: number;
   knockoutsTotal: number;
+  onHeroAction: () => void;
   onOpenMatch: (matchId: string) => void;
   onRetry: () => void;
   onTabSelect: (tab: WorldCupTab) => void;
@@ -112,10 +101,11 @@ export function WorldCupScreenView({
   errorMessage,
   groups,
   groupMatchCountsByGroupId,
-  heroMatch,
+  hero,
   isLoading,
   knockoutsFinished,
   knockoutsTotal,
+  onHeroAction,
   onOpenMatch,
   onRetry,
   onTabSelect,
@@ -125,30 +115,19 @@ export function WorldCupScreenView({
 }: WorldCupScreenViewProps) {
   const { locale } = useLocale();
 
+  const heroProps = hero
+    ? toHeroProps({
+        match: hero.match,
+        state: hero.state,
+        locale,
+        onAction: onHeroAction
+      })
+    : null;
+
   return (
     <div className="grid gap-4">
-      {heroMatch ? (
-        <NextMatchHero
-          awayTeam={{
-            teamName: heroMatch.awayTeam.name,
-            fifaCode: heroMatch.awayTeam.fifaCode,
-            flagAsset: heroMatch.awayTeam.flagAsset,
-            flagUrl: heroMatch.awayTeam.flagUrl
-          }}
-          ctaLabel={copyForLocale(locale, "Ver detalle", "View details")}
-          eyebrow={heroMatch.status === "live" ? copyForLocale(locale, "EN VIVO", "LIVE") : copyForLocale(locale, "PRÓXIMO PARTIDO", "NEXT MATCH")}
-          homeTeam={{
-            teamName: heroMatch.homeTeam.name,
-            fifaCode: heroMatch.homeTeam.fifaCode,
-            flagAsset: heroMatch.homeTeam.flagAsset,
-            flagUrl: heroMatch.homeTeam.flagUrl
-          }}
-          metaLabel={`${toStageLabel(heroMatch.stage, heroMatch.groupId, locale)} · ${toLocalKickoffLabel(heroMatch.kickoffAt, locale)}`}
-          onAction={() => onOpenMatch(heroMatch.matchId)}
-          status={heroMatch.status === "live" ? "live" : "neutral"}
-          statusLabel={heroMatch.status === "live" ? copyForLocale(locale, "En vivo", "Live") : copyForLocale(locale, "Programado", "Scheduled")}
-          title={`${heroMatch.homeTeam.name} vs ${heroMatch.awayTeam.name}`}
-        />
+      {heroProps ? (
+        <NextMatchHero {...heroProps} />
       ) : (
         <Card elevated className="hero-worldcup-bg" style={{ gap: 8, padding: 20 }}>
           <span className="typo-small text-text-muted">EL MUNDIAL</span>
@@ -225,13 +204,13 @@ export function WorldCupScreenView({
 }
 
 export function WorldCupScreen() {
-  const router = useRouter();
   const { status, user } = useAuth();
   const [items, setItems] = useState<MatchSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [activeTab, setActiveTab] = useState<WorldCupTab>("groups");
+  const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -324,7 +303,10 @@ export function WorldCupScreen() {
     [groupMatches, knockoutMatches]
   );
 
-  const heroMatch = useMemo(() => pickHeroMatch(sortedItems), [sortedItems]);
+  const hero = useMemo(
+    () => pickContextualHeroMatch(sortedItems, "live-first"),
+    [sortedItems]
+  );
 
   const totalMatchesFinished = useMemo(
     () => sortedItems.filter((m) => m.status === "finished").length,
@@ -333,24 +315,47 @@ export function WorldCupScreen() {
 
   const knockoutsFinished = knockoutMatches.filter((m) => m.status === "finished").length;
 
+  const handleHeroAction = () => {
+    if (!hero) return;
+    setActiveMatchId(hero.match.matchId);
+  };
+
   return (
-    <WorldCupScreenView
-      activeTab={activeTab}
-      bracket={bracket}
-      bracketReadiness={bracketReadiness}
-      errorMessage={errorMessage}
-      groups={groups}
-      groupMatchCountsByGroupId={groupMatchCountsByGroupId}
-      heroMatch={heroMatch}
-      isLoading={isLoading}
-      knockoutsFinished={knockoutsFinished}
-      knockoutsTotal={knockoutMatches.length}
-      onOpenMatch={(matchId) => router.push(`${APP_ROUTES.matches}/${matchId}`)}
-      onRetry={() => setReloadKey((k) => k + 1)}
-      onTabSelect={setActiveTab}
-      phaseItems={phaseItems}
-      totalMatchesFinished={totalMatchesFinished}
-      totalMatches={sortedItems.length}
-    />
+    <>
+      <WorldCupScreenView
+        activeTab={activeTab}
+        bracket={bracket}
+        bracketReadiness={bracketReadiness}
+        errorMessage={errorMessage}
+        groups={groups}
+        groupMatchCountsByGroupId={groupMatchCountsByGroupId}
+        hero={hero}
+        isLoading={isLoading}
+        knockoutsFinished={knockoutsFinished}
+        knockoutsTotal={knockoutMatches.length}
+        onHeroAction={handleHeroAction}
+        onOpenMatch={(matchId) => setActiveMatchId(matchId)}
+        onRetry={() => setReloadKey((k) => k + 1)}
+        onTabSelect={setActiveTab}
+        phaseItems={phaseItems}
+        totalMatchesFinished={totalMatchesFinished}
+        totalMatches={sortedItems.length}
+      />
+
+      <QuickPredictionModal
+        matchId={activeMatchId}
+        isOpen={activeMatchId !== null}
+        hasNextPending={
+          sortedItems.filter(
+            (m) => canEditPrediction(m) && m.predictionStatus === "empty" && m.matchId !== activeMatchId
+          ).length > 0
+        }
+        onClose={() => setActiveMatchId(null)}
+        onSaved={() => {
+          setActiveMatchId(null);
+          setReloadKey((k) => k + 1);
+        }}
+      />
+    </>
   );
 }

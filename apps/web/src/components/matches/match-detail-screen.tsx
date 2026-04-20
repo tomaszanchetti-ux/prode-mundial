@@ -2,8 +2,6 @@
 
 import React from "react";
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type { MatchDetail, SaveMatchPredictionInput } from "@prode/shared";
 import { Button, Card, ScoreInput, StatusTag, TeamIdentity } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -37,7 +35,6 @@ type MatchDetailScreenViewProps = {
   onHomeChange: (value: string) => void;
   onRetryLoad: () => void;
   onSave: () => void;
-  onBackToMatches: () => void;
   saveNotice: MatchDetailNotice | null;
 };
 
@@ -52,7 +49,6 @@ export function MatchDetailScreenView({
   onHomeChange,
   onRetryLoad,
   onSave,
-  onBackToMatches,
   saveNotice
 }: MatchDetailScreenViewProps) {
   const qualifierOptions = useMemo(() => {
@@ -91,12 +87,9 @@ export function MatchDetailScreenView({
         <p className="typo-body m-0 text-text-secondary">
           {loadErrorMessage ?? "No pudimos cargar este partido."}
         </p>
-        <div className="grid gap-2 grid-cols-2">
+        <div>
           <Button variant="secondary" onClick={onRetryLoad}>
             Reintentar
-          </Button>
-          <Button variant="ghost" onClick={onBackToMatches}>
-            Volver
           </Button>
         </div>
       </Card>
@@ -112,14 +105,9 @@ export function MatchDetailScreenView({
       ) : null}
 
       <Card elevated style={{ gap: 14, padding: 18 }}>
-        <div className="grid gap-2">
-          <Link href="/matches" className="text-[13px] leading-[1.35] text-text-secondary no-underline">
-            Volver a partidos
-          </Link>
-          <div className="flex justify-between gap-3 items-start">
-            <span className="typo-small text-text-muted">{toStageLabel(detail)}</span>
-            <StatusTag status={toStatusTone(detail)} label={toStatusLabel(detail)} />
-          </div>
+        <div className="flex justify-between gap-3 items-start">
+          <span className="typo-small text-text-muted">{toStageLabel(detail)}</span>
+          <StatusTag status={toStatusTone(detail)} label={toStatusLabel(detail)} />
         </div>
 
         <div className="grid gap-2.5">
@@ -186,7 +174,7 @@ export function MatchDetailScreenView({
           loading={isSaving}
           onClick={onSave}
         >
-          {detail.userPrediction ? "Actualizar prediccion" : "Guardar prediccion"}
+          {detail.userPrediction ? "Guardar cambios" : "Guardar prediccion"}
         </Button>
       </Card>
 
@@ -229,7 +217,6 @@ export function MatchDetailScreenView({
 }
 
 export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
-  const router = useRouter();
   const { status, user } = useAuth();
   const [detail, setDetail] = useState<MatchDetail | null>(null);
   const [formState, setFormState] = useState<FormState>({
@@ -346,7 +333,6 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
       onHomeChange={(value) => setFormState((current) => ({ ...current, homeScorePred: value }))}
       onRetryLoad={() => setReloadKey((current) => current + 1)}
       onSave={handleSave}
-      onBackToMatches={() => router.push("/matches")}
       saveNotice={saveNotice}
     />
   );

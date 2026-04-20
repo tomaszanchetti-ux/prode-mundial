@@ -1,7 +1,5 @@
-import { MatchDetailScreen } from "@/components/matches/match-detail-screen";
+import { redirect } from "next/navigation";
 
-export default async function MatchDetailPage({ params }: { params: Promise<{ matchId: string }> }) {
-  const { matchId } = await params;
-
-  return <MatchDetailScreen matchId={matchId} />;
+export default async function MatchDetailPage() {
+  redirect("/matches");
 }

@@ -17,18 +17,11 @@ import { Card, ErrorCard, NextMatchHero, SkeletonCard } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useLocale } from "@/lib/i18n/locale-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
-import {
-  pickQuickMatch,
-  toCardTone,
-  toLocalKickoffLabel,
-  toStageLabel,
-  toStatusLabel
-} from "@/components/matches/matches-helpers";
 import { ApiClientError, getChampionPick, getMatches, getPreTournamentSummary, getSubChampionPick, getTournamentProjection, getTuMundial } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
-import { ChampionPickerCard } from "./champion-picker-card";
-import { GoldenBallCard } from "./golden-ball-card";
-import { SubChampionPickerCard } from "./sub-champion-picker-card";
+import { pickContextualHeroMatch, type ContextualHero } from "@/lib/hero/pick-contextual-hero";
+import { toHeroProps } from "@/lib/hero/to-hero-props";
+import { MisPicksSection } from "./mis-picks-section";
 import { ModeToggle, type TournamentMode } from "./mode-toggle";
 import { PhaseKnockoutView } from "./phase-knockout-view";
 import { PhaseTabs, type PhaseStatus, type PhaseTabItem, type TournamentPhase } from "./phase-tabs";
@@ -149,19 +142,19 @@ type TournamentScreenViewProps = {
   subChampionPick: SubChampionPickResponse | null;
   errorMessage: string | null;
   groups: TuMundialGroupCard[];
+  hero: ContextualHero | null;
   isLoading: boolean;
   matchesByPhase: Map<TournamentPhase, MatchSummary[]>;
   matchesByGroupId: Map<string, MatchSummary[]>;
+  onHeroAction: () => void;
   onModeSelect: (mode: TournamentMode) => void;
-  onOpenChampionPicker: () => void;
+  onOpenPicks: (tab?: "champion" | "sub-champion" | "best-player") => void;
   onOpenMatch: (matchId: string) => void;
   onPhaseSelect: (phase: TournamentPhase) => void;
-  onPredictNext: () => void;
   onRetry: () => void;
   phaseItems: PhaseTabItem[];
   preTournamentSummary: PreTournamentSummary | null;
   projection: TournamentProjectionResponse | null;
-  quickMatch: MatchSummary | null;
 };
 
 export function TournamentScreenView({
@@ -171,50 +164,37 @@ export function TournamentScreenView({
   subChampionPick,
   errorMessage,
   groups,
+  hero,
   isLoading,
   matchesByPhase,
   matchesByGroupId,
+  onHeroAction,
   onModeSelect,
-  onOpenChampionPicker,
+  onOpenPicks,
   onOpenMatch,
   onPhaseSelect,
-  onPredictNext,
   onRetry,
   phaseItems,
-  projection,
-  quickMatch
+  projection
 }: TournamentScreenViewProps) {
   const { locale } = useLocale();
 
+  const heroProps = hero
+    ? toHeroProps({
+        match: hero.match,
+        state: hero.state,
+        locale,
+        onAction: onHeroAction
+      })
+    : null;
+
   return (
     <div className="grid gap-4">
-      {quickMatch ? (
-        <NextMatchHero
-          awayTeam={{
-            teamName: quickMatch.awayTeam.name,
-            fifaCode: quickMatch.awayTeam.fifaCode,
-            flagAsset: quickMatch.awayTeam.flagAsset,
-            flagUrl: quickMatch.awayTeam.flagUrl
-          }}
-          ctaLabel={quickMatch.userPredictionSummary ? "Editar prediccion" : "Predecir"}
-          eyebrow="TU PROXIMO"
-          homeTeam={{
-            teamName: quickMatch.homeTeam.name,
-            fifaCode: quickMatch.homeTeam.fifaCode,
-            flagAsset: quickMatch.homeTeam.flagAsset,
-            flagUrl: quickMatch.homeTeam.flagUrl
-          }}
-          metaLabel={`${toStageLabel(quickMatch.stage, quickMatch.groupId, locale)} · ${toLocalKickoffLabel(quickMatch.kickoffAt, locale)}`}
-          onAction={onPredictNext}
-          onSecondaryAction={onOpenChampionPicker}
-          secondaryCtaLabel="Elegir campeon"
-          status={toCardTone(quickMatch)}
-          statusLabel={toStatusLabel(quickMatch)}
-          title={`${quickMatch.homeTeam.name} vs ${quickMatch.awayTeam.name}`}
-        />
+      {heroProps ? (
+        <NextMatchHero {...heroProps} />
       ) : (
         <Card elevated className="hero-worldcup-bg" style={{ gap: 8, padding: 20 }}>
-          <span className="typo-small text-text-muted">TU MUNDIAL</span>
+          <span className="typo-small text-text-muted">MI MUNDIAL</span>
           <h1 className="typo-h2 m-0 text-text-primary">Todo al dia</h1>
           <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">
             No tenes predicciones pendientes ahora. Aprovecha para revisar tus tablas o elegir a tu campeon.
@@ -222,15 +202,11 @@ export function TournamentScreenView({
         </Card>
       )}
 
-      <ChampionPickerCard data={championPick} onOpen={onOpenChampionPicker} />
-
-      <SubChampionPickerCard
-        data={subChampionPick}
+      <MisPicksSection
         championPick={championPick}
-        onOpen={onOpenChampionPicker}
+        subChampionPick={subChampionPick}
+        onOpenPicks={onOpenPicks}
       />
-
-      <GoldenBallCard />
 
       <ModeToggle activeMode={activeMode} onSelect={onModeSelect} />
 
@@ -244,7 +220,7 @@ export function TournamentScreenView({
       ) : null}
 
       {errorMessage ? (
-        <ErrorCard title="No pudimos cargar Tu Mundial" message={errorMessage} onRetry={onRetry} />
+        <ErrorCard title="No pudimos cargar Mi Mundial" message={errorMessage} onRetry={onRetry} />
       ) : null}
 
       {!isLoading && !errorMessage ? (
@@ -333,7 +309,7 @@ export function TournamentScreen() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorMessage(error instanceof ApiClientError ? error.message : error instanceof Error ? error.message : "No pudimos cargar Tu Mundial.");
+          setErrorMessage(error instanceof ApiClientError ? error.message : error instanceof Error ? error.message : "No pudimos cargar Mi Mundial.");
         }
       } finally {
         if (!cancelled) {
@@ -417,11 +393,19 @@ export function TournamentScreen() {
     }
   };
 
-  const quickMatch = useMemo(() => pickQuickMatch(sortedItems), [sortedItems]);
+  const hero = useMemo(
+    () => pickContextualHeroMatch(sortedItems, "predictions-first"),
+    [sortedItems]
+  );
   const editableMatches = useMemo(
     () => sortedItems.filter((match) => canEditPrediction(match)),
     [sortedItems]
   );
+
+  const handleHeroAction = () => {
+    if (!hero) return;
+    setActiveMatchId(hero.match.matchId);
+  };
 
   return (
     <>
@@ -432,33 +416,35 @@ export function TournamentScreen() {
         subChampionPick={subChampionPick}
         errorMessage={errorMessage}
         groups={data?.groups ?? []}
+        hero={hero}
         isLoading={isLoading}
         matchesByPhase={matchesByPhase}
         matchesByGroupId={matchesByGroupId}
+        onHeroAction={handleHeroAction}
         onModeSelect={handleModeSelect}
-        onOpenChampionPicker={() => router.push(APP_ROUTES.macroPicks)}
+        onOpenPicks={(tab) =>
+          router.push(tab ? `${APP_ROUTES.picks}?tab=${tab}` : APP_ROUTES.picks)
+        }
         onOpenMatch={(matchId) => setActiveMatchId(matchId)}
         onPhaseSelect={setActivePhase}
-        onPredictNext={() => {
-          if (quickMatch) {
-            setActiveMatchId(quickMatch.matchId);
-          }
-        }}
         onRetry={() => setReloadKey((current) => current + 1)}
         phaseItems={phaseItems}
         preTournamentSummary={preTournamentSummary}
         projection={projection}
-        quickMatch={quickMatch}
       />
 
       <QuickPredictionModal
         matchId={activeMatchId}
         isOpen={activeMatchId !== null}
-        hasNextPending={editableMatches.filter((m) => m.matchId !== activeMatchId).length > 0}
+        hasNextPending={
+          editableMatches.filter((m) => m.predictionStatus === "empty" && m.matchId !== activeMatchId).length > 0
+        }
         onClose={() => setActiveMatchId(null)}
         onSaved={() => {
-          const remaining = editableMatches.filter((m) => m.matchId !== activeMatchId);
-          const nextMatch = remaining.find((m) => m.predictionStatus === "empty") ?? remaining[0] ?? null;
+          const pendingMatches = editableMatches.filter(
+            (m) => m.predictionStatus === "empty" && m.matchId !== activeMatchId
+          );
+          const nextMatch = pendingMatches[0] ?? null;
 
           if (nextMatch) {
             setActiveMatchId(nextMatch.matchId);
