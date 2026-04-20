@@ -10,7 +10,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --import tsx --test src/**/*.test.ts",
     "format": "echo \"No formatter configured for @prode/jobs yet\"",
-    "sync:matches": "JOB_NAME=match-result-sync tsx src/index.ts"
+    "sync:matches": "JOB_NAME=match-result-sync tsx src/index.ts",
+    "fcm:reminders": "JOB_NAME=fcm-reminders tsx src/index.ts"
   },
   "dependencies": {
     "@prode/shared": "workspace:*",
