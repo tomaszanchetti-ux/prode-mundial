@@ -8,6 +8,7 @@ import { Button, Card, ErrorCard, SkeletonCard, SkeletonStandingRow, StatusTag }
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, createLeague, getLeagueStandings, getMyLeagues, getPoints, joinLeague } from "@/lib/api/client";
+import { track } from "@/lib/firebase/analytics";
 import { CopyButton } from "./copy-button";
 import { HighlightsCard } from "./highlights-card";
 import { MiScoreSection } from "@/components/home/mi-score-widget";
@@ -218,7 +219,7 @@ export function LeaguesScreenView({
 
       {!isGlobal && selectedLeague?.inviteLink ? (
         <div>
-          <CopyButton value={selectedLeague.inviteLink} label="Invitar" />
+          <CopyButton value={selectedLeague.inviteLink} label="Invitar" shareLeagueId={selectedLeague.leagueId} />
         </div>
       ) : null}
 
@@ -251,7 +252,7 @@ export function LeaguesScreenView({
                   Ver detalle
                 </Button>
                 {league.inviteLink ? (
-                  <CopyButton value={league.inviteLink} label="Invitar" />
+                  <CopyButton value={league.inviteLink} label="Invitar" shareLeagueId={league.leagueId} />
                 ) : null}
               </div>
             </Card>
@@ -361,6 +362,7 @@ export function LeaguesScreen() {
         name: formState.leagueName
       });
 
+      track("league_created", { leagueId: league.leagueId });
       setLastActionLeague(league);
       setActionMessage("Liga creada. Ya tienes codigo e invite link para compartir.");
       setFormState((current) => ({ ...current, leagueName: "" }));
@@ -391,6 +393,7 @@ export function LeaguesScreen() {
         inviteCode: formState.inviteCode
       });
 
+      track("league_joined", { leagueId: league.leagueId, joinMethod: "code" });
       setLastActionLeague(league);
       setActionMessage("Ya formas parte de la liga. Seleccionala en el selector para ver la tabla.");
       setFormState((current) => ({ ...current, inviteCode: "" }));

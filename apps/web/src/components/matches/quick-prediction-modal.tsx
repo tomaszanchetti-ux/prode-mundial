@@ -5,6 +5,7 @@ import type { MatchDetail, SaveMatchPredictionInput } from "@prode/shared";
 import { PredictionModal, ScoreInput } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
+import { track } from "@/lib/firebase/analytics";
 import { copyForLocale, formatDateTime, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
 import { toStatusLabel, toStatusTone } from "./match-detail-helpers";
@@ -171,6 +172,13 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
       };
 
       await saveMatchPrediction(token, detail.matchId, payload);
+      track("prediction_saved", {
+        matchId: detail.matchId,
+        stage: detail.stage,
+        groupId: detail.groupId ?? null,
+        homeTeamId: detail.homeTeam.teamId,
+        awayTeamId: detail.awayTeam.teamId
+      });
       onSaved?.();
     } catch (error) {
       setErrorMessage(toErrorMessage(error));

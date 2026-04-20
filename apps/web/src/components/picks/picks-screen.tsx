@@ -22,6 +22,7 @@ import {
   saveChampionPick,
   saveSubChampionPick
 } from "@/lib/api/client";
+import { track } from "@/lib/firebase/analytics";
 import { WORLD_CUP_2026_OFFICIAL_GROUPS } from "@/lib/world-cup/groups";
 import { PickableList, type PickableListItem } from "@/components/tournament/pickable-list";
 
@@ -238,13 +239,19 @@ export function PicksScreen() {
     setFeedbackMessage(null);
     try {
       const token = await user.getIdToken();
-      if (championPick?.status === "adjustment_available") {
+      const isAdjustment = championPick?.status === "adjustment_available";
+      if (isAdjustment) {
         const response = await adjustChampionPick(token, { championTeamId: championSelected });
         setFeedbackMessage(response.penaltyNotice);
       } else {
         await saveChampionPick(token, { championTeamId: championSelected });
         setFeedbackMessage("Mi campeón quedó guardado.");
       }
+      track("champion_saved", {
+        teamId: championSelected,
+        pickWindow: championPick?.pickWindow ?? null,
+        isAdjustment
+      });
       setReloadKey((k) => k + 1);
     } catch (error) {
       setErrorMessage(
@@ -266,13 +273,19 @@ export function PicksScreen() {
     setFeedbackMessage(null);
     try {
       const token = await user.getIdToken();
-      if (subChampionPick?.status === "adjustment_available") {
+      const isAdjustment = subChampionPick?.status === "adjustment_available";
+      if (isAdjustment) {
         const response = await adjustSubChampionPick(token, { subChampionTeamId: subChampionSelected });
         setFeedbackMessage(response.penaltyNotice);
       } else {
         await saveSubChampionPick(token, { subChampionTeamId: subChampionSelected });
         setFeedbackMessage("Mi sub-campeón quedó guardado.");
       }
+      track("sub_champion_saved", {
+        teamId: subChampionSelected,
+        pickWindow: subChampionPick?.pickWindow ?? null,
+        isAdjustment
+      });
       setReloadKey((k) => k + 1);
     } catch (error) {
       setErrorMessage(
