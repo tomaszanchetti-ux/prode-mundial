@@ -7,6 +7,7 @@ import { APP_ROUTES } from "@prode/shared";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getLeagueInvitePreview, joinLeague } from "@/lib/api/client";
+import { track } from "@/lib/firebase/analytics";
 
 type InvitePreviewState = Awaited<ReturnType<typeof getLeagueInvitePreview>>;
 
@@ -79,6 +80,7 @@ export function LeagueInviteScreen() {
     try {
       const idToken = await user.getIdToken();
       const league = await joinLeague(idToken, { inviteToken: token });
+      track("league_joined", { leagueId: league.leagueId, joinMethod: "token" });
       router.replace(`/leagues/${league.leagueId}`);
     } catch (error) {
       if (error instanceof ApiClientError && error.code === "ALREADY_LEAGUE_MEMBER" && preview) {

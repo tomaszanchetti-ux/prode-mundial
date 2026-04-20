@@ -23,6 +23,7 @@ import { getTournamentProjectionController } from "../domains/tournament/control
 import { getTuMundialController } from "../domains/tournament/controllers/get-tu-mundial-controller";
 import { getMeController } from "../domains/users/controllers/get-me-controller";
 import { patchMeController } from "../domains/users/controllers/patch-me-controller";
+import { postFcmTokenController } from "../domains/users/controllers/post-fcm-token-controller";
 import { requireAuth } from "./middleware/auth";
 import { requireAdmin } from "./middleware/require-admin";
 import { errorHandler } from "./middleware/error-handler";
@@ -82,6 +83,7 @@ export function createApp() {
   app.put("/api/v1/matches/:matchId/prediction", requireAuth, putMatchPredictionController);
   app.post("/api/v1/admin/matches/:matchId/result", requireAuth, requireAdmin, postMatchResultController);
   app.patch("/api/v1/me", requireAuth, patchMeController);
+  app.post("/api/v1/me/fcm-tokens", requireAuth, postFcmTokenController);
 
   app.use(errorHandler);
 

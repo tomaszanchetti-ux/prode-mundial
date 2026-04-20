@@ -3,16 +3,25 @@ import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { LocaleProvider } from "@/lib/i18n/locale-provider";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
+import { AnalyticsInit } from "@/components/analytics/analytics-init";
 import "./globals.css";
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  "https://prode-mundial-2026--prode-mundial-4e419.europe-west4.hosted.app";
+
+const SITE_NAME = "Prode Mundial";
+const SITE_DESCRIPTION =
+  "Pronosticá los partidos del Mundial 2026, competí en ligas privadas y sumá puntos.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Prode Mundial",
-    template: "%s · Prode Mundial"
+    default: SITE_NAME,
+    template: `%s · ${SITE_NAME}`
   },
-  description:
-    "Pronosticá los partidos del Mundial 2026, competí en ligas privadas y sumá puntos.",
-  applicationName: "Prode Mundial",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
@@ -26,6 +35,23 @@ export const metadata: Metadata = {
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" }
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }]
+  },
+  openGraph: {
+    type: "website",
+    locale: "es_AR",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION
+  },
+  robots: {
+    index: true,
+    follow: true
   },
   formatDetection: {
     telephone: false
@@ -51,6 +77,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <AuthProvider>{children}</AuthProvider>
         </LocaleProvider>
         <ServiceWorkerRegister />
+        <AnalyticsInit />
       </body>
     </html>
   );

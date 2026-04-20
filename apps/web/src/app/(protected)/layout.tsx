@@ -6,6 +6,7 @@ import { AuthGuard } from "@/components/auth/auth-guard";
 import { useAuth } from "@/components/auth/auth-provider";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { LanguageToggle } from "@/components/layout/language-toggle";
+import { FcmSync } from "@/components/notifications/fcm-sync";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 
 function resolveInitials(name: string | null | undefined) {
@@ -65,6 +66,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
         <section>{children}</section>
         <BottomNav />
       </main>
+      <FcmSync />
     </AuthGuard>
   );
 }

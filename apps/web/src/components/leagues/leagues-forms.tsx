@@ -108,7 +108,7 @@ export function ActionResultCard({ actionMessage, league, onOpenLeague }: Action
         <div className="grid gap-1.5 p-3 rounded-[16px] surface-inset">
           <div className="flex justify-between gap-2 items-center">
             <span className="typo-small text-text-muted">INVITE LINK</span>
-            <CopyButton value={league.inviteLink} />
+            <CopyButton value={league.inviteLink} shareLeagueId={league.leagueId} />
           </div>
           <span className="text-[14px] leading-[1.4] text-text-secondary break-all">{league.inviteLink}</span>
         </div>
