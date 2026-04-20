@@ -42,6 +42,27 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   return Notification.requestPermission();
 }
 
+async function ensureRegistrationActive(
+  registration: ServiceWorkerRegistration
+): Promise<ServiceWorkerRegistration> {
+  if (registration.active) return registration;
+
+  const worker = registration.installing ?? registration.waiting;
+  if (!worker) return registration;
+
+  await new Promise<void>((resolve) => {
+    const onChange = () => {
+      if (worker.state === "activated") {
+        worker.removeEventListener("statechange", onChange);
+        resolve();
+      }
+    };
+    worker.addEventListener("statechange", onChange);
+  });
+
+  return registration;
+}
+
 export async function getFcmToken(): Promise<string | null> {
   if (!hasVapidKey()) {
     console.warn("[messaging] missing NEXT_PUBLIC_FIREBASE_VAPID_KEY");
@@ -57,6 +78,7 @@ export async function getFcmToken(): Promise<string | null> {
       "/firebase-messaging-sw.js",
       { scope: "/firebase-cloud-messaging-push-scope" }
     );
+    await ensureRegistrationActive(registration);
 
     const mod = await import("firebase/messaging");
     const token = await mod.getToken(instance, {
