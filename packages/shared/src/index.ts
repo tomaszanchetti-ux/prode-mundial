@@ -24,6 +24,7 @@ export * from "./tournament/pick-window";
 export * from "./tournament/r32-bracket-resolver";
 export * from "./tournament/slot-label";
 export * from "./schemas/bootstrap";
+export * from "./schemas/fcm";
 export * from "./schemas/leagues";
 export * from "./schemas/macro-results";
 export * from "./schemas/macro-scoring";

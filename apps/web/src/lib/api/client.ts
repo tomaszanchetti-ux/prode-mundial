@@ -456,3 +456,27 @@ export async function saveMatchPrediction(
 
   return saveMatchPredictionResponseSchema.parse(await parseJson<SaveMatchPredictionResponse>(response));
 }
+
+export async function registerFcmToken(
+  token: string,
+  input: { fcmToken: string; platform: "web" | "ios" | "android"; userAgent: string | null }
+): Promise<void> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/me/fcm-tokens`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify({
+      token: input.fcmToken,
+      platform: input.platform,
+      userAgent: input.userAgent
+    })
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to register FCM token (${response.status}).`);
+  }
+
+  await parseJson(response);
+}
