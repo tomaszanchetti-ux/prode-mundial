@@ -67,7 +67,7 @@ export function MatchesScreenView({
               flagUrl: quickMatch.awayTeam.flagUrl
             }}
             ctaLabel={quickMatch.userPredictionSummary ? copyForLocale(locale, "Editar", "Edit") : copyForLocale(locale, "Predecir", "Predict")}
-            eyebrow={copyForLocale(locale, "TU PROXIMO", "YOUR NEXT")}
+            eyebrow={copyForLocale(locale, "MI PROXIMO", "MY NEXT")}
             homeTeam={{
               teamName: quickMatch.homeTeam.name,
               fifaCode: quickMatch.homeTeam.fifaCode,

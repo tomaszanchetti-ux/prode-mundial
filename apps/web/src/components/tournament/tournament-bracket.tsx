@@ -338,11 +338,19 @@ function PairGroup({
   drawConnector: boolean;
 }) {
   const showConnector = drawConnector && matches.length === 2;
+  const halfA = sideById.get(matches[0]?.matchId ?? "") ?? "neutral";
+  const halfB = sideById.get(matches[1]?.matchId ?? "") ?? "neutral";
+  const pairHalf: BracketHalf = halfA === halfB ? halfA : "neutral";
+  const connectorClass = showConnector
+    ? pairHalf === "A"
+      ? "bracket-pair bracket-pair--a"
+      : pairHalf === "B"
+        ? "bracket-pair bracket-pair--b"
+        : "bracket-pair"
+    : "";
   return (
     <div
-      className={`relative flex flex-col justify-around flex-1 min-h-0 ${
-        showConnector ? "bracket-pair" : ""
-      }`.trim()}
+      className={`relative flex flex-col justify-around flex-1 min-h-0 ${connectorClass}`.trim()}
     >
       {matches.map((match) => (
         <MatchCard
@@ -495,7 +503,7 @@ export function TournamentBracket({
 
       <BracketLegend />
 
-      <div className="overflow-x-auto lg:overflow-visible -mx-2 px-2 pb-1">
+      <div className="max-h-[75vh] overflow-auto -mx-2 px-2 pb-1">
         <section className="bracket-section flex min-w-max lg:min-w-0 items-stretch">
           {ROUND_ORDER.map((key, idx) => {
             const nextKey = ROUND_ORDER[idx + 1];

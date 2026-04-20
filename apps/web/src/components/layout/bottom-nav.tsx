@@ -15,9 +15,9 @@ export function BottomNav() {
   const { locale } = useLocale();
   const labels = {
     home: copyForLocale(locale, "Inicio", "Home"),
-    tournament: copyForLocale(locale, "Tu Mundial", "Your World Cup"),
+    tournament: copyForLocale(locale, "Mi Mundial", "My World Cup"),
     worldCup: copyForLocale(locale, "El Mundial", "World Cup"),
-    leagues: copyForLocale(locale, "Tus Ligas", "Your Leagues")
+    leagues: copyForLocale(locale, "Mis Ligas", "My Leagues")
   } as const;
 
   const navLabel = copyForLocale(locale, "Navegación principal", "Main navigation");

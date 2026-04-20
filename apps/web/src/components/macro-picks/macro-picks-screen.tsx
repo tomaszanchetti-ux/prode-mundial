@@ -248,9 +248,9 @@ export function MacroPicksScreen() {
           <div className="grid gap-1.5">
             <div className="flex items-center gap-3">
               <img src="/mundial/wc2026-logo.png" alt="" width={32} height={32} className="opacity-70" />
-              <span className="typo-small text-text-muted">TU CAMPEON</span>
+              <span className="typo-small text-text-muted">MI CAMPEON</span>
             </div>
-            <h1 className="typo-h2 m-0 text-text-primary">Tu Campeon</h1>
+            <h1 className="typo-h2 m-0 text-text-primary">Mi Campeon</h1>
             <p className="typo-body m-0 text-text-secondary">
               Elegi la seleccion que levanta la copa.
             </p>
@@ -262,7 +262,7 @@ export function MacroPicksScreen() {
 
         <div className="flex gap-2.5 flex-wrap">
           <Button variant="ghost" onClick={() => router.push(APP_ROUTES.tournament)}>
-            Volver a Tu Mundial
+            Volver a Mi Mundial
           </Button>
           {canEdit && selectedTeamId ? (
             <Button onClick={() => void handleSave()} disabled={isSaving}>
@@ -302,7 +302,7 @@ export function MacroPicksScreen() {
       {currentPick && !canEdit ? (
         <Card elevated style={{ gap: 12, padding: 16 }}>
           <span className="typo-small text-text-muted">
-            {data?.adjustedChampionTeamId ? "CAMPEON AJUSTADO" : "TU CAMPEON"}
+            {data?.adjustedChampionTeamId ? "CAMPEON AJUSTADO" : "MI CAMPEON"}
           </span>
           <div className="flex items-center gap-3">
             <TeamIdentity team={resolveTeamData(currentPick)} size="lg" showFlag showName emphasis="hero" />

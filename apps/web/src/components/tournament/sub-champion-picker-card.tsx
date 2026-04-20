@@ -140,7 +140,7 @@ export function SubChampionPickerCard({ data, championPick, onOpen }: SubChampio
       <Card elevated style={{ padding: 14, gap: 10 }}>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="typo-small text-text-muted">TU SUB-CAMPEON</span>
+            <span className="typo-small text-text-muted">MI SUB-CAMPEON</span>
           </div>
           <StatusTag status={statusMeta.tone} label={statusMeta.label} />
         </div>
