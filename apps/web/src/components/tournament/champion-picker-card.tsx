@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import type { ChampionPickResponse, TournamentPickWindow } from "@prode/shared";
 import { resolveTeamIdentity } from "@prode/shared";
-import { Card, StatusTag, TeamIdentity } from "@prode/ui";
+import { Button, Card, StatusTag, TeamIdentity } from "@prode/ui";
 import type { StatusTone } from "@prode/ui";
 
 type ChampionPickerCardProps = {
@@ -117,44 +117,34 @@ export function ChampionPickerCard({ data, onOpen }: ChampionPickerCardProps) {
     : null;
 
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="text-left cursor-pointer w-full"
-      aria-label={ctaLabel}
-    >
-      <Card elevated style={{ padding: 14, gap: 10 }}>
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="typo-small text-text-muted">MI CAMPEON</span>
-          </div>
-          <StatusTag status={statusMeta.tone} label={statusMeta.label} />
-        </div>
+    <Card elevated style={{ padding: 14, gap: 10 }}>
+      <div className="flex items-center justify-between gap-3">
+        <span className="typo-small text-text-muted">MI CAMPEON</span>
+        <StatusTag status={statusMeta.tone} label={statusMeta.label} />
+      </div>
 
-        <div className="flex items-center justify-between gap-3">
-          {teamData ? (
-            <TeamIdentity
-              team={{
-                teamName: teamData.name,
-                fifaCode: teamData.fifaCode,
-                flagAsset: teamData.flagAsset,
-                flagUrl: teamData.flagUrl
-              }}
-              size="md"
-              showFlag
-              showName
-              emphasis="compact"
-            />
-          ) : (
-            <span className="text-[14px] leading-[1.4] text-text-secondary">
-              Elegí la selección que levanta la copa.
-            </span>
-          )}
-          <span className="text-[13px] text-accent-primary whitespace-nowrap">{ctaLabel} →</span>
-        </div>
+      {teamData ? (
+        <TeamIdentity
+          team={{
+            teamName: teamData.name,
+            fifaCode: teamData.fifaCode,
+            flagAsset: teamData.flagAsset,
+            flagUrl: teamData.flagUrl
+          }}
+          size="md"
+          showFlag
+          showName
+          emphasis="compact"
+        />
+      ) : (
+        <span className="text-[14px] leading-[1.4] text-text-secondary">
+          Elegí la selección que levanta la copa.
+        </span>
+      )}
 
+      <div className="flex items-center justify-between gap-3 pt-1 border-t border-border-subtle">
         {windowMeta ? (
-          <div className="flex items-center gap-2 pt-1 border-t border-border-subtle">
+          <div className="grid gap-0.5">
             <StatusTag status={windowMeta.badgeTone} label={windowMeta.badgeLabel} />
             {windowMeta.helperText ? (
               <span className="text-[12px] leading-[1.3] text-text-muted tabular-nums">
@@ -162,8 +152,13 @@ export function ChampionPickerCard({ data, onOpen }: ChampionPickerCardProps) {
               </span>
             ) : null}
           </div>
-        ) : null}
-      </Card>
-    </button>
+        ) : (
+          <span />
+        )}
+        <Button variant="primary" onClick={onOpen}>
+          {ctaLabel}
+        </Button>
+      </div>
+    </Card>
   );
 }

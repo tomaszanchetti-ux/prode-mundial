@@ -216,14 +216,9 @@ export function LeaguesScreenView({
 
       <HighlightsCard highlights={highlights} />
 
-      {!isGlobal && selectedLeague ? (
-        <div className="flex gap-2 flex-wrap">
-          {selectedLeague.inviteLink ? (
-            <CopyButton value={selectedLeague.inviteLink} label="Invitar" />
-          ) : null}
-          <Button variant="ghost" onClick={() => onSelectLeague(GLOBAL_LEAGUE_ID)}>
-            Volver a Global
-          </Button>
+      {!isGlobal && selectedLeague?.inviteLink ? (
+        <div>
+          <CopyButton value={selectedLeague.inviteLink} label="Invitar" />
         </div>
       ) : null}
 

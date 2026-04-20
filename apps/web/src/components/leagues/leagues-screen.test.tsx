@@ -197,7 +197,6 @@ test("LeaguesScreenView renders standings table when a private league is selecte
   assert.match(html, /E1/);
   assert.match(html, /-6 de la punta/);
   assert.match(html, /Invitar/);
-  assert.match(html, /Volver a Global/);
   assert.doesNotMatch(html, /MIS LIGAS PRIVADAS/);
 });
 

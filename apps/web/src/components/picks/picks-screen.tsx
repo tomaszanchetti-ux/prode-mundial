@@ -338,11 +338,6 @@ export function PicksScreen() {
         <p className="m-0 text-[13px] leading-[1.45] text-text-secondary">
           25 pts por acierto inicial · 10 pts si ajustás post-grupos.
         </p>
-        <div>
-          <Button variant="ghost" onClick={() => router.push(APP_ROUTES.tournament)}>
-            Volver a Mi Mundial
-          </Button>
-        </div>
       </Card>
 
       <TabsBar activeTab={activeTab} onSelect={switchTab} />
