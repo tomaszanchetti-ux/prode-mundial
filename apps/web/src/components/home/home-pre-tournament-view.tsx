@@ -23,6 +23,7 @@ type HomePreTournamentViewProps = {
   onOpenMatches: () => void;
   onOpenLeagues: () => void;
   onOpenTournament: () => void;
+  onOpenPicks: () => void;
 };
 
 export function HomePreTournamentView({
@@ -39,7 +40,8 @@ export function HomePreTournamentView({
   onOpenMatch,
   onOpenMatches,
   onOpenLeagues,
-  onOpenTournament
+  onOpenTournament,
+  onOpenPicks
 }: HomePreTournamentViewProps) {
   const { locale } = useLocale();
   const hero = pickContextualHeroMatch(items, "predictions-first");
@@ -92,7 +94,7 @@ export function HomePreTournamentView({
       <MisPicksWidget
         championPick={championPick}
         subChampionPick={subChampionPick}
-        onOpenPicks={onOpenTournament}
+        onOpenPicks={onOpenPicks}
       />
 
       <AdSlotCard description={copyForLocale(locale, "Espacio reservado para patrocinio nativo, ubicado despues de la accion principal.", "Reserved slot for native sponsorship, placed after the main action.")} />

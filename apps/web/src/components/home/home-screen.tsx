@@ -26,6 +26,7 @@ export type HomeScreenViewProps = {
   onOpenMatches: () => void;
   onOpenLeagues: () => void;
   onOpenTournament: () => void;
+  onOpenPicks: () => void;
 };
 
 export function HomeScreenView(props: HomeScreenViewProps) {
@@ -140,6 +141,7 @@ export function HomeScreen() {
         onOpenMatches={() => router.push(APP_ROUTES.tournament)}
         onOpenLeagues={() => router.push(APP_ROUTES.leagues)}
         onOpenTournament={() => router.push(APP_ROUTES.tournament)}
+        onOpenPicks={() => router.push(APP_ROUTES.picks)}
       />
 
       <QuickPredictionModal

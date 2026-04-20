@@ -197,7 +197,19 @@ export class SubChampionPickService {
     }
 
     const nextTeamId = input.subChampionTeamId.trim();
-    await assertCrossHalfOrThrow(userId, champion.championTeamId, nextTeamId, now);
+
+    // Cross-half rule — relaxed in window A (pre-tournament). Enforcing it
+    // here would require the user to complete group predictions first (to
+    // hydrate the bracket), which defeats the point of a 25-pt blind bet.
+    // The rule is still enforced in `adjustForUser` (window B) where the
+    // bracket is hydrated from finalized group results.
+    if (nextTeamId === champion.championTeamId) {
+      throw new ApiError(
+        409,
+        "SUB_CHAMPION_SAME_TEAM",
+        "Sub-campeon no puede ser el mismo equipo que el campeon."
+      );
+    }
 
     const existing = await subChampionPicksRepository.getByUserId(userId);
     const nowIso = now.toISOString();

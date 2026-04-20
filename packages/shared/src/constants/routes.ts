@@ -4,6 +4,7 @@ export const APP_ROUTES = {
   home: "/home",
   tournament: "/tournament",
   worldCup: "/world-cup",
+  picks: "/picks",
   macroPicks: "/macro-picks",
   matches: "/matches",
   rankings: "/rankings",

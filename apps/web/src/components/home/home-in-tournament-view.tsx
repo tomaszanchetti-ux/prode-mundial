@@ -29,6 +29,7 @@ type HomeInTournamentViewProps = {
   onOpenMatches: () => void;
   onOpenLeagues: () => void;
   onOpenTournament: () => void;
+  onOpenPicks: () => void;
 };
 
 export function HomeInTournamentView({
@@ -45,7 +46,8 @@ export function HomeInTournamentView({
   onOpenMatch,
   onOpenMatches,
   onOpenLeagues,
-  onOpenTournament
+  onOpenTournament,
+  onOpenPicks
 }: HomeInTournamentViewProps) {
   const { locale } = useLocale();
   const pendingMatches = useMemo(() => items.filter((match) => canEditPrediction(match)), [items]);
@@ -93,7 +95,7 @@ export function HomeInTournamentView({
       <MisPicksWidget
         championPick={championPick}
         subChampionPick={subChampionPick}
-        onOpenPicks={onOpenTournament}
+        onOpenPicks={onOpenPicks}
       />
 
       <Card elevated style={{ gap: 8, padding: 12 }}>

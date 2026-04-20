@@ -148,7 +148,7 @@ type TournamentScreenViewProps = {
   matchesByGroupId: Map<string, MatchSummary[]>;
   onHeroAction: () => void;
   onModeSelect: (mode: TournamentMode) => void;
-  onOpenChampionPicker: () => void;
+  onOpenPicks: (tab?: "champion" | "sub-champion" | "best-player") => void;
   onOpenMatch: (matchId: string) => void;
   onPhaseSelect: (phase: TournamentPhase) => void;
   onRetry: () => void;
@@ -170,7 +170,7 @@ export function TournamentScreenView({
   matchesByGroupId,
   onHeroAction,
   onModeSelect,
-  onOpenChampionPicker,
+  onOpenPicks,
   onOpenMatch,
   onPhaseSelect,
   onRetry,
@@ -205,7 +205,7 @@ export function TournamentScreenView({
       <MisPicksSection
         championPick={championPick}
         subChampionPick={subChampionPick}
-        onOpenChampionPicker={onOpenChampionPicker}
+        onOpenPicks={onOpenPicks}
       />
 
       <ModeToggle activeMode={activeMode} onSelect={onModeSelect} />
@@ -422,7 +422,9 @@ export function TournamentScreen() {
         matchesByGroupId={matchesByGroupId}
         onHeroAction={handleHeroAction}
         onModeSelect={handleModeSelect}
-        onOpenChampionPicker={() => router.push(APP_ROUTES.macroPicks)}
+        onOpenPicks={(tab) =>
+          router.push(tab ? `${APP_ROUTES.picks}?tab=${tab}` : APP_ROUTES.picks)
+        }
         onOpenMatch={(matchId) => setActiveMatchId(matchId)}
         onPhaseSelect={setActivePhase}
         onRetry={() => setReloadKey((current) => current + 1)}

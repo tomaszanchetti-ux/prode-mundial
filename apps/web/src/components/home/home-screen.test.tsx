@@ -87,7 +87,8 @@ test("HomeScreenView renders pre-tournament next-match hero and follow-up CTAs",
       onOpenLeagues: () => undefined,
       championPick: null,
       subChampionPick: null,
-      onOpenTournament: () => undefined
+      onOpenTournament: () => undefined,
+      onOpenPicks: () => undefined
     })
   );
 
@@ -114,7 +115,8 @@ test("HomeScreenView keeps live-tournament priority match card when pre-tourname
       onOpenLeagues: () => undefined,
       championPick: null,
       subChampionPick: null,
-      onOpenTournament: () => undefined
+      onOpenTournament: () => undefined,
+      onOpenPicks: () => undefined
     })
   );
 

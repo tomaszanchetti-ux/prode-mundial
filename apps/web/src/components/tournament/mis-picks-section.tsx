@@ -6,16 +6,18 @@ import { ChampionPickerCard } from "./champion-picker-card";
 import { SubChampionPickerCard } from "./sub-champion-picker-card";
 import { GoldenBallCard } from "./golden-ball-card";
 
+type PicksTab = "champion" | "sub-champion" | "best-player";
+
 type MisPicksSectionProps = {
   championPick: ChampionPickResponse | null;
   subChampionPick: SubChampionPickResponse | null;
-  onOpenChampionPicker: () => void;
+  onOpenPicks: (tab?: PicksTab) => void;
 };
 
 export function MisPicksSection({
   championPick,
   subChampionPick,
-  onOpenChampionPicker
+  onOpenPicks
 }: MisPicksSectionProps) {
   return (
     <section className="grid gap-3" aria-labelledby="mis-picks-heading">
@@ -23,12 +25,12 @@ export function MisPicksSection({
         MIS PICKS
       </span>
 
-      <ChampionPickerCard data={championPick} onOpen={onOpenChampionPicker} />
+      <ChampionPickerCard data={championPick} onOpen={() => onOpenPicks("champion")} />
 
       <SubChampionPickerCard
         data={subChampionPick}
         championPick={championPick}
-        onOpen={onOpenChampionPicker}
+        onOpen={() => onOpenPicks("sub-champion")}
       />
 
       <GoldenBallCard />

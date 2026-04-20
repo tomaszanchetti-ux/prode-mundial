@@ -135,7 +135,7 @@ function renderView(
       matchesByGroupId: new Map(),
       onHeroAction: () => undefined,
       onModeSelect: () => undefined,
-      onOpenChampionPicker: () => undefined,
+      onOpenPicks: () => undefined,
       onOpenMatch: () => undefined,
       onPhaseSelect: () => undefined,
       onRetry: () => undefined,
