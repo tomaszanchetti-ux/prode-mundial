@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { LocaleProvider } from "@/lib/i18n/locale-provider";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
+import { AnalyticsInit } from "@/components/analytics/analytics-init";
 import "./globals.css";
 
 const SITE_URL =
@@ -76,6 +77,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <AuthProvider>{children}</AuthProvider>
         </LocaleProvider>
         <ServiceWorkerRegister />
+        <AnalyticsInit />
       </body>
     </html>
   );

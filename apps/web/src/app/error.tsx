@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { track } from "@/lib/firebase/analytics";
 
 type ErrorProps = {
   error: Error & { digest?: string };
@@ -11,6 +12,11 @@ type ErrorProps = {
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
     console.error("[app-error]", error);
+    track("app_error", {
+      scope: "route-segment",
+      digest: error.digest ?? null,
+      message: error.message.slice(0, 200)
+    });
   }, [error]);
 
   return (

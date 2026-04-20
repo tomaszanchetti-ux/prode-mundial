@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { track } from "@/lib/firebase/analytics";
 
 type GlobalErrorProps = {
   error: Error & { digest?: string };
@@ -10,6 +11,11 @@ type GlobalErrorProps = {
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
     console.error("[global-error]", error);
+    track("app_error", {
+      scope: "global",
+      digest: error.digest ?? null,
+      message: error.message.slice(0, 200)
+    });
   }, [error]);
 
   return (
