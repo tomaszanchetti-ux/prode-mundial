@@ -3,10 +3,24 @@ import { ApiError } from "../../../server/errors/api-error";
 import { matchesRepository } from "../repositories/matches-repository";
 import { predictionsRepository } from "../repositories/predictions-repository";
 import { teamsRepository } from "../repositories/teams-repository";
-import { applyMatchesCursor, encodeMatchesCursor, toMatchDetail, toMatchSummary } from "./match-payloads";
+import {
+  applyMatchesCursor,
+  buildTournamentContext,
+  encodeMatchesCursor,
+  toMatchDetail,
+  toMatchSummary,
+  type TournamentContext
+} from "./match-payloads";
 
 function collectTeamIdsFromMatches(matches: Awaited<ReturnType<typeof matchesRepository.listMatches>>) {
   return matches.flatMap((match) => [match.homeTeamId, match.awayTeamId].filter((teamId): teamId is string => Boolean(teamId)));
+}
+
+async function loadTournamentContext(
+  preloaded: Awaited<ReturnType<typeof matchesRepository.listMatches>> | null
+): Promise<TournamentContext> {
+  const all = preloaded ?? (await matchesRepository.listMatches({}));
+  return buildTournamentContext(all);
 }
 
 function filterSummaries(items: ReturnType<typeof toMatchSummary>[], filter: ListMatchesQuery["filter"], now = new Date()) {
@@ -46,9 +60,10 @@ export class MatchesQueryService {
       matches.map((match) => match.matchId)
     );
     const teamsById = await teamsRepository.getTeamsByIds(collectTeamIdsFromMatches(matches));
+    const context = await loadTournamentContext(query.stage ? null : matches);
 
     const summaries = matches.map((match) =>
-      toMatchSummary(match, predictionsByMatchId.get(match.matchId) ?? null, teamsById, now)
+      toMatchSummary(match, predictionsByMatchId.get(match.matchId) ?? null, teamsById, now, context)
     );
     const filteredSummaries = filterSummaries(summaries, query.filter, now);
     const cursorApplied = applyMatchesCursor(filteredSummaries, query.cursor);
@@ -76,8 +91,9 @@ export class MatchesQueryService {
     const teamsById = await teamsRepository.getTeamsByIds(
       [match.homeTeamId, match.awayTeamId].filter((teamId): teamId is string => Boolean(teamId))
     );
+    const context = await loadTournamentContext(null);
 
-    return toMatchDetail(match, prediction, teamsById, now);
+    return toMatchDetail(match, prediction, teamsById, now, context);
   }
 }
 

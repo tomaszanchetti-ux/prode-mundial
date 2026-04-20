@@ -271,16 +271,20 @@ export function MatchesScreen() {
       <QuickPredictionModal
         matchId={activeMatchId}
         isOpen={activeMatchId !== null}
-        hasNextPending={items.filter((m) => canEditPrediction(m) && m.matchId !== activeMatchId).length > 0}
+        hasNextPending={
+          items.filter(
+            (m) => canEditPrediction(m) && m.predictionStatus === "empty" && m.matchId !== activeMatchId
+          ).length > 0
+        }
         onClose={() => {
           setActiveMatchId(null);
           setDismissedCycle(true);
         }}
         onSaved={() => {
-          const editableMatches = items
-            .filter((m) => canEditPrediction(m) && m.matchId !== activeMatchId)
+          const pendingMatches = items
+            .filter((m) => canEditPrediction(m) && m.predictionStatus === "empty" && m.matchId !== activeMatchId)
             .sort((a, b) => a.kickoffAt.localeCompare(b.kickoffAt));
-          const nextMatch = editableMatches.find((m) => m.predictionStatus === "empty") ?? editableMatches[0] ?? null;
+          const nextMatch = pendingMatches[0] ?? null;
 
           if (nextMatch) {
             setActiveMatchId(nextMatch.matchId);

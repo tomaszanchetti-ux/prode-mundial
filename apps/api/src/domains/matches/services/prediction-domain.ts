@@ -1,6 +1,7 @@
 import { ApiError } from "../../../server/errors/api-error";
 import type { StoredMatch, StoredPrediction } from "../types";
 import { getPredictionDeadlineAt } from "./match-state";
+import type { TournamentContext } from "./match-payloads";
 
 export type ValidatedPredictionInput = {
   homeScorePred: number;
@@ -68,7 +69,11 @@ function assertValidQualifierForMatch(match: StoredMatch, predictedQualifierTeam
   }
 }
 
-export function assertMatchPredictionEditable(match: StoredMatch, now = new Date()) {
+export function assertMatchPredictionEditable(
+  match: StoredMatch,
+  now = new Date(),
+  context?: TournamentContext
+) {
   if (match.isLocked || match.status !== "scheduled" || resolveEditableDeadline(match) <= now.getTime()) {
     throw new ApiError(409, "MATCH_LOCKED", "This match is locked and cannot be edited anymore.", {
       matchId: match.matchId,
@@ -97,6 +102,21 @@ export function assertMatchPredictionEditable(match: StoredMatch, now = new Date
       }
     );
   }
+
+  // Phase CLOSE gate: once every match in this stage is finished, predictions
+  // for the stage are sealed even if a specific match's individual deadline
+  // hasn't been reached. Prevents stragglers from being predicted post-phase.
+  if (context?.stageCompletion?.[match.stage]) {
+    throw new ApiError(
+      409,
+      "PHASE_CLOSED",
+      "This phase is already closed — every match has finished.",
+      {
+        matchId: match.matchId,
+        stage: match.stage
+      }
+    );
+  }
 }
 
 export function assertPredictionOwnership(prediction: StoredPrediction, userId: string) {
@@ -108,8 +128,13 @@ export function assertPredictionOwnership(prediction: StoredPrediction, userId: 
   }
 }
 
-export function validatePredictionInput(match: StoredMatch, input: unknown, now = new Date()): ValidatedPredictionInput {
-  assertMatchPredictionEditable(match, now);
+export function validatePredictionInput(
+  match: StoredMatch,
+  input: unknown,
+  now = new Date(),
+  context?: TournamentContext
+): ValidatedPredictionInput {
+  assertMatchPredictionEditable(match, now, context);
 
   if (typeof input !== "object" || input === null) {
     throw new ApiError(400, "INVALID_SCORE", "Prediction input must be an object.");

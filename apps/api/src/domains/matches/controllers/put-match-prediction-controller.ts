@@ -6,7 +6,7 @@ import { ok } from "../../../server/http/respond";
 import { parseBody } from "../../../server/http/validation";
 import { matchesRepository } from "../repositories/matches-repository";
 import { predictionsRepository } from "../repositories/predictions-repository";
-import { toSaveMatchPredictionResponse } from "../services/match-payloads";
+import { buildTournamentContext, toSaveMatchPredictionResponse } from "../services/match-payloads";
 import { validatePredictionInput } from "../services/prediction-domain";
 
 type AuthenticatedRequest = Request & {
@@ -27,12 +27,15 @@ export async function putMatchPredictionController(req: Request, res: Response) 
     });
   }
 
-  const validatedInput = validatePredictionInput(match, input);
+  const allMatches = await matchesRepository.listMatches({});
+  const context = buildTournamentContext(allMatches);
+
+  const validatedInput = validatePredictionInput(match, input, new Date(), context);
   const prediction = await predictionsRepository.upsertPrediction(
     authenticatedRequest.auth.userId,
     match.matchId,
     validatedInput
   );
 
-  res.json(ok(toSaveMatchPredictionResponse(match, prediction)));
+  res.json(ok(toSaveMatchPredictionResponse(match, prediction, new Date(), context)));
 }

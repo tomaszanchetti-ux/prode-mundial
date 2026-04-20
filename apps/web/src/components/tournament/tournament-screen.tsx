@@ -438,11 +438,15 @@ export function TournamentScreen() {
       <QuickPredictionModal
         matchId={activeMatchId}
         isOpen={activeMatchId !== null}
-        hasNextPending={editableMatches.filter((m) => m.matchId !== activeMatchId).length > 0}
+        hasNextPending={
+          editableMatches.filter((m) => m.predictionStatus === "empty" && m.matchId !== activeMatchId).length > 0
+        }
         onClose={() => setActiveMatchId(null)}
         onSaved={() => {
-          const remaining = editableMatches.filter((m) => m.matchId !== activeMatchId);
-          const nextMatch = remaining.find((m) => m.predictionStatus === "empty") ?? remaining[0] ?? null;
+          const pendingMatches = editableMatches.filter(
+            (m) => m.predictionStatus === "empty" && m.matchId !== activeMatchId
+          );
+          const nextMatch = pendingMatches[0] ?? null;
 
           if (nextMatch) {
             setActiveMatchId(nextMatch.matchId);

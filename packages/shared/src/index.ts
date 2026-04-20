@@ -19,6 +19,7 @@ export * from "./tournament/bracket-simulator";
 export * from "./tournament/full-hydration-planner";
 export * from "./tournament/knockout-hydration-resolver";
 export * from "./tournament/official-standings";
+export * from "./tournament/phase-completion";
 export * from "./tournament/pick-window";
 export * from "./tournament/r32-bracket-resolver";
 export * from "./tournament/slot-label";

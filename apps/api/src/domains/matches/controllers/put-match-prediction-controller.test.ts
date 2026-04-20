@@ -48,6 +48,7 @@ test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and retu
     email: "tomas@example.com",
     name: "Tomas"
   }));
+  const listMatchesMock = mock.method(matchesRepository, "listMatches", async () => []);
   const getMatchByIdMock = mock.method(matchesRepository, "getMatchById", async (matchId: string) => {
     assert.equal(matchId, "m_073");
 
@@ -139,6 +140,7 @@ test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and retu
     });
   } finally {
     verifyIdTokenMock.mock.restore();
+    listMatchesMock.mock.restore();
     getMatchByIdMock.mock.restore();
     upsertPredictionMock.mock.restore();
   }
@@ -188,6 +190,7 @@ test("PUT /api/v1/matches/:matchId/prediction returns MATCH_LOCKED when domain r
     email: "tomas@example.com",
     name: "Tomas"
   }));
+  const listMatchesMock = mock.method(matchesRepository, "listMatches", async () => []);
   const getMatchByIdMock = mock.method(matchesRepository, "getMatchById", async () => ({
     matchId: "m_002",
     stage: "group",
@@ -231,6 +234,7 @@ test("PUT /api/v1/matches/:matchId/prediction returns MATCH_LOCKED when domain r
     assert.equal(payload.error.code, "MATCH_LOCKED");
   } finally {
     verifyIdTokenMock.mock.restore();
+    listMatchesMock.mock.restore();
     getMatchByIdMock.mock.restore();
   }
 });
@@ -242,6 +246,7 @@ test("PUT /api/v1/matches/:matchId/prediction returns INVALID_KNOCKOUT_CLASSIFIE
     email: "tomas@example.com",
     name: "Tomas"
   }));
+  const listMatchesMock = mock.method(matchesRepository, "listMatches", async () => []);
   const getMatchByIdMock = mock.method(matchesRepository, "getMatchById", async () => ({
     matchId: "m_073",
     stage: "R32",
@@ -287,6 +292,7 @@ test("PUT /api/v1/matches/:matchId/prediction returns INVALID_KNOCKOUT_CLASSIFIE
     assert.equal(payload.error.message, "Predicted qualifier is required when a knockout prediction ends in a draw.");
   } finally {
     verifyIdTokenMock.mock.restore();
+    listMatchesMock.mock.restore();
     getMatchByIdMock.mock.restore();
   }
 });
