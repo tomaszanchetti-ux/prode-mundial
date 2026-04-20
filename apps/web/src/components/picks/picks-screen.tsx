@@ -243,7 +243,7 @@ export function PicksScreen() {
         setFeedbackMessage(response.penaltyNotice);
       } else {
         await saveChampionPick(token, { championTeamId: championSelected });
-        setFeedbackMessage("Tu campeón quedó guardado.");
+        setFeedbackMessage("Mi campeón quedó guardado.");
       }
       setReloadKey((k) => k + 1);
     } catch (error) {
@@ -271,7 +271,7 @@ export function PicksScreen() {
         setFeedbackMessage(response.penaltyNotice);
       } else {
         await saveSubChampionPick(token, { subChampionTeamId: subChampionSelected });
-        setFeedbackMessage("Tu sub-campeón quedó guardado.");
+        setFeedbackMessage("Mi sub-campeón quedó guardado.");
       }
       setReloadKey((k) => k + 1);
     } catch (error) {
