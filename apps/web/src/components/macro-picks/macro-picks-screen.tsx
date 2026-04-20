@@ -82,9 +82,9 @@ type StatusMeta = { label: string; tone: "editable" | "saved" | "closing-soon" |
 function resolveStatusMeta(status: ChampionPickResponse["status"]): StatusMeta {
   switch (status) {
     case "empty":
-      return { label: "Sin elegir", tone: "editable", description: "Elegi tu campeon antes de que arranque el torneo." };
+      return { label: "Pendiente", tone: "editable", description: "Elegi tu campeon antes de que arranque el torneo." };
     case "picked":
-      return { label: "Elegido", tone: "editable", description: "Tu campeon esta guardado. Podes cambiarlo hasta el inicio del torneo." };
+      return { label: "Guardado", tone: "saved", description: "Tu campeon esta guardado. Podes cambiarlo hasta el inicio del torneo." };
     case "locked":
       return { label: "Bloqueado", tone: "neutral", description: "El torneo empezo. Tu pick original esta congelado." };
     case "adjustment_available":
@@ -266,7 +266,7 @@ export function MacroPicksScreen() {
           </Button>
           {canEdit && selectedTeamId ? (
             <Button onClick={() => void handleSave()} disabled={isSaving}>
-              {isSaving ? "Guardando..." : data?.championTeamId ? "Cambiar campeon" : "Elegir campeon"}
+              {isSaving ? "Guardando..." : data?.championTeamId ? "Guardar cambios" : "Guardar"}
             </Button>
           ) : null}
           {canAdjust && selectedTeamId && selectedTeamId !== data?.championTeamId ? (

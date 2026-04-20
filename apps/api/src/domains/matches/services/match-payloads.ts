@@ -98,7 +98,7 @@ export function deriveMatchViewState(match: StoredMatch, prediction: StoredPredi
   let ctaLabel = "Predecir";
 
   if (derivedState.predictionStatus === "saved_editable") {
-    ctaLabel = "Editar prediccion";
+    ctaLabel = "Editar";
   } else if (derivedState.predictionStatus === "scored") {
     ctaLabel = "Ver puntos";
   } else if (derivedState.predictionStatus === "locked_unscored") {
@@ -116,7 +116,7 @@ export function deriveMatchViewState(match: StoredMatch, prediction: StoredPredi
     !qualifier &&
     derivedState.isEditable
   ) {
-    ctaLabel = "Editar prediccion";
+    ctaLabel = "Editar";
   }
 
   return {

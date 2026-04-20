@@ -88,7 +88,7 @@ export function LeaguesScreenView({
             {mode === "create" ? "Cancelar" : "Crear liga"}
           </Button>
           <Button variant={mode === "join" ? "secondary" : "ghost"} onClick={() => onChangeMode(mode === "join" ? null : "join")}>
-            {mode === "join" ? "Cancelar" : "Unirme con codigo"}
+            {mode === "join" ? "Cancelar" : "Unirme"}
           </Button>
         </div>
       </Card>
@@ -253,7 +253,7 @@ export function LeaguesScreenView({
               </div>
               <div className="flex gap-2 flex-wrap">
                 <Button variant="secondary" onClick={() => onSelectLeague(league.leagueId)}>
-                  Abrir
+                  Ver detalle
                 </Button>
                 {league.inviteLink ? (
                   <CopyButton value={league.inviteLink} label="Invitar" />

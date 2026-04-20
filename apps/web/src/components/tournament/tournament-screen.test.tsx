@@ -155,7 +155,6 @@ test("TournamentScreenView renders next-match hero with predict CTA only", () =>
   assert.match(html, /Mexico/);
   assert.match(html, /South Africa/);
   assert.match(html, /Predecir/);
-  assert.doesNotMatch(html, /Elegir campeon/);
 });
 
 test("TournamentScreenView shows mode toggle and phase tabs", () => {

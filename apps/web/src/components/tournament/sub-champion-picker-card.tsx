@@ -21,7 +21,7 @@ type StatusMeta = {
 function resolveStatusMeta(status: SubChampionPickResponse["status"] | null | undefined): StatusMeta {
   switch (status) {
     case "picked":
-      return { label: "Elegido", tone: "saved" };
+      return { label: "Guardado", tone: "saved" };
     case "locked":
       return { label: "Bloqueado", tone: "neutral" };
     case "adjustment_available":
@@ -32,7 +32,7 @@ function resolveStatusMeta(status: SubChampionPickResponse["status"] | null | un
       return { label: "Puntuado", tone: "scored" };
     case "empty":
     default:
-      return { label: "Sin elegir", tone: "editable" };
+      return { label: "Pendiente", tone: "editable" };
   }
 }
 
@@ -40,17 +40,10 @@ function resolveCtaLabel(
   status: SubChampionPickResponse["status"] | null | undefined,
   requiresChampion: boolean
 ) {
-  if (requiresChampion) return "Elegi tu campeon primero";
-  switch (status) {
-    case "empty":
-      return "Elegir sub-campeon";
-    case "picked":
-      return "Cambiar sub-campeon";
-    case "adjustment_available":
-      return "Ajustar pick";
-    default:
-      return "Ver tu sub-campeon";
+  if (requiresChampion || status === "empty" || status == null) {
+    return "Elegir";
   }
+  return "Modificar";
 }
 
 function formatRemaining(closesAtMs: number, nowMs: number): string | null {

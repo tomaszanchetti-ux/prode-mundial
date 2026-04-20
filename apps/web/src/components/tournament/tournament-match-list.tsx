@@ -32,8 +32,8 @@ export function TournamentMatchList({ matches, onOpenMatch }: TournamentMatchLis
             flagUrl: match.awayTeam.flagUrl
           }}
           ctaLabel={
-            match.ctaLabel === "Editar prediccion"
-              ? copyForLocale(locale, "Editar prediccion", "Edit prediction")
+            match.ctaLabel === "Editar"
+              ? copyForLocale(locale, "Editar", "Edit")
               : match.ctaLabel === "Predecir"
                 ? copyForLocale(locale, "Predecir", "Predict")
                 : match.ctaLabel

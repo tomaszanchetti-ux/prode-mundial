@@ -74,7 +74,7 @@ test("MatchesScreenView renders saved editable CTA for saved-filter matches", ()
         buildMatchSummary({
           predictionStatus: "saved_editable",
           userPredictionSummary: "2-1",
-          ctaLabel: "Editar prediccion"
+          ctaLabel: "Editar"
         })
       ],
       onFilterSelect: () => undefined,
@@ -84,7 +84,7 @@ test("MatchesScreenView renders saved editable CTA for saved-filter matches", ()
     })
   );
 
-  assert.match(html, /Editar prediccion/);
+  assert.match(html, /Editar/);
 });
 
 test("MatchesScreenView renders empty state when filter has no results", () => {

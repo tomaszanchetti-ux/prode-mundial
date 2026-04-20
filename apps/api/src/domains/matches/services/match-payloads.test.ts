@@ -53,7 +53,7 @@ test("deriveMatchViewState marks editable saved predictions correctly", () => {
   assert.equal(state.isEditable, true);
   assert.equal(state.matchState, "EDITABLE");
   assert.equal(state.predictionStatus, "saved_editable");
-  assert.equal(state.ctaLabel, "Editar prediccion");
+  assert.equal(state.ctaLabel, "Editar");
 });
 
 test("deriveMatchViewState marks scheduled matches as editable well before kickoff (no opening window)", () => {

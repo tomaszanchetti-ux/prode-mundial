@@ -146,7 +146,7 @@ export function LeagueInviteScreen() {
                 {isJoining ? "Uniendome..." : "Unirme a esta liga"}
               </Button>
               <Button variant="ghost" onClick={() => router.push("/leagues")}>
-                Ir a mis ligas
+                Volver a mis ligas
               </Button>
             </div>
           ) : (

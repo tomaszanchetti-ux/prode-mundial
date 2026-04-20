@@ -64,7 +64,7 @@ export function toHeroProps({
   } else if (state === "pending") {
     ctaLabel = copyForLocale(locale, "Predecir", "Predict");
   } else if (isEditable && hasPrediction) {
-    ctaLabel = copyForLocale(locale, "Editar prediccion", "Edit prediction");
+    ctaLabel = copyForLocale(locale, "Editar", "Edit");
   } else if (isEditable && !hasPrediction) {
     ctaLabel = copyForLocale(locale, "Predecir", "Predict");
   } else {
