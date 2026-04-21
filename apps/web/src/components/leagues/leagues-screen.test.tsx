@@ -157,7 +157,8 @@ test("LeaguesScreenView renders synthetic summary and private league list in Glo
     })
   );
 
-  assert.match(html, /Mis Ligas/);
+  assert.match(html, /Crear liga/);
+  assert.match(html, /Unirme/);
   assert.match(html, /Global/);
   assert.match(html, /MI SCORE/);
   assert.match(html, />14</);

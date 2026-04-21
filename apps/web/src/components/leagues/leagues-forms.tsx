@@ -26,14 +26,8 @@ type ActionResultCardProps = {
 
 export function CreateLeagueForm({ formState, isSubmitting, onFieldChange, onSubmit }: CreateLeagueFormProps) {
   return (
-    <Card elevated style={{ gap: 16 }}>
-      <div className="grid gap-1.5">
-        <span className="typo-small text-primary-500">CREAR LIGA</span>
-        <h2 className="typo-h3 m-0 text-text-primary">Abre tu mesa competitiva</h2>
-        <p className="typo-body m-0 text-text-secondary">
-          El nombre sale publicado para todos los miembros. Apenas la creas te devolvemos codigo e invite link.
-        </p>
-      </div>
+    <Card elevated style={{ gap: 12 }}>
+      <h2 className="typo-h3 m-0 text-text-primary">Crear liga</h2>
       <form onSubmit={onSubmit} className="grid gap-3">
         <label className="grid gap-2">
           <span className="typo-small text-text-secondary">Nombre de la liga</span>
@@ -49,7 +43,7 @@ export function CreateLeagueForm({ formState, isSubmitting, onFieldChange, onSub
           />
         </label>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creando..." : "Crear liga"}
+          {isSubmitting ? "Creando..." : "Crear"}
         </Button>
       </form>
     </Card>
@@ -58,30 +52,24 @@ export function CreateLeagueForm({ formState, isSubmitting, onFieldChange, onSub
 
 export function JoinLeagueForm({ formState, isSubmitting, onFieldChange, onSubmit }: JoinLeagueFormProps) {
   return (
-    <Card elevated style={{ gap: 16 }}>
-      <div className="grid gap-1.5">
-        <span className="typo-small text-gold">JOIN POR CODIGO</span>
-        <h2 className="typo-h3 m-0 text-text-primary">Entra a una liga existente</h2>
-        <p className="typo-body m-0 text-text-secondary">
-          Pega el codigo que te compartieron. Lo normalizamos y validamos antes de sumarte.
-        </p>
-      </div>
+    <Card elevated style={{ gap: 12 }}>
+      <h2 className="typo-h3 m-0 text-text-primary">Unirse con código</h2>
       <form onSubmit={onSubmit} className="grid gap-3">
         <label className="grid gap-2">
-          <span className="typo-small text-text-secondary">Codigo de invitacion</span>
+          <span className="typo-small text-text-secondary">Código</span>
           <input
             name="inviteCode"
             value={formState.inviteCode}
             onChange={onFieldChange}
             minLength={4}
             maxLength={24}
-            placeholder="ASADO26"
+            placeholder="ABC123"
             required
             className="email-input uppercase"
           />
         </label>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Uniendome..." : "Unirme a la liga"}
+          {isSubmitting ? "Uniendome..." : "Unirme"}
         </Button>
       </form>
     </Card>
