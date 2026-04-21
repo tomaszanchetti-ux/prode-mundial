@@ -6,6 +6,7 @@ import type {
   TournamentProjectionMatch,
   TournamentProjectionReadiness
 } from "@prode/shared";
+import { buildCompactSlotLabel } from "@prode/shared";
 import { Card, TeamIdentity } from "@prode/ui";
 import { useLocale } from "@/lib/i18n/locale-provider";
 import { toLocalKickoffLabel } from "@/components/matches/matches-helpers";
@@ -237,7 +238,7 @@ function BracketSideRow({
   return (
     <div className="flex items-center gap-2 min-w-0 text-text-muted pl-2 py-1 border-l-4 border-transparent">
       <div className="w-5 h-5 rounded-full border border-dashed border-border-default" aria-hidden />
-      <span className="text-[12px] leading-[1.3] truncate">{side.slotLabel}</span>
+      <span className="text-[12px] leading-[1.3] truncate tabular-nums">{buildCompactSlotLabel(side.slot)}</span>
     </div>
   );
 }
