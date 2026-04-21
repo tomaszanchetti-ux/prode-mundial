@@ -174,7 +174,7 @@ export function MatchDetailScreenView({
           loading={isSaving}
           onClick={onSave}
         >
-          {detail.userPrediction ? "Guardar cambios" : "Guardar prediccion"}
+          Guardar
         </Button>
       </Card>
 

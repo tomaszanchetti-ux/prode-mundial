@@ -552,13 +552,7 @@ export function PicksScreen() {
           {championInteractive ? (
             <div className="flex justify-end">
               <Button onClick={() => void handleSaveChampion()} disabled={championSaveDisabled}>
-                {isSaving
-                  ? "Guardando..."
-                  : championCanAdjust
-                    ? "Confirmar ajuste"
-                    : championPersistedId
-                      ? "Guardar cambios"
-                      : "Guardar"}
+                {isSaving ? "Guardando..." : championCanAdjust ? "Ajustar" : "Guardar"}
               </Button>
             </div>
           ) : null}
@@ -601,7 +595,7 @@ export function PicksScreen() {
               </p>
               <div>
                 <Button variant="secondary" onClick={() => switchTab("champion")}>
-                  Ir a Campeón
+                  Elegir campeón
                 </Button>
               </div>
             </div>
@@ -633,13 +627,7 @@ export function PicksScreen() {
           {subInteractive && hasChampion ? (
             <div className="flex justify-end">
               <Button onClick={() => void handleSaveSubChampion()} disabled={subSaveDisabled}>
-                {isSaving
-                  ? "Guardando..."
-                  : subCanAdjust
-                    ? "Confirmar ajuste"
-                    : subPersistedId
-                      ? "Guardar cambios"
-                      : "Guardar"}
+                {isSaving ? "Guardando..." : subCanAdjust ? "Ajustar" : "Guardar"}
               </Button>
             </div>
           ) : null}
@@ -696,13 +684,7 @@ export function PicksScreen() {
           {bestPlayerInteractive ? (
             <div className="flex justify-end">
               <Button onClick={() => void handleSaveBestPlayer()} disabled={bestPlayerSaveDisabled}>
-                {isSaving
-                  ? "Guardando..."
-                  : bestPlayerCanAdjust
-                    ? "Confirmar ajuste"
-                    : bestPlayerPersistedId
-                      ? "Guardar cambios"
-                      : "Guardar"}
+                {isSaving ? "Guardando..." : bestPlayerCanAdjust ? "Ajustar" : "Guardar"}
               </Button>
             </div>
           ) : null}
