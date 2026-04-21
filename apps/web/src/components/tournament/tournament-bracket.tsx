@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import type {
   TournamentProjectionBracket,
   TournamentProjectionMatch,
@@ -456,6 +456,50 @@ function RoundColumn({
   );
 }
 
+/**
+ * Wraps the horizontal scroll container and renders edge fade affordances
+ * via data attributes read by `.bracket-scroll-wrap` in globals.css.
+ * Updates `data-scroll-start` / `data-scroll-end` on scroll + resize so the
+ * gradients hide at the extremes — signaling "this is the end" without a
+ * visible scrollbar.
+ */
+function BracketScrollWrap({ children }: { children: React.ReactNode }) {
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const updateScrollEdges = useCallback(() => {
+    const scroller = scrollRef.current;
+    const wrap = wrapRef.current;
+    if (!scroller || !wrap) return;
+    const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+    const atStart = scroller.scrollLeft <= 1;
+    const atEnd = maxScroll <= 1 || scroller.scrollLeft >= maxScroll - 1;
+    wrap.dataset.scrollStart = atStart ? "true" : "false";
+    wrap.dataset.scrollEnd = atEnd ? "true" : "false";
+  }, []);
+
+  useEffect(() => {
+    updateScrollEdges();
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    scroller.addEventListener("scroll", updateScrollEdges, { passive: true });
+    const ro = new ResizeObserver(updateScrollEdges);
+    ro.observe(scroller);
+    return () => {
+      scroller.removeEventListener("scroll", updateScrollEdges);
+      ro.disconnect();
+    };
+  }, [updateScrollEdges]);
+
+  return (
+    <div ref={wrapRef} className="bracket-scroll-wrap" data-scroll-start="true" data-scroll-end="false">
+      <div ref={scrollRef} className="max-h-[75vh] overflow-auto -mx-2 px-2 pb-2 scroll-smooth">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function BracketLegend() {
   return (
     <div className="flex items-center gap-3 text-[11px] text-text-secondary">
@@ -526,7 +570,7 @@ export function TournamentBracket({
 
       <BracketLegend />
 
-      <div className="max-h-[75vh] overflow-auto -mx-2 px-2 pb-1">
+      <BracketScrollWrap>
         <section className="bracket-section flex min-w-max lg:min-w-0 items-stretch">
           {ROUND_ORDER.map((key, idx) => {
             const nextKey = ROUND_ORDER[idx + 1];
@@ -543,7 +587,7 @@ export function TournamentBracket({
             );
           })}
         </section>
-      </div>
+      </BracketScrollWrap>
 
       {bronzeMatch ? (
         <section className="grid gap-2 justify-items-start">

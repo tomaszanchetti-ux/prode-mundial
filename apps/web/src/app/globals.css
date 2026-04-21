@@ -774,3 +774,47 @@
 .bracket-pair--b {
   --bracket-connector: rgba(124, 58, 237, 0.55);
 }
+
+/*
+ * Bracket horizontal scroll affordance
+ * ------------------------------------
+ * Wraps the scroll container with fade gradients on the left/right edges to
+ * signal "there is more content". The fades are position:absolute siblings
+ * (not pseudo-elements on the scroller itself, which scroll *with* the
+ * content). They toggle visibility via data attributes toggled by a
+ * scroll listener — when scrollLeft === 0 the left fade is hidden, and when
+ * the scroll hits the right edge the right fade is hidden.
+ */
+.bracket-scroll-wrap {
+  position: relative;
+}
+
+.bracket-scroll-wrap::before,
+.bracket-scroll-wrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 8px; /* leave room for the scrollbar gutter */
+  width: 24px;
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity 160ms ease;
+}
+
+.bracket-scroll-wrap::before {
+  left: 0;
+  background: linear-gradient(to right, var(--color-bg-main, #f0f1f3) 0%, rgba(240, 241, 243, 0) 100%);
+}
+
+.bracket-scroll-wrap::after {
+  right: 0;
+  background: linear-gradient(to left, var(--color-bg-main, #f0f1f3) 0%, rgba(240, 241, 243, 0) 100%);
+}
+
+.bracket-scroll-wrap[data-scroll-start="true"]::before {
+  opacity: 0;
+}
+
+.bracket-scroll-wrap[data-scroll-end="true"]::after {
+  opacity: 0;
+}
