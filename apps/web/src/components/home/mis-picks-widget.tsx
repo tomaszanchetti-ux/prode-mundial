@@ -24,8 +24,12 @@ export function MisPicksWidget({
     subChampionPick?.adjustedSubChampionTeamId ?? subChampionPick?.subChampionTeamId ?? null;
   const bestPlayerId = bestPlayerPick?.adjustedBestPlayerId ?? bestPlayerPick?.bestPlayerId ?? null;
   const bestPlayerName = bestPlayerId ? getBestPlayerById(bestPlayerId)?.name ?? null : null;
+  // Si hay playerId salvado pero el roster ya no lo tiene (post data-swap FIFA),
+  // diferenciar "stale" de "sin elegir" — el user sí hizo pick, solo que es inválido.
+  const bestPlayerStale = bestPlayerId !== null && bestPlayerName === null;
 
   const emptyLabel = copyForLocale(locale, "sin elegir", "not picked");
+  const stalePlayerLabel = copyForLocale(locale, "jugador no disponible", "player unavailable");
 
   return (
     <Card elevated style={{ gap: 12, padding: 16 }}>
@@ -47,7 +51,8 @@ export function MisPicksWidget({
         <PickRow
           label={copyForLocale(locale, "Balon de Oro", "Golden Ball")}
           value={bestPlayerName}
-          placeholder={emptyLabel}
+          placeholder={bestPlayerStale ? stalePlayerLabel : emptyLabel}
+          placeholderTone={bestPlayerStale ? "muted" : "italic"}
         />
       </ul>
 
