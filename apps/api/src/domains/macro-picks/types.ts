@@ -17,11 +17,29 @@ export type StoredChampionScoringLog = {
   championPoints: number;
   wasAdjusted: boolean;
   scoredAt: string;
+  /**
+   * EPIC 19 Card 6 — logs macro unificados. Defaults a 0 para picks
+   * escritos con versiones anteriores del batch. `totalPoints` suma los 3.
+   */
+  subChampionPoints?: number;
+  bestPlayerPoints?: number;
 };
 
 export type StoredChampionResult = {
   tournamentId: string;
   championTeamId: string;
+  updatedAt: string;
+};
+
+export type StoredSubChampionResult = {
+  tournamentId: string;
+  subChampionTeamId: string;
+  updatedAt: string;
+};
+
+export type StoredBestPlayerResult = {
+  tournamentId: string;
+  bestPlayerId: string;
   updatedAt: string;
 };
 
