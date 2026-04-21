@@ -43,7 +43,7 @@ export function BottomNav() {
             aria-current={isActive ? "page" : undefined}
             className={`no-underline text-center min-h-[44px] grid place-items-center py-[9px] px-1 rounded-pill border border-transparent text-[11px] leading-[1.1] uppercase transition-colors ${
               isActive
-                ? "text-primary-600 bg-primary-soft font-bold tracking-[0.06em]"
+                ? "text-white bg-primary-500 font-bold tracking-[0.06em]"
                 : "text-text-muted bg-transparent font-medium tracking-[0.04em] hover:text-text-primary"
             }`}
           >
