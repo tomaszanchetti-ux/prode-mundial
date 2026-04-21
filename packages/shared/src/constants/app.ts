@@ -4,8 +4,8 @@ export const APP_NAME = "Prode Mundial";
 
 export const MAIN_TABS = [
   { key: "home", label: "Inicio", href: "/home" },
-  { key: "tournament", label: "Mi Mundial", href: "/tournament" },
-  { key: "worldCup", label: "El Mundial", href: "/world-cup" },
+  { key: "tournament", label: "Predicciones", href: "/tournament" },
+  { key: "worldCup", label: "Tabla", href: "/world-cup" },
   { key: "leagues", label: "Mis Ligas", href: "/leagues" }
 ] as const;
 
