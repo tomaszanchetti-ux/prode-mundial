@@ -106,7 +106,7 @@ export function MatchDetailScreenView({
 
       <Card elevated style={{ gap: 14, padding: 18 }}>
         <div className="flex justify-between gap-3 items-start">
-          <span className="typo-small text-text-muted">{toStageLabel(detail)}</span>
+          <span className="typo-eyebrow">{toStageLabel(detail)}</span>
           <StatusTag status={toStatusTone(detail)} label={toStatusLabel(detail)} />
         </div>
 

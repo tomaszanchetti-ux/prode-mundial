@@ -34,7 +34,7 @@ export function GroupStandingsCard({ group }: GroupStandingsCardProps) {
     <Card elevated style={{ gap: 10, padding: 14 }}>
       <div className="flex justify-between items-center gap-2">
         <div className="flex items-center gap-2">
-          <span className="typo-small text-text-muted">{group.groupName}</span>
+          <span className="typo-eyebrow text-primary-600">{group.groupName}</span>
           <span className="text-[12px] leading-[1.3] text-text-muted">
             {group.completedMatches}/{group.totalMatches}
           </span>

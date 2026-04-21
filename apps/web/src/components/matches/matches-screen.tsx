@@ -129,7 +129,7 @@ export function MatchesScreenView({
 
       {!isLoading && !errorMessage && visibleItems.length === 0 ? (
         <Card elevated style={{ gap: 8, textAlign: "center", justifyItems: "center", padding: 24 }}>
-          <span className="typo-small text-text-muted">{copyForLocale(locale, "SIN PARTIDOS", "NO MATCHES")}</span>
+          <span className="typo-eyebrow">{copyForLocale(locale, "SIN PARTIDOS", "NO MATCHES")}</span>
           <h2 className="typo-h2 m-0 text-text-primary">{copyForLocale(locale, "No encontramos cruces para este filtro", "We couldn't find matches for this filter")}</h2>
         </Card>
       ) : null}

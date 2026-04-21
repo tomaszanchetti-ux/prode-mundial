@@ -107,7 +107,7 @@ export function ActionResultCard({ actionMessage, league, onOpenLeague }: Action
 export function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="grid gap-1 p-3 surface-inset">
-      <span className="typo-small text-text-muted">{label}</span>
+      <span className="typo-meta">{label}</span>
       <span className="typo-h3 m-0 text-text-primary">{value}</span>
     </div>
   );

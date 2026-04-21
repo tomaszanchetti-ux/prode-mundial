@@ -106,7 +106,7 @@ export function TournamentScreenView({
         <NextMatchHero {...heroProps} />
       ) : (
         <Card elevated className="hero-worldcup-bg" style={{ gap: 8, padding: 20 }}>
-          <span className="typo-small text-text-muted">MI MUNDIAL</span>
+          <span className="typo-eyebrow">MI MUNDIAL</span>
           <h1 className="typo-h2 m-0 text-text-primary">Todo al dia</h1>
           <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">
             No tenes predicciones pendientes ahora. Aprovecha para revisar tus tablas o elegir a tu campeon.
@@ -124,7 +124,7 @@ export function TournamentScreenView({
       <div className="grid gap-2">
         <PredictionsTabs items={tabItems} activeTab={activeTab} onSelect={onTabSelect} />
         {progressLabel ? (
-          <span className="typo-small text-text-muted px-1">{progressLabel}</span>
+          <span className="typo-meta px-1">{progressLabel}</span>
         ) : null}
       </div>
 
@@ -153,7 +153,7 @@ export function TournamentScreenView({
           </div>
         ) : (
           <Card elevated style={{ gap: 8, textAlign: "center", justifyItems: "center", padding: 24 }}>
-            <span className="typo-small text-text-muted">KNOCKOUTS</span>
+            <span className="typo-eyebrow">KNOCKOUTS</span>
             <h2 className="typo-h2 m-0 text-text-primary">Se habilitan al cerrar la fase de grupos.</h2>
           </Card>
         )

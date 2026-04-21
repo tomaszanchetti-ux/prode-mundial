@@ -535,7 +535,7 @@ export function TournamentBracket({
   if (totalKnockoutMatches === 0) {
     return (
       <Card elevated style={{ gap: 8, textAlign: "center", justifyItems: "center", padding: 24 }}>
-        <span className="typo-small text-text-muted">BRACKET NO DISPONIBLE</span>
+        <span className="typo-eyebrow">BRACKET NO DISPONIBLE</span>
         <p className="m-0 text-[14px] leading-[1.45] text-text-secondary max-w-[420px]">
           Todavía no podemos calcular tu bracket proyectado.
         </p>
@@ -560,7 +560,7 @@ export function TournamentBracket({
     <div className="grid gap-3">
       {showReadinessBanner && !readiness.isGroupsComplete ? (
         <Card elevated style={{ gap: 6, padding: 12 }}>
-          <span className="typo-small text-text-muted">BRACKET PROYECTADO</span>
+          <span className="typo-eyebrow">BRACKET PROYECTADO</span>
           <p className="m-0 text-[13px] leading-[1.4] text-text-secondary">
             Completá los {readiness.groupMatchesTotal} partidos de grupos para ver tu bracket completo.
             Llevás <strong>{readiness.groupMatchesWithPrediction}/{readiness.groupMatchesTotal}</strong>.

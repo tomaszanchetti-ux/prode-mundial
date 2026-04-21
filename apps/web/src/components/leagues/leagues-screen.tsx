@@ -217,7 +217,7 @@ export function LeaguesScreenView({
 
       {!isLoading && !isGlobal && !standings && selectedLeague ? (
         <Card className="surface-inset" style={{ gap: 8, padding: 16 }}>
-          <span className="typo-small text-text-muted">SIN COMPETENCIA ACTIVA</span>
+          <span className="typo-eyebrow">SIN COMPETENCIA ACTIVA</span>
           <p className="typo-body m-0 text-text-secondary">
             Cuando la liga tenga predicciones puntuadas vas a ver la tabla aqui.
           </p>
@@ -232,7 +232,7 @@ export function LeaguesScreenView({
 
       {isGlobal && items.length === 0 ? (
         <Card elevated style={{ gap: 10 }}>
-          <span className="typo-small text-text-muted">SIN LIGAS PRIVADAS</span>
+          <span className="typo-eyebrow">SIN LIGAS PRIVADAS</span>
           <h2 className="typo-h3 m-0 text-text-primary">Todavia no competis en ninguna</h2>
           <p className="typo-body m-0 text-text-secondary">
             Crea tu primera liga o unite con un codigo para sumar competencia social.
@@ -242,7 +242,7 @@ export function LeaguesScreenView({
 
       {isGlobal && items.length > 0 ? (
         <div className="grid gap-3">
-          <span className="typo-small text-text-muted">MIS LIGAS PRIVADAS</span>
+          <span className="typo-eyebrow">MIS LIGAS PRIVADAS</span>
           {items.map((league) => (
             <Card key={league.leagueId} elevated style={{ gap: 10 }}>
               <div className="flex justify-between gap-2 items-center">

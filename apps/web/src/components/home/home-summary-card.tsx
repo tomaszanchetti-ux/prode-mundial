@@ -53,7 +53,7 @@ export function HomeSummaryCard({ points, leagues, scored, pending, onOpen }: Ho
             <span className="text-[22px] leading-none font-black text-text-primary tabular-nums">
               {topLeague.position != null ? `#${topLeague.position}` : "—"}
             </span>
-            <span className="typo-small text-text-muted truncate max-w-[160px]">
+            <span className="typo-meta truncate max-w-[160px]">
               {topLeague.name}
             </span>
           </div>
@@ -80,7 +80,7 @@ export function HomeSummaryCard({ points, leagues, scored, pending, onOpen }: Ho
             style={{ width: `${percentage}%` }}
           />
         </div>
-        <span className="typo-small text-text-muted tabular-nums">
+        <span className="typo-meta tabular-nums">
           {scored}/{totalRelevant} {copyForLocale(locale, "predicciones", "predictions")}
           <span className="text-text-muted"> · {percentage}%</span>
         </span>

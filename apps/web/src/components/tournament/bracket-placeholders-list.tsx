@@ -59,7 +59,7 @@ export function BracketPlaceholdersList({ bracket }: BracketPlaceholdersListProp
                   {awayText}
                 </span>
               </div>
-              <span className="typo-small text-text-muted text-center">{kickoff}</span>
+              <span className="typo-meta text-center">{kickoff}</span>
             </li>
           );
         })}

@@ -108,7 +108,7 @@ export function WorldCupScreenView({
         <NextMatchHero {...heroProps} />
       ) : (
         <Card elevated className="hero-worldcup-bg" style={{ gap: 6, padding: 16 }}>
-          <span className="typo-small text-text-muted">RESULTADOS</span>
+          <span className="typo-eyebrow">RESULTADOS</span>
           <h1 className="typo-h2 m-0 text-text-primary">{copyForLocale(locale, "Mundial 2026", "World Cup 2026")}</h1>
         </Card>
       )}

@@ -71,7 +71,7 @@ export function HomePreTournamentView({
           className="hero-worldcup-bg text-left w-full cursor-pointer"
           style={{ gap: 8, padding: 20 }}
         >
-          <span className="typo-small text-text-muted">
+          <span className="typo-eyebrow">
             {copyForLocale(locale, "PREDICCIONES", "PREDICTIONS")}
           </span>
           <h1 className="typo-h1 m-0 text-text-primary">
