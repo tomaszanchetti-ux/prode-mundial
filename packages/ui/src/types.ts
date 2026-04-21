@@ -116,6 +116,7 @@ export type NextMatchHeroProps = {
   metaLabel?: string;
   onAction?: () => void;
   onSecondaryAction?: () => void;
+  score?: { home: string; away: string } | null;
   secondaryCtaLabel?: string;
   status: MatchCardStatus;
   statusLabel: string;

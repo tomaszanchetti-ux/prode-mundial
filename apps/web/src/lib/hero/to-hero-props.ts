@@ -24,10 +24,22 @@ export type ContextualHeroProps = Pick<
   | "homeTeam"
   | "metaLabel"
   | "onAction"
+  | "score"
   | "status"
   | "statusLabel"
   | "title"
 >;
+
+function parsePredictionScore(summary: string | null | undefined): { home: string; away: string } | null {
+  if (!summary) {
+    return null;
+  }
+  const match = summary.match(/^(\d+)-(\d+)/);
+  if (!match) {
+    return null;
+  }
+  return { home: match[1], away: match[2] };
+}
 
 export function toHeroProps({
   match,
@@ -99,6 +111,7 @@ export function toHeroProps({
     helperText,
     metaLabel,
     onAction,
+    score: parsePredictionScore(match.userPredictionSummary),
     status,
     statusLabel,
     title: `${match.homeTeam.name} vs ${match.awayTeam.name}`

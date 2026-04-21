@@ -15,6 +15,7 @@ export function NextMatchHero({
   metaLabel,
   onAction,
   onSecondaryAction,
+  score,
   secondaryCtaLabel,
   status,
   statusLabel,
@@ -42,12 +43,24 @@ export function NextMatchHero({
         <StatusTag status={status} label={statusLabel} />
       </div>
 
-      {/* ── Matchup (centered duel) ── */}
-      <div className="flex items-center justify-center gap-5 px-4 py-4">
+      {/* ── Matchup (centered duel with scoreboard) ── */}
+      <div className="flex items-center justify-center gap-4 px-4 py-4">
         <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
           <TeamIdentity team={homeTeam} size="lg" emphasis="hero" align="center" />
         </div>
-        <span className="text-[18px] font-black tracking-[0.14em] text-text-muted shrink-0">VS</span>
+        {score ? (
+          <div className="flex items-baseline gap-2 shrink-0">
+            <span className="text-[36px] leading-none font-black tracking-tight text-text-primary tabular-nums">{score.home}</span>
+            <span className="text-[24px] leading-none font-bold text-text-muted">–</span>
+            <span className="text-[36px] leading-none font-black tracking-tight text-text-primary tabular-nums">{score.away}</span>
+          </div>
+        ) : (
+          <div className="flex items-baseline gap-2 shrink-0">
+            <span className="text-[36px] leading-none font-black tracking-tight text-text-muted tabular-nums">–</span>
+            <span className="text-[24px] leading-none font-bold text-text-muted opacity-0">–</span>
+            <span className="text-[36px] leading-none font-black tracking-tight text-text-muted tabular-nums">–</span>
+          </div>
+        )}
         <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
           <TeamIdentity team={awayTeam} size="lg" emphasis="hero" align="center" />
         </div>
