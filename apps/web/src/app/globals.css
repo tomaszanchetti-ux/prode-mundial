@@ -492,6 +492,41 @@
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
   }
 
+  /* ── Predictions tabs (EPIC 23 WS5: Partidos / Knockouts) ── */
+  .predictions-tabs {
+    display: flex;
+    gap: 24px;
+    border-bottom: 1px solid var(--color-border-default);
+    padding: 0 4px;
+  }
+  .predictions-tab {
+    position: relative;
+    padding: 10px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    transition: color 140ms ease;
+  }
+  .predictions-tab:hover {
+    color: var(--color-text-primary);
+  }
+  .predictions-tab--active {
+    color: var(--color-primary-600);
+  }
+  .predictions-tab--active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--color-primary-500);
+    border-radius: 2px;
+  }
+
   /* ── Group accordion (Mis Predicciones + Grupos) ── */
   .group-accordion-header {
     display: flex;
