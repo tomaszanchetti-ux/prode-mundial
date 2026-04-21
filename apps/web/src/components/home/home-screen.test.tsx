@@ -71,7 +71,7 @@ function buildPoints(overrides: Partial<PointsResponse> = {}): PointsResponse {
   };
 }
 
-test("HomeScreenView renders pre-tournament next-match hero and follow-up CTAs", () => {
+test("HomeScreenView renders pre-tournament hero + summary card", () => {
   const html = renderToStaticMarkup(
     createElement(HomeScreenView, {
       profileDisplayName: "Tomas",
@@ -96,7 +96,7 @@ test("HomeScreenView renders pre-tournament next-match hero and follow-up CTAs",
   assert.match(html, /Grupo A/);
   assert.match(html, /Argentina/);
   assert.match(html, /Brasil/);
-  assert.match(html, /Crear liga/);
+  assert.match(html, /aria-label="Ver mi resumen"/);
   assert.match(html, /MI SCORE/);
 });
 
