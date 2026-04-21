@@ -108,16 +108,13 @@ export type SectionHeaderProps = {
 
 export type NextMatchHeroProps = {
   awayTeam: TeamData;
-  ctaDisabled?: boolean;
-  ctaLabel: string;
+  disabled?: boolean;
   eyebrow: string;
   helperText?: string;
   homeTeam: TeamData;
   metaLabel?: string;
   onAction?: () => void;
-  onSecondaryAction?: () => void;
   score?: { home: string; away: string } | null;
-  secondaryCtaLabel?: string;
   status: MatchCardStatus;
   statusLabel: string;
   title: string;

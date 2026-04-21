@@ -17,8 +17,7 @@ export type ToHeroPropsInput = {
 export type ContextualHeroProps = Pick<
   NextMatchHeroProps,
   | "awayTeam"
-  | "ctaDisabled"
-  | "ctaLabel"
+  | "disabled"
   | "eyebrow"
   | "helperText"
   | "homeTeam"
@@ -60,21 +59,10 @@ export function toHeroProps({
 
   const metaLabel = `${toStageLabel(match.stage, match.groupId, locale)} · ${toLocalKickoffLabel(match.kickoffAt, locale)}`;
 
-  let helperText: string | undefined;
-  if (state === "up-to-date" && hasPrediction) {
-    helperText = copyForLocale(
-      locale,
-      `Tu prediccion: ${match.userPredictionSummary}`,
-      `Your prediction: ${match.userPredictionSummary}`
-    );
-  } else if (state === "pending" && isEditable) {
-    helperText = toEditWindowLabel(match.deadlineAt, locale, now);
-  }
+  const helperText =
+    state === "pending" && isEditable ? toEditWindowLabel(match.deadlineAt, locale, now) : undefined;
 
-  const ctaLabel = hasPrediction
-    ? copyForLocale(locale, "Editar", "Edit")
-    : copyForLocale(locale, "Predecir", "Predict");
-  const ctaDisabled = !isEditable;
+  const disabled = !isEditable;
 
   let status: NextMatchHeroProps["status"];
   let statusLabel: string;
@@ -105,8 +93,7 @@ export function toHeroProps({
       flagAsset: match.homeTeam.flagAsset,
       flagUrl: match.homeTeam.flagUrl
     },
-    ctaDisabled,
-    ctaLabel,
+    disabled,
     eyebrow,
     helperText,
     metaLabel,

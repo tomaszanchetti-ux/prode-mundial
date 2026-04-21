@@ -1,22 +1,18 @@
 import React from "react";
 import type { NextMatchHeroProps } from "./types";
-import { Button } from "./button";
 import { Card } from "./card";
 import { StatusTag } from "./status-tag";
 import { TeamIdentity } from "./team";
 
 export function NextMatchHero({
   awayTeam,
-  ctaDisabled,
-  ctaLabel,
+  disabled,
   eyebrow,
   helperText,
   homeTeam,
   metaLabel,
   onAction,
-  onSecondaryAction,
   score,
-  secondaryCtaLabel,
   status,
   statusLabel,
   title
@@ -30,11 +26,18 @@ export function NextMatchHero({
         : status === "closing-soon"
           ? "text-gold"
           : "text-text-muted";
+  const glowClass = status === "editable" ? "ring-2 ring-primary-500/30" : "";
+  const bgClass = isActionable ? "hero-editable-bg" : "hero-locked-bg";
 
   return (
     <Card
+      as="button"
+      type="button"
       elevated
-      className={isActionable ? "hero-editable-bg" : "hero-locked-bg"}
+      onClick={onAction}
+      disabled={disabled}
+      aria-label={title}
+      className={`text-left w-full disabled:opacity-70 disabled:cursor-not-allowed transition-shadow ${bgClass} ${glowClass}`}
       style={{ padding: 0, overflow: "hidden" }}
     >
       {/* ── Eyebrow + Status ── */}
@@ -66,26 +69,17 @@ export function NextMatchHero({
         </div>
       </div>
 
-      {/* ── Meta + CTA ── */}
-      <div className="grid gap-2 px-4 pb-4">
-        {metaLabel ? (
-          <span className="typo-body text-text-secondary text-center">{metaLabel}</span>
-        ) : null}
-
-        {helperText ? (
-          <span className="typo-small text-text-muted text-center">{helperText}</span>
-        ) : null}
-
-        <Button fullWidth onClick={onAction} disabled={ctaDisabled}>
-          {ctaLabel}
-        </Button>
-
-        {secondaryCtaLabel ? (
-          <Button variant="ghost" fullWidth onClick={onSecondaryAction}>
-            {secondaryCtaLabel}
-          </Button>
-        ) : null}
-      </div>
+      {/* ── Meta footer ── */}
+      {metaLabel || helperText ? (
+        <div className="grid gap-1 px-4 pb-4">
+          {metaLabel ? (
+            <span className="typo-body text-text-secondary text-center">{metaLabel}</span>
+          ) : null}
+          {helperText ? (
+            <span className="typo-small text-text-muted text-center">{helperText}</span>
+          ) : null}
+        </div>
+      ) : null}
     </Card>
   );
 }
