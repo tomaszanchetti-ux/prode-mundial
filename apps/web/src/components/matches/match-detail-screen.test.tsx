@@ -132,7 +132,7 @@ test("MatchDetailScreenView renders locked state copy and disables editing inten
   );
 
   assert.match(html, /Abre pronto/);
-  assert.match(html, /Guardar prediccion/);
+  assert.match(html, />Guardar</);
 });
 
 test("MatchDetailScreenView renders retry save UI on actionable error", () => {

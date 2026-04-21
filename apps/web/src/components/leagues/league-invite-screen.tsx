@@ -107,11 +107,8 @@ export function LeagueInviteScreen() {
       </header>
 
       <Card elevated className="login-hero-bg gap-4 p-6">
-        <span className="typo-small text-primary-500">INVITE LINK</span>
+        <span className="typo-small text-primary-500">Invitación</span>
         <h1 className="typo-h1 m-0 text-text-primary">{preview?.name ?? "Liga privada"}</h1>
-        <p className="typo-body m-0 text-text-secondary max-w-[560px]">
-          Entra a esta liga y compite dentro de una tabla cerrada. Si ya tienes sesión, puedes confirmar el join desde aquí mismo.
-        </p>
       </Card>
 
       {errorMessage ? (
@@ -145,7 +142,7 @@ export function LeagueInviteScreen() {
           {status === "authenticated" ? (
             <div>
               <Button onClick={() => void handleJoin()} disabled={isJoining}>
-                {isJoining ? "Uniendome..." : "Unirme a esta liga"}
+                {isJoining ? "Uniendome..." : "Unirme"}
               </Button>
             </div>
           ) : (
