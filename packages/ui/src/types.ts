@@ -162,6 +162,7 @@ export type ScoreInputProps = {
   homeLabel?: string;
   homeTeam?: TeamData;
   homeValue: string;
+  justSaved?: boolean;
   onAwayChange?: (value: string) => void;
   onClassifierChange?: (value: string) => void;
   onHomeChange?: (value: string) => void;
