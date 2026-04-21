@@ -530,9 +530,9 @@
 
   /* ── Group Table ── */
   .group-row-qualified {
-    background: var(--color-primary-soft);
-    border: 1px solid rgba(0, 82, 204, 0.18);
-    border-left: 3px solid var(--color-primary-500);
+    background: rgba(24, 169, 87, 0.10);
+    border: 1px solid rgba(24, 169, 87, 0.22);
+    border-left: 3px solid var(--color-success);
   }
 
   /* ── Standings ── */

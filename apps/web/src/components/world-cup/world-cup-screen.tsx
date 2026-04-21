@@ -68,7 +68,6 @@ type WorldCupScreenViewProps = {
   bracketReadiness: ReturnType<typeof buildOfficialBracket>["readiness"];
   errorMessage: string | null;
   groups: FullGroupStandings[];
-  groupMatchCountsByGroupId: Map<string, { played: number; total: number }>;
   hero: ContextualHero | null;
   isLoading: boolean;
   knockoutsFinished: number;
@@ -78,8 +77,6 @@ type WorldCupScreenViewProps = {
   onRetry: () => void;
   onTabSelect: (tab: WorldCupTab) => void;
   tabItems: SimpleTabItem<WorldCupTab>[];
-  totalMatchesFinished: number;
-  totalMatches: number;
 };
 
 export function WorldCupScreenView({
@@ -88,7 +85,6 @@ export function WorldCupScreenView({
   bracketReadiness,
   errorMessage,
   groups,
-  groupMatchCountsByGroupId,
   hero,
   isLoading,
   knockoutsFinished,
@@ -97,9 +93,7 @@ export function WorldCupScreenView({
   onOpenMatch,
   onRetry,
   onTabSelect,
-  tabItems,
-  totalMatchesFinished,
-  totalMatches
+  tabItems
 }: WorldCupScreenViewProps) {
   const { locale } = useLocale();
 
@@ -117,23 +111,9 @@ export function WorldCupScreenView({
       {heroProps ? (
         <NextMatchHero {...heroProps} />
       ) : (
-        <Card elevated className="hero-worldcup-bg" style={{ gap: 8, padding: 20 }}>
-          <span className="typo-small text-text-muted">EL MUNDIAL</span>
+        <Card elevated className="hero-worldcup-bg" style={{ gap: 6, padding: 16 }}>
+          <span className="typo-small text-text-muted">RESULTADOS</span>
           <h1 className="typo-h2 m-0 text-text-primary">{copyForLocale(locale, "Mundial 2026", "World Cup 2026")}</h1>
-          <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">
-            {copyForLocale(
-              locale,
-              "Seguí el torneo real: grupos, cruces y camino al campeón.",
-              "Follow the real tournament: groups, brackets and road to the champion."
-            )}
-          </p>
-          <p className="m-0 text-[13px] leading-[1.4] text-text-muted">
-            {copyForLocale(
-              locale,
-              `Llevás ${totalMatchesFinished} de ${totalMatches} partidos disputados.`,
-              `${totalMatchesFinished} of ${totalMatches} matches played so far.`
-            )}
-          </p>
         </Card>
       )}
 
@@ -153,18 +133,13 @@ export function WorldCupScreenView({
       {!isLoading && !errorMessage ? (
         activeTab === "groups" ? (
           <section className="grid gap-3">
-            {groups.map((group) => {
-              const counts = groupMatchCountsByGroupId.get(group.groupId) ?? { played: 0, total: 0 };
-              return (
-                <WorldCupGroupCard
-                  key={group.groupId}
-                  group={group}
-                  groupName={groupDisplayName(group.groupId)}
-                  playedMatches={counts.played}
-                  totalMatches={counts.total}
-                />
-              );
-            })}
+            {groups.map((group) => (
+              <WorldCupGroupCard
+                key={group.groupId}
+                group={group}
+                groupName={groupDisplayName(group.groupId)}
+              />
+            ))}
           </section>
         ) : (
           <section className="grid gap-3">
@@ -254,18 +229,6 @@ export function WorldCupScreen() {
     [groupMatches]
   );
 
-  const groupMatchCountsByGroupId = useMemo(() => {
-    const map = new Map<string, { played: number; total: number }>();
-    for (const group of WORLD_CUP_2026_OFFICIAL_GROUPS) {
-      const matchesForGroup = groupMatches.filter((m) => m.groupId === group.groupId);
-      map.set(group.groupId, {
-        played: matchesForGroup.filter((m) => m.status === "finished").length,
-        total: matchesForGroup.length
-      });
-    }
-    return map;
-  }, [groupMatches]);
-
   const { bracket, readiness: bracketReadiness } = useMemo(
     () => buildOfficialBracket(sortedItems),
     [sortedItems]
@@ -284,11 +247,6 @@ export function WorldCupScreen() {
     [sortedItems]
   );
 
-  const totalMatchesFinished = useMemo(
-    () => sortedItems.filter((m) => m.status === "finished").length,
-    [sortedItems]
-  );
-
   const knockoutsFinished = knockoutMatches.filter((m) => m.status === "finished").length;
 
   const handleHeroAction = () => {
@@ -304,7 +262,6 @@ export function WorldCupScreen() {
         bracketReadiness={bracketReadiness}
         errorMessage={errorMessage}
         groups={groups}
-        groupMatchCountsByGroupId={groupMatchCountsByGroupId}
         hero={hero}
         isLoading={isLoading}
         knockoutsFinished={knockoutsFinished}
@@ -314,8 +271,6 @@ export function WorldCupScreen() {
         onRetry={() => setReloadKey((k) => k + 1)}
         onTabSelect={setActiveTab}
         tabItems={tabItems}
-        totalMatchesFinished={totalMatchesFinished}
-        totalMatches={sortedItems.length}
       />
 
       <QuickPredictionModal

@@ -3,48 +3,19 @@
 import React from "react";
 import type { FullGroupStandings } from "@prode/shared";
 import { resolveTeamIdentity } from "@prode/shared";
-import { Card, StatusTag, TeamIdentity } from "@prode/ui";
+import { Card, TeamIdentity } from "@prode/ui";
 
 type WorldCupGroupCardProps = {
   group: FullGroupStandings;
   groupName: string;
-  playedMatches: number;
-  totalMatches: number;
 };
 
-function toGroupState(playedMatches: number, totalMatches: number) {
-  if (playedMatches === 0) {
-    return { label: "Por comenzar", tone: "neutral" as const };
-  }
-  if (playedMatches === totalMatches) {
-    return { label: "Cerrado", tone: "scored" as const };
-  }
-  return { label: "En juego", tone: "editable" as const };
-}
-
-export function WorldCupGroupCard({ group, groupName, playedMatches, totalMatches }: WorldCupGroupCardProps) {
-  const state = toGroupState(playedMatches, totalMatches);
-
+export function WorldCupGroupCard({ group, groupName }: WorldCupGroupCardProps) {
   return (
-    <Card elevated style={{ gap: 10, padding: 14 }}>
-      <div className="flex justify-between items-center gap-2">
-        <div className="flex items-center gap-2">
-          <span className="typo-small text-text-muted">{groupName}</span>
-          <span className="text-[12px] leading-[1.3] text-text-muted">
-            {playedMatches}/{totalMatches}
-          </span>
-        </div>
-        <StatusTag status={state.tone} label={state.label} />
-      </div>
+    <Card elevated style={{ gap: 8, padding: 12 }}>
+      <span className="typo-small text-text-muted uppercase">{groupName}</span>
 
-      <div className="grid gap-[6px]">
-        <div className="grid grid-cols-[minmax(0,1fr)_36px_36px_36px] gap-1.5 items-center px-2">
-          <span className="text-[11px] font-semibold text-text-muted tracking-wide">EQUIPO</span>
-          <span className="text-[11px] font-semibold text-text-muted text-center">PJ</span>
-          <span className="text-[11px] font-semibold text-text-muted text-center">DG</span>
-          <span className="text-[11px] font-semibold text-text-muted text-center">PTS</span>
-        </div>
-
+      <div className="grid gap-[4px]">
         {group.rows.map((row) => {
           const qualified = row.position <= 2;
           const identity = resolveTeamIdentity(row.teamId);
@@ -52,18 +23,18 @@ export function WorldCupGroupCard({ group, groupName, playedMatches, totalMatche
           return (
             <div
               key={row.teamId}
-              className={`grid grid-cols-[minmax(0,1fr)_36px_36px_36px] gap-1.5 items-center px-2 py-2 rounded-[10px] ${
+              className={`grid grid-cols-[24px_minmax(0,1fr)_32px] gap-2 items-center px-2 py-1.5 rounded-[8px] ${
                 qualified ? "group-row-qualified" : "bg-bg-surface border border-border-default"
               }`}
             >
+              <span
+                className={`text-[12px] leading-[1] font-bold text-center ${
+                  qualified ? "text-success" : "text-text-muted"
+                }`}
+              >
+                {row.position}
+              </span>
               <div className="flex items-center gap-2 min-w-0">
-                <span
-                  className={`text-[11px] leading-[1] font-bold w-[18px] text-center ${
-                    qualified ? "text-primary-600" : "text-text-muted"
-                  }`}
-                >
-                  {row.position}
-                </span>
                 <TeamIdentity
                   team={{
                     teamName: row.teamName,
@@ -75,9 +46,9 @@ export function WorldCupGroupCard({ group, groupName, playedMatches, totalMatche
                   emphasis="compact"
                 />
               </div>
-              <span className="text-[13px] leading-[1.2] text-text-primary text-center">{row.played}</span>
-              <span className="text-[13px] leading-[1.2] text-text-primary text-center">{row.goalDifference}</span>
-              <span className="text-[13px] leading-[1.2] text-text-primary text-center font-bold">{row.points}</span>
+              <span className="text-[14px] leading-[1.2] text-text-primary text-center font-bold tabular-nums">
+                {row.points}
+              </span>
             </div>
           );
         })}
