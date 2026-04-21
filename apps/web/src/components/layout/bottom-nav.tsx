@@ -17,7 +17,7 @@ export function BottomNav() {
     home: copyForLocale(locale, "Inicio", "Home"),
     tournament: copyForLocale(locale, "Predicciones", "Predictions"),
     worldCup: copyForLocale(locale, "Resultados", "Results"),
-    leagues: copyForLocale(locale, "Mis Ligas", "My Leagues")
+    leagues: copyForLocale(locale, "Ligas", "Leagues")
   } as const;
 
   const navLabel = copyForLocale(locale, "Navegación principal", "Main navigation");
