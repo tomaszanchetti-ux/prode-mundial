@@ -2,32 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { MatchSummary, PreTournamentSummary, PredictedGroupStandingRow, TuMundialGroupCard } from "@prode/shared";
+import type { MatchSummary, PreTournamentSummary } from "@prode/shared";
 import { TournamentScreenView } from "./tournament-screen";
 import type { PredictionsTab, PredictionsTabItem } from "./predictions-tabs";
 import type { ContextualHero } from "@/lib/hero/pick-contextual-hero";
-
-function buildProjectedRow(teamId: string, teamName: string, points: number, position: number): PredictedGroupStandingRow {
-  return {
-    teamId,
-    teamName,
-    fifaCode: teamId,
-    iso2: null,
-    iso3: null,
-    flagAsset: "/flags/mock.svg",
-    flagUrl: null,
-    played: 2,
-    won: position === 1 ? 2 : 1,
-    drawn: 0,
-    lost: position === 1 ? 0 : 1,
-    goalsFor: position === 1 ? 4 : 2,
-    goalsAgainst: position === 1 ? 1 : 3,
-    goalDifference: position === 1 ? 3 : -1,
-    points,
-    position,
-    isProjectedQualified: true
-  };
-}
 
 function buildPreTournamentSummary(overrides: Partial<PreTournamentSummary> = {}): PreTournamentSummary {
   return {
@@ -37,21 +15,6 @@ function buildPreTournamentSummary(overrides: Partial<PreTournamentSummary> = {}
     remainingMatches: 36,
     completionPercentage: 25,
     nextPendingMatchId: "m_001",
-    ...overrides
-  };
-}
-
-function buildGroup(overrides: Partial<TuMundialGroupCard> = {}): TuMundialGroupCard {
-  return {
-    groupId: "A",
-    groupName: "Grupo A",
-    completedMatches: 2,
-    totalMatches: 6,
-    isComplete: false,
-    items: [
-      buildProjectedRow("MEX", "Mexico", 6, 1),
-      buildProjectedRow("RSA", "South Africa", 3, 2)
-    ],
     ...overrides
   };
 }
@@ -121,11 +84,10 @@ function renderView(
     createElement(TournamentScreenView, {
       activeTab: overrides.activeTab ?? "matches",
       errorMessage: null,
-      groups: [buildGroup()],
+      groupMatches: [buildQuickMatch()],
       hero,
       isLoading: false,
       knockoutMatches: [],
-      matchesByGroupId: new Map(),
       onHeroAction: () => undefined,
       onOpenPicks: () => undefined,
       onOpenMatch: () => undefined,
@@ -158,10 +120,17 @@ test("TournamentScreenView shows simplified tabs Partidos/Knockouts", () => {
   assert.doesNotMatch(html, /Mis Predicciones/);
 });
 
-test("TournamentScreenView renders predictions groups accordion on matches tab", () => {
+test("TournamentScreenView renders flat match list on matches tab", () => {
   const html = renderView({ activeTab: "matches" });
 
-  assert.match(html, /Grupo A/);
+  assert.match(html, /Mexico/);
+  assert.match(html, /South Africa/);
+});
+
+test("TournamentScreenView renders knockouts empty state when no knockouts yet", () => {
+  const html = renderView({ activeTab: "knockouts" });
+
+  assert.match(html, /Se habilitan al cerrar la fase de grupos/);
 });
 
 test("TournamentScreenView shows fallback hero when no hero match is available", () => {

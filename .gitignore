@@ -11,3 +11,9 @@ firebase-debug.log
 *.tsbuildinfo
 __pycache__/
 *.pyc
+
+# Session docs (local only, never pushed)
+Prode Mundial_WS*.md
+
+# Claude Code local config
+.claude/

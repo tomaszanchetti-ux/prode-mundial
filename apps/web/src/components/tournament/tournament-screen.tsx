@@ -10,22 +10,19 @@ import {
   type MatchSummary,
   type PreTournamentSummary,
   type SubChampionPickResponse,
-  type TournamentProjectionResponse,
-  type TuMundialGroupCard,
-  type TuMundialResponse
+  type TournamentProjectionResponse
 } from "@prode/shared";
 import { Card, ErrorCard, NextMatchHero, SkeletonCard } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useLocale } from "@/lib/i18n/locale-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
-import { ApiClientError, getBestPlayerPick, getChampionPick, getMatches, getPreTournamentSummary, getSubChampionPick, getTournamentProjection, getTuMundial } from "@/lib/api/client";
+import { ApiClientError, getBestPlayerPick, getChampionPick, getMatches, getPreTournamentSummary, getSubChampionPick, getTournamentProjection } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
 import { pickContextualHeroMatch, type ContextualHero } from "@/lib/hero/pick-contextual-hero";
 import { toHeroProps } from "@/lib/hero/to-hero-props";
 import { MisPicksSection } from "./mis-picks-section";
-import { PhaseKnockoutView } from "./phase-knockout-view";
-import { PredictionsGroupsView } from "./predictions-groups-view";
 import { PredictionsTabs, type PredictionsTab, type PredictionsTabItem } from "./predictions-tabs";
+import { TournamentFlatList } from "./tournament-flat-list";
 
 const KNOCKOUT_STAGES: MatchStage[] = ["R32", "R16", "QF", "SF", "BRONZE", "FINAL"];
 
@@ -54,11 +51,10 @@ type TournamentScreenViewProps = {
   subChampionPick: SubChampionPickResponse | null;
   bestPlayerPick: BestPlayerPickResponse | null;
   errorMessage: string | null;
-  groups: TuMundialGroupCard[];
+  groupMatches: MatchSummary[];
   hero: ContextualHero | null;
   isLoading: boolean;
   knockoutMatches: MatchSummary[];
-  matchesByGroupId: Map<string, MatchSummary[]>;
   onHeroAction: () => void;
   onOpenPicks: (tab?: "champion" | "sub-champion" | "best-player") => void;
   onOpenMatch: (matchId: string) => void;
@@ -74,11 +70,10 @@ export function TournamentScreenView({
   subChampionPick,
   bestPlayerPick,
   errorMessage,
-  groups,
+  groupMatches,
   hero,
   isLoading,
   knockoutMatches,
-  matchesByGroupId,
   onHeroAction,
   onOpenPicks,
   onOpenMatch,
@@ -133,16 +128,17 @@ export function TournamentScreenView({
 
       {!isLoading && !errorMessage ? (
         activeTab === "matches" ? (
-          <PredictionsGroupsView
-            groups={groups}
-            matchesByGroupId={matchesByGroupId}
-            onOpenMatch={onOpenMatch}
-          />
+          <TournamentFlatList matches={groupMatches} onOpenMatch={onOpenMatch} />
         ) : (
-          <PhaseKnockoutView
+          <TournamentFlatList
             matches={knockoutMatches}
-            phaseLabel="Knockouts"
             onOpenMatch={onOpenMatch}
+            emptyState={
+              <Card elevated style={{ gap: 8, textAlign: "center", justifyItems: "center", padding: 24 }}>
+                <span className="typo-small text-text-muted">KNOCKOUTS</span>
+                <h2 className="typo-h2 m-0 text-text-primary">Se habilitan al cerrar la fase de grupos.</h2>
+              </Card>
+            }
           />
         )
       ) : null}
@@ -153,7 +149,6 @@ export function TournamentScreenView({
 export function TournamentScreen() {
   const router = useRouter();
   const { status, user } = useAuth();
-  const [data, setData] = useState<TuMundialResponse | null>(null);
   const [projection, setProjection] = useState<TournamentProjectionResponse | null>(null);
   const [championPick, setChampionPick] = useState<ChampionPickResponse | null>(null);
   const [subChampionPick, setSubChampionPick] = useState<SubChampionPickResponse | null>(null);
@@ -171,7 +166,6 @@ export function TournamentScreen() {
 
     async function loadTournament() {
       if (status !== "authenticated" || !user) {
-        setData(null);
         setProjection(null);
         setChampionPick(null);
         setSubChampionPick(null);
@@ -187,8 +181,7 @@ export function TournamentScreen() {
 
       try {
         const token = await user.getIdToken();
-        const [nextData, nextProjection, nextChampion, nextSubChampion, nextBestPlayer, nextSummary, matchesResponse] = await Promise.all([
-          getTuMundial(token),
+        const [nextProjection, nextChampion, nextSubChampion, nextBestPlayer, nextSummary, matchesResponse] = await Promise.all([
           getTournamentProjection(token),
           getChampionPick(token),
           getSubChampionPick(token),
@@ -198,7 +191,6 @@ export function TournamentScreen() {
         ]);
 
         if (!cancelled) {
-          setData(nextData);
           setProjection(nextProjection);
           setChampionPick(nextChampion);
           setSubChampionPick(nextSubChampion);
@@ -235,22 +227,6 @@ export function TournamentScreen() {
     () => sortedItems.filter((m) => KNOCKOUT_STAGES.includes(m.stage)),
     [sortedItems]
   );
-
-  const matchesByGroupId = useMemo(() => {
-    const map = new Map<string, MatchSummary[]>();
-
-    for (const match of groupMatches) {
-      if (!match.groupId) {
-        continue;
-      }
-
-      const bucket = map.get(match.groupId) ?? [];
-      bucket.push(match);
-      map.set(match.groupId, bucket);
-    }
-
-    return map;
-  }, [groupMatches]);
 
   const tabItems = useMemo<PredictionsTabItem[]>(
     () => [
@@ -292,11 +268,10 @@ export function TournamentScreen() {
         subChampionPick={subChampionPick}
         bestPlayerPick={bestPlayerPick}
         errorMessage={errorMessage}
-        groups={data?.groups ?? []}
+        groupMatches={groupMatches}
         hero={hero}
         isLoading={isLoading}
         knockoutMatches={knockoutMatches}
-        matchesByGroupId={matchesByGroupId}
         onHeroAction={handleHeroAction}
         onOpenPicks={(tab) =>
           router.push(tab ? `${APP_ROUTES.picks}?tab=${tab}` : APP_ROUTES.picks)
