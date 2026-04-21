@@ -164,8 +164,7 @@ test("LeaguesScreenView renders synthetic summary and private league list in Glo
   assert.match(html, />14</);
   assert.match(html, /pts totales/);
   assert.match(html, /Liga Demo Madrid/);
-  assert.match(html, /Argentina vs Brasil/);
-  assert.match(html, /DONDE GANASTE VENTAJA/);
+  assert.doesNotMatch(html, /DONDE GANASTE VENTAJA/);
 });
 
 test("LeaguesScreenView renders standings table when a private league is selected", () => {

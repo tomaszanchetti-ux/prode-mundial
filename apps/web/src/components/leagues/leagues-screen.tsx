@@ -11,13 +11,11 @@ import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { ApiClientError, createLeague, getLeagueStandings, getMyLeagues, getPoints, joinLeague } from "@/lib/api/client";
 import { track } from "@/lib/firebase/analytics";
 import { CopyButton } from "./copy-button";
-import { HighlightsCard } from "./highlights-card";
 import { MiScoreSection } from "@/components/home/mi-score-widget";
 import {
   GLOBAL_LEAGUE_ID,
   GLOBAL_LEAGUE_NAME,
   buildSyntheticSummary,
-  pickLeagueHighlights,
   toPositionColor,
   toStandingRowClass,
   type LeagueOption
@@ -79,7 +77,6 @@ export function LeaguesScreenView({
 
   const isGlobal = selectedLeagueId === GLOBAL_LEAGUE_ID;
   const summary = buildSyntheticSummary(points, standings, isGlobal);
-  const highlights = pickLeagueHighlights(points);
   const selectedLeague = items.find((league) => league.leagueId === selectedLeagueId) ?? null;
 
   return (
@@ -227,8 +224,6 @@ export function LeaguesScreenView({
         </Card>
       ) : null}
 
-      <HighlightsCard highlights={highlights} />
-
       {!isGlobal && selectedLeague?.inviteLink ? (
         <div>
           <CopyButton value={selectedLeague.inviteLink} label="Invitar" shareLeagueId={selectedLeague.leagueId} />
@@ -282,7 +277,14 @@ export function LeaguesScreen() {
   const [items, setItems] = useState<LeagueSummary[]>([]);
   const [points, setPoints] = useState<PointsResponse | null>(null);
   const [standings, setStandings] = useState<LeagueStandingsResponse | null>(null);
-  const [selectedLeagueId, setSelectedLeagueId] = useState<string>(searchParams.get("leagueId") ?? GLOBAL_LEAGUE_ID);
+  /*
+   * selectedLeagueId is derived from the URL (single source of truth) so
+   * that `router.replace` on chip click drives the re-render. Previously
+   * we used useState + a sync useEffect, which caused a race: setState ran
+   * with the fresh value but the sync effect re-read a stale searchParams
+   * and reverted the state, forcing the user to click Global twice.
+   */
+  const selectedLeagueId = searchParams.get("leagueId") ?? GLOBAL_LEAGUE_ID;
   const [mode, setMode] = useState<"create" | "join" | null>(null);
   const [formState, setFormState] = useState({
     leagueName: "",
@@ -295,14 +297,6 @@ export function LeaguesScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
-
-  useEffect(() => {
-    const nextLeagueId = searchParams.get("leagueId");
-
-    if (nextLeagueId && nextLeagueId !== selectedLeagueId) {
-      setSelectedLeagueId(nextLeagueId);
-    }
-  }, [searchParams, selectedLeagueId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -440,8 +434,6 @@ export function LeaguesScreen() {
       onCreateLeague={handleCreateLeague}
       onJoinLeague={handleJoinLeague}
       onSelectLeague={(leagueId) => {
-        setSelectedLeagueId(leagueId);
-
         if (leagueId === GLOBAL_LEAGUE_ID) {
           router.replace("/leagues");
         } else {
