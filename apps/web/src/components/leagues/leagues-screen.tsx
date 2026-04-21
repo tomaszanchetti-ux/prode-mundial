@@ -82,17 +82,20 @@ export function LeaguesScreenView({
 
   return (
     <div className="grid gap-4">
-      <Card elevated style={{ gap: 10 }}>
-        <h1 className="typo-h2 m-0 text-text-primary">Mis Ligas</h1>
-        <div className="flex gap-2 flex-wrap">
-          <Button variant={mode === "create" ? "secondary" : "primary"} onClick={() => onChangeMode(mode === "create" ? null : "create")}>
-            {mode === "create" ? "Cancelar" : "Crear liga"}
-          </Button>
-          <Button variant={mode === "join" ? "secondary" : "ghost"} onClick={() => onChangeMode(mode === "join" ? null : "join")}>
-            {mode === "join" ? "Cancelar" : "Unirme"}
-          </Button>
-        </div>
-      </Card>
+      <div className="flex gap-2 justify-end flex-wrap">
+        <Button
+          variant={mode === "create" ? "secondary" : "ghost"}
+          onClick={() => onChangeMode(mode === "create" ? null : "create")}
+        >
+          {mode === "create" ? "Cancelar" : "Crear liga"}
+        </Button>
+        <Button
+          variant={mode === "join" ? "secondary" : "ghost"}
+          onClick={() => onChangeMode(mode === "join" ? null : "join")}
+        >
+          {mode === "join" ? "Cancelar" : "Unirme"}
+        </Button>
+      </div>
 
       {mode === "create" ? (
         <CreateLeagueForm
