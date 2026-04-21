@@ -56,7 +56,7 @@ export function PredictionModal({
             </div>
             {onClose ? (
               <button type="button" aria-label="Cerrar" onClick={onClose} className="close-btn">
-                <span aria-hidden="true" className="block text-[20px] leading-none font-normal">×</span>
+                <span aria-hidden="true" className="block text-[18px] leading-none font-light">×</span>
               </button>
             ) : null}
           </div>

@@ -209,8 +209,8 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
       saveLabel={hasNextPending ? copyForLocale(locale, "Guardar y seguir", "Save & next") : detail?.userPrediction ? copyForLocale(locale, "Guardar cambios", "Save changes") : copyForLocale(locale, "Guardar prediccion", "Save prediction")}
       saving={isSaving}
       stageLabel={detail ? (locale === "en" && detail.stage === "group" && detail.groupId ? `Group ${detail.groupId}` : toStageLabel(detail)) : copyForLocale(locale, "Partido", "Match")}
-      statusLabel={detail ? toStatusLabel(detail) : undefined}
-      statusTone={detail ? toStatusTone(detail) : undefined}
+      statusLabel={detail && toStatusTone(detail) !== "saved" ? toStatusLabel(detail) : undefined}
+      statusTone={detail && toStatusTone(detail) !== "saved" ? toStatusTone(detail) : undefined}
       title={detail ? `${detail.homeTeam.name} vs ${detail.awayTeam.name}` : copyForLocale(locale, "Tu proximo pendiente", "Your next pending match")}
     >
       <ScoreInput

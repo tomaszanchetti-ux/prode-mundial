@@ -662,8 +662,8 @@
 
   /* ── Close Button ── */
   .close-btn {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -672,16 +672,15 @@
     background: transparent;
     color: var(--color-text-muted);
     cursor: pointer;
-    transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 80ms ease;
+    opacity: 0.7;
+    transition: opacity 120ms ease, color 120ms ease, transform 80ms ease;
   }
   .close-btn:hover {
-    background: var(--color-bg-interactive);
+    opacity: 1;
     color: var(--color-text-primary);
-    border-color: var(--color-border-default);
   }
   .close-btn:active {
-    background: var(--color-bg-muted);
-    transform: scale(0.94);
+    transform: scale(0.92);
   }
 }
 
