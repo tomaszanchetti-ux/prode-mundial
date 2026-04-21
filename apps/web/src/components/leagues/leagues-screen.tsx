@@ -151,26 +151,24 @@ export function LeaguesScreenView({
         })}
       </div>
 
-      <Card elevated style={{ gap: 14 }}>
+      <Card elevated style={{ gap: 12 }}>
+        {!isGlobal && summary.positionLabel !== "Sin puesto" ? (
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="text-[20px] font-extrabold text-text-primary tabular-nums leading-none">
+              {summary.positionLabel}
+            </span>
+            {summary.gapLabel ? (
+              <span className="text-[13px] text-text-muted leading-none">· {summary.gapLabel}</span>
+            ) : null}
+          </div>
+        ) : null}
+
         <MiScoreSection points={points} />
 
-        {!isGlobal || summary.gapLabel ? (
-          <>
-            <div className="h-px bg-border-subtle" />
-            <div className="grid gap-1">
-              <div className="flex items-baseline gap-2 flex-wrap typo-small">
-                <strong className="text-text-primary font-bold">{summary.positionLabel}</strong>
-                {summary.gapLabel ? (
-                  <span className="text-text-muted">· {summary.gapLabel}</span>
-                ) : null}
-              </div>
-              {!isGlobal && selectedLeague ? (
-                <span className="text-[12px] leading-[1.35] text-text-muted">
-                  {selectedLeague.membersCount}/{selectedLeague.memberLimit} jugadores · {selectedLeague.inviteCode}
-                </span>
-              ) : null}
-            </div>
-          </>
+        {!isGlobal && selectedLeague ? (
+          <span className="text-[12px] leading-[1.35] text-text-muted">
+            {selectedLeague.membersCount}/{selectedLeague.memberLimit} jugadores · código {selectedLeague.inviteCode}
+          </span>
         ) : null}
       </Card>
 
