@@ -6,10 +6,13 @@ import { getLeagueStandingsController } from "../domains/leagues/controllers/get
 import { getLeaguesController } from "../domains/leagues/controllers/get-leagues-controller";
 import { postJoinLeagueController } from "../domains/leagues/controllers/post-join-league-controller";
 import { postLeaguesController } from "../domains/leagues/controllers/post-leagues-controller";
+import { getBestPlayerController } from "../domains/macro-picks/controllers/get-best-player-controller";
 import { getMacroPicksController } from "../domains/macro-picks/controllers/get-macro-picks-controller";
 import { getSubChampionController } from "../domains/macro-picks/controllers/get-sub-champion-controller";
+import { postBestPlayerAdjustmentController } from "../domains/macro-picks/controllers/post-best-player-adjustment-controller";
 import { postMacroAdjustmentController } from "../domains/macro-picks/controllers/post-macro-adjustment-controller";
 import { postSubChampionAdjustmentController } from "../domains/macro-picks/controllers/post-sub-champion-adjustment-controller";
+import { putBestPlayerController } from "../domains/macro-picks/controllers/put-best-player-controller";
 import { putMacroPicksController } from "../domains/macro-picks/controllers/put-macro-picks-controller";
 import { putSubChampionController } from "../domains/macro-picks/controllers/put-sub-champion-controller";
 import { getMatchDetailController } from "../domains/matches/controllers/get-match-detail-controller";
@@ -73,6 +76,9 @@ export function createApp() {
   app.get("/api/v1/macro-picks/sub-champion", requireAuth, getSubChampionController);
   app.put("/api/v1/macro-picks/sub-champion", requireAuth, putSubChampionController);
   app.post("/api/v1/macro-picks/sub-champion/adjustment", requireAuth, postSubChampionAdjustmentController);
+  app.get("/api/v1/macro-picks/best-player", requireAuth, getBestPlayerController);
+  app.put("/api/v1/macro-picks/best-player", requireAuth, putBestPlayerController);
+  app.post("/api/v1/macro-picks/best-player/adjustment", requireAuth, postBestPlayerAdjustmentController);
   app.get("/api/v1/leagues", requireAuth, getLeaguesController);
   app.post("/api/v1/leagues", requireAuth, postLeaguesController);
   app.post("/api/v1/leagues/join", requireAuth, postJoinLeagueController);

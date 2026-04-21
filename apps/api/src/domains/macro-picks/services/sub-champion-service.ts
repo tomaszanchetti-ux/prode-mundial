@@ -1,15 +1,13 @@
 import {
-  classifyTeamBracketHalves,
+  resolveAliveTeamsAfterGroups,
   resolvePickWindow,
-  validateSubChampionHalf,
   type AdjustSubChampionInput,
   type AdjustSubChampionResponse,
   type ChampionPickStatus,
   type PickWindowResolution,
   type SaveSubChampionPickInput,
   type SaveSubChampionPickResponse,
-  type SubChampionPickResponse,
-  type SubChampionValidationReason
+  type SubChampionPickResponse
 } from "@prode/shared";
 import { ApiError } from "../../../server/errors/api-error";
 import { matchesRepository } from "../../matches/repositories/matches-repository";
@@ -124,39 +122,25 @@ function toResponse(
   };
 }
 
-// ── Validation error mapping ────────────────────────────
+// ── Guards ──────────────────────────────────────────────
 //
-// The pure validator returns a generic reason; translate each to a distinct
-// API error code so the frontend can show a specific message.
+// EPIC 19 — la regla de "mitad opuesta" pasó de hard-block a soft-warning
+// (se muestra como banner en el front vía `detectMacroPickWarnings`). Lo
+// único que queda como hard-block cross-pick es SAME_TEAM. En ventana B
+// sumamos "alive-post-groups" como hard-block: no se puede ajustar a un
+// equipo eliminado en fase de grupos.
 
-const REASON_TO_ERROR: Record<SubChampionValidationReason, { code: "SUB_CHAMPION_SAME_TEAM" | "SUB_CHAMPION_SAME_HALF" | "SUB_CHAMPION_UNRESOLVED_HALF"; message: string }> = {
-  SAME_TEAM: {
-    code: "SUB_CHAMPION_SAME_TEAM",
-    message: "Sub-campeon no puede ser el mismo equipo que el campeon."
-  },
-  SAME_HALF: {
-    code: "SUB_CHAMPION_SAME_HALF",
-    message: "Sub-campeon debe estar en la mitad opuesta del bracket al campeon."
-  },
-  UNRESOLVED_HALF: {
-    code: "SUB_CHAMPION_UNRESOLVED_HALF",
-    message: "El bracket proyectado no alcanza para ubicar este equipo en un lado. Completa tus predicciones de grupos primero."
-  }
-};
-
-async function assertCrossHalfOrThrow(
-  userId: string,
-  championTeamId: string,
-  candidateTeamId: string,
-  now: Date
-): Promise<void> {
+async function assertTeamAliveOrThrow(userId: string, teamId: string, now: Date): Promise<void> {
   const projection = await tuMundialService.getTournamentProjectionForUser(userId, now);
-  const teamHalves = classifyTeamBracketHalves(projection.bracket);
-  const result = validateSubChampionHalf(championTeamId, candidateTeamId, teamHalves);
-  if (result.valid) return;
-
-  const mapped = REASON_TO_ERROR[result.reason];
-  throw new ApiError(409, mapped.code, mapped.message, { reason: result.reason });
+  const alive = resolveAliveTeamsAfterGroups(projection.bracket);
+  if (alive.size === 0) return; // bracket aún no hidratado — no bloqueamos
+  if (!alive.has(teamId)) {
+    throw new ApiError(
+      409,
+      "SUB_CHAMPION_TEAM_ELIMINATED",
+      "El equipo seleccionado fue eliminado en fase de grupos."
+    );
+  }
 }
 
 // ── Service ─────────────────────────────────────────────
@@ -285,7 +269,16 @@ export class SubChampionPickService {
     }
 
     const nextTeamId = input.subChampionTeamId.trim();
-    await assertCrossHalfOrThrow(userId, champion.championTeamId, nextTeamId, now);
+
+    if (nextTeamId === champion.championTeamId) {
+      throw new ApiError(
+        409,
+        "SUB_CHAMPION_SAME_TEAM",
+        "Sub-campeon no puede ser el mismo equipo que el campeon."
+      );
+    }
+
+    await assertTeamAliveOrThrow(userId, nextTeamId, now);
 
     const nowIso = now.toISOString();
 

@@ -315,7 +315,11 @@ test("saveForUser persists the pick with any valid sub during window A", async (
   }
 });
 
-test("adjustForUser throws SUB_CHAMPION_SAME_HALF when window B pick shares a half", async () => {
+test("adjustForUser accepts same-half picks in window B (soft-warning now)", async () => {
+  // EPIC 19 — "same half" dejó de ser hard-block. El backend permite la
+  // adjustment; el front muestra un banner de warning. Acá comprobamos que
+  // el ajuste persiste correctamente aunque sub-champion y champion compartan
+  // mitad. El único hard-block cross-pick en B es que el equipo esté vivo.
   const existingSub = buildStoredSub({ subChampionTeamId: "BRA" });
   const champMock = mock.method(championPicksRepository, "getByUserId", async () =>
     buildStoredChampion({ championTeamId: "ARG" })
@@ -325,9 +329,44 @@ test("adjustForUser throws SUB_CHAMPION_SAME_HALF when window B pick shares a ha
     buildMatch({ matchId: "m_048", kickoffAt: "2026-06-26T19:00:00Z", status: "finished" }),
     buildMatch({ matchId: "m_073", stage: "R32", groupId: null, kickoffAt: "2026-06-28T19:00:00Z", status: "scheduled" })
   ]);
-  // ARG at R32 73 (half A), MEX at R32 77 (also half A — 73..80 all A).
+  // ARG at R32 73 (half A), MEX at R32 77 (also half A — same half → warning).
   const projectionMock = mock.method(tuMundialService, "getTournamentProjectionForUser", async () =>
     buildProjection({ 73: ["ARG", null], 77: ["MEX", null] })
+  );
+  const subGetMock = mock.method(subChampionPicksRepository, "getByUserId", async () => existingSub);
+  const upsertMock = mock.method(subChampionPicksRepository, "upsert", async () => undefined);
+
+  try {
+    const result = await subChampionPickService.adjustForUser(
+      "usr_1",
+      { subChampionTeamId: "MEX" },
+      new Date("2026-06-27T12:00:00Z")
+    );
+    assert.equal(result.ok, true);
+    assert.equal(result.status, "adjusted");
+    assert.equal(upsertMock.mock.callCount(), 1);
+  } finally {
+    champMock.mock.restore();
+    listMatchesMock.mock.restore();
+    projectionMock.mock.restore();
+    subGetMock.mock.restore();
+    upsertMock.mock.restore();
+  }
+});
+
+test("adjustForUser throws SUB_CHAMPION_TEAM_ELIMINATED when window B pick is eliminated", async () => {
+  const existingSub = buildStoredSub({ subChampionTeamId: "BRA" });
+  const champMock = mock.method(championPicksRepository, "getByUserId", async () =>
+    buildStoredChampion({ championTeamId: "ARG" })
+  );
+  const listMatchesMock = mock.method(matchesRepository, "listMatches", async () => [
+    buildMatch({ matchId: "m_001", kickoffAt: "2026-06-11T19:00:00Z", status: "finished" }),
+    buildMatch({ matchId: "m_048", kickoffAt: "2026-06-26T19:00:00Z", status: "finished" }),
+    buildMatch({ matchId: "m_073", stage: "R32", groupId: null, kickoffAt: "2026-06-28T19:00:00Z", status: "scheduled" })
+  ]);
+  // Solo ARG y BRA en R32 → MEX eliminado.
+  const projectionMock = mock.method(tuMundialService, "getTournamentProjectionForUser", async () =>
+    buildProjection({ 73: ["ARG", null], 85: ["BRA", null] })
   );
   const subGetMock = mock.method(subChampionPicksRepository, "getByUserId", async () => existingSub);
 
@@ -341,7 +380,7 @@ test("adjustForUser throws SUB_CHAMPION_SAME_HALF when window B pick shares a ha
         ),
       (err: unknown) => {
         const apiErr = err as { code?: string };
-        assert.equal(apiErr.code, "SUB_CHAMPION_SAME_HALF");
+        assert.equal(apiErr.code, "SUB_CHAMPION_TEAM_ELIMINATED");
         return true;
       }
     );

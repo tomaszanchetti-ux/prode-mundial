@@ -36,3 +36,15 @@ export type StoredSubChampionPick = {
   lockedAt: string | null;
   adjustedAt: string | null;
 };
+
+export type StoredBestPlayerPick = {
+  userId: string;
+  bestPlayerId: string | null;
+  adjustedBestPlayerId: string | null;
+  isLocked: boolean;
+  isAdjusted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lockedAt: string | null;
+  adjustedAt: string | null;
+};
