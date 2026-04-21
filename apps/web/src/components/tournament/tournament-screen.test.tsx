@@ -149,13 +149,13 @@ function renderView(
   );
 }
 
-test("TournamentScreenView renders next-match hero with predict CTA only", () => {
+test("TournamentScreenView renders next-match hero as clickable card", () => {
   const html = renderView();
 
   assert.match(html, /TU PROXIMO/);
   assert.match(html, /Mexico/);
   assert.match(html, /South Africa/);
-  assert.match(html, /Predecir/);
+  assert.match(html, /aria-label="Mexico vs South Africa"/);
 });
 
 test("TournamentScreenView shows mode toggle and phase tabs", () => {

@@ -29,7 +29,7 @@ export type ContextualHeroProps = Pick<
   | "title"
 >;
 
-function parsePredictionScore(summary: string | null | undefined): { home: string; away: string } | null {
+export function parsePredictionScore(summary: string | null | undefined): { home: string; away: string } | null {
   if (!summary) {
     return null;
   }

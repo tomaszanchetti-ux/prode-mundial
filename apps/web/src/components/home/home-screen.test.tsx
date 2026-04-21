@@ -125,7 +125,7 @@ test("HomeScreenView keeps live-tournament priority match card when pre-tourname
   assert.match(html, /Grupo A/);
   assert.match(html, /Argentina/);
   assert.match(html, /Brasil/);
-  assert.match(html, /Predecir/);
+  assert.match(html, /aria-label="Argentina vs Brasil"/);
   assert.match(html, /MI SCORE/);
   assert.match(html, /28/);
 });
