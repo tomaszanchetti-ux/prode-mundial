@@ -300,8 +300,21 @@ function MatchCard({
   );
 }
 
-function RoundLabel({ label, tone = "primary" }: { label: string; tone?: "primary" | "gold" }) {
-  const toneClass = tone === "gold" ? "bg-gold text-white" : "bg-primary-500 text-white";
+function RoundLabel({
+  label,
+  tone = "primary"
+}: {
+  label: string;
+  tone?: "tenue" | "primary" | "strong" | "gold";
+}) {
+  const toneClass =
+    tone === "gold"
+      ? "bg-gold text-white"
+      : tone === "tenue"
+        ? "bg-primary-soft text-primary-600"
+        : tone === "strong"
+          ? "bg-primary-700 text-white"
+          : "bg-primary-500 text-white";
   return (
     <div className="sticky top-0 z-[2] bg-bg-main py-1.5 flex justify-center">
       <span
@@ -312,6 +325,14 @@ function RoundLabel({ label, tone = "primary" }: { label: string; tone?: "primar
     </div>
   );
 }
+
+const ROUND_TONE: Record<RoundKey, "tenue" | "primary" | "strong"> = {
+  round32: "tenue",
+  round16: "tenue",
+  quarterfinals: "primary",
+  semifinals: "primary",
+  final: "strong"
+};
 
 /**
  * Pair wrapper: contains two sibling matches that feed the same child in the
@@ -382,12 +403,13 @@ function RoundColumn({
   hasNextRound: boolean;
 }) {
   const label = ROUND_LABEL[roundKey];
+  const tone = ROUND_TONE[roundKey];
   const columnWidthClass = "min-w-[180px] md:min-w-[200px] lg:flex-1 lg:min-w-0";
 
   if (matches.length === 0) {
     return (
       <div className={`flex flex-col gap-2 ${columnWidthClass}`}>
-        <RoundLabel label={label} />
+        <RoundLabel label={label} tone={tone} />
         <div className="flex-1 grid place-items-center py-4">
           <span className="text-[11px] text-text-muted">—</span>
         </div>
@@ -400,7 +422,7 @@ function RoundColumn({
     const match = matches[0];
     return (
       <div className={`flex flex-col gap-2 ${columnWidthClass}`}>
-        <RoundLabel label={label} />
+        <RoundLabel label={label} tone={tone} />
         <div className="flex-1 flex flex-col justify-around">
           <MatchCard
             match={match}
@@ -417,7 +439,7 @@ function RoundColumn({
 
   return (
     <div className={`flex flex-col gap-2 ${columnWidthClass}`}>
-      <RoundLabel label={label} />
+      <RoundLabel label={label} tone={tone} />
       <div className="flex-1 flex flex-col">
         {pairs.map((pair, idx) => (
           <PairGroup
