@@ -21,8 +21,8 @@ function buildPreTournamentSummary(overrides: Partial<PreTournamentSummary> = {}
 
 function buildTabItems(): PredictionsTabItem[] {
   return [
-    { key: "matches", label: "Partidos", completed: 2, total: 48 },
-    { key: "knockouts", label: "Knockouts", completed: 0, total: 16 }
+    { key: "matches", label: "Grupos", completed: 2, total: 48 },
+    { key: "knockouts", label: "Cruces", completed: 0, total: 16 }
   ];
 }
 
@@ -112,11 +112,11 @@ test("TournamentScreenView renders next-match hero as clickable card", () => {
   assert.match(html, /aria-label="Mexico vs South Africa"/);
 });
 
-test("TournamentScreenView shows simplified tabs Partidos/Knockouts", () => {
+test("TournamentScreenView shows simplified tabs Grupos/Cruces", () => {
   const html = renderView();
 
-  assert.match(html, /Partidos/);
-  assert.match(html, /Knockouts/);
+  assert.match(html, /Grupos/);
+  assert.match(html, /Cruces/);
   assert.doesNotMatch(html, /Mis Resultados/);
   assert.doesNotMatch(html, /Mis Predicciones/);
 });

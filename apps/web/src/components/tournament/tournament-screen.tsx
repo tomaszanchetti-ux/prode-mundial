@@ -248,13 +248,13 @@ export function TournamentScreen() {
     () => [
       {
         key: "matches",
-        label: "Partidos",
+        label: "Grupos",
         completed: countCompleted(groupMatches),
         total: groupMatches.length
       },
       {
         key: "knockouts",
-        label: "Knockouts",
+        label: "Cruces",
         completed: countCompleted(knockoutMatches),
         total: knockoutMatches.length
       }
