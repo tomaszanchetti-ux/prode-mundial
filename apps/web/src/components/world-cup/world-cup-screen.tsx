@@ -70,8 +70,6 @@ type WorldCupScreenViewProps = {
   groups: FullGroupStandings[];
   hero: ContextualHero | null;
   isLoading: boolean;
-  knockoutsFinished: number;
-  knockoutsTotal: number;
   onHeroAction: () => void;
   onOpenMatch: (matchId: string) => void;
   onRetry: () => void;
@@ -87,8 +85,6 @@ export function WorldCupScreenView({
   groups,
   hero,
   isLoading,
-  knockoutsFinished,
-  knockoutsTotal,
   onHeroAction,
   onOpenMatch,
   onRetry,
@@ -149,24 +145,12 @@ export function WorldCupScreenView({
             ))}
           </section>
         ) : (
-          <section className="grid gap-3">
-            <Card elevated style={{ gap: 4, padding: 12 }}>
-              <span className="typo-small text-text-muted">CRUCES OFICIALES</span>
-              <p className="m-0 text-[13px] leading-[1.4] text-text-secondary">
-                {copyForLocale(
-                  locale,
-                  `${knockoutsFinished} de ${knockoutsTotal} partidos de knock-out disputados. Los cruces se completan a medida que cierra cada fase.`,
-                  `${knockoutsFinished} of ${knockoutsTotal} knockout matches played. Matchups fill in as each round closes.`
-                )}
-              </p>
-            </Card>
-            <TournamentBracket
-              bracket={bracket}
-              readiness={bracketReadiness}
-              onOpenMatch={onOpenMatch}
-              showReadinessBanner={false}
-            />
-          </section>
+          <TournamentBracket
+            bracket={bracket}
+            readiness={bracketReadiness}
+            onOpenMatch={onOpenMatch}
+            showReadinessBanner={false}
+          />
         )
       ) : null}
     </div>
@@ -254,8 +238,6 @@ export function WorldCupScreen() {
     [sortedItems]
   );
 
-  const knockoutsFinished = knockoutMatches.filter((m) => m.status === "finished").length;
-
   const handleHeroAction = () => {
     if (!hero) return;
     setActiveMatchId(hero.match.matchId);
@@ -271,8 +253,6 @@ export function WorldCupScreen() {
         groups={groups}
         hero={hero}
         isLoading={isLoading}
-        knockoutsFinished={knockoutsFinished}
-        knockoutsTotal={knockoutMatches.length}
         onHeroAction={handleHeroAction}
         onOpenMatch={(matchId) => setActiveMatchId(matchId)}
         onRetry={() => setReloadKey((k) => k + 1)}
