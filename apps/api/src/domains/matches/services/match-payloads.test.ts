@@ -102,7 +102,7 @@ test("toMatchSummary resolves knockout placeholders from bracket slots", () => {
   );
 
   assert.equal(summary.homeTeam.teamId, "slot:2A");
-  assert.equal(summary.homeTeam.name, "Por definir (2A)");
+  assert.equal(summary.homeTeam.name, "2A");
   assert.equal(summary.awayTeam.teamId, "slot:2B");
   assert.equal(summary.isFinished, false);
   assert.equal(summary.isScored, false);

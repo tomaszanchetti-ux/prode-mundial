@@ -1,5 +1,6 @@
 import {
   MATCH_SCORING_RULES,
+  buildCompactSlotLabel,
   computeStageCompletion,
   type MatchDetail,
   type MatchStatus,
@@ -72,17 +73,15 @@ function formatPredictionSummary(prediction: StoredPrediction | null) {
   return baseSummary;
 }
 
-// Slots up to 4 chars (1A, 2B, W49, L73) fit nicely between parens and give
-// useful context. Longer slots (legacy WINNER_SF_N, 3ABCDF, etc.) overflow
-// the modal/card layout, so we drop the suffix and just say "Por definir".
-const SLOT_NAME_HINT_MAX_LENGTH = 4;
-
+// For knockout matches with unresolved slots we surface the compact slot
+// label (1B, 2A, W49, L73, 3ºABCDF) directly as the team name — same vocab
+// as the bracket view, no "Por definir" prefix. If there is no slot at all
+// we fall back to "Por definir".
 function buildSlotTeamRef(slot: string | null | undefined, fallbackKey: string): TeamRef {
   if (slot) {
-    const showHint = slot.length <= SLOT_NAME_HINT_MAX_LENGTH;
     return {
       teamId: `slot:${slot}`,
-      name: showHint ? `Por definir (${slot})` : "Por definir",
+      name: buildCompactSlotLabel(slot),
       ...resolveTeamIdentity(null)
     };
   }
