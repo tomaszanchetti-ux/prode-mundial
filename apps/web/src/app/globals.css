@@ -12,6 +12,7 @@
   --color-primary-400: #4285F4;
   --color-primary-500: #0052CC;
   --color-primary-600: #0747A6;
+  --color-primary-700: #03307A;
   --color-primary-soft: rgba(0, 82, 204, 0.10);
   --color-primary-surface: rgba(0, 82, 204, 0.06);
 
@@ -787,6 +788,13 @@
  */
 .bracket-scroll-wrap {
   position: relative;
+  /*
+   * min-width:0 is the classic fix for a grid/flex child that contains an
+   * overflow:auto scroller: without it, the default min-width:auto lets the
+   * scroller's inner min-content (the wide bracket section) push the parent
+   * cell, which in turn stretches the whole page horizontally on mobile.
+   */
+  min-width: 0;
 }
 
 .bracket-scroll-wrap::before,
