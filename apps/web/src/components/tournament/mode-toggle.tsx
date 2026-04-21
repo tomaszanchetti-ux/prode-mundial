@@ -16,7 +16,7 @@ const OPTIONS: Array<{ mode: TournamentMode; label: string }> = [
 
 export function ModeToggle({ activeMode, onSelect }: ModeToggleProps) {
   return (
-    <div className="mode-toggle" role="tablist" aria-label="Modo Mi Mundial">
+    <div className="mode-toggle" role="tablist" aria-label="Modo Predicciones">
       {OPTIONS.map((option) => {
         const isActive = option.mode === activeMode;
 

@@ -62,14 +62,14 @@ export function HomePreTournamentView({
         <NextMatchHero {...heroProps} />
       ) : (
         <Card elevated className="hero-worldcup-bg" style={{ gap: 12, padding: 20 }}>
-          <span className="typo-small text-text-muted">MI MUNDIAL</span>
+          <span className="typo-small text-text-muted">PREDICCIONES</span>
           <h1 className="typo-h1 m-0 text-text-primary">
             {copyForLocale(locale, "Completa tu Mundial", "Complete your World Cup")}
           </h1>
           <div className="flex gap-2.5 flex-wrap">
             <Button onClick={onOpenMatches}>{copyForLocale(locale, "Ver calendario", "See schedule")}</Button>
             <Button variant="ghost" onClick={onOpenTournament}>
-              {copyForLocale(locale, "Ir a Mi Mundial", "Go to My World Cup")}
+              {copyForLocale(locale, "Ir a Predicciones", "Go to Predictions")}
             </Button>
           </div>
         </Card>

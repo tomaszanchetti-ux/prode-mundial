@@ -159,7 +159,7 @@ export function WorldCupScreenView({
       ) : null}
 
       {errorMessage ? (
-        <ErrorCard title={copyForLocale(locale, "No pudimos cargar El Mundial", "Could not load the World Cup")} message={errorMessage} onRetry={onRetry} />
+        <ErrorCard title={copyForLocale(locale, "No pudimos cargar la Tabla", "Could not load the Standings")} message={errorMessage} onRetry={onRetry} />
       ) : null}
 
       {!isLoading && !errorMessage ? (
@@ -239,7 +239,7 @@ export function WorldCupScreen() {
               ? error.message
               : error instanceof Error
                 ? error.message
-                : "No pudimos cargar El Mundial."
+                : "No pudimos cargar la Tabla."
           );
         }
       } finally {

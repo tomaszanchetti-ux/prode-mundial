@@ -224,7 +224,7 @@ export function TournamentScreenView({
       ) : null}
 
       {errorMessage ? (
-        <ErrorCard title="No pudimos cargar Mi Mundial" message={errorMessage} onRetry={onRetry} />
+        <ErrorCard title="No pudimos cargar Predicciones" message={errorMessage} onRetry={onRetry} />
       ) : null}
 
       {!isLoading && !errorMessage ? (
@@ -317,7 +317,7 @@ export function TournamentScreen() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorMessage(error instanceof ApiClientError ? error.message : error instanceof Error ? error.message : "No pudimos cargar Mi Mundial.");
+          setErrorMessage(error instanceof ApiClientError ? error.message : error instanceof Error ? error.message : "No pudimos cargar Predicciones.");
         }
       } finally {
         if (!cancelled) {
