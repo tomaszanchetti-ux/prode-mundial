@@ -218,7 +218,7 @@ function BracketSideRow({
 
   if (side.team) {
     return (
-      <div className={`flex items-center gap-2 min-w-0 rounded-sm pl-2 py-1 transition-colors ${winnerClass}`}>
+      <div className={`flex items-center gap-1.5 min-w-0 rounded-sm pl-1.5 py-0.5 transition-colors ${winnerClass}`}>
         <TeamIdentity
           team={{
             teamName: side.team.name,
@@ -236,9 +236,9 @@ function BracketSideRow({
   }
 
   return (
-    <div className="flex items-center gap-2 min-w-0 text-text-muted pl-2 py-1 border-l-4 border-transparent">
-      <div className="w-5 h-5 rounded-full border border-dashed border-border-default" aria-hidden />
-      <span className="text-[12px] leading-[1.3] truncate tabular-nums">{buildCompactSlotLabel(side.slot)}</span>
+    <div className="flex items-center gap-1.5 min-w-0 text-text-muted pl-1.5 py-0.5 border-l-4 border-transparent">
+      <div className="w-4 h-4 rounded-full border border-dashed border-border-default" aria-hidden />
+      <span className="text-[11px] leading-[1.25] truncate tabular-nums font-semibold">{buildCompactSlotLabel(side.slot)}</span>
     </div>
   );
 }
@@ -280,19 +280,19 @@ function MatchCard({
     <button
       type="button"
       onClick={onOpen}
-      className={`relative z-[1] text-left rounded-lg border-2 ${accentClass} ${sideBgClass} shadow-card hover:shadow-modal transition-all p-3 cursor-pointer grid gap-2 w-full`.trim()}
+      className={`relative z-[1] text-left rounded-lg border-2 ${accentClass} ${sideBgClass} shadow-card hover:shadow-modal transition-all px-2 py-2 cursor-pointer grid gap-1.5 w-full`.trim()}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <span
-          className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded ${
+          className={`text-[9px] font-bold font-mono px-1 py-0.5 rounded leading-none ${
             accentTone === "bronze" ? "bg-gold-soft text-gold" : "bg-primary-soft text-primary-600"
           }`}
         >
           {match.officialMatchNumber ? `M${match.officialMatchNumber}` : "—"}
         </span>
-        <span className="text-[10px] text-text-muted tabular-nums">{kickoffLabel}</span>
+        <span className="text-[9px] text-text-muted tabular-nums leading-none">{kickoffLabel}</span>
       </div>
-      <div className="grid gap-1">
+      <div className="grid gap-0.5">
         <BracketSideRow side={match.home} isWinner={homeIsWinner} hasWinnerDecided={hasWinnerDecided} />
         <BracketSideRow side={match.away} isWinner={awayIsWinner} hasWinnerDecided={hasWinnerDecided} />
       </div>
@@ -382,7 +382,7 @@ function RoundColumn({
   hasNextRound: boolean;
 }) {
   const label = ROUND_LABEL[roundKey];
-  const columnWidthClass = "min-w-[200px] md:min-w-[220px] lg:flex-1 lg:min-w-0";
+  const columnWidthClass = "min-w-[180px] md:min-w-[200px] lg:flex-1 lg:min-w-0";
 
   if (matches.length === 0) {
     return (
