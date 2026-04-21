@@ -54,13 +54,13 @@ export function NextMatchHero({
         {score ? (
           <div className="flex items-center gap-2 shrink-0">
             <span className="text-[36px] leading-none font-black tracking-tight text-text-primary tabular-nums">{score.home}</span>
-            <span className="text-[24px] leading-none font-bold text-text-muted">–</span>
+            <span className="text-[24px] leading-none font-light text-text-muted">–</span>
             <span className="text-[36px] leading-none font-black tracking-tight text-text-primary tabular-nums">{score.away}</span>
           </div>
         ) : (
           <div className="flex items-center gap-2 shrink-0">
             <span className="text-[36px] leading-none font-black tracking-tight text-text-muted tabular-nums">–</span>
-            <span className="text-[24px] leading-none font-bold text-text-muted opacity-0">–</span>
+            <span className="text-[24px] leading-none font-light text-text-muted opacity-0">–</span>
             <span className="text-[36px] leading-none font-black tracking-tight text-text-muted tabular-nums">–</span>
           </div>
         )}
@@ -76,7 +76,7 @@ export function NextMatchHero({
             <span className="typo-body text-text-secondary text-center">{metaLabel}</span>
           ) : null}
           {helperText ? (
-            <span className="typo-small text-text-muted text-center">{helperText}</span>
+            <span className="typo-meta text-center">{helperText}</span>
           ) : null}
         </div>
       ) : null}

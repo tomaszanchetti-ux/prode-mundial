@@ -37,7 +37,7 @@ export function MatchRow({ match, onClick, locale: localeProp }: MatchRowProps) 
           {score ? (
             <>
               <span className="text-text-primary">{score.home}</span>
-              <span className="text-text-muted font-bold">–</span>
+              <span className="text-text-muted font-light">–</span>
               <span className="text-text-primary">{score.away}</span>
             </>
           ) : (
@@ -55,7 +55,7 @@ export function MatchRow({ match, onClick, locale: localeProp }: MatchRowProps) 
           </span>
         </div>
       </div>
-      <span className="typo-small text-text-muted text-center">{kickoff}</span>
+      <span className="typo-meta text-center">{kickoff}</span>
     </button>
   );
 }

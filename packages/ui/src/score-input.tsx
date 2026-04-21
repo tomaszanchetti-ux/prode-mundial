@@ -99,7 +99,7 @@ export function ScoreInput({
     <div className="grid gap-4">
       <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
         <ScoreStepper label={homeLabel} team={homeTeam} value={homeValue} disabled={disabled} justSaved={justSaved} onChange={onHomeChange} />
-        <span aria-hidden="true" className="text-[13px] font-bold tracking-[0.1em] text-text-muted mt-[47px]">
+        <span aria-hidden="true" className="text-[13px] font-light tracking-[0.1em] text-text-muted mt-[47px]">
           –
         </span>
         <ScoreStepper label={awayLabel} team={awayTeam} value={awayValue} disabled={disabled} justSaved={justSaved} onChange={onAwayChange} />

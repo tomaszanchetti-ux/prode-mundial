@@ -79,6 +79,12 @@
   .typo-lead { font-size: 16px; font-weight: 500; line-height: 1.5; }
   .typo-body { font-size: 15px; font-weight: 400; line-height: 1.5; }
   .typo-small { font-size: 12px; font-weight: 600; line-height: 1.35; letter-spacing: 0.04em; }
+  /*
+   * Metadata inline (kickoff time, helper text, venue): light peso 400, sin
+   * tracking ni uppercase. Se usa cuando el texto debe ceder protagonismo a
+   * equipos (bold) y marcador (extrabold) en match rows / hero.
+   */
+  .typo-meta { font-size: 12px; font-weight: 400; line-height: 1.4; color: var(--color-text-muted); }
   .typo-eyebrow {
     font-size: 11px; font-weight: 600; line-height: 1.35;
     letter-spacing: 0.06em; text-transform: uppercase;
