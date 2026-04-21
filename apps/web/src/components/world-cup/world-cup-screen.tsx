@@ -15,37 +15,25 @@ import { pickContextualHeroMatch, type ContextualHero } from "@/lib/hero/pick-co
 import { toHeroProps } from "@/lib/hero/to-hero-props";
 import { WORLD_CUP_2026_OFFICIAL_GROUPS } from "@/lib/world-cup/groups";
 import { buildOfficialBracket } from "@/lib/world-cup/build-official-bracket";
-import { PhaseTabs, type PhaseStatus, type PhaseTabItem, type TournamentPhase } from "@/components/tournament/phase-tabs";
 import { TournamentBracket } from "@/components/tournament/tournament-bracket";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { canEditPrediction } from "@/lib/matches/editability";
+import { SimpleTabs, type SimpleTabItem } from "@/components/ui/simple-tabs";
 import { WorldCupGroupCard } from "./world-cup-group-card";
 
-// World Cup uses 2 tabs (mirror of `/tournament` Mis Resultados): official
-// groups + official knockout bracket. Both are read-only projections of the
-// SOT — no simulator, no predictions.
-type WorldCupTab = Extract<TournamentPhase, "groups" | "bracket">;
+// World Cup uses 2 tabs: official groups + official knockout bracket.
+// Both are read-only projections of the SOT — no simulator, no predictions.
+type WorldCupTab = "groups" | "bracket";
 
 const TAB_LABELS: Record<WorldCupTab, string> = {
   groups: "Grupos",
-  bracket: "Knock-outs"
+  bracket: "Cruces"
 };
 
 function compareMatchesChronologically(left: MatchSummary, right: MatchSummary) {
   const kickoffDifference = new Date(left.kickoffAt).getTime() - new Date(right.kickoffAt).getTime();
   if (kickoffDifference !== 0) return kickoffDifference;
   return left.matchId.localeCompare(right.matchId);
-}
-
-function resolveOfficialPhaseStatus(matches: MatchSummary[]): PhaseStatus {
-  if (matches.length === 0) return "locked";
-
-  const finished = matches.filter((m) => m.status === "finished").length;
-
-  if (finished === matches.length) return "scored";
-  if (finished > 0) return "partial";
-  if (matches.some((m) => m.status === "live")) return "partial";
-  return "empty";
 }
 
 function toGroupMatchResults(groupMatches: MatchSummary[]): GroupMatchResult[] {
@@ -89,7 +77,7 @@ type WorldCupScreenViewProps = {
   onOpenMatch: (matchId: string) => void;
   onRetry: () => void;
   onTabSelect: (tab: WorldCupTab) => void;
-  phaseItems: PhaseTabItem[];
+  tabItems: SimpleTabItem<WorldCupTab>[];
   totalMatchesFinished: number;
   totalMatches: number;
 };
@@ -109,7 +97,7 @@ export function WorldCupScreenView({
   onOpenMatch,
   onRetry,
   onTabSelect,
-  phaseItems,
+  tabItems,
   totalMatchesFinished,
   totalMatches
 }: WorldCupScreenViewProps) {
@@ -149,7 +137,7 @@ export function WorldCupScreenView({
         </Card>
       )}
 
-      <PhaseTabs items={phaseItems} activePhase={activeTab} onSelect={(phase) => onTabSelect(phase as WorldCupTab)} />
+      <SimpleTabs items={tabItems} activeTab={activeTab} onSelect={onTabSelect} ariaLabel="Resultados" />
 
       {isLoading ? (
         <div className="grid gap-3">
@@ -283,24 +271,12 @@ export function WorldCupScreen() {
     [sortedItems]
   );
 
-  const phaseItems = useMemo<PhaseTabItem[]>(
+  const tabItems = useMemo<SimpleTabItem<WorldCupTab>[]>(
     () => [
-      {
-        phase: "groups",
-        label: TAB_LABELS.groups,
-        completed: groupMatches.filter((m) => m.status === "finished").length,
-        total: groupMatches.length,
-        status: resolveOfficialPhaseStatus(groupMatches)
-      },
-      {
-        phase: "bracket",
-        label: TAB_LABELS.bracket,
-        completed: knockoutMatches.filter((m) => m.status === "finished").length,
-        total: knockoutMatches.length,
-        status: resolveOfficialPhaseStatus(knockoutMatches)
-      }
+      { key: "groups", label: TAB_LABELS.groups },
+      { key: "bracket", label: TAB_LABELS.bracket }
     ],
-    [groupMatches, knockoutMatches]
+    []
   );
 
   const hero = useMemo(
@@ -337,7 +313,7 @@ export function WorldCupScreen() {
         onOpenMatch={(matchId) => setActiveMatchId(matchId)}
         onRetry={() => setReloadKey((k) => k + 1)}
         onTabSelect={setActiveTab}
-        phaseItems={phaseItems}
+        tabItems={tabItems}
         totalMatchesFinished={totalMatchesFinished}
         totalMatches={sortedItems.length}
       />
