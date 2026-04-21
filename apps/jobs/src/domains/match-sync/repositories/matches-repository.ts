@@ -10,6 +10,12 @@ export class MatchSyncMatchesRepository {
   }
 
   async updateMatch(matchId: string, patch: Partial<SyncStoredMatch>): Promise<void> {
+    if ("kickoffAt" in patch) {
+      throw new Error(
+        `Refusing to overwrite kickoffAt for match ${matchId}. ` +
+          `Kickoffs are seeded from world-cup-2026-canonical-matches.json and must not be mutated by sync jobs.`
+      );
+    }
     await matchesCollection.doc(matchId).set(patch, { merge: true });
   }
 }

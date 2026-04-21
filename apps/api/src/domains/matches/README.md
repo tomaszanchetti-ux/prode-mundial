@@ -2,7 +2,7 @@
 
 ## World Cup 2026 base seed
 
-`CARD 2` usa el fixture normalizado en `data/world-cup-2026-normalized-matches.json` como base reproducible para sembrar:
+Usa el fixture canónico en `data/world-cup-2026-canonical-matches.json` como base reproducible para sembrar:
 
 - `teams`
 - `groups`

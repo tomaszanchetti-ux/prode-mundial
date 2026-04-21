@@ -4,7 +4,7 @@ import {
   WORLD_CUP_2026_TEAMS,
   type WorldCup2026NormalizedMatch
 } from "../data/world-cup-2026";
-import normalizedSchedule from "../data/world-cup-2026-normalized-matches.json";
+import normalizedSchedule from "../data/world-cup-2026-canonical-matches.json";
 import { firestore } from "../../../server/firebase/firebase-admin";
 
 type TeamSeed = {
