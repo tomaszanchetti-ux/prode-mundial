@@ -37,7 +37,7 @@ export function NextMatchHero({
       onClick={onAction}
       disabled={disabled}
       aria-label={title}
-      className={`text-left w-full disabled:opacity-70 disabled:cursor-not-allowed transition-shadow ${bgClass} ${glowClass}`}
+      className={`text-left w-full cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed transition-shadow ${bgClass} ${glowClass}`}
       style={{ padding: 0, overflow: "hidden" }}
     >
       {/* ── Eyebrow + Status ── */}
@@ -52,13 +52,13 @@ export function NextMatchHero({
           <TeamIdentity team={homeTeam} size="lg" emphasis="hero" align="center" />
         </div>
         {score ? (
-          <div className="flex items-baseline gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <span className="text-[36px] leading-none font-black tracking-tight text-text-primary tabular-nums">{score.home}</span>
             <span className="text-[24px] leading-none font-bold text-text-muted">–</span>
             <span className="text-[36px] leading-none font-black tracking-tight text-text-primary tabular-nums">{score.away}</span>
           </div>
         ) : (
-          <div className="flex items-baseline gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <span className="text-[36px] leading-none font-black tracking-tight text-text-muted tabular-nums">–</span>
             <span className="text-[24px] leading-none font-bold text-text-muted opacity-0">–</span>
             <span className="text-[36px] leading-none font-black tracking-tight text-text-muted tabular-nums">–</span>
