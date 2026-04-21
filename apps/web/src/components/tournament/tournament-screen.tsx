@@ -141,9 +141,9 @@ export function TournamentScreenView({
 
       {!isLoading && !errorMessage ? (
         activeTab === "matches" ? (
-          <TournamentFlatList matches={groupMatches} onOpenMatch={onOpenMatch} />
+          <TournamentFlatList matches={groupMatches} onOpenMatch={onOpenMatch} adSlotEvery={6} />
         ) : knockoutMatches.length > 0 ? (
-          <TournamentFlatList matches={knockoutMatches} onOpenMatch={onOpenMatch} />
+          <TournamentFlatList matches={knockoutMatches} onOpenMatch={onOpenMatch} adSlotEvery={6} />
         ) : projection ? (
           <div className="grid gap-2">
             <span className="typo-small text-text-muted px-1">
