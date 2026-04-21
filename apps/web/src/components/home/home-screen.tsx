@@ -2,11 +2,11 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { APP_ROUTES, type ChampionPickResponse, type LeagueSummary, type MatchSummary, type PointsResponse, type PreTournamentSummary, type SubChampionPickResponse } from "@prode/shared";
+import { APP_ROUTES, type BestPlayerPickResponse, type ChampionPickResponse, type LeagueSummary, type MatchSummary, type PointsResponse, type PreTournamentSummary, type SubChampionPickResponse } from "@prode/shared";
 import { useAuth } from "@/components/auth/auth-provider";
 import { EnableNotificationsBanner } from "@/components/notifications/enable-notifications-banner";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
-import { ApiClientError, getChampionPick, getMatches, getMyLeagues, getPoints, getPreTournamentSummary, getSubChampionPick } from "@/lib/api/client";
+import { ApiClientError, getBestPlayerPick, getChampionPick, getMatches, getMyLeagues, getPoints, getPreTournamentSummary, getSubChampionPick } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
 import { compareMatchesChronologically, pickPriorityMatch } from "./home-helpers";
 import { HomeInTournamentView } from "./home-in-tournament-view";
@@ -19,6 +19,7 @@ export type HomeScreenViewProps = {
   points: PointsResponse | null;
   championPick: ChampionPickResponse | null;
   subChampionPick: SubChampionPickResponse | null;
+  bestPlayerPick: BestPlayerPickResponse | null;
   preTournamentSummary: PreTournamentSummary | null;
   isLoading: boolean;
   errorMessage: string | null;
@@ -51,6 +52,7 @@ export function HomeScreen() {
   const [points, setPoints] = useState<PointsResponse | null>(null);
   const [championPick, setChampionPick] = useState<ChampionPickResponse | null>(null);
   const [subChampionPick, setSubChampionPick] = useState<SubChampionPickResponse | null>(null);
+  const [bestPlayerPick, setBestPlayerPick] = useState<BestPlayerPickResponse | null>(null);
   const [preTournamentSummary, setPreTournamentSummary] = useState<PreTournamentSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -74,13 +76,14 @@ export function HomeScreen() {
 
       try {
         const token = await user.getIdToken();
-        const [matchesResponse, summaryResponse, leaguesResponse, pointsResponse, championResponse, subChampionResponse] = await Promise.all([
+        const [matchesResponse, summaryResponse, leaguesResponse, pointsResponse, championResponse, subChampionResponse, bestPlayerResponse] = await Promise.all([
           getMatches(token, { limit: 120 }),
           getPreTournamentSummary(token),
           getMyLeagues(token).catch(() => ({ items: [] as LeagueSummary[] })),
           getPoints(token).catch(() => null),
           getChampionPick(token).catch(() => null),
-          getSubChampionPick(token).catch(() => null)
+          getSubChampionPick(token).catch(() => null),
+          getBestPlayerPick(token).catch(() => null)
         ]);
 
         if (!cancelled) {
@@ -89,6 +92,7 @@ export function HomeScreen() {
           setPoints(pointsResponse);
           setChampionPick(championResponse);
           setSubChampionPick(subChampionResponse);
+          setBestPlayerPick(bestPlayerResponse);
           setPreTournamentSummary(summaryResponse);
         }
       } catch (error) {
@@ -136,6 +140,7 @@ export function HomeScreen() {
         points={points}
         championPick={championPick}
         subChampionPick={subChampionPick}
+        bestPlayerPick={bestPlayerPick}
         preTournamentSummary={preTournamentSummary}
         isLoading={isLoading}
         errorMessage={errorMessage}

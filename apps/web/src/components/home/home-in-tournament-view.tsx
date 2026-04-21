@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import type { ChampionPickResponse, LeagueSummary, MatchSummary, PointsResponse, PreTournamentSummary, SubChampionPickResponse } from "@prode/shared";
+import type { BestPlayerPickResponse, ChampionPickResponse, LeagueSummary, MatchSummary, PointsResponse, PreTournamentSummary, SubChampionPickResponse } from "@prode/shared";
 import { AdSlotCard, Card, NextMatchHero } from "@prode/ui";
 import { MiScoreWidget } from "./mi-score-widget";
 import { MisPicksWidget } from "./mis-picks-widget";
@@ -21,6 +21,7 @@ type HomeInTournamentViewProps = {
   points: PointsResponse | null;
   championPick: ChampionPickResponse | null;
   subChampionPick: SubChampionPickResponse | null;
+  bestPlayerPick: BestPlayerPickResponse | null;
   preTournamentSummary: PreTournamentSummary | null;
   isLoading: boolean;
   errorMessage: string | null;
@@ -39,6 +40,7 @@ export function HomeInTournamentView({
   points,
   championPick,
   subChampionPick,
+  bestPlayerPick,
   preTournamentSummary,
   isLoading,
   errorMessage,
@@ -95,6 +97,7 @@ export function HomeInTournamentView({
       <MisPicksWidget
         championPick={championPick}
         subChampionPick={subChampionPick}
+        bestPlayerPick={bestPlayerPick}
         onOpenPicks={onOpenPicks}
       />
 

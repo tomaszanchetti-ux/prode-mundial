@@ -1,4 +1,5 @@
 import {
+  resolveAliveTeamsAfterGroups,
   resolvePickWindow,
   type ChampionPickResponse,
   type ChampionPickStatus,
@@ -11,6 +12,7 @@ import {
 import { ApiError } from "../../../server/errors/api-error";
 import { matchesRepository } from "../../matches/repositories/matches-repository";
 import type { StoredMatch } from "../../matches/types";
+import { tuMundialService } from "../../tournament/services/tu-mundial-service";
 import { championPicksRepository } from "../repositories/macro-picks-repository";
 import { championScoringLogsRepository } from "../repositories/macro-scoring-logs-repository";
 import type { StoredChampionPick } from "../types";
@@ -223,11 +225,24 @@ export class ChampionPickService {
       throw new ApiError(409, "ADJUSTMENT_ALREADY_USED", "Champion adjustment was already used.");
     }
 
+    // EPIC 19 — hard-block post-grupos: no se puede ajustar a un equipo que
+    // quedó eliminado. Si el bracket aún no está hidratado, no bloqueamos.
+    const nextTeamId = input.championTeamId.trim();
+    const projection = await tuMundialService.getTournamentProjectionForUser(userId, now);
+    const alive = resolveAliveTeamsAfterGroups(projection.bracket);
+    if (alive.size > 0 && !alive.has(nextTeamId)) {
+      throw new ApiError(
+        409,
+        "CHAMPION_TEAM_ELIMINATED",
+        "El equipo seleccionado fue eliminado en fase de grupos."
+      );
+    }
+
     const nowIso = now.toISOString();
 
     const nextPick: StoredChampionPick = {
       ...existing,
-      adjustedChampionTeamId: input.championTeamId.trim(),
+      adjustedChampionTeamId: nextTeamId,
       isLocked: true,
       isAdjusted: true,
       adjustedAt: nowIso,

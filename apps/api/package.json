@@ -16,6 +16,7 @@
     "reset:competition-demo": "tsx src/domains/leagues/scripts/reset-competition-demo.ts",
     "fresh:competition-demo": "tsx src/domains/leagues/scripts/fresh-competition-demo.ts",
     "upsert:macro-results": "tsx src/domains/macro-picks/scripts/upsert-macro-results.ts",
+    "upsert:best-player-result": "tsx src/domains/macro-picks/scripts/upsert-best-player-result.ts",
     "score:macro": "tsx src/domains/macro-picks/scripts/score-macro.ts",
     "rebuild:macro": "tsx src/domains/macro-picks/scripts/rebuild-macro-scoring.ts"
   },

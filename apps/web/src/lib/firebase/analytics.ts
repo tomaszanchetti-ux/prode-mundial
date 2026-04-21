@@ -42,6 +42,7 @@ export type TrackEvent =
   | "prediction_saved"
   | "champion_saved"
   | "sub_champion_saved"
+  | "best_player_saved"
   | "league_created"
   | "league_joined"
   | "invite_shared"
