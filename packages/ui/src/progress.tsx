@@ -37,9 +37,13 @@ export function ProgressCompact({ items }: ProgressCompactProps) {
 
 export function AdSlotCard({ description, title = "Publicidad" }: AdSlotCardProps) {
   return (
-    <Card className="ad-slot-bg" style={{ gap: 8, padding: 16 }}>
-      <span className="typo-small text-text-muted">{title}</span>
-      <p className="typo-body m-0 text-text-secondary">{description}</p>
+    <Card className="ad-slot-bg" style={{ gap: 4, padding: 12, minHeight: 88 }}>
+      <div className="flex flex-col items-center justify-center gap-1 h-full text-center">
+        <span className="typo-small text-text-muted uppercase tracking-widest">{title}</span>
+        {description ? (
+          <span className="text-[11px] leading-[1.3] text-text-muted max-w-[320px]">{description}</span>
+        ) : null}
+      </div>
     </Card>
   );
 }

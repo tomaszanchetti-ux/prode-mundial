@@ -133,7 +133,7 @@ export type ProgressCompactProps = {
 
 export type AdSlotCardProps = {
   title?: string;
-  description: string;
+  description?: string;
 };
 
 export type MatchCardProps = {
