@@ -1,9 +1,12 @@
 import type {
+  AdjustBestPlayerInput,
+  AdjustBestPlayerResponse,
   AdjustChampionInput,
   AdjustChampionResponse,
   AdjustSubChampionInput,
   AdjustSubChampionResponse,
   ApiResponse,
+  BestPlayerPickResponse,
   ChampionPickResponse,
   CreateLeagueInput,
   JoinLeagueInput,
@@ -17,6 +20,8 @@ import type {
   PointsResponse,
   PreTournamentSummary,
   PublicBootstrap,
+  SaveBestPlayerPickInput,
+  SaveBestPlayerPickResponse,
   SaveChampionPickInput,
   SaveChampionPickResponse,
   SaveMatchPredictionInput,
@@ -30,10 +35,13 @@ import type {
   UserProfile
 } from "@prode/shared";
 import {
+  adjustBestPlayerInputSchema,
+  adjustBestPlayerResponseSchema,
   adjustChampionInputSchema,
   adjustChampionResponseSchema,
   adjustSubChampionInputSchema,
   adjustSubChampionResponseSchema,
+  bestPlayerPickResponseSchema,
   championPickResponseSchema,
   createLeagueInputSchema,
   joinLeagueInputSchema,
@@ -46,6 +54,8 @@ import {
   pointsResponseSchema,
   preTournamentSummarySchema,
   publicBootstrapSchema,
+  saveBestPlayerPickInputSchema,
+  saveBestPlayerPickResponseSchema,
   saveChampionPickInputSchema,
   saveChampionPickResponseSchema,
   saveMatchPredictionResponseSchema,
@@ -284,6 +294,61 @@ export async function adjustSubChampionPick(
   }
 
   return adjustSubChampionResponseSchema.parse(await parseJson<AdjustSubChampionResponse>(response));
+}
+
+export async function getBestPlayerPick(token: string): Promise<BestPlayerPickResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/best-player`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load best-player pick (${response.status}).`);
+  }
+
+  return bestPlayerPickResponseSchema.parse(await parseJson<BestPlayerPickResponse>(response));
+}
+
+export async function saveBestPlayerPick(
+  token: string,
+  input: SaveBestPlayerPickInput
+): Promise<SaveBestPlayerPickResponse> {
+  const payload = saveBestPlayerPickInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/best-player`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to save best-player pick (${response.status}).`);
+  }
+
+  return saveBestPlayerPickResponseSchema.parse(await parseJson<SaveBestPlayerPickResponse>(response));
+}
+
+export async function adjustBestPlayerPick(
+  token: string,
+  input: AdjustBestPlayerInput
+): Promise<AdjustBestPlayerResponse> {
+  const payload = adjustBestPlayerInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/best-player/adjustment`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to confirm best-player adjustment (${response.status}).`);
+  }
+
+  return adjustBestPlayerResponseSchema.parse(await parseJson<AdjustBestPlayerResponse>(response));
 }
 
 export async function getPoints(token: string): Promise<PointsResponse> {

@@ -2,29 +2,42 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import type {
+  BestPlayerPickResponse,
   ChampionPickResponse,
+  MacroPickWarning,
   SubChampionPickResponse,
   TournamentPickWindow,
   TournamentProjectionResponse
 } from "@prode/shared";
-import { APP_ROUTES, classifyTeamBracketHalves, resolveTeamIdentity } from "@prode/shared";
+import {
+  APP_ROUTES,
+  BEST_PLAYER_ROSTER,
+  detectMacroPickWarnings,
+  getBestPlayerById,
+  resolveAliveTeamsAfterGroups,
+  resolveTeamIdentity
+} from "@prode/shared";
 import { Button, Card, ErrorCard, SkeletonCard, StatusTag, TeamIdentity } from "@prode/ui";
 import type { StatusTone } from "@prode/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import {
   ApiClientError,
+  adjustBestPlayerPick,
   adjustChampionPick,
   adjustSubChampionPick,
+  getBestPlayerPick,
   getChampionPick,
   getSubChampionPick,
   getTournamentProjection,
+  saveBestPlayerPick,
   saveChampionPick,
   saveSubChampionPick
 } from "@/lib/api/client";
 import { track } from "@/lib/firebase/analytics";
 import { WORLD_CUP_2026_OFFICIAL_GROUPS } from "@/lib/world-cup/groups";
 import { PickableList, type PickableListItem } from "@/components/tournament/pickable-list";
+import { PlayerPickableList } from "@/components/tournament/player-pickable-list";
 
 type PickTab = "champion" | "sub-champion" | "best-player";
 
@@ -113,6 +126,22 @@ function WindowChip({ pickWindow, pointValue, closesAt }: WindowChipProps) {
   return <StatusTag status={pickWindow === "A" ? "live" : "closing-soon"} label={label} />;
 }
 
+// ── Warning banner ──────────────────────────────────────
+
+type WarningBannerProps = {
+  title: string;
+  message: string;
+};
+
+function WarningBanner({ title, message }: WarningBannerProps) {
+  return (
+    <div className="grid gap-1 p-3 rounded-md alert-warning">
+      <strong className="text-[14px]">{title}</strong>
+      <p className="m-0 text-[13px] leading-[1.45]">{message}</p>
+    </div>
+  );
+}
+
 // ── Tab headers ─────────────────────────────────────────
 
 type TabsBarProps = {
@@ -161,10 +190,12 @@ export function PicksScreen() {
   );
   const [championPick, setChampionPick] = useState<ChampionPickResponse | null>(null);
   const [subChampionPick, setSubChampionPick] = useState<SubChampionPickResponse | null>(null);
+  const [bestPlayerPick, setBestPlayerPick] = useState<BestPlayerPickResponse | null>(null);
   const [projection, setProjection] = useState<TournamentProjectionResponse | null>(null);
 
   const [championSelected, setChampionSelected] = useState<string | null>(null);
   const [subChampionSelected, setSubChampionSelected] = useState<string | null>(null);
+  const [bestPlayerSelected, setBestPlayerSelected] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -186,18 +217,21 @@ export function PicksScreen() {
 
       try {
         const token = await user.getIdToken();
-        const [nextChampion, nextSub, nextProjection] = await Promise.all([
+        const [nextChampion, nextSub, nextBestPlayer, nextProjection] = await Promise.all([
           getChampionPick(token),
           getSubChampionPick(token),
+          getBestPlayerPick(token),
           getTournamentProjection(token).catch(() => null)
         ]);
 
         if (!cancelled) {
           setChampionPick(nextChampion);
           setSubChampionPick(nextSub);
+          setBestPlayerPick(nextBestPlayer);
           setProjection(nextProjection);
           setChampionSelected(nextChampion.adjustedChampionTeamId ?? nextChampion.championTeamId);
           setSubChampionSelected(nextSub.adjustedSubChampionTeamId ?? nextSub.subChampionTeamId);
+          setBestPlayerSelected(nextBestPlayer.adjustedBestPlayerId ?? nextBestPlayer.bestPlayerId);
         }
       } catch (error) {
         if (!cancelled) {
@@ -300,6 +334,40 @@ export function PicksScreen() {
     }
   }
 
+  async function handleSaveBestPlayer() {
+    if (!user || !bestPlayerSelected) return;
+    setIsSaving(true);
+    setErrorMessage(null);
+    setFeedbackMessage(null);
+    try {
+      const token = await user.getIdToken();
+      const isAdjustment = bestPlayerPick?.status === "adjustment_available";
+      if (isAdjustment) {
+        const response = await adjustBestPlayerPick(token, { bestPlayerId: bestPlayerSelected });
+        setFeedbackMessage(response.penaltyNotice);
+      } else {
+        await saveBestPlayerPick(token, { bestPlayerId: bestPlayerSelected });
+        setFeedbackMessage("Mi Balón de Oro quedó guardado.");
+      }
+      track("best_player_saved", {
+        playerId: bestPlayerSelected,
+        pickWindow: bestPlayerPick?.pickWindow ?? null,
+        isAdjustment
+      });
+      setReloadKey((k) => k + 1);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof ApiClientError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "No pudimos guardar tu Balón de Oro."
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   // Champion tab derived state
   const championStatusMeta = resolveStatusMeta(championPick?.status);
   const championCanEdit = championPick?.status === "empty" || championPick?.status === "picked";
@@ -319,26 +387,83 @@ export function PicksScreen() {
   const subSaveDisabled =
     isSaving || !subChampionSelected || subChampionSelected === subPersistedId;
 
+  // Best-player tab derived state
+  const bestPlayerStatusMeta = resolveStatusMeta(bestPlayerPick?.status);
+  const bestPlayerCanEdit = bestPlayerPick?.status === "empty" || bestPlayerPick?.status === "picked";
+  const bestPlayerCanAdjust = bestPlayerPick?.status === "adjustment_available";
+  const bestPlayerInteractive = bestPlayerCanEdit || bestPlayerCanAdjust;
+  const bestPlayerPersistedId =
+    bestPlayerPick?.adjustedBestPlayerId ?? bestPlayerPick?.bestPlayerId ?? null;
+  const bestPlayerSaveDisabled =
+    isSaving || !bestPlayerSelected || bestPlayerSelected === bestPlayerPersistedId;
+
   const championTeamId = championPick?.adjustedChampionTeamId ?? championPick?.championTeamId ?? null;
   const hasChampion = !!championTeamId;
+  const bestPlayerTeamId = bestPlayerPersistedId ? getBestPlayerById(bestPlayerPersistedId)?.teamId ?? null : null;
 
-  // Disabled set for Sub-Champion PickableList — only enforced in window B
-  // (post-groups adjustment). Window A is a 25-pt blind bet, no gating.
+  // Alive set — only applied in window B when the bracket is actually hydrated
+  // from finalized groups. In window A the set is a projection from the user's
+  // predictions, so we don't disable teams based on it.
+  const aliveTeams = useMemo(() => {
+    if (!projection?.bracket) return new Set<string>();
+    if (championPick?.pickWindow !== "B") return new Set<string>();
+    return resolveAliveTeamsAfterGroups(projection.bracket);
+  }, [projection, championPick?.pickWindow]);
+
+  // Champion disabled items — only eliminated teams in window B (hard-block on
+  // adjust, warning on saved-but-stale picks).
+  const championDisabledItems = useMemo(() => {
+    const set = new Set<string>();
+    if (!championCanAdjust) return set;
+    if (aliveTeams.size === 0) return set;
+    for (const team of ALL_TEAMS) {
+      if (!aliveTeams.has(team.teamId)) set.add(team.teamId);
+    }
+    return set;
+  }, [championCanAdjust, aliveTeams]);
+
+  // Sub-champion disabled items — cross-uniqueness (champion team) + eliminated
+  // in window B. Same-half is NO LONGER disabled (soft warning only, EPIC 19).
   const subDisabledItems = useMemo(() => {
     const set = new Set<string>();
-    if (!championTeamId) return set;
-    set.add(championTeamId);
-    if (subChampionPick?.pickWindow === "B" && projection?.bracket) {
-      const halves = classifyTeamBracketHalves(projection.bracket);
-      const championHalf = halves.get(championTeamId);
-      if (championHalf && championHalf !== "neutral") {
-        for (const [teamId, half] of halves) {
-          if (half === championHalf) set.add(teamId);
-        }
+    if (championTeamId) set.add(championTeamId);
+    if (subCanAdjust && aliveTeams.size > 0) {
+      for (const team of ALL_TEAMS) {
+        if (!aliveTeams.has(team.teamId)) set.add(team.teamId);
       }
     }
     return set;
-  }, [championTeamId, projection, subChampionPick?.pickWindow]);
+  }, [championTeamId, subCanAdjust, aliveTeams]);
+
+  // Best-player disabled items — players whose team was eliminated in groups.
+  const bestPlayerDisabledItems = useMemo(() => {
+    const set = new Set<string>();
+    if (!bestPlayerCanAdjust) return set;
+    if (aliveTeams.size === 0) return set;
+    for (const player of BEST_PLAYER_ROSTER) {
+      if (!aliveTeams.has(player.teamId)) set.add(player.playerId);
+    }
+    return set;
+  }, [bestPlayerCanAdjust, aliveTeams]);
+
+  // Warnings — pure detector from shared. Emitted even pre-groups-closed for
+  // same_half (structural); eliminated warnings only show once groups close.
+  const warnings: MacroPickWarning[] = useMemo(() => {
+    if (!projection?.bracket) return [];
+    const areGroupsOfficiallyClosed = championPick?.pickWindow === "B";
+    return detectMacroPickWarnings({
+      bracket: projection.bracket,
+      championTeamId,
+      subChampionTeamId: subPersistedId,
+      bestPlayerTeamId,
+      areGroupsOfficiallyClosed
+    });
+  }, [projection, championPick?.pickWindow, championTeamId, subPersistedId, bestPlayerTeamId]);
+
+  const hasSameHalfWarning = warnings.some((w) => w.kind === "same_half");
+  const hasChampionEliminatedWarning = warnings.some((w) => w.kind === "champion_eliminated");
+  const hasSubChampionEliminatedWarning = warnings.some((w) => w.kind === "sub_champion_eliminated");
+  const hasBestPlayerEliminatedWarning = warnings.some((w) => w.kind === "best_player_eliminated");
 
   return (
     <div className="grid gap-4">
@@ -387,8 +512,22 @@ export function PicksScreen() {
             />
           ) : null}
 
+          {hasChampionEliminatedWarning ? (
+            <WarningBanner
+              title="Tu campeón fue eliminado"
+              message="El equipo que elegiste no pasó de grupos. Ajustá tu pick para sumar 10 pts."
+            />
+          ) : null}
+
+          {hasSameHalfWarning ? (
+            <WarningBanner
+              title="Cruce temprano con tu sub-campeón"
+              message="Tu campeón y sub-campeón quedaron en la misma mitad del bracket: solo uno puede llegar a la final. Podés ajustar alguno."
+            />
+          ) : null}
+
           {championCanAdjust ? (
-            <div className="grid gap-1 p-3 rounded-md alert-warning">
+            <div className="grid gap-1 p-3 rounded-md alert-info">
               <strong className="text-[14px]">Ventana de ajuste abierta</strong>
               <p className="m-0 text-[13px] leading-[1.45]">
                 Podés cambiar tu campeón, pero si acertás sumás 10 pts en vez de 25.
@@ -401,6 +540,8 @@ export function PicksScreen() {
               items={ALL_TEAMS}
               selectedTeamId={championSelected}
               onSelect={(teamId) => setChampionSelected(teamId)}
+              disabledItems={championDisabledItems}
+              disabledHint="eliminado"
             />
           ) : championPersistedId ? (
             <div className="flex items-center gap-3">
@@ -439,6 +580,20 @@ export function PicksScreen() {
             />
           ) : null}
 
+          {hasSubChampionEliminatedWarning ? (
+            <WarningBanner
+              title="Tu sub-campeón fue eliminado"
+              message="El equipo que elegiste no pasó de grupos. Ajustá tu pick para sumar 10 pts."
+            />
+          ) : null}
+
+          {hasSameHalfWarning ? (
+            <WarningBanner
+              title="Cruce temprano con tu campeón"
+              message="Tu campeón y sub-campeón quedaron en la misma mitad del bracket: solo uno puede llegar a la final. Podés ajustar alguno."
+            />
+          ) : null}
+
           {subInteractive && !hasChampion ? (
             <div className="grid gap-2 p-3 rounded-md alert-info">
               <p className="m-0 text-[13px] leading-[1.45]">
@@ -453,10 +608,10 @@ export function PicksScreen() {
           ) : null}
 
           {subCanAdjust ? (
-            <div className="grid gap-1 p-3 rounded-md alert-warning">
+            <div className="grid gap-1 p-3 rounded-md alert-info">
               <strong className="text-[14px]">Ventana de ajuste abierta</strong>
               <p className="m-0 text-[13px] leading-[1.45]">
-                El sub-campeón debe estar en la mitad opuesta a tu campeón. Las selecciones de la misma mitad aparecen deshabilitadas.
+                Podés cambiar tu sub-campeón. Si comparte mitad con el campeón verás un aviso, pero el pick se guarda igual.
               </p>
             </div>
           ) : null}
@@ -467,7 +622,7 @@ export function PicksScreen() {
               selectedTeamId={subChampionSelected}
               onSelect={(teamId) => setSubChampionSelected(teamId)}
               disabledItems={subDisabledItems}
-              disabledHint={subCanAdjust ? "misma mitad" : "es tu campeón"}
+              disabledHint={subCanAdjust ? "eliminado / campeón" : "es tu campeón"}
             />
           ) : !subInteractive && subPersistedId ? (
             <div className="flex items-center gap-3">
@@ -491,18 +646,98 @@ export function PicksScreen() {
         </Card>
       ) : null}
 
-      {/* Best-Player tab (placeholder) */}
+      {/* Best-Player tab */}
       {activeTab === "best-player" && !isLoading ? (
         <Card elevated style={{ gap: 12, padding: 16 }}>
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <span className="typo-small text-text-muted">MI BALÓN DE ORO</span>
-            <StatusTag status="neutral" label="Mayo 2026" />
+            <StatusTag status={bestPlayerStatusMeta.tone} label={bestPlayerStatusMeta.label} />
           </div>
-          <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">
-            Elegí al mejor jugador del Mundial cuando FIFA publique el roster oficial.
+          {bestPlayerPick ? (
+            <WindowChip
+              pickWindow={bestPlayerPick.pickWindow}
+              pointValue={bestPlayerPick.pickWindowPointValue}
+              closesAt={bestPlayerPick.pickWindowClosesAt}
+            />
+          ) : null}
+
+          {hasBestPlayerEliminatedWarning ? (
+            <WarningBanner
+              title="El equipo de tu jugador fue eliminado"
+              message="El jugador que elegiste quedó fuera del torneo. Ajustá tu pick para sumar 10 pts."
+            />
+          ) : null}
+
+          {bestPlayerCanAdjust ? (
+            <div className="grid gap-1 p-3 rounded-md alert-info">
+              <strong className="text-[14px]">Ventana de ajuste abierta</strong>
+              <p className="m-0 text-[13px] leading-[1.45]">
+                Podés cambiar tu Balón de Oro, pero si acertás sumás 10 pts en vez de 25.
+              </p>
+            </div>
+          ) : null}
+
+          <p className="m-0 text-[13px] leading-[1.45] text-text-secondary">
+            Roster provisional — cuando FIFA publique la nómina oficial vamos a sincronizar los jugadores.
           </p>
+
+          {bestPlayerInteractive ? (
+            <PlayerPickableList
+              items={BEST_PLAYER_ROSTER}
+              selectedPlayerId={bestPlayerSelected}
+              onSelect={(playerId) => setBestPlayerSelected(playerId)}
+              disabledItems={bestPlayerDisabledItems}
+              disabledHint="equipo eliminado"
+            />
+          ) : bestPlayerPersistedId ? (
+            <BestPlayerSummary playerId={bestPlayerPersistedId} />
+          ) : null}
+
+          {bestPlayerInteractive ? (
+            <div className="flex justify-end">
+              <Button onClick={() => void handleSaveBestPlayer()} disabled={bestPlayerSaveDisabled}>
+                {isSaving
+                  ? "Guardando..."
+                  : bestPlayerCanAdjust
+                    ? "Confirmar ajuste"
+                    : bestPlayerPersistedId
+                      ? "Guardar cambios"
+                      : "Guardar"}
+              </Button>
+            </div>
+          ) : null}
         </Card>
       ) : null}
+    </div>
+  );
+}
+
+function BestPlayerSummary({ playerId }: { playerId: string }) {
+  const player = getBestPlayerById(playerId);
+  if (!player) {
+    return (
+      <p className="m-0 text-[13px] text-text-muted">Jugador no disponible en el roster actual.</p>
+    );
+  }
+  const identity = resolveTeamIdentity(player.teamId);
+  return (
+    <div className="flex items-center gap-3">
+      <TeamIdentity
+        team={{
+          teamName: player.teamId,
+          fifaCode: identity.fifaCode,
+          flagAsset: identity.flagAsset,
+          flagUrl: identity.flagUrl
+        }}
+        size="lg"
+        showFlag
+        showName={false}
+        emphasis="hero"
+      />
+      <div className="flex flex-col">
+        <span className="text-[16px] font-semibold text-text-primary">{player.name}</span>
+        <span className="text-[13px] text-text-muted">{player.club} · {player.position}</span>
+      </div>
     </div>
   );
 }
