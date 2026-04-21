@@ -434,65 +434,6 @@
     color: var(--color-text-primary);
   }
 
-  /* ── Phase tab status dot (Mi Mundial subtabs) ── */
-  .phase-tab-dot {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 14px;
-    height: 14px;
-    border-radius: var(--radius-pill);
-    font-size: 10px;
-    font-weight: 700;
-    line-height: 1;
-  }
-  .phase-tab-dot--complete {
-    background: var(--color-success);
-    color: #FFFFFF;
-  }
-  .phase-tab-dot--partial {
-    background: var(--color-gold, #D4A842);
-    color: #FFFFFF;
-  }
-  .phase-tab-dot--empty {
-    background: transparent;
-    color: var(--color-text-muted);
-    border: 1px solid var(--color-border-default);
-  }
-  .phase-tab-dot--locked {
-    background: var(--color-bg-muted);
-    color: var(--color-text-muted);
-  }
-
-  /* ── Mode toggle (Mi Mundial: Predicciones / Resultados) ── */
-  .mode-toggle {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
-    gap: 4px;
-    padding: 4px;
-    border-radius: var(--radius-pill);
-    background: var(--color-bg-muted);
-    border: 1px solid var(--color-border-default);
-  }
-  .mode-toggle-option {
-    padding: 8px 12px;
-    border-radius: var(--radius-pill);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: background 140ms ease, color 140ms ease;
-  }
-  .mode-toggle-option:hover {
-    color: var(--color-text-primary);
-  }
-  .mode-toggle-option--active {
-    background: var(--color-bg-surface, #FFFFFF);
-    color: var(--color-text-primary);
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-  }
-
   /* ── Group accordion (Mis Predicciones + Grupos) ── */
   .group-accordion-header {
     display: flex;
