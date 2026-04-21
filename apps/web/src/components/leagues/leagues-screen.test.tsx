@@ -224,7 +224,7 @@ test("LeaguesScreenView renders create success state", () => {
     })
   );
 
-  assert.match(html, /ACCION COMPLETADA/);
+  assert.doesNotMatch(html, /ACCION COMPLETADA/);
   assert.match(html, /Liga creada/);
   assert.match(html, /Creador/);
 });

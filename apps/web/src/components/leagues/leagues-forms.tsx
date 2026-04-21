@@ -79,13 +79,12 @@ export function JoinLeagueForm({ formState, isSubmitting, onFieldChange, onSubmi
 export function ActionResultCard({ actionMessage, league, onOpenLeague }: ActionResultCardProps) {
   return (
     <Card elevated className="league-action-bg" style={{ gap: 12 }}>
-      <span className="typo-small text-primary-500">ACCION COMPLETADA</span>
       <h2 className="typo-h3 m-0 text-text-primary">{league.name}</h2>
-      <p className="typo-body m-0 text-text-secondary">
-        {actionMessage ?? "La liga ya quedo lista para competir."}
-      </p>
+      {actionMessage ? (
+        <p className="typo-body m-0 text-text-secondary">{actionMessage}</p>
+      ) : null}
       <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(120px,1fr))]">
-        <Metric label="Codigo" value={league.inviteCode} />
+        <Metric label="Código" value={league.inviteCode} />
         <Metric label="Jugadores" value={`${league.membersCount}/${league.memberLimit}`} />
         <Metric label="Tu rol" value={league.membershipRole === "owner" ? "Creador" : "Miembro"} />
       </div>
@@ -95,7 +94,7 @@ export function ActionResultCard({ actionMessage, league, onOpenLeague }: Action
       {league.inviteLink ? (
         <div className="grid gap-1.5 p-3 rounded-[16px] surface-inset">
           <div className="flex justify-between gap-2 items-center">
-            <span className="typo-small text-text-muted">INVITE LINK</span>
+            <span className="typo-small text-text-muted">Link</span>
             <CopyButton value={league.inviteLink} shareLeagueId={league.leagueId} />
           </div>
           <span className="text-[14px] leading-[1.4] text-text-secondary break-all">{league.inviteLink}</span>
