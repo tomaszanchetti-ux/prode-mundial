@@ -32,7 +32,7 @@ function ScoreStepper({
   }, [safeValue]);
 
   return (
-    <div className="flex flex-col items-center gap-2.5">
+    <div className="flex flex-col items-center gap-1 w-full">
       {/* Score display */}
       <div
         aria-live="polite"
@@ -43,13 +43,13 @@ function ScoreStepper({
       </div>
 
       {/* +/- buttons */}
-      <div className="grid grid-cols-2 gap-2 w-full">
+      <div className="grid grid-cols-2 gap-1.5 w-[106px]">
         <button
           type="button"
           disabled={disabled}
           aria-label={`Bajar marcador de ${label}`}
           onClick={() => onChange?.(stepScoreValue(safeValue, -1))}
-          className={`min-h-[48px] rounded-[var(--radius-md)] score-btn text-[22px] font-bold active:scale-95 transition-transform ${disabledCls}`}
+          className={`min-h-[44px] rounded-[var(--radius-md)] score-btn text-[22px] font-bold active:scale-95 transition-transform ${disabledCls}`}
         >
           −
         </button>
@@ -58,7 +58,7 @@ function ScoreStepper({
           disabled={disabled}
           aria-label={`Subir marcador de ${label}`}
           onClick={() => onChange?.(stepScoreValue(safeValue, 1))}
-          className={`min-h-[48px] rounded-[var(--radius-md)] score-btn text-[22px] font-bold active:scale-95 transition-transform ${disabledCls}`}
+          className={`min-h-[44px] rounded-[var(--radius-md)] score-btn text-[22px] font-bold active:scale-95 transition-transform ${disabledCls}`}
         >
           +
         </button>
