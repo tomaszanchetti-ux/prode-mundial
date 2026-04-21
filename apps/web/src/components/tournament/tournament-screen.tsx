@@ -20,6 +20,7 @@ import { ApiClientError, getBestPlayerPick, getChampionPick, getMatches, getPreT
 import { canEditPrediction } from "@/lib/matches/editability";
 import { pickContextualHeroMatch, type ContextualHero } from "@/lib/hero/pick-contextual-hero";
 import { toHeroProps } from "@/lib/hero/to-hero-props";
+import { BracketPlaceholdersList } from "./bracket-placeholders-list";
 import { MisPicksSection } from "./mis-picks-section";
 import { PredictionsTabs, type PredictionsTab, type PredictionsTabItem } from "./predictions-tabs";
 import { TournamentFlatList } from "./tournament-flat-list";
@@ -61,6 +62,7 @@ type TournamentScreenViewProps = {
   onRetry: () => void;
   onTabSelect: (tab: PredictionsTab) => void;
   preTournamentSummary: PreTournamentSummary | null;
+  projection: TournamentProjectionResponse | null;
   tabItems: PredictionsTabItem[];
 };
 
@@ -79,6 +81,7 @@ export function TournamentScreenView({
   onOpenMatch,
   onRetry,
   onTabSelect,
+  projection,
   tabItems
 }: TournamentScreenViewProps) {
   const { locale } = useLocale();
@@ -90,6 +93,11 @@ export function TournamentScreenView({
         locale,
         onAction: onHeroAction
       })
+    : null;
+
+  const activeTabItem = tabItems.find((item) => item.key === activeTab);
+  const progressLabel = activeTabItem
+    ? `${activeTabItem.completed} / ${activeTabItem.total} predicciones guardadas`
     : null;
 
   return (
@@ -113,7 +121,12 @@ export function TournamentScreenView({
         onOpenPicks={onOpenPicks}
       />
 
-      <PredictionsTabs items={tabItems} activeTab={activeTab} onSelect={onTabSelect} />
+      <div className="grid gap-2">
+        <PredictionsTabs items={tabItems} activeTab={activeTab} onSelect={onTabSelect} />
+        {progressLabel ? (
+          <span className="typo-small text-text-muted px-1">{progressLabel}</span>
+        ) : null}
+      </div>
 
       {isLoading ? (
         <div className="grid gap-3">
@@ -129,17 +142,20 @@ export function TournamentScreenView({
       {!isLoading && !errorMessage ? (
         activeTab === "matches" ? (
           <TournamentFlatList matches={groupMatches} onOpenMatch={onOpenMatch} />
+        ) : knockoutMatches.length > 0 ? (
+          <TournamentFlatList matches={knockoutMatches} onOpenMatch={onOpenMatch} />
+        ) : projection ? (
+          <div className="grid gap-2">
+            <span className="typo-small text-text-muted px-1">
+              Se habilitan al cerrar la fase de grupos. Vista preliminar de los cruces:
+            </span>
+            <BracketPlaceholdersList bracket={projection.bracket} />
+          </div>
         ) : (
-          <TournamentFlatList
-            matches={knockoutMatches}
-            onOpenMatch={onOpenMatch}
-            emptyState={
-              <Card elevated style={{ gap: 8, textAlign: "center", justifyItems: "center", padding: 24 }}>
-                <span className="typo-small text-text-muted">KNOCKOUTS</span>
-                <h2 className="typo-h2 m-0 text-text-primary">Se habilitan al cerrar la fase de grupos.</h2>
-              </Card>
-            }
-          />
+          <Card elevated style={{ gap: 8, textAlign: "center", justifyItems: "center", padding: 24 }}>
+            <span className="typo-small text-text-muted">KNOCKOUTS</span>
+            <h2 className="typo-h2 m-0 text-text-primary">Se habilitan al cerrar la fase de grupos.</h2>
+          </Card>
         )
       ) : null}
     </div>
@@ -280,6 +296,7 @@ export function TournamentScreen() {
         onRetry={() => setReloadKey((current) => current + 1)}
         onTabSelect={setActiveTab}
         preTournamentSummary={preTournamentSummary}
+        projection={projection}
         tabItems={tabItems}
       />
 

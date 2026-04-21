@@ -93,6 +93,7 @@ function renderView(
       onOpenMatch: () => undefined,
       onRetry: () => undefined,
       onTabSelect: () => undefined,
+      projection: null,
       tabItems: buildTabItems(),
       preTournamentSummary: overrides.preTournamentSummary ?? buildPreTournamentSummary(),
       championPick: null,
@@ -127,7 +128,13 @@ test("TournamentScreenView renders flat match list on matches tab", () => {
   assert.match(html, /South Africa/);
 });
 
-test("TournamentScreenView renders knockouts empty state when no knockouts yet", () => {
+test("TournamentScreenView shows progress label for the active tab", () => {
+  const html = renderView({ activeTab: "matches" });
+
+  assert.match(html, /2 \/ 48 predicciones guardadas/);
+});
+
+test("TournamentScreenView renders knockouts empty state when no projection available", () => {
   const html = renderView({ activeTab: "knockouts" });
 
   assert.match(html, /Se habilitan al cerrar la fase de grupos/);
