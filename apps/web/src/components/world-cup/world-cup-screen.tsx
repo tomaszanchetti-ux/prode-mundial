@@ -7,7 +7,7 @@ import {
   type GroupMatchResult,
   type MatchSummary
 } from "@prode/shared";
-import { Card, ErrorCard, NextMatchHero, SkeletonCard } from "@prode/ui";
+import { AdSlotCard, Card, ErrorCard, NextMatchHero, SkeletonCard } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useLocale, copyForLocale } from "@/lib/i18n/locale-provider";
 import { ApiClientError, getMatches } from "@/lib/api/client";
@@ -133,12 +133,19 @@ export function WorldCupScreenView({
       {!isLoading && !errorMessage ? (
         activeTab === "groups" ? (
           <section className="grid gap-3">
-            {groups.map((group) => (
-              <WorldCupGroupCard
-                key={group.groupId}
-                group={group}
-                groupName={groupDisplayName(group.groupId)}
-              />
+            {groups.map((group, idx) => (
+              <React.Fragment key={group.groupId}>
+                <WorldCupGroupCard group={group} groupName={groupDisplayName(group.groupId)} />
+                {idx > 0 && (idx + 1) % 3 === 0 && idx < groups.length - 1 ? (
+                  <AdSlotCard
+                    description={copyForLocale(
+                      locale,
+                      "Espacio reservado para patrocinio nativo.",
+                      "Reserved slot for native sponsorship."
+                    )}
+                  />
+                ) : null}
+              </React.Fragment>
             ))}
           </section>
         ) : (
