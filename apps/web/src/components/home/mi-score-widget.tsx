@@ -1,13 +1,6 @@
 import React from "react";
-import type { LeagueSummary, PointsResponse } from "@prode/shared";
-import { Button, Card } from "@prode/ui";
+import type { PointsResponse } from "@prode/shared";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
-
-type MiScoreWidgetProps = {
-  points: PointsResponse | null;
-  leagues: LeagueSummary[];
-  onOpenLeagues: () => void;
-};
 
 export function MiScoreSection({ points }: { points: PointsResponse | null }) {
   const { locale } = useLocale();
@@ -55,74 +48,6 @@ export function MiScoreSection({ points }: { points: PointsResponse | null }) {
           )}
         </p>
       )}
-    </div>
-  );
-}
-
-export function MiScoreWidget({ points, leagues, onOpenLeagues }: MiScoreWidgetProps) {
-  const { locale } = useLocale();
-  const hasLeagues = leagues.length > 0;
-
-  return (
-    <Card elevated style={{ gap: 14, padding: 16 }}>
-      <MiScoreSection points={points} />
-
-      <div className="h-px bg-border-subtle" />
-
-      {hasLeagues ? (
-        <ul className="grid gap-3 list-none p-0 m-0">
-          {leagues.map((league, idx) => (
-            <li
-              key={league.leagueId}
-              className={`grid gap-3 ${idx > 0 ? "pt-3 border-t border-border-subtle" : ""}`.trim()}
-            >
-              <h3 className="typo-h3 m-0 text-text-primary truncate">{league.name}</h3>
-
-              <div className="grid grid-cols-3 gap-2">
-                <LeagueMetric
-                  value={league.position != null ? `#${league.position}` : "—"}
-                  label={copyForLocale(locale, "posicion", "position")}
-                />
-                <LeagueMetric
-                  value={league.userPoints.toString()}
-                  label={copyForLocale(locale, "puntos", "points")}
-                />
-                <LeagueMetric
-                  value={league.membersCount.toString()}
-                  label={copyForLocale(locale, "jugadores", "players")}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="m-0 typo-small text-text-secondary">
-          {copyForLocale(
-            locale,
-            "Todavia no estas en ninguna liga. Crea una o uni amigos con un codigo.",
-            "You're not in any league yet. Create one or join friends with a code."
-          )}
-        </p>
-      )}
-
-      <Button variant="secondary" onClick={onOpenLeagues}>
-        {hasLeagues
-          ? copyForLocale(locale, "Ver ligas", "See leagues")
-          : copyForLocale(locale, "Crear liga", "Create league")}
-      </Button>
-    </Card>
-  );
-}
-
-function LeagueMetric({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="grid gap-0.5 justify-items-center text-center">
-      <span className="text-[22px] leading-none font-black text-text-primary tabular-nums">
-        {value}
-      </span>
-      <span className="text-[11px] leading-[1.2] uppercase tracking-wider text-text-muted">
-        {label}
-      </span>
     </div>
   );
 }

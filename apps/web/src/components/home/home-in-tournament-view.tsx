@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
 import type { BestPlayerPickResponse, ChampionPickResponse, LeagueSummary, MatchSummary, PointsResponse, PreTournamentSummary, SubChampionPickResponse } from "@prode/shared";
-import { AdSlotCard, Card, NextMatchHero } from "@prode/ui";
-import { MiScoreWidget } from "./mi-score-widget";
+import { AdSlotCard, NextMatchHero } from "@prode/ui";
+import { HomeSummaryCard } from "./home-summary-card";
 import { MisPicksWidget } from "./mis-picks-widget";
+import { NextMatchesList } from "./next-matches-list";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
 import { pickContextualHeroMatch } from "@/lib/hero/pick-contextual-hero";
@@ -73,11 +74,6 @@ export function HomeInTournamentView({
       })
     : null;
 
-  const scored = scoredMatches.length;
-  const pending = pendingMatches.length;
-  const totalRelevant = scored + pending;
-  const percentage = totalRelevant > 0 ? Math.round((scored / totalRelevant) * 100) : 0;
-
   return (
     <div className="grid gap-4">
       {isPostTournament ? (
@@ -92,7 +88,23 @@ export function HomeInTournamentView({
         <NextMatchHero {...heroProps} />
       ) : null}
 
-      <MiScoreWidget points={points} leagues={leagues} onOpenLeagues={onOpenLeagues} />
+      {!isPostTournament ? (
+        <NextMatchesList
+          items={items}
+          excludeMatchId={hero?.match.matchId ?? null}
+          onOpenMatch={onOpenMatch}
+        />
+      ) : null}
+
+      <AdSlotCard description={copyForLocale(locale, "Espacio reservado para patrocinio nativo.", "Reserved slot for native sponsorship.")} />
+
+      <HomeSummaryCard
+        points={points}
+        leagues={leagues}
+        scored={scoredMatches.length}
+        pending={pendingMatches.length}
+        onOpen={onOpenLeagues}
+      />
 
       <MisPicksWidget
         championPick={championPick}
@@ -100,24 +112,6 @@ export function HomeInTournamentView({
         bestPlayerPick={bestPlayerPick}
         onOpenPicks={onOpenPicks}
       />
-
-      <Card elevated style={{ gap: 8, padding: 12 }}>
-        <div className="h-1.5 w-full rounded-pill bg-bg-muted overflow-hidden">
-          <div
-            className="h-full bg-success rounded-pill transition-[width] duration-300"
-            style={{ width: `${percentage}%` }}
-          />
-        </div>
-        <div className="flex items-baseline justify-between gap-2 typo-small">
-          <span className="text-text-primary font-semibold">
-            {scored} {copyForLocale(locale, "puntuados", "scored")}
-            <span className="text-text-muted font-normal"> · {pending} {copyForLocale(locale, "pendientes", "pending")}</span>
-          </span>
-          <span className="text-text-muted">{percentage}%</span>
-        </div>
-      </Card>
-
-      <AdSlotCard description={copyForLocale(locale, "Espacio reservado para patrocinio nativo, ubicado despues del bloque principal.", "Reserved slot for native sponsorship, placed after the main block.")} />
 
       {errorMessage ? <HomeErrorCard message={errorMessage} onRetry={onRetry} /> : null}
       {isLoading ? <HomeSkeletonCard /> : null}
