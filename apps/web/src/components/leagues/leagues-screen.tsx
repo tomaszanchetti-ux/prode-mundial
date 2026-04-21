@@ -181,13 +181,13 @@ export function LeaguesScreenView({
       ) : null}
 
       {!isLoading && !isGlobal && standings ? (
-        <div className="grid gap-[6px]">
+        <div className="grid gap-1">
           {standings.items.map((entry) => (
             <div
               key={entry.userId}
-              className={`flex items-center gap-2 px-3 py-2 rounded-[10px] ${toStandingRowClass(entry)}`}
+              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-[8px] ${toStandingRowClass(entry)}`}
             >
-              <span className={`text-[13px] font-bold w-[24px] text-center flex-shrink-0 ${toPositionColor(entry)}`}>
+              <span className={`text-[13px] font-bold w-[22px] text-center flex-shrink-0 tabular-nums ${toPositionColor(entry)}`}>
                 {entry.position}
               </span>
               <div className="flex-1 min-w-0">
@@ -195,11 +195,11 @@ export function LeaguesScreenView({
                   {entry.displayName}
                   {entry.isMe ? " (tu)" : ""}
                 </span>
-                <span className="text-[12px] leading-[1.3] text-text-muted">
+                <span className="text-[11px] leading-[1.3] text-text-muted tabular-nums">
                   E{entry.exactHits} · S{entry.correctSigns} · M{entry.macroPoints}
                 </span>
               </div>
-              <span className={`text-[14px] font-bold flex-shrink-0 ${entry.isMe ? "text-primary-600" : entry.position === 1 ? "text-gold" : "text-text-primary"}`}>
+              <span className={`text-[14px] font-bold flex-shrink-0 tabular-nums ${entry.isMe ? "text-primary-600" : entry.position === 1 ? "text-gold" : "text-text-primary"}`}>
                 {entry.totalPoints}
               </span>
             </div>

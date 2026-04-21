@@ -537,10 +537,16 @@
   }
 
   /* ── Standings ── */
-  .standing-me { background: rgba(47, 107, 255, 0.14); border: 1px solid var(--color-primary-500); }
-  .standing-leader { background: rgba(231, 198, 106, 0.14); border: 1px solid var(--color-gold); }
-  .standing-podium { background: var(--color-gold-soft); border: 1px solid rgba(212, 168, 66, 0.22); }
-  .standing-default { background: var(--color-bg-surface); border: 1px solid var(--color-border-default); }
+  /*
+   * Standings rows — sobrio: sin border completo (se veían como input
+   * selection). `me` usa accent lateral vía inset box-shadow que respeta
+   * los rounded corners. Podium y default visualmente iguales — el ranking
+   * ya comunica la jerarquía por la posición numérica.
+   */
+  .standing-me { background: var(--color-primary-surface); box-shadow: inset 3px 0 0 var(--color-primary-500); }
+  .standing-leader { background: var(--color-gold-soft); }
+  .standing-podium { background: var(--color-bg-surface); }
+  .standing-default { background: var(--color-bg-surface); }
 
   /* ── Toast ── */
   .toast-base {
