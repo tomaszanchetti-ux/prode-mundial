@@ -266,6 +266,16 @@ export function LeaguesScreenView({
           ))}
         </div>
       ) : null}
+
+      {isGlobal ? (
+        <AdSlotCard
+          description={copyForLocale(
+            locale,
+            "Espacio reservado para patrocinio nativo.",
+            "Reserved slot for native sponsorship."
+          )}
+        />
+      ) : null}
     </div>
   );
 }
