@@ -26,9 +26,8 @@ export function BottomNav() {
     <nav
       data-bottom-nav
       aria-label={navLabel}
-      className="sticky z-50 grid gap-1 p-[6px] rounded-pill border border-border-default shadow-card backdrop-blur-[18px]"
+      className="sticky z-50 flex items-center justify-around gap-1 p-[6px] rounded-pill border border-border-default shadow-card backdrop-blur-[18px]"
       style={{
-        gridTemplateColumns: `repeat(${MAIN_TABS.length}, minmax(0, 1fr))`,
         background: "rgba(255, 255, 255, 0.92)",
         bottom: "max(10px, env(safe-area-inset-bottom))"
       }}
@@ -41,7 +40,7 @@ export function BottomNav() {
             key={tab.key}
             href={tab.href}
             aria-current={isActive ? "page" : undefined}
-            className={`no-underline text-center min-h-[44px] grid place-items-center py-[9px] px-1 rounded-pill border border-transparent text-[10px] leading-[1.1] uppercase whitespace-nowrap transition-colors focus:outline-none focus-visible:outline-none ${
+            className={`no-underline text-center min-h-[44px] grid place-items-center py-[9px] px-3 rounded-pill border border-transparent text-[10px] leading-[1.1] uppercase whitespace-nowrap transition-colors focus:outline-none focus-visible:outline-none ${
               isActive
                 ? "text-white bg-primary-500 font-bold tracking-[0.02em]"
                 : "text-text-muted bg-transparent font-medium tracking-[0.02em] hover:text-text-primary"
