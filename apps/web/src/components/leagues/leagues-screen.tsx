@@ -4,9 +4,10 @@ import React from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { LeagueDetail, LeagueStandingsResponse, LeagueSummary, PointsResponse } from "@prode/shared";
-import { Button, Card, ErrorCard, SkeletonCard, SkeletonStandingRow, StatusTag } from "@prode/ui";
+import { AdSlotCard, Button, Card, ErrorCard, SkeletonCard, SkeletonStandingRow, StatusTag } from "@prode/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
+import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { ApiClientError, createLeague, getLeagueStandings, getMyLeagues, getPoints, joinLeague } from "@/lib/api/client";
 import { track } from "@/lib/firebase/analytics";
 import { CopyButton } from "./copy-button";
@@ -67,6 +68,7 @@ export function LeaguesScreenView({
   onSelectLeague,
   onRetry
 }: LeaguesScreenViewProps) {
+  const { locale } = useLocale();
   const options = useMemo<LeagueOption[]>(
     () => [
       { leagueId: GLOBAL_LEAGUE_ID, name: GLOBAL_LEAGUE_NAME, isGlobal: true },
@@ -181,30 +183,39 @@ export function LeaguesScreenView({
       ) : null}
 
       {!isLoading && !isGlobal && standings ? (
-        <div className="grid gap-1">
-          {standings.items.map((entry) => (
-            <div
-              key={entry.userId}
-              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-[8px] ${toStandingRowClass(entry)}`}
-            >
-              <span className={`text-[13px] font-bold w-[22px] text-center flex-shrink-0 tabular-nums ${toPositionColor(entry)}`}>
-                {entry.position}
-              </span>
-              <div className="flex-1 min-w-0">
-                <span className={`text-[14px] leading-[1.3] text-text-primary truncate block ${entry.isMe ? "font-bold" : "font-medium"}`}>
-                  {entry.displayName}
-                  {entry.isMe ? " (tu)" : ""}
+        <>
+          <div className="grid gap-1">
+            {standings.items.map((entry) => (
+              <div
+                key={entry.userId}
+                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-[8px] ${toStandingRowClass(entry)}`}
+              >
+                <span className={`text-[13px] font-bold w-[22px] text-center flex-shrink-0 tabular-nums ${toPositionColor(entry)}`}>
+                  {entry.position}
                 </span>
-                <span className="text-[11px] leading-[1.3] text-text-muted tabular-nums">
-                  E{entry.exactHits} · S{entry.correctSigns} · M{entry.macroPoints}
+                <div className="flex-1 min-w-0">
+                  <span className={`text-[14px] leading-[1.3] text-text-primary truncate block ${entry.isMe ? "font-bold" : "font-medium"}`}>
+                    {entry.displayName}
+                    {entry.isMe ? " (tu)" : ""}
+                  </span>
+                  <span className="text-[11px] leading-[1.3] text-text-muted tabular-nums">
+                    E{entry.exactHits} · S{entry.correctSigns} · M{entry.macroPoints}
+                  </span>
+                </div>
+                <span className={`text-[14px] font-bold flex-shrink-0 tabular-nums ${entry.isMe ? "text-primary-600" : entry.position === 1 ? "text-gold" : "text-text-primary"}`}>
+                  {entry.totalPoints}
                 </span>
               </div>
-              <span className={`text-[14px] font-bold flex-shrink-0 tabular-nums ${entry.isMe ? "text-primary-600" : entry.position === 1 ? "text-gold" : "text-text-primary"}`}>
-                {entry.totalPoints}
-              </span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+          <AdSlotCard
+            description={copyForLocale(
+              locale,
+              "Espacio reservado para patrocinio nativo.",
+              "Reserved slot for native sponsorship."
+            )}
+          />
+        </>
       ) : null}
 
       {!isLoading && !isGlobal && !standings && selectedLeague ? (
