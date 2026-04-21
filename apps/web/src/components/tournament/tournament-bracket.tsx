@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import type {
   TournamentProjectionBracket,
   TournamentProjectionMatch,
   TournamentProjectionReadiness
 } from "@prode/shared";
+import { buildCompactSlotLabel } from "@prode/shared";
 import { Card, TeamIdentity } from "@prode/ui";
 import { useLocale } from "@/lib/i18n/locale-provider";
 import { toLocalKickoffLabel } from "@/components/matches/matches-helpers";
@@ -217,7 +218,7 @@ function BracketSideRow({
 
   if (side.team) {
     return (
-      <div className={`flex items-center gap-2 min-w-0 rounded-sm pl-2 py-1 transition-colors ${winnerClass}`}>
+      <div className={`flex items-center gap-1.5 min-w-0 rounded-sm pl-1.5 py-0.5 transition-colors ${winnerClass}`}>
         <TeamIdentity
           team={{
             teamName: side.team.name,
@@ -235,9 +236,9 @@ function BracketSideRow({
   }
 
   return (
-    <div className="flex items-center gap-2 min-w-0 text-text-muted pl-2 py-1 border-l-4 border-transparent">
-      <div className="w-5 h-5 rounded-full border border-dashed border-border-default" aria-hidden />
-      <span className="text-[12px] leading-[1.3] truncate">{side.slotLabel}</span>
+    <div className="flex items-center gap-1.5 min-w-0 text-text-muted pl-1.5 py-0.5 border-l-4 border-transparent">
+      <div className="w-4 h-4 rounded-full border border-dashed border-border-default" aria-hidden />
+      <span className="text-[11px] leading-[1.25] truncate tabular-nums font-semibold">{buildCompactSlotLabel(side.slot)}</span>
     </div>
   );
 }
@@ -279,19 +280,19 @@ function MatchCard({
     <button
       type="button"
       onClick={onOpen}
-      className={`relative z-[1] text-left rounded-lg border-2 ${accentClass} ${sideBgClass} shadow-card hover:shadow-modal transition-all p-3 cursor-pointer grid gap-2 w-full`.trim()}
+      className={`relative z-[1] text-left rounded-lg border-2 ${accentClass} ${sideBgClass} shadow-card hover:shadow-modal transition-all px-2 py-2 cursor-pointer grid gap-1.5 w-full`.trim()}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <span
-          className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded ${
+          className={`text-[9px] font-bold font-mono px-1 py-0.5 rounded leading-none ${
             accentTone === "bronze" ? "bg-gold-soft text-gold" : "bg-primary-soft text-primary-600"
           }`}
         >
           {match.officialMatchNumber ? `M${match.officialMatchNumber}` : "—"}
         </span>
-        <span className="text-[10px] text-text-muted tabular-nums">{kickoffLabel}</span>
+        <span className="text-[9px] text-text-muted tabular-nums leading-none">{kickoffLabel}</span>
       </div>
-      <div className="grid gap-1">
+      <div className="grid gap-0.5">
         <BracketSideRow side={match.home} isWinner={homeIsWinner} hasWinnerDecided={hasWinnerDecided} />
         <BracketSideRow side={match.away} isWinner={awayIsWinner} hasWinnerDecided={hasWinnerDecided} />
       </div>
@@ -299,8 +300,21 @@ function MatchCard({
   );
 }
 
-function RoundLabel({ label, tone = "primary" }: { label: string; tone?: "primary" | "gold" }) {
-  const toneClass = tone === "gold" ? "bg-gold text-white" : "bg-primary-500 text-white";
+function RoundLabel({
+  label,
+  tone = "primary"
+}: {
+  label: string;
+  tone?: "tenue" | "primary" | "strong" | "gold";
+}) {
+  const toneClass =
+    tone === "gold"
+      ? "bg-gold text-white"
+      : tone === "tenue"
+        ? "bg-primary-soft text-primary-600"
+        : tone === "strong"
+          ? "bg-primary-700 text-white"
+          : "bg-primary-500 text-white";
   return (
     <div className="sticky top-0 z-[2] bg-bg-main py-1.5 flex justify-center">
       <span
@@ -311,6 +325,14 @@ function RoundLabel({ label, tone = "primary" }: { label: string; tone?: "primar
     </div>
   );
 }
+
+const ROUND_TONE: Record<RoundKey, "tenue" | "primary" | "strong"> = {
+  round32: "tenue",
+  round16: "tenue",
+  quarterfinals: "primary",
+  semifinals: "primary",
+  final: "strong"
+};
 
 /**
  * Pair wrapper: contains two sibling matches that feed the same child in the
@@ -381,12 +403,13 @@ function RoundColumn({
   hasNextRound: boolean;
 }) {
   const label = ROUND_LABEL[roundKey];
-  const columnWidthClass = "min-w-[200px] md:min-w-[220px] lg:flex-1 lg:min-w-0";
+  const tone = ROUND_TONE[roundKey];
+  const columnWidthClass = "min-w-[180px] md:min-w-[200px] lg:flex-1 lg:min-w-0";
 
   if (matches.length === 0) {
     return (
       <div className={`flex flex-col gap-2 ${columnWidthClass}`}>
-        <RoundLabel label={label} />
+        <RoundLabel label={label} tone={tone} />
         <div className="flex-1 grid place-items-center py-4">
           <span className="text-[11px] text-text-muted">—</span>
         </div>
@@ -399,7 +422,7 @@ function RoundColumn({
     const match = matches[0];
     return (
       <div className={`flex flex-col gap-2 ${columnWidthClass}`}>
-        <RoundLabel label={label} />
+        <RoundLabel label={label} tone={tone} />
         <div className="flex-1 flex flex-col justify-around">
           <MatchCard
             match={match}
@@ -416,7 +439,7 @@ function RoundColumn({
 
   return (
     <div className={`flex flex-col gap-2 ${columnWidthClass}`}>
-      <RoundLabel label={label} />
+      <RoundLabel label={label} tone={tone} />
       <div className="flex-1 flex flex-col">
         {pairs.map((pair, idx) => (
           <PairGroup
@@ -428,6 +451,50 @@ function RoundColumn({
             drawConnector={hasNextRound}
           />
         ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Wraps the horizontal scroll container and renders edge fade affordances
+ * via data attributes read by `.bracket-scroll-wrap` in globals.css.
+ * Updates `data-scroll-start` / `data-scroll-end` on scroll + resize so the
+ * gradients hide at the extremes — signaling "this is the end" without a
+ * visible scrollbar.
+ */
+function BracketScrollWrap({ children }: { children: React.ReactNode }) {
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const updateScrollEdges = useCallback(() => {
+    const scroller = scrollRef.current;
+    const wrap = wrapRef.current;
+    if (!scroller || !wrap) return;
+    const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+    const atStart = scroller.scrollLeft <= 1;
+    const atEnd = maxScroll <= 1 || scroller.scrollLeft >= maxScroll - 1;
+    wrap.dataset.scrollStart = atStart ? "true" : "false";
+    wrap.dataset.scrollEnd = atEnd ? "true" : "false";
+  }, []);
+
+  useEffect(() => {
+    updateScrollEdges();
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    scroller.addEventListener("scroll", updateScrollEdges, { passive: true });
+    const ro = new ResizeObserver(updateScrollEdges);
+    ro.observe(scroller);
+    return () => {
+      scroller.removeEventListener("scroll", updateScrollEdges);
+      ro.disconnect();
+    };
+  }, [updateScrollEdges]);
+
+  return (
+    <div ref={wrapRef} className="bracket-scroll-wrap" data-scroll-start="true" data-scroll-end="false">
+      <div ref={scrollRef} className="max-h-[75vh] overflow-auto -mx-2 px-2 pb-2 scroll-smooth">
+        {children}
       </div>
     </div>
   );
@@ -468,7 +535,7 @@ export function TournamentBracket({
   if (totalKnockoutMatches === 0) {
     return (
       <Card elevated style={{ gap: 8, textAlign: "center", justifyItems: "center", padding: 24 }}>
-        <span className="typo-small text-text-muted">BRACKET NO DISPONIBLE</span>
+        <span className="typo-eyebrow">BRACKET NO DISPONIBLE</span>
         <p className="m-0 text-[14px] leading-[1.45] text-text-secondary max-w-[420px]">
           Todavía no podemos calcular tu bracket proyectado.
         </p>
@@ -493,7 +560,7 @@ export function TournamentBracket({
     <div className="grid gap-3">
       {showReadinessBanner && !readiness.isGroupsComplete ? (
         <Card elevated style={{ gap: 6, padding: 12 }}>
-          <span className="typo-small text-text-muted">BRACKET PROYECTADO</span>
+          <span className="typo-eyebrow">BRACKET PROYECTADO</span>
           <p className="m-0 text-[13px] leading-[1.4] text-text-secondary">
             Completá los {readiness.groupMatchesTotal} partidos de grupos para ver tu bracket completo.
             Llevás <strong>{readiness.groupMatchesWithPrediction}/{readiness.groupMatchesTotal}</strong>.
@@ -503,7 +570,7 @@ export function TournamentBracket({
 
       <BracketLegend />
 
-      <div className="max-h-[75vh] overflow-auto -mx-2 px-2 pb-1">
+      <BracketScrollWrap>
         <section className="bracket-section flex min-w-max lg:min-w-0 items-stretch">
           {ROUND_ORDER.map((key, idx) => {
             const nextKey = ROUND_ORDER[idx + 1];
@@ -520,7 +587,7 @@ export function TournamentBracket({
             );
           })}
         </section>
-      </div>
+      </BracketScrollWrap>
 
       {bronzeMatch ? (
         <section className="grid gap-2 justify-items-start">

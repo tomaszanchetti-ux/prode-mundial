@@ -9,6 +9,7 @@ import { QuickPredictionModal } from "@/components/matches/quick-prediction-moda
 import { ApiClientError, getMatches } from "@/lib/api/client";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
+import { parsePredictionScore } from "@/lib/hero/to-hero-props";
 import {
   applyClientFilter,
   filterChips,
@@ -63,8 +64,8 @@ export function MatchesScreenView({
               flagAsset: quickMatch.awayTeam.flagAsset,
               flagUrl: quickMatch.awayTeam.flagUrl
             }}
-            ctaLabel={quickMatch.userPredictionSummary ? copyForLocale(locale, "Editar", "Edit") : copyForLocale(locale, "Predecir", "Predict")}
             eyebrow={copyForLocale(locale, "MI PROXIMO", "MY NEXT")}
+            score={parsePredictionScore(quickMatch.userPredictionSummary)}
             homeTeam={{
               teamName: quickMatch.homeTeam.name,
               fifaCode: quickMatch.homeTeam.fifaCode,
@@ -128,7 +129,7 @@ export function MatchesScreenView({
 
       {!isLoading && !errorMessage && visibleItems.length === 0 ? (
         <Card elevated style={{ gap: 8, textAlign: "center", justifyItems: "center", padding: 24 }}>
-          <span className="typo-small text-text-muted">{copyForLocale(locale, "SIN PARTIDOS", "NO MATCHES")}</span>
+          <span className="typo-eyebrow">{copyForLocale(locale, "SIN PARTIDOS", "NO MATCHES")}</span>
           <h2 className="typo-h2 m-0 text-text-primary">{copyForLocale(locale, "No encontramos cruces para este filtro", "We couldn't find matches for this filter")}</h2>
         </Card>
       ) : null}

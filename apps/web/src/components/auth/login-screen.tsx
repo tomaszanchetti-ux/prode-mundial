@@ -97,7 +97,7 @@ export function LoginScreenView({
 
         <Card elevated style={{ gap: 16, padding: 24 }}>
           <div className="grid gap-2">
-            <span className="typo-small text-text-muted">ACCESO</span>
+            <span className="typo-eyebrow">ACCESO</span>
             <h2 className="typo-h2 m-0 text-text-primary">Entra para seguir jugando</h2>
             <p className="typo-body m-0 text-text-secondary">
               Elige la forma mas rapida para volver a tu home de partidos y ligas.

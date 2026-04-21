@@ -90,6 +90,7 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -179,10 +180,14 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
         homeTeamId: detail.homeTeam.teamId,
         awayTeamId: detail.awayTeam.teamId
       });
-      onSaved?.();
+      setIsSaving(false);
+      setJustSaved(true);
+      setTimeout(() => {
+        setJustSaved(false);
+        onSaved?.();
+      }, 320);
     } catch (error) {
       setErrorMessage(toErrorMessage(error));
-    } finally {
       setIsSaving(false);
     }
   }
@@ -206,11 +211,11 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
       onClose={onClose}
       onSubmit={handleSave}
       closeLabel={hasNextPending ? copyForLocale(locale, "Saltar", "Skip") : copyForLocale(locale, "Mas tarde", "Later")}
-      saveLabel={hasNextPending ? copyForLocale(locale, "Guardar y seguir", "Save & next") : detail?.userPrediction ? copyForLocale(locale, "Guardar cambios", "Save changes") : copyForLocale(locale, "Guardar prediccion", "Save prediction")}
+      saveLabel={hasNextPending ? copyForLocale(locale, "Guardar y seguir", "Save & next") : copyForLocale(locale, "Guardar", "Save")}
       saving={isSaving}
       stageLabel={detail ? (locale === "en" && detail.stage === "group" && detail.groupId ? `Group ${detail.groupId}` : toStageLabel(detail)) : copyForLocale(locale, "Partido", "Match")}
-      statusLabel={detail ? toStatusLabel(detail) : undefined}
-      statusTone={detail ? toStatusTone(detail) : undefined}
+      statusLabel={detail && toStatusTone(detail) !== "saved" ? toStatusLabel(detail) : undefined}
+      statusTone={detail && toStatusTone(detail) !== "saved" ? toStatusTone(detail) : undefined}
       title={detail ? `${detail.homeTeam.name} vs ${detail.awayTeam.name}` : copyForLocale(locale, "Tu proximo pendiente", "Your next pending match")}
     >
       <ScoreInput
@@ -225,6 +230,7 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
         homeLabel={detail?.homeTeam.name ?? "Local"}
         homeTeam={detail ? { teamName: detail.homeTeam.name, fifaCode: detail.homeTeam.fifaCode, flagAsset: detail.homeTeam.flagAsset, flagUrl: detail.homeTeam.flagUrl } : undefined}
         homeValue={formState.homeScorePred}
+        justSaved={justSaved}
         onAwayChange={(value) => setFormState((current) => ({ ...current, awayScorePred: value }))}
         onClassifierChange={(value) => setFormState((current) => ({ ...current, predictedQualifierTeamId: value }))}
         onHomeChange={(value) => setFormState((current) => ({ ...current, homeScorePred: value }))}

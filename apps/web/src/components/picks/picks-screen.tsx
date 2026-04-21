@@ -470,7 +470,7 @@ export function PicksScreen() {
       <Card elevated className="hero-worldcup-bg" style={{ gap: 8, padding: 20 }}>
         <div className="flex items-center gap-3">
           <img src="/mundial/wc2026-logo.png" alt="" width={32} height={32} className="opacity-70" />
-          <span className="typo-small text-text-muted">MIS PICKS</span>
+          <span className="typo-eyebrow">MIS PICKS</span>
         </div>
         <h1 className="typo-h2 m-0 text-text-primary">Elegí al Campeón, Sub-Campeón y Balón de Oro.</h1>
         <p className="m-0 text-[13px] leading-[1.45] text-text-secondary">
@@ -501,7 +501,7 @@ export function PicksScreen() {
       {activeTab === "champion" && !isLoading ? (
         <Card elevated style={{ gap: 12, padding: 16 }}>
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <span className="typo-small text-text-muted">MI CAMPEÓN</span>
+            <span className="typo-eyebrow">MI CAMPEÓN</span>
             <StatusTag status={championStatusMeta.tone} label={championStatusMeta.label} />
           </div>
           {championPick ? (
@@ -552,13 +552,7 @@ export function PicksScreen() {
           {championInteractive ? (
             <div className="flex justify-end">
               <Button onClick={() => void handleSaveChampion()} disabled={championSaveDisabled}>
-                {isSaving
-                  ? "Guardando..."
-                  : championCanAdjust
-                    ? "Confirmar ajuste"
-                    : championPersistedId
-                      ? "Guardar cambios"
-                      : "Guardar"}
+                {isSaving ? "Guardando..." : championCanAdjust ? "Ajustar" : "Guardar"}
               </Button>
             </div>
           ) : null}
@@ -569,7 +563,7 @@ export function PicksScreen() {
       {activeTab === "sub-champion" && !isLoading ? (
         <Card elevated style={{ gap: 12, padding: 16 }}>
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <span className="typo-small text-text-muted">MI SUB-CAMPEÓN</span>
+            <span className="typo-eyebrow">MI SUB-CAMPEÓN</span>
             <StatusTag status={subStatusMeta.tone} label={subStatusMeta.label} />
           </div>
           {subChampionPick ? (
@@ -601,7 +595,7 @@ export function PicksScreen() {
               </p>
               <div>
                 <Button variant="secondary" onClick={() => switchTab("champion")}>
-                  Ir a Campeón
+                  Elegir campeón
                 </Button>
               </div>
             </div>
@@ -633,13 +627,7 @@ export function PicksScreen() {
           {subInteractive && hasChampion ? (
             <div className="flex justify-end">
               <Button onClick={() => void handleSaveSubChampion()} disabled={subSaveDisabled}>
-                {isSaving
-                  ? "Guardando..."
-                  : subCanAdjust
-                    ? "Confirmar ajuste"
-                    : subPersistedId
-                      ? "Guardar cambios"
-                      : "Guardar"}
+                {isSaving ? "Guardando..." : subCanAdjust ? "Ajustar" : "Guardar"}
               </Button>
             </div>
           ) : null}
@@ -650,7 +638,7 @@ export function PicksScreen() {
       {activeTab === "best-player" && !isLoading ? (
         <Card elevated style={{ gap: 12, padding: 16 }}>
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <span className="typo-small text-text-muted">MI BALÓN DE ORO</span>
+            <span className="typo-eyebrow">MI BALÓN DE ORO</span>
             <StatusTag status={bestPlayerStatusMeta.tone} label={bestPlayerStatusMeta.label} />
           </div>
           {bestPlayerPick ? (
@@ -696,13 +684,7 @@ export function PicksScreen() {
           {bestPlayerInteractive ? (
             <div className="flex justify-end">
               <Button onClick={() => void handleSaveBestPlayer()} disabled={bestPlayerSaveDisabled}>
-                {isSaving
-                  ? "Guardando..."
-                  : bestPlayerCanAdjust
-                    ? "Confirmar ajuste"
-                    : bestPlayerPersistedId
-                      ? "Guardar cambios"
-                      : "Guardar"}
+                {isSaving ? "Guardando..." : bestPlayerCanAdjust ? "Ajustar" : "Guardar"}
               </Button>
             </div>
           ) : null}

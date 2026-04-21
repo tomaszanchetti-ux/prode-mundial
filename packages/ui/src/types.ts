@@ -108,15 +108,13 @@ export type SectionHeaderProps = {
 
 export type NextMatchHeroProps = {
   awayTeam: TeamData;
-  ctaDisabled?: boolean;
-  ctaLabel: string;
+  disabled?: boolean;
   eyebrow: string;
   helperText?: string;
   homeTeam: TeamData;
   metaLabel?: string;
   onAction?: () => void;
-  onSecondaryAction?: () => void;
-  secondaryCtaLabel?: string;
+  score?: { home: string; away: string } | null;
   status: MatchCardStatus;
   statusLabel: string;
   title: string;
@@ -135,7 +133,7 @@ export type ProgressCompactProps = {
 
 export type AdSlotCardProps = {
   title?: string;
-  description: string;
+  description?: string;
 };
 
 export type MatchCardProps = {
@@ -164,6 +162,7 @@ export type ScoreInputProps = {
   homeLabel?: string;
   homeTeam?: TeamData;
   homeValue: string;
+  justSaved?: boolean;
   onAwayChange?: (value: string) => void;
   onClassifierChange?: (value: string) => void;
   onHomeChange?: (value: string) => void;

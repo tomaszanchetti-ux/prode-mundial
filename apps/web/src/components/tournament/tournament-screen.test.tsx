@@ -2,33 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { MatchSummary, PreTournamentSummary, PredictedGroupStandingRow, TuMundialGroupCard } from "@prode/shared";
+import type { MatchSummary, PreTournamentSummary } from "@prode/shared";
 import { TournamentScreenView } from "./tournament-screen";
-import type { TournamentMode } from "./mode-toggle";
-import type { PhaseTabItem, TournamentPhase } from "./phase-tabs";
+import type { PredictionsTab, PredictionsTabItem } from "./predictions-tabs";
 import type { ContextualHero } from "@/lib/hero/pick-contextual-hero";
-
-function buildProjectedRow(teamId: string, teamName: string, points: number, position: number): PredictedGroupStandingRow {
-  return {
-    teamId,
-    teamName,
-    fifaCode: teamId,
-    iso2: null,
-    iso3: null,
-    flagAsset: "/flags/mock.svg",
-    flagUrl: null,
-    played: 2,
-    won: position === 1 ? 2 : 1,
-    drawn: 0,
-    lost: position === 1 ? 0 : 1,
-    goalsFor: position === 1 ? 4 : 2,
-    goalsAgainst: position === 1 ? 1 : 3,
-    goalDifference: position === 1 ? 3 : -1,
-    points,
-    position,
-    isProjectedQualified: true
-  };
-}
 
 function buildPreTournamentSummary(overrides: Partial<PreTournamentSummary> = {}): PreTournamentSummary {
   return {
@@ -42,29 +19,10 @@ function buildPreTournamentSummary(overrides: Partial<PreTournamentSummary> = {}
   };
 }
 
-function buildGroup(overrides: Partial<TuMundialGroupCard> = {}): TuMundialGroupCard {
-  return {
-    groupId: "A",
-    groupName: "Grupo A",
-    completedMatches: 2,
-    totalMatches: 6,
-    isComplete: false,
-    items: [
-      buildProjectedRow("MEX", "Mexico", 6, 1),
-      buildProjectedRow("RSA", "South Africa", 3, 2)
-    ],
-    ...overrides
-  };
-}
-
-function buildPhaseItems(): PhaseTabItem[] {
+function buildTabItems(): PredictionsTabItem[] {
   return [
-    { phase: "groups", label: "Grupos", completed: 2, total: 6, status: "partial" },
-    { phase: "r32", label: "16vos", completed: 0, total: 16, status: "empty" },
-    { phase: "r16", label: "8vos", completed: 0, total: 8, status: "empty" },
-    { phase: "qf", label: "QF", completed: 0, total: 4, status: "empty" },
-    { phase: "sf", label: "SF", completed: 0, total: 2, status: "empty" },
-    { phase: "final", label: "Final", completed: 0, total: 2, status: "empty" }
+    { key: "matches", label: "Grupos", completed: 2, total: 48 },
+    { key: "knockouts", label: "Cruces", completed: 0, total: 16 }
   ];
 }
 
@@ -114,8 +72,7 @@ function buildQuickMatch(overrides: Partial<MatchSummary> = {}): MatchSummary {
 
 function renderView(
   overrides: {
-    activeMode?: TournamentMode;
-    activePhase?: TournamentPhase;
+    activeTab?: PredictionsTab;
     preTournamentSummary?: PreTournamentSummary;
     hero?: ContextualHero | null;
   } = {}
@@ -125,23 +82,20 @@ function renderView(
 
   return renderToStaticMarkup(
     createElement(TournamentScreenView, {
-      activeMode: overrides.activeMode ?? "predictions",
-      activePhase: overrides.activePhase ?? "groups",
+      activeTab: overrides.activeTab ?? "matches",
       errorMessage: null,
-      groups: [buildGroup()],
+      groupMatches: [buildQuickMatch()],
       hero,
       isLoading: false,
-      matchesByPhase: new Map(),
-      matchesByGroupId: new Map(),
+      knockoutMatches: [],
       onHeroAction: () => undefined,
-      onModeSelect: () => undefined,
       onOpenPicks: () => undefined,
       onOpenMatch: () => undefined,
-      onPhaseSelect: () => undefined,
       onRetry: () => undefined,
-      phaseItems: buildPhaseItems(),
-      preTournamentSummary: overrides.preTournamentSummary ?? buildPreTournamentSummary(),
+      onTabSelect: () => undefined,
       projection: null,
+      tabItems: buildTabItems(),
+      preTournamentSummary: overrides.preTournamentSummary ?? buildPreTournamentSummary(),
       championPick: null,
       subChampionPick: null,
       bestPlayerPick: null
@@ -149,38 +103,41 @@ function renderView(
   );
 }
 
-test("TournamentScreenView renders next-match hero with predict CTA only", () => {
+test("TournamentScreenView renders next-match hero as clickable card", () => {
   const html = renderView();
 
   assert.match(html, /TU PROXIMO/);
   assert.match(html, /Mexico/);
   assert.match(html, /South Africa/);
-  assert.match(html, /Predecir/);
+  assert.match(html, /aria-label="Mexico vs South Africa"/);
 });
 
-test("TournamentScreenView shows mode toggle and phase tabs", () => {
+test("TournamentScreenView shows simplified tabs Grupos/Cruces", () => {
   const html = renderView();
 
-  assert.match(html, /Mis Predicciones/);
-  assert.match(html, /Mis Resultados/);
   assert.match(html, /Grupos/);
-  assert.match(html, /16vos/);
-  assert.match(html, /Final/);
+  assert.match(html, /Cruces/);
+  assert.doesNotMatch(html, /Mis Resultados/);
+  assert.doesNotMatch(html, /Mis Predicciones/);
 });
 
-test("TournamentScreenView renders predictions groups accordion when mode is predictions", () => {
-  const html = renderView({ activeMode: "predictions", activePhase: "groups" });
+test("TournamentScreenView renders flat match list on matches tab", () => {
+  const html = renderView({ activeTab: "matches" });
 
-  assert.match(html, /Grupo A/);
-  assert.match(html, /guardados/);
-});
-
-test("TournamentScreenView renders results standings cards when mode is results", () => {
-  const html = renderView({ activeMode: "results", activePhase: "groups" });
-
-  assert.match(html, /Grupo A/);
-  assert.match(html, /PTS/);
   assert.match(html, /Mexico/);
+  assert.match(html, /South Africa/);
+});
+
+test("TournamentScreenView shows progress label for the active tab", () => {
+  const html = renderView({ activeTab: "matches" });
+
+  assert.match(html, /2 \/ 48 predicciones guardadas/);
+});
+
+test("TournamentScreenView renders knockouts empty state when no projection available", () => {
+  const html = renderView({ activeTab: "knockouts" });
+
+  assert.match(html, /Se habilitan al cerrar la fase de grupos/);
 });
 
 test("TournamentScreenView shows fallback hero when no hero match is available", () => {

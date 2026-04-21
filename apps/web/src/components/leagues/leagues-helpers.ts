@@ -1,4 +1,4 @@
-import type { LeagueStandingEntry, LeagueStandingsResponse, PointsResponse, RecentPointsEntry } from "@prode/shared";
+import type { LeagueStandingEntry, LeagueStandingsResponse, PointsResponse } from "@prode/shared";
 
 export const GLOBAL_LEAGUE_ID = "__global__";
 export const GLOBAL_LEAGUE_NAME = "Global";
@@ -13,13 +13,6 @@ export type SyntheticSummary = {
   positionLabel: string;
   pointsLabel: string;
   gapLabel: string | null;
-};
-
-export type HighlightEntry = {
-  matchId: string;
-  title: string;
-  subtitle: string;
-  points: number;
 };
 
 export function buildSyntheticSummary(
@@ -79,26 +72,6 @@ function buildGapLabel(standings: LeagueStandingsResponse | null, myPosition: nu
 
   const gap = leader.totalPoints - me.totalPoints;
   return gap === 0 ? "Empatado con la punta" : `-${gap} de la punta`;
-}
-
-export function pickLeagueHighlights(points: PointsResponse | null, limit = 3): HighlightEntry[] {
-  if (!points || points.recentMatches.length === 0) {
-    return [];
-  }
-
-  return [...points.recentMatches]
-    .sort((a, b) => b.points - a.points)
-    .slice(0, limit)
-    .map(toHighlight);
-}
-
-function toHighlight(entry: RecentPointsEntry): HighlightEntry {
-  return {
-    matchId: entry.matchId,
-    title: entry.matchLabel,
-    subtitle: `${entry.stageLabel} · tu pick ${entry.userPredictionSummary} · oficial ${entry.officialResultSummary}`,
-    points: entry.points
-  };
 }
 
 export function toStandingRowClass(entry: Pick<LeagueStandingEntry, "isMe" | "position">) {

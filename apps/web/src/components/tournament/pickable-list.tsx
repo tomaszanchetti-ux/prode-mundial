@@ -68,7 +68,7 @@ export function PickableList({
 
       {grouped.map(([groupId, teams]) => (
         <div key={groupId} className="grid gap-1.5">
-          <span className="typo-small text-text-muted">GRUPO {groupId}</span>
+          <span className="typo-eyebrow">GRUPO {groupId}</span>
           <ul className="grid gap-1 m-0 p-0 list-none" role="listbox" aria-label={`Grupo ${groupId}`}>
             {teams.map((team) => {
               const identity = resolveTeamIdentity(team.teamId);

@@ -9,12 +9,14 @@ function ScoreStepper({
   team,
   value,
   disabled,
+  justSaved,
   onChange
 }: {
   label: string;
   team?: TeamData;
   value: string;
   disabled?: boolean;
+  justSaved?: boolean;
   onChange?: (value: string) => void;
 }) {
   const safeValue = normalizeScoreValue(value);
@@ -31,25 +33,31 @@ function ScoreStepper({
     }
   }, [safeValue]);
 
+  const displayAnimation = justSaved
+    ? { animation: "score-saved 380ms ease-out" }
+    : bumping
+      ? { animation: "score-bump 180ms ease-out" }
+      : undefined;
+
   return (
-    <div className="flex flex-col items-center gap-2.5">
+    <div className="flex flex-col items-center gap-1 w-full">
       {/* Score display */}
       <div
         aria-live="polite"
-        className="w-[88px] h-[88px] rounded-[22px] score-display-bg grid place-items-center text-[44px] font-extrabold leading-none select-none"
-        style={bumping ? { animation: "score-bump 180ms ease-out" } : undefined}
+        className="w-[106px] h-[106px] rounded-[26px] score-display-bg grid place-items-center text-[52px] font-extrabold leading-none select-none"
+        style={displayAnimation}
       >
         {safeValue === "" ? "0" : safeValue}
       </div>
 
       {/* +/- buttons */}
-      <div className="grid grid-cols-2 gap-2 w-full">
+      <div className="grid grid-cols-2 gap-1.5 w-[106px]">
         <button
           type="button"
           disabled={disabled}
           aria-label={`Bajar marcador de ${label}`}
           onClick={() => onChange?.(stepScoreValue(safeValue, -1))}
-          className={`min-h-[48px] rounded-[var(--radius-md)] score-btn text-[22px] font-bold active:scale-95 transition-transform ${disabledCls}`}
+          className={`min-h-[44px] rounded-[var(--radius-md)] score-btn text-[22px] font-bold active:scale-95 transition-transform ${disabledCls}`}
         >
           −
         </button>
@@ -58,7 +66,7 @@ function ScoreStepper({
           disabled={disabled}
           aria-label={`Subir marcador de ${label}`}
           onClick={() => onChange?.(stepScoreValue(safeValue, 1))}
-          className={`min-h-[48px] rounded-[var(--radius-md)] score-btn text-[22px] font-bold active:scale-95 transition-transform ${disabledCls}`}
+          className={`min-h-[44px] rounded-[var(--radius-md)] score-btn text-[22px] font-bold active:scale-95 transition-transform ${disabledCls}`}
         >
           +
         </button>
@@ -79,6 +87,7 @@ export function ScoreInput({
   homeLabel = "Local",
   homeTeam,
   homeValue,
+  justSaved,
   onAwayChange,
   onClassifierChange,
   onHomeChange
@@ -89,11 +98,11 @@ export function ScoreInput({
   return (
     <div className="grid gap-4">
       <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
-        <ScoreStepper label={homeLabel} team={homeTeam} value={homeValue} disabled={disabled} onChange={onHomeChange} />
-        <span aria-hidden="true" className="text-[13px] font-bold tracking-[0.1em] text-text-muted mt-[38px]">
+        <ScoreStepper label={homeLabel} team={homeTeam} value={homeValue} disabled={disabled} justSaved={justSaved} onChange={onHomeChange} />
+        <span aria-hidden="true" className="text-[13px] font-light tracking-[0.1em] text-text-muted mt-[47px]">
           –
         </span>
-        <ScoreStepper label={awayLabel} team={awayTeam} value={awayValue} disabled={disabled} onChange={onAwayChange} />
+        <ScoreStepper label={awayLabel} team={awayTeam} value={awayValue} disabled={disabled} justSaved={justSaved} onChange={onAwayChange} />
       </div>
 
       {showClassifier ? (

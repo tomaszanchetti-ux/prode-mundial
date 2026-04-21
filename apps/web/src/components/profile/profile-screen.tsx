@@ -146,11 +146,11 @@ export function ProfileScreen() {
       {/* ── 3. Stats 2×2 ── */}
       {profile ? (
         <Card elevated style={{ gap: 10, padding: 20 }}>
-          <span className="typo-small text-text-muted">TU RESUMEN</span>
+          <span className="typo-eyebrow">TU RESUMEN</span>
           <div className="grid gap-2.5 grid-cols-2">
             {profileStats.map((item) => (
               <div key={item.label} className="grid gap-1 p-3 surface-inset">
-                <span className="typo-small text-text-muted">{item.label.toUpperCase()}</span>
+                <span className="typo-eyebrow">{item.label.toUpperCase()}</span>
                 <span className="text-[24px] leading-none text-text-primary font-bold">{item.value}</span>
               </div>
             ))}
@@ -162,7 +162,7 @@ export function ProfileScreen() {
 
       {/* ── 4. Cuenta + logout ── */}
       <Card elevated style={{ gap: 10, padding: 20 }}>
-        <span className="typo-small text-text-muted">CUENTA</span>
+        <span className="typo-eyebrow">CUENTA</span>
         <Button variant="secondary" onClick={handleLogout}>
           Cerrar sesion
         </Button>

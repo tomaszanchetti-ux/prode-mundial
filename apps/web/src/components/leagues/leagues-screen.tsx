@@ -4,19 +4,18 @@ import React from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { LeagueDetail, LeagueStandingsResponse, LeagueSummary, PointsResponse } from "@prode/shared";
-import { Button, Card, ErrorCard, SkeletonCard, SkeletonStandingRow, StatusTag } from "@prode/ui";
+import { AdSlotCard, Button, Card, ErrorCard, SkeletonCard, SkeletonStandingRow, StatusTag } from "@prode/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
+import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { ApiClientError, createLeague, getLeagueStandings, getMyLeagues, getPoints, joinLeague } from "@/lib/api/client";
 import { track } from "@/lib/firebase/analytics";
 import { CopyButton } from "./copy-button";
-import { HighlightsCard } from "./highlights-card";
 import { MiScoreSection } from "@/components/home/mi-score-widget";
 import {
   GLOBAL_LEAGUE_ID,
   GLOBAL_LEAGUE_NAME,
   buildSyntheticSummary,
-  pickLeagueHighlights,
   toPositionColor,
   toStandingRowClass,
   type LeagueOption
@@ -67,6 +66,7 @@ export function LeaguesScreenView({
   onSelectLeague,
   onRetry
 }: LeaguesScreenViewProps) {
+  const { locale } = useLocale();
   const options = useMemo<LeagueOption[]>(
     () => [
       { leagueId: GLOBAL_LEAGUE_ID, name: GLOBAL_LEAGUE_NAME, isGlobal: true },
@@ -77,22 +77,24 @@ export function LeaguesScreenView({
 
   const isGlobal = selectedLeagueId === GLOBAL_LEAGUE_ID;
   const summary = buildSyntheticSummary(points, standings, isGlobal);
-  const highlights = pickLeagueHighlights(points);
   const selectedLeague = items.find((league) => league.leagueId === selectedLeagueId) ?? null;
 
   return (
     <div className="grid gap-4">
-      <Card elevated style={{ gap: 10 }}>
-        <h1 className="typo-h2 m-0 text-text-primary">Mis Ligas</h1>
-        <div className="flex gap-2 flex-wrap">
-          <Button variant={mode === "create" ? "secondary" : "primary"} onClick={() => onChangeMode(mode === "create" ? null : "create")}>
-            {mode === "create" ? "Cancelar" : "Crear liga"}
-          </Button>
-          <Button variant={mode === "join" ? "secondary" : "ghost"} onClick={() => onChangeMode(mode === "join" ? null : "join")}>
-            {mode === "join" ? "Cancelar" : "Unirme"}
-          </Button>
-        </div>
-      </Card>
+      <div className="flex gap-2 justify-end flex-wrap">
+        <Button
+          variant={mode === "create" ? "secondary" : "ghost"}
+          onClick={() => onChangeMode(mode === "create" ? null : "create")}
+        >
+          {mode === "create" ? "Cancelar" : "Crear liga"}
+        </Button>
+        <Button
+          variant={mode === "join" ? "secondary" : "ghost"}
+          onClick={() => onChangeMode(mode === "join" ? null : "join")}
+        >
+          {mode === "join" ? "Cancelar" : "Unirme"}
+        </Button>
+      </div>
 
       {mode === "create" ? (
         <CreateLeagueForm
@@ -148,26 +150,24 @@ export function LeaguesScreenView({
         })}
       </div>
 
-      <Card elevated style={{ gap: 14 }}>
+      <Card elevated style={{ gap: 12 }}>
+        {!isGlobal && summary.positionLabel !== "Sin puesto" ? (
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="text-[20px] font-extrabold text-text-primary tabular-nums leading-none">
+              {summary.positionLabel}
+            </span>
+            {summary.gapLabel ? (
+              <span className="text-[13px] text-text-muted leading-none">· {summary.gapLabel}</span>
+            ) : null}
+          </div>
+        ) : null}
+
         <MiScoreSection points={points} />
 
-        {!isGlobal || summary.gapLabel ? (
-          <>
-            <div className="h-px bg-border-subtle" />
-            <div className="grid gap-1">
-              <div className="flex items-baseline gap-2 flex-wrap typo-small">
-                <strong className="text-text-primary font-bold">{summary.positionLabel}</strong>
-                {summary.gapLabel ? (
-                  <span className="text-text-muted">· {summary.gapLabel}</span>
-                ) : null}
-              </div>
-              {!isGlobal && selectedLeague ? (
-                <span className="text-[12px] leading-[1.35] text-text-muted">
-                  {selectedLeague.membersCount}/{selectedLeague.memberLimit} jugadores · {selectedLeague.inviteCode}
-                </span>
-              ) : null}
-            </div>
-          </>
+        {!isGlobal && selectedLeague ? (
+          <span className="text-[12px] leading-[1.35] text-text-muted">
+            {selectedLeague.membersCount}/{selectedLeague.memberLimit} jugadores · código {selectedLeague.inviteCode}
+          </span>
         ) : null}
       </Card>
 
@@ -180,42 +180,49 @@ export function LeaguesScreenView({
       ) : null}
 
       {!isLoading && !isGlobal && standings ? (
-        <div className="grid gap-[6px]">
-          {standings.items.map((entry) => (
-            <div
-              key={entry.userId}
-              className={`flex items-center gap-2 px-3 py-2 rounded-[10px] ${toStandingRowClass(entry)}`}
-            >
-              <span className={`text-[13px] font-bold w-[24px] text-center flex-shrink-0 ${toPositionColor(entry)}`}>
-                {entry.position}
-              </span>
-              <div className="flex-1 min-w-0">
-                <span className={`text-[14px] leading-[1.3] text-text-primary truncate block ${entry.isMe ? "font-bold" : "font-medium"}`}>
-                  {entry.displayName}
-                  {entry.isMe ? " (tu)" : ""}
+        <>
+          <div className="grid gap-1">
+            {standings.items.map((entry) => (
+              <div
+                key={entry.userId}
+                className={`flex items-center gap-2 px-2.5 py-1.5 rounded-[8px] ${toStandingRowClass(entry)}`}
+              >
+                <span className={`text-[13px] font-bold w-[22px] text-center flex-shrink-0 tabular-nums ${toPositionColor(entry)}`}>
+                  {entry.position}
                 </span>
-                <span className="text-[12px] leading-[1.3] text-text-muted">
-                  E{entry.exactHits} · S{entry.correctSigns} · M{entry.macroPoints}
+                <div className="flex-1 min-w-0">
+                  <span className={`text-[14px] leading-[1.3] text-text-primary truncate block ${entry.isMe ? "font-bold" : "font-medium"}`}>
+                    {entry.displayName}
+                    {entry.isMe ? " (tu)" : ""}
+                  </span>
+                  <span className="text-[11px] leading-[1.3] text-text-muted tabular-nums">
+                    E{entry.exactHits} · S{entry.correctSigns} · M{entry.macroPoints}
+                  </span>
+                </div>
+                <span className={`text-[14px] font-bold flex-shrink-0 tabular-nums ${entry.isMe ? "text-primary-600" : entry.position === 1 ? "text-gold" : "text-text-primary"}`}>
+                  {entry.totalPoints}
                 </span>
               </div>
-              <span className={`text-[14px] font-bold flex-shrink-0 ${entry.isMe ? "text-primary-600" : entry.position === 1 ? "text-gold" : "text-text-primary"}`}>
-                {entry.totalPoints}
-              </span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+          <AdSlotCard
+            description={copyForLocale(
+              locale,
+              "Espacio reservado para patrocinio nativo.",
+              "Reserved slot for native sponsorship."
+            )}
+          />
+        </>
       ) : null}
 
       {!isLoading && !isGlobal && !standings && selectedLeague ? (
         <Card className="surface-inset" style={{ gap: 8, padding: 16 }}>
-          <span className="typo-small text-text-muted">SIN COMPETENCIA ACTIVA</span>
+          <span className="typo-eyebrow">SIN COMPETENCIA ACTIVA</span>
           <p className="typo-body m-0 text-text-secondary">
             Cuando la liga tenga predicciones puntuadas vas a ver la tabla aqui.
           </p>
         </Card>
       ) : null}
-
-      <HighlightsCard highlights={highlights} />
 
       {!isGlobal && selectedLeague?.inviteLink ? (
         <div>
@@ -225,7 +232,7 @@ export function LeaguesScreenView({
 
       {isGlobal && items.length === 0 ? (
         <Card elevated style={{ gap: 10 }}>
-          <span className="typo-small text-text-muted">SIN LIGAS PRIVADAS</span>
+          <span className="typo-eyebrow">SIN LIGAS PRIVADAS</span>
           <h2 className="typo-h3 m-0 text-text-primary">Todavia no competis en ninguna</h2>
           <p className="typo-body m-0 text-text-secondary">
             Crea tu primera liga o unite con un codigo para sumar competencia social.
@@ -235,7 +242,7 @@ export function LeaguesScreenView({
 
       {isGlobal && items.length > 0 ? (
         <div className="grid gap-3">
-          <span className="typo-small text-text-muted">MIS LIGAS PRIVADAS</span>
+          <span className="typo-eyebrow">MIS LIGAS PRIVADAS</span>
           {items.map((league) => (
             <Card key={league.leagueId} elevated style={{ gap: 10 }}>
               <div className="flex justify-between gap-2 items-center">
@@ -259,6 +266,16 @@ export function LeaguesScreenView({
           ))}
         </div>
       ) : null}
+
+      {isGlobal ? (
+        <AdSlotCard
+          description={copyForLocale(
+            locale,
+            "Espacio reservado para patrocinio nativo.",
+            "Reserved slot for native sponsorship."
+          )}
+        />
+      ) : null}
     </div>
   );
 }
@@ -270,7 +287,14 @@ export function LeaguesScreen() {
   const [items, setItems] = useState<LeagueSummary[]>([]);
   const [points, setPoints] = useState<PointsResponse | null>(null);
   const [standings, setStandings] = useState<LeagueStandingsResponse | null>(null);
-  const [selectedLeagueId, setSelectedLeagueId] = useState<string>(searchParams.get("leagueId") ?? GLOBAL_LEAGUE_ID);
+  /*
+   * selectedLeagueId is derived from the URL (single source of truth) so
+   * that `router.replace` on chip click drives the re-render. Previously
+   * we used useState + a sync useEffect, which caused a race: setState ran
+   * with the fresh value but the sync effect re-read a stale searchParams
+   * and reverted the state, forcing the user to click Global twice.
+   */
+  const selectedLeagueId = searchParams.get("leagueId") ?? GLOBAL_LEAGUE_ID;
   const [mode, setMode] = useState<"create" | "join" | null>(null);
   const [formState, setFormState] = useState({
     leagueName: "",
@@ -283,14 +307,6 @@ export function LeaguesScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
-
-  useEffect(() => {
-    const nextLeagueId = searchParams.get("leagueId");
-
-    if (nextLeagueId && nextLeagueId !== selectedLeagueId) {
-      setSelectedLeagueId(nextLeagueId);
-    }
-  }, [searchParams, selectedLeagueId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -428,8 +444,6 @@ export function LeaguesScreen() {
       onCreateLeague={handleCreateLeague}
       onJoinLeague={handleJoinLeague}
       onSelectLeague={(leagueId) => {
-        setSelectedLeagueId(leagueId);
-
         if (leagueId === GLOBAL_LEAGUE_ID) {
           router.replace("/leagues");
         } else {

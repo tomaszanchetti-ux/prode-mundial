@@ -107,11 +107,8 @@ export function LeagueInviteScreen() {
       </header>
 
       <Card elevated className="login-hero-bg gap-4 p-6">
-        <span className="typo-small text-primary-500">INVITE LINK</span>
+        <span className="typo-small text-primary-500">Invitación</span>
         <h1 className="typo-h1 m-0 text-text-primary">{preview?.name ?? "Liga privada"}</h1>
-        <p className="typo-body m-0 text-text-secondary max-w-[560px]">
-          Entra a esta liga y compite dentro de una tabla cerrada. Si ya tienes sesión, puedes confirmar el join desde aquí mismo.
-        </p>
       </Card>
 
       {errorMessage ? (
@@ -127,25 +124,25 @@ export function LeagueInviteScreen() {
 
       {preview ? (
         <Card elevated className="gap-4 p-6">
-          <div className="grid gap-2 grid-cols-[repeat(auto-fit,minmax(140px,1fr))]">
-            <div className="p-3 surface-inset">
-              <span className="typo-small text-text-muted">Jugadores</span>
-              <p className="mt-2 mb-0 text-text-primary font-bold">{preview.membersCount}</p>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="grid gap-1">
+              <span className="typo-meta">Jugadores</span>
+              <p className="m-0 text-[18px] leading-none text-text-primary font-bold tabular-nums">{preview.membersCount}</p>
             </div>
-            <div className="p-3 surface-inset">
-              <span className="typo-small text-text-muted">Limite</span>
-              <p className="mt-2 mb-0 text-text-primary font-bold">{preview.memberLimit}</p>
+            <div className="grid gap-1">
+              <span className="typo-meta">Límite</span>
+              <p className="m-0 text-[18px] leading-none text-text-primary font-bold tabular-nums">{preview.memberLimit}</p>
             </div>
-            <div className="p-3 surface-inset">
-              <span className="typo-small text-text-muted">Estado</span>
-              <p className="mt-2 mb-0 text-text-primary font-bold">{preview.isActive ? "Activa" : "Inactiva"}</p>
+            <div className="grid gap-1">
+              <span className="typo-meta">Estado</span>
+              <p className="m-0 text-[18px] leading-none text-text-primary font-bold">{preview.isActive ? "Activa" : "Inactiva"}</p>
             </div>
           </div>
 
           {status === "authenticated" ? (
             <div>
               <Button onClick={() => void handleJoin()} disabled={isJoining}>
-                {isJoining ? "Uniendome..." : "Unirme a esta liga"}
+                {isJoining ? "Uniendome..." : "Unirme"}
               </Button>
             </div>
           ) : (

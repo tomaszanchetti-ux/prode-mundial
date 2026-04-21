@@ -17,17 +17,28 @@ export type ToHeroPropsInput = {
 export type ContextualHeroProps = Pick<
   NextMatchHeroProps,
   | "awayTeam"
-  | "ctaDisabled"
-  | "ctaLabel"
+  | "disabled"
   | "eyebrow"
   | "helperText"
   | "homeTeam"
   | "metaLabel"
   | "onAction"
+  | "score"
   | "status"
   | "statusLabel"
   | "title"
 >;
+
+export function parsePredictionScore(summary: string | null | undefined): { home: string; away: string } | null {
+  if (!summary) {
+    return null;
+  }
+  const match = summary.match(/^(\d+)-(\d+)/);
+  if (!match) {
+    return null;
+  }
+  return { home: match[1], away: match[2] };
+}
 
 export function toHeroProps({
   match,
@@ -48,21 +59,10 @@ export function toHeroProps({
 
   const metaLabel = `${toStageLabel(match.stage, match.groupId, locale)} · ${toLocalKickoffLabel(match.kickoffAt, locale)}`;
 
-  let helperText: string | undefined;
-  if (state === "up-to-date" && hasPrediction) {
-    helperText = copyForLocale(
-      locale,
-      `Tu prediccion: ${match.userPredictionSummary}`,
-      `Your prediction: ${match.userPredictionSummary}`
-    );
-  } else if (state === "pending" && isEditable) {
-    helperText = toEditWindowLabel(match.deadlineAt, locale, now);
-  }
+  const helperText =
+    state === "pending" && isEditable ? toEditWindowLabel(match.deadlineAt, locale, now) : undefined;
 
-  const ctaLabel = hasPrediction
-    ? copyForLocale(locale, "Editar", "Edit")
-    : copyForLocale(locale, "Predecir", "Predict");
-  const ctaDisabled = !isEditable;
+  const disabled = !isEditable;
 
   let status: NextMatchHeroProps["status"];
   let statusLabel: string;
@@ -93,12 +93,12 @@ export function toHeroProps({
       flagAsset: match.homeTeam.flagAsset,
       flagUrl: match.homeTeam.flagUrl
     },
-    ctaDisabled,
-    ctaLabel,
+    disabled,
     eyebrow,
     helperText,
     metaLabel,
     onAction,
+    score: parsePredictionScore(match.userPredictionSummary),
     status,
     statusLabel,
     title: `${match.homeTeam.name} vs ${match.awayTeam.name}`

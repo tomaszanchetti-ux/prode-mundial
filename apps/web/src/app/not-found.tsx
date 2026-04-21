@@ -11,7 +11,7 @@ export default function NotFound() {
           </h1>
           <p className="typo-body m-0 text-text-secondary">
             Capaz que el link está viejo. Desde el inicio llegás a todo —
-            partidos, Mi Mundial y tus ligas.
+            partidos, predicciones y tus ligas.
           </p>
         </div>
 

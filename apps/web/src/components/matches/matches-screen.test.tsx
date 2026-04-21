@@ -60,7 +60,7 @@ test("MatchesScreenView renders contextual CTA for editable pending matches", ()
 
   assert.match(html, /Partidos/);
   assert.match(html, /Argentina/);
-  assert.match(html, /Predecir/);
+  assert.match(html, /aria-label="Argentina vs Brasil"/);
 });
 
 test("MatchesScreenView renders saved editable CTA for saved-filter matches", () => {
@@ -82,7 +82,8 @@ test("MatchesScreenView renders saved editable CTA for saved-filter matches", ()
     })
   );
 
-  assert.match(html, /Editar/);
+  assert.match(html, /tabular-nums">2</);
+  assert.match(html, /tabular-nums">1</);
 });
 
 test("MatchesScreenView renders empty state when filter has no results", () => {

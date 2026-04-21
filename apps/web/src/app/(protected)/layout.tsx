@@ -36,24 +36,16 @@ function ProtectedHeader() {
   const profileLabel = copyForLocale(locale, "Abrir perfil", "Open profile");
 
   return (
-    <header className="flex items-center justify-between gap-3 pt-[2px]">
-      <div className="grid gap-[2px]">
-        <span className="typo-small text-text-muted">PRODE MUNDIAL</span>
-        <strong className="text-[18px] leading-none text-text-primary tracking-[-0.02em]">
-          {copyForLocale(locale, "Juega tu torneo", "Play your tournament")}
-        </strong>
-      </div>
-      <div className="flex items-center gap-3">
-        <LanguageToggle />
-        <Link
-          href="/profile"
-          aria-label={profileLabel}
-          title={profileLabel}
-          className="w-11 h-11 rounded-pill grid place-items-center no-underline text-text-primary text-[13px] font-bold tracking-[0.06em] uppercase bg-bg-interactive border border-border-default hover:bg-[#E3E7EC] transition-colors"
-        >
-          {initials ?? fallback}
-        </Link>
-      </div>
+    <header className="flex items-center justify-end gap-3 pt-[2px]">
+      <LanguageToggle />
+      <Link
+        href="/profile"
+        aria-label={profileLabel}
+        title={profileLabel}
+        className="w-11 h-11 rounded-pill grid place-items-center no-underline text-text-primary text-[13px] font-bold tracking-[0.06em] uppercase bg-bg-interactive border border-border-default hover:bg-[#E3E7EC] transition-colors"
+      >
+        {initials ?? fallback}
+      </Link>
     </header>
   );
 }

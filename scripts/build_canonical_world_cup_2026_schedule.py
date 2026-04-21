@@ -140,7 +140,7 @@ CANONICAL_KICKOFFS: list[tuple[int, str, str, int]] = [
     # Round of 16
     (89, "2026-07-04", "17:00", -4),  # Philadelphia
     (90, "2026-07-04", "12:00", -5),  # Houston
-    (91, "2026-07-05", "20:00", -4),  # East Rutherford
+    (91, "2026-07-05", "16:00", -4),  # East Rutherford (corrected 2026-04-21: Wikipedia has 16:00 ET, not 20:00)
     (92, "2026-07-05", "18:00", -6),  # Mexico City
     (93, "2026-07-06", "14:00", -5),  # Arlington (Dallas)
     (94, "2026-07-06", "17:00", -7),  # Seattle
