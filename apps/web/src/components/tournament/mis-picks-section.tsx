@@ -53,7 +53,7 @@ function CompactPickRow({
       }`}
     >
       <div className="flex flex-col min-w-0 flex-1 gap-0.5">
-        <span className="typo-eyebrow text-text-muted uppercase">{eyebrow}</span>
+        <span className="typo-eyebrow text-primary-600">{eyebrow}</span>
         {hasPick ? (
           <div className="flex items-center gap-2 min-w-0">
             <TeamIdentity team={team!} size="sm" showName={false} />

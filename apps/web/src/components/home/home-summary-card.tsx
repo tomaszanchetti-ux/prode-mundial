@@ -36,7 +36,7 @@ export function HomeSummaryCard({ points, leagues, scored, pending, onOpen }: Ho
     >
       <div className="flex items-end justify-between gap-4">
         <div className="grid gap-1 min-w-0">
-          <span className="typo-eyebrow text-text-muted uppercase">
+          <span className="typo-eyebrow text-primary-600">
             {copyForLocale(locale, "MI SCORE", "MY SCORE")}
           </span>
           <div className="flex items-baseline gap-2">

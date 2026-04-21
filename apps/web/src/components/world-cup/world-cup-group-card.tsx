@@ -13,7 +13,7 @@ type WorldCupGroupCardProps = {
 export function WorldCupGroupCard({ group, groupName }: WorldCupGroupCardProps) {
   return (
     <Card elevated style={{ gap: 8, padding: 12 }}>
-      <span className="typo-small text-text-muted uppercase">{groupName}</span>
+      <span className="typo-eyebrow text-primary-600">{groupName}</span>
 
       <div className="grid gap-[4px]">
         {group.rows.map((row) => {
