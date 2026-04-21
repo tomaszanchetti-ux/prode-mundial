@@ -13,3 +13,18 @@ export const CHAMPION_PICK_STATUSES = [
 ] as const;
 
 export type ChampionPickStatus = (typeof CHAMPION_PICK_STATUSES)[number];
+
+// ── Balón de Oro (EPIC 19) ─────────────────────────────
+// Mirror exacto de la estructura Campeón/Sub-Campeón. Mismas ventanas A/B,
+// mismas reglas de scoring (25 / 10). El pick target es un playerId del
+// mock roster (`BEST_PLAYER_ROSTER`); backend real post-15/05 reemplaza el
+// roster sin tocar infra.
+
+export const BEST_PLAYER_SCORING_RULES = {
+  originalCorrectPoints: 25,
+  adjustedCorrectPoints: 10,
+} as const;
+
+export const BEST_PLAYER_PICK_STATUSES = CHAMPION_PICK_STATUSES;
+
+export type BestPlayerPickStatus = ChampionPickStatus;
