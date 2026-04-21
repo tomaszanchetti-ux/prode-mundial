@@ -100,13 +100,17 @@ export function PredictionModal({
         <div className="px-5">{children}</div>
 
         {/* ── CTAs ── */}
-        <div className="grid gap-2 px-5 pb-5">
+        <div className="grid gap-3 px-5 pb-5 pt-1 justify-items-center">
           <Button fullWidth onClick={onSubmit} loading={saving}>
             {saveLabel}
           </Button>
-          <Button variant="ghost" fullWidth onClick={onClose}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-[14px] font-medium text-text-muted hover:text-text-primary transition-colors cursor-pointer py-1"
+          >
             {closeLabel}
-          </Button>
+          </button>
         </div>
       </div>
     </div>
