@@ -35,15 +35,20 @@ export function AuthGuard({ children }: PropsWithChildren) {
   }, [pathname, profile, router, status]);
 
   if (status === "loading" || status === "idle") {
-    return <p style={{ margin: 0, color: "#5f6657" }}>Cargando sesión...</p>;
+    return (
+      <div className="min-h-[40vh] grid content-center gap-3 justify-items-start">
+        <div className="w-28 h-2.5 rounded-full bg-border-strong" />
+        <div className="w-[220px] h-3.5 rounded-full bg-border-subtle" />
+      </div>
+    );
   }
 
   if (status === "error") {
-    return <p style={{ margin: 0, color: "#8a1c1c" }}>No pudimos validar tu sesión.</p>;
+    return <p className="m-0 text-error">No pudimos validar tu sesion.</p>;
   }
 
   if (status !== "authenticated") {
-    return <p style={{ margin: 0, color: "#5f6657" }}>Redirigiendo a login...</p>;
+    return <p className="m-0 text-text-secondary">Volviendo al ingreso...</p>;
   }
 
   return <>{children}</>;

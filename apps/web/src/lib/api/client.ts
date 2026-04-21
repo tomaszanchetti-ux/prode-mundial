@@ -1,5 +1,71 @@
-import type { ApiResponse, PublicBootstrap, UpdateProfileInput, UserProfile } from "@prode/shared";
-import { publicBootstrapSchema, userProfileSchema } from "@prode/shared";
+import type {
+  AdjustBestPlayerInput,
+  AdjustBestPlayerResponse,
+  AdjustChampionInput,
+  AdjustChampionResponse,
+  AdjustSubChampionInput,
+  AdjustSubChampionResponse,
+  ApiResponse,
+  BestPlayerPickResponse,
+  ChampionPickResponse,
+  CreateLeagueInput,
+  JoinLeagueInput,
+  LeagueDetail,
+  LeagueInvitePreview,
+  LeagueStandingsResponse,
+  ListMyLeaguesResponse,
+  ListMatchesQuery,
+  ListMatchesResponse,
+  MatchDetail,
+  PointsResponse,
+  PreTournamentSummary,
+  PublicBootstrap,
+  SaveBestPlayerPickInput,
+  SaveBestPlayerPickResponse,
+  SaveChampionPickInput,
+  SaveChampionPickResponse,
+  SaveMatchPredictionInput,
+  SaveMatchPredictionResponse,
+  SaveSubChampionPickInput,
+  SaveSubChampionPickResponse,
+  SubChampionPickResponse,
+  TournamentProjectionResponse,
+  TuMundialResponse,
+  UpdateProfileInput,
+  UserProfile
+} from "@prode/shared";
+import {
+  adjustBestPlayerInputSchema,
+  adjustBestPlayerResponseSchema,
+  adjustChampionInputSchema,
+  adjustChampionResponseSchema,
+  adjustSubChampionInputSchema,
+  adjustSubChampionResponseSchema,
+  bestPlayerPickResponseSchema,
+  championPickResponseSchema,
+  createLeagueInputSchema,
+  joinLeagueInputSchema,
+  leagueDetailSchema,
+  leagueInvitePreviewSchema,
+  leagueStandingsResponseSchema,
+  listMyLeaguesResponseSchema,
+  listMatchesResponseSchema,
+  matchDetailSchema,
+  pointsResponseSchema,
+  preTournamentSummarySchema,
+  publicBootstrapSchema,
+  saveBestPlayerPickInputSchema,
+  saveBestPlayerPickResponseSchema,
+  saveChampionPickInputSchema,
+  saveChampionPickResponseSchema,
+  saveMatchPredictionResponseSchema,
+  saveSubChampionPickInputSchema,
+  saveSubChampionPickResponseSchema,
+  subChampionPickResponseSchema,
+  tournamentProjectionResponseSchema,
+  tuMundialResponseSchema,
+  userProfileSchema
+} from "@prode/shared";
 import { webConfig } from "@/config/app";
 
 export class ApiClientError extends Error {
@@ -59,6 +125,18 @@ export async function getPublicBootstrap(): Promise<PublicBootstrap> {
   return publicBootstrapSchema.parse(await parseJson<PublicBootstrap>(response));
 }
 
+export async function getLeagueInvitePreview(inviteToken: string): Promise<LeagueInvitePreview> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/public/leagues/invite/${inviteToken}`, {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load invite preview (${response.status}).`);
+  }
+
+  return leagueInvitePreviewSchema.parse(await parseJson<LeagueInvitePreview>(response));
+}
+
 export async function getMyProfile(token: string): Promise<UserProfile> {
   const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/me`, {
     cache: "no-store",
@@ -70,6 +148,295 @@ export async function getMyProfile(token: string): Promise<UserProfile> {
   }
 
   return userProfileSchema.parse(await parseJson<UserProfile>(response));
+}
+
+export async function getPreTournamentSummary(token: string): Promise<PreTournamentSummary> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/me/pre-tournament`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load pre-tournament summary (${response.status}).`);
+  }
+
+  return preTournamentSummarySchema.parse(await parseJson<PreTournamentSummary>(response));
+}
+
+export async function getTuMundial(token: string): Promise<TuMundialResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/me/tournament`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load Mi Mundial (${response.status}).`);
+  }
+
+  return tuMundialResponseSchema.parse(await parseJson<TuMundialResponse>(response));
+}
+
+export async function getTournamentProjection(token: string): Promise<TournamentProjectionResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/me/tournament/projection`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load tournament projection (${response.status}).`);
+  }
+
+  return tournamentProjectionResponseSchema.parse(await parseJson<TournamentProjectionResponse>(response));
+}
+
+export async function getChampionPick(token: string): Promise<ChampionPickResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load champion pick (${response.status}).`);
+  }
+
+  return championPickResponseSchema.parse(await parseJson<ChampionPickResponse>(response));
+}
+
+export async function saveChampionPick(token: string, input: SaveChampionPickInput): Promise<SaveChampionPickResponse> {
+  const payload = saveChampionPickInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to save champion pick (${response.status}).`);
+  }
+
+  return saveChampionPickResponseSchema.parse(await parseJson<SaveChampionPickResponse>(response));
+}
+
+export async function adjustChampionPick(
+  token: string,
+  input: AdjustChampionInput
+): Promise<AdjustChampionResponse> {
+  const payload = adjustChampionInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/adjustment`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to confirm champion adjustment (${response.status}).`);
+  }
+
+  return adjustChampionResponseSchema.parse(await parseJson<AdjustChampionResponse>(response));
+}
+
+export async function getSubChampionPick(token: string): Promise<SubChampionPickResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/sub-champion`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load sub-champion pick (${response.status}).`);
+  }
+
+  return subChampionPickResponseSchema.parse(await parseJson<SubChampionPickResponse>(response));
+}
+
+export async function saveSubChampionPick(
+  token: string,
+  input: SaveSubChampionPickInput
+): Promise<SaveSubChampionPickResponse> {
+  const payload = saveSubChampionPickInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/sub-champion`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to save sub-champion pick (${response.status}).`);
+  }
+
+  return saveSubChampionPickResponseSchema.parse(await parseJson<SaveSubChampionPickResponse>(response));
+}
+
+export async function adjustSubChampionPick(
+  token: string,
+  input: AdjustSubChampionInput
+): Promise<AdjustSubChampionResponse> {
+  const payload = adjustSubChampionInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/sub-champion/adjustment`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to confirm sub-champion adjustment (${response.status}).`);
+  }
+
+  return adjustSubChampionResponseSchema.parse(await parseJson<AdjustSubChampionResponse>(response));
+}
+
+export async function getBestPlayerPick(token: string): Promise<BestPlayerPickResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/best-player`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load best-player pick (${response.status}).`);
+  }
+
+  return bestPlayerPickResponseSchema.parse(await parseJson<BestPlayerPickResponse>(response));
+}
+
+export async function saveBestPlayerPick(
+  token: string,
+  input: SaveBestPlayerPickInput
+): Promise<SaveBestPlayerPickResponse> {
+  const payload = saveBestPlayerPickInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/best-player`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to save best-player pick (${response.status}).`);
+  }
+
+  return saveBestPlayerPickResponseSchema.parse(await parseJson<SaveBestPlayerPickResponse>(response));
+}
+
+export async function adjustBestPlayerPick(
+  token: string,
+  input: AdjustBestPlayerInput
+): Promise<AdjustBestPlayerResponse> {
+  const payload = adjustBestPlayerInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/macro-picks/best-player/adjustment`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to confirm best-player adjustment (${response.status}).`);
+  }
+
+  return adjustBestPlayerResponseSchema.parse(await parseJson<AdjustBestPlayerResponse>(response));
+}
+
+export async function getPoints(token: string): Promise<PointsResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/points`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load points (${response.status}).`);
+  }
+
+  return pointsResponseSchema.parse(await parseJson<PointsResponse>(response));
+}
+
+export async function getMyLeagues(token: string): Promise<ListMyLeaguesResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load leagues (${response.status}).`);
+  }
+
+  return listMyLeaguesResponseSchema.parse(await parseJson<ListMyLeaguesResponse>(response));
+}
+
+export async function createLeague(token: string, input: CreateLeagueInput): Promise<LeagueDetail> {
+  const payload = createLeagueInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to create league (${response.status}).`);
+  }
+
+  return leagueDetailSchema.parse(await parseJson<LeagueDetail>(response));
+}
+
+export async function joinLeague(token: string, input: JoinLeagueInput): Promise<LeagueDetail> {
+  const payload = joinLeagueInputSchema.parse(input);
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues/join`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to join league (${response.status}).`);
+  }
+
+  return leagueDetailSchema.parse(await parseJson<LeagueDetail>(response));
+}
+
+export async function getLeagueDetail(token: string, leagueId: string): Promise<LeagueDetail> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues/${leagueId}`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load league detail (${response.status}).`);
+  }
+
+  return leagueDetailSchema.parse(await parseJson<LeagueDetail>(response));
+}
+
+export async function getLeagueStandings(token: string, leagueId: string): Promise<LeagueStandingsResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues/${leagueId}/standings`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load standings (${response.status}).`);
+  }
+
+  return leagueStandingsResponseSchema.parse(await parseJson<LeagueStandingsResponse>(response));
 }
 
 export async function updateMyProfile(token: string, input: UpdateProfileInput): Promise<UserProfile> {
@@ -87,4 +454,94 @@ export async function updateMyProfile(token: string, input: UpdateProfileInput):
   }
 
   return userProfileSchema.parse(await parseJson<UserProfile>(response));
+}
+
+export async function getMatches(token: string, query: ListMatchesQuery = {}): Promise<ListMatchesResponse> {
+  const params = new URLSearchParams();
+
+  if (query.stage) {
+    params.set("stage", query.stage);
+  }
+
+  if (query.filter) {
+    params.set("filter", query.filter);
+  }
+
+  if (query.cursor) {
+    params.set("cursor", query.cursor);
+  }
+
+  if (typeof query.limit === "number") {
+    params.set("limit", String(query.limit));
+  }
+
+  const url = `${webConfig.apiBaseUrl}/api/v1/matches${params.size > 0 ? `?${params.toString()}` : ""}`;
+  const response = await fetch(url, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load matches (${response.status}).`);
+  }
+
+  return listMatchesResponseSchema.parse(await parseJson<ListMatchesResponse>(response));
+}
+
+export async function getMatchDetail(token: string, matchId: string): Promise<MatchDetail> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/matches/${matchId}`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load match detail (${response.status}).`);
+  }
+
+  return matchDetailSchema.parse(await parseJson<MatchDetail>(response));
+}
+
+export async function saveMatchPrediction(
+  token: string,
+  matchId: string,
+  input: SaveMatchPredictionInput
+): Promise<SaveMatchPredictionResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/matches/${matchId}/prediction`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify(input)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to save prediction (${response.status}).`);
+  }
+
+  return saveMatchPredictionResponseSchema.parse(await parseJson<SaveMatchPredictionResponse>(response));
+}
+
+export async function registerFcmToken(
+  token: string,
+  input: { fcmToken: string; platform: "web" | "ios" | "android"; userAgent: string | null }
+): Promise<void> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/me/fcm-tokens`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    },
+    body: JSON.stringify({
+      token: input.fcmToken,
+      platform: input.platform,
+      userAgent: input.userAgent
+    })
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to register FCM token (${response.status}).`);
+  }
+
+  await parseJson(response);
 }

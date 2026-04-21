@@ -35,6 +35,45 @@ function toPublicProfile(profile: StoredProfile): UserProfile {
 }
 
 export class UsersRepository {
+  async findByUserId(userId: string): Promise<UserProfile | null> {
+    const snapshot = await usersCollection.doc(userId).get();
+
+    if (!snapshot.exists) {
+      return null;
+    }
+
+    return toPublicProfile(snapshot.data() as StoredProfile);
+  }
+
+  async listByUserIds(userIds: string[]): Promise<UserProfile[]> {
+    if (userIds.length === 0) {
+      return [];
+    }
+
+    const snapshots = await Promise.all(userIds.map((userId) => usersCollection.doc(userId).get()));
+
+    return snapshots
+      .filter((snapshot) => snapshot.exists)
+      .map((snapshot) => toPublicProfile(snapshot.data() as StoredProfile));
+  }
+
+  async listProfiles(limit = 20): Promise<UserProfile[]> {
+    const snapshot = await usersCollection.limit(limit).get();
+    return snapshot.docs.map((doc) => toPublicProfile(doc.data() as StoredProfile));
+  }
+
+  async upsertProfile(profile: UserProfile): Promise<void> {
+    const now = new Date().toISOString();
+    const snapshot = await usersCollection.doc(profile.userId).get();
+    const existing = snapshot.exists ? (snapshot.data() as StoredProfile) : null;
+
+    await usersCollection.doc(profile.userId).set({
+      ...profile,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now
+    });
+  }
+
   async findOrCreateByAuth(auth: AuthContext): Promise<UserProfile> {
     const ref = usersCollection.doc(auth.userId);
     const snapshot = await ref.get();

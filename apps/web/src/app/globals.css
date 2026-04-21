@@ -1,0 +1,771 @@
+@import "tailwindcss";
+@source "../../../../packages/ui/src";
+
+/*
+ * Prode Mundial — Design Tokens
+ * Mapeados desde packages/ui/src/tokens.ts
+ * Tailwind v4 CSS-first config
+ */
+
+@theme {
+  /* ── Colors ── Stadium Light palette (FASE 1C) */
+  --color-primary-400: #4285F4;
+  --color-primary-500: #0052CC;
+  --color-primary-600: #0747A6;
+  --color-primary-soft: rgba(0, 82, 204, 0.10);
+  --color-primary-surface: rgba(0, 82, 204, 0.06);
+
+  --color-success: #18A957;
+  --color-error: #E5484D;
+  --color-warning: #F5A623;
+  --color-gold: #D4A842;
+  --color-gold-soft: rgba(212, 168, 66, 0.12);
+
+  --color-bg-main: #F0F1F3;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-surface-raised: #F5F6F8;
+  --color-bg-surface-highlight: rgba(0, 82, 204, 0.06);
+  --color-bg-elevated: #F7F8FA;
+  --color-bg-interactive: #EBF0F7;
+  --color-bg-muted: #ECEEF2;
+  --color-bg-inset: rgba(15, 23, 42, 0.04);
+
+  --color-border-subtle: rgba(15, 23, 42, 0.06);
+  --color-border-default: #E3E7EC;
+  --color-border-strong: rgba(15, 23, 42, 0.18);
+
+  /* Escala de texto: primary (títulos), secondary (body/metadata), muted (hints). */
+  --color-text-primary: #0E1116;
+  --color-text-secondary: #5B6470;
+  --color-text-muted: #8A94A1;
+
+  --color-overlay: rgba(15, 23, 42, 0.45);
+
+  /* ── Border Radius ── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  /* ── Shadows ── light mode (sutiles, profundidad por contraste) */
+  --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.03), 0 1px 3px rgba(15, 23, 42, 0.05);
+  --shadow-card: 0 2px 10px rgba(15, 23, 42, 0.06);
+  --shadow-modal: 0 16px 40px rgba(15, 23, 42, 0.14);
+
+  /* ── Font Family ── */
+  --font-sans: "Sora", "Manrope", "Inter", system-ui, sans-serif;
+
+  /* ── Font Size ── */
+  --font-size-h1: 34px;
+  --font-size-h2: 24px;
+  --font-size-h3: 20px;
+  --font-size-lead: 16px;
+  --font-size-body: 15px;
+  --font-size-small: 12px;
+  --font-size-eyebrow: 11px;
+}
+
+/*
+ * Component-level CSS classes
+ * En @layer components para que Tailwind utilities puedan overridearlas
+ */
+@layer components {
+  /* ── Typography ── */
+  .typo-h1 { font-size: 34px; font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; }
+  .typo-h2 { font-size: 24px; font-weight: 700; line-height: 1.12; letter-spacing: -0.02em; }
+  .typo-h3 { font-size: 20px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
+  .typo-lead { font-size: 16px; font-weight: 500; line-height: 1.5; }
+  .typo-body { font-size: 15px; font-weight: 400; line-height: 1.5; }
+  .typo-small { font-size: 12px; font-weight: 600; line-height: 1.35; letter-spacing: 0.04em; }
+  .typo-eyebrow {
+    font-size: 11px; font-weight: 600; line-height: 1.35;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  /* ── Buttons ── WS50 · WAVE 1 · C3 (unificados: altura 44, misma jerarquía) */
+  .btn-base {
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: var(--radius-lg);
+    font-size: 15px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    transition: transform 140ms ease, opacity 140ms ease,
+      background 140ms ease, border-color 140ms ease,
+      box-shadow 140ms ease, color 140ms ease;
+  }
+  .btn-primary {
+    background: var(--color-primary-500);
+    color: #FFFFFF;
+    border: 1px solid var(--color-primary-600);
+    box-shadow: 0 4px 10px rgba(0, 82, 204, 0.18);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-primary-600);
+  }
+  .btn-secondary {
+    background: var(--color-bg-interactive);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border-default);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: #E3E7EC;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-primary-500);
+    border: 1px solid var(--color-border-default);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--color-primary-surface);
+  }
+  .btn-destructive {
+    background: #FFFFFF;
+    color: var(--color-error);
+    border: 1px solid rgba(229, 72, 77, 0.32);
+  }
+  .btn-destructive:hover:not(:disabled) {
+    background: rgba(229, 72, 77, 0.06);
+    border-color: var(--color-error);
+  }
+
+  /* ── Status Pills ── */
+  .status-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    min-height: 24px;
+    padding: 0 10px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: 0.04em;
+    transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+  }
+  /*
+   * Sistema semántico (WS50 / Fase 2 ronda 2):
+   *   editable      → azul (acción disponible)
+   *   saved         → verde (hecho)
+   *   scored        → verde (ya puntuado; mismo verde que saved, se diferencia por label)
+   *   closing-soon  → amarillo (urgencia: empty + editable + deadline ≤ 2h)
+   *   live          → rojo (en curso)
+   *   neutral       → gris (no accionable: opens-later, locked sin predecir, etc.)
+   */
+  .status-editable     { background: var(--color-primary-soft); color: var(--color-primary-600); border: 1px solid rgba(0, 82, 204, 0.18); }
+  .status-saved        { background: rgba(24, 169, 87, 0.10); color: #0F7A3F; border: 1px solid rgba(24, 169, 87, 0.24); }
+  .status-scored       { background: rgba(24, 169, 87, 0.10); color: #0F7A3F; border: 1px solid rgba(24, 169, 87, 0.24); }
+  .status-closing-soon { background: rgba(245, 166, 35, 0.12); color: #8A5A00; border: 1px solid rgba(245, 166, 35, 0.30); }
+  .status-live         { background: rgba(229, 72, 77, 0.10); color: #B42318; border: 1px solid rgba(229, 72, 77, 0.24); }
+  .status-neutral      { background: var(--color-bg-muted); color: var(--color-text-muted); border: 1px solid var(--color-border-subtle); }
+
+  /* ── Card ── WS50 · WAVE 1 · C4 (borders débiles, depth por shadow) */
+  .card-base {
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+  }
+  .card-elevated-bg {
+    background: var(--color-bg-elevated);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* ── Surface Inset ── C4: sin border, la superficie gris ya da separación */
+  .surface-inset {
+    border-radius: var(--radius-md);
+    background: var(--color-bg-muted);
+  }
+
+  /* ── Login ── */
+  .login-hero-bg {
+    background: linear-gradient(180deg, var(--color-primary-surface) 0%, #FFFFFF 60%);
+    border: 1px solid rgba(0, 82, 204, 0.14);
+  }
+  .step-card {
+    background: #FFFFFF;
+    border: 1px solid var(--color-border-subtle);
+    box-shadow: var(--shadow-soft);
+  }
+  .email-input {
+    min-height: 52px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-default);
+    background: #FFFFFF;
+    color: var(--color-text-primary);
+    padding: 0 14px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+  }
+  .email-input:focus {
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px var(--color-primary-surface);
+  }
+  .select-input {
+    min-height: 48px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-default);
+    background: #FFFFFF;
+    color: var(--color-text-primary);
+    padding: 0 14px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+  }
+  .select-input:focus {
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px var(--color-primary-surface);
+  }
+  /* ── Inline Notifications ── */
+  .notification-base {
+    padding: 14px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .notification-warning, .alert-warning {
+    background: rgba(245, 166, 35, 0.08);
+    border: 1px solid rgba(245, 166, 35, 0.28);
+    color: #8A5A00;
+  }
+  .notification-error, .alert-error {
+    background: rgba(229, 72, 77, 0.06);
+    border: 1px solid rgba(229, 72, 77, 0.22);
+    color: #B42318;
+  }
+  .notification-success, .alert-success {
+    background: rgba(24, 169, 87, 0.06);
+    border: 1px solid rgba(24, 169, 87, 0.24);
+    color: #0F7A3F;
+  }
+  .notification-info, .alert-info {
+    background: var(--color-primary-surface);
+    border: 1px solid rgba(0, 82, 204, 0.18);
+    color: var(--color-primary-600);
+  }
+
+  /* ── Hero Backgrounds ── */
+  .hero-editable-bg {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.96) 60%),
+      url("/mundial/hero-stadium.jpg") center top / cover no-repeat;
+    border: 1px solid rgba(0, 82, 204, 0.14);
+  }
+  .hero-locked-bg {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.95) 60%),
+      url("/mundial/hero-stadium.jpg") center top / cover no-repeat;
+    border: 1px solid rgba(212, 168, 66, 0.22);
+  }
+
+  /* ── Score Input ── */
+  .score-panel-bg {
+    background: var(--color-bg-muted);
+  }
+  .score-display-bg {
+    background: var(--color-primary-surface);
+    border: 1px solid rgba(0, 82, 204, 0.18);
+    color: var(--color-primary-600);
+  }
+  .score-btn {
+    border: 1px solid var(--color-border-default);
+    background: #FFFFFF;
+    color: var(--color-text-primary);
+  }
+  .score-btn:hover:not(:disabled) {
+    background: var(--color-bg-interactive);
+  }
+
+  /* ── Flag Fallback ── */
+  .flag-fallback-bg {
+    background: var(--color-primary-surface);
+    color: var(--color-primary-600);
+  }
+
+  /* ── League Action ── */
+  .league-action-bg {
+    background:
+      radial-gradient(circle at top right, var(--color-primary-surface), transparent 32%),
+      linear-gradient(180deg, var(--color-primary-surface) 0%, #FFFFFF 70%);
+    border: 1px solid rgba(0, 82, 204, 0.14);
+  }
+
+  /* ── Home Hero ── */
+  .hero-worldcup-bg {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.94) 70%),
+      url("/mundial/tournament-trophy.jpg") center center / cover no-repeat;
+    border: 1px solid var(--color-border-default);
+  }
+
+  /* ── Stage Badges ── */
+  .stage-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .stage-badge-sm {
+    height: 22px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+  .stage-badge-md {
+    height: 26px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+  .stage-badge-icon {
+    font-size: 0.85em;
+    line-height: 1;
+  }
+  .stage-badge-group {
+    background: var(--color-primary-surface);
+    color: var(--color-primary-600);
+    border: 1px solid rgba(0, 82, 204, 0.14);
+  }
+  .stage-badge-knockout {
+    background: rgba(234, 88, 12, 0.08);
+    color: #c2410c;
+    border: 1px solid rgba(234, 88, 12, 0.16);
+  }
+  .stage-badge-semi {
+    background: rgba(147, 51, 234, 0.08);
+    color: #7c3aed;
+    border: 1px solid rgba(147, 51, 234, 0.16);
+  }
+  .stage-badge-bronze {
+    background: rgba(180, 130, 60, 0.08);
+    color: #92650a;
+    border: 1px solid rgba(180, 130, 60, 0.16);
+  }
+  .stage-badge-final {
+    background: linear-gradient(135deg, rgba(212, 168, 66, 0.12) 0%, rgba(234, 179, 8, 0.08) 100%);
+    color: #92650a;
+    border: 1px solid rgba(212, 168, 66, 0.24);
+    font-weight: 700;
+  }
+
+  /* ── Section Dividers ── */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 0;
+  }
+  .section-divider-line {
+    flex: 1;
+    height: 1px;
+  }
+  .section-divider-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .section-divider-default .section-divider-line {
+    background: var(--color-border-default);
+  }
+  .section-divider-default .section-divider-label {
+    color: var(--color-text-muted);
+  }
+  .section-divider-knockout .section-divider-line {
+    background: linear-gradient(90deg, transparent 0%, rgba(234, 88, 12, 0.3) 50%, transparent 100%);
+  }
+  .section-divider-knockout .section-divider-label {
+    color: #c2410c;
+  }
+  .section-divider-final .section-divider-line {
+    background: linear-gradient(90deg, transparent 0%, rgba(212, 168, 66, 0.4) 50%, transparent 100%);
+  }
+  .section-divider-final .section-divider-label {
+    color: #92650a;
+  }
+
+  /* ── Filter Bar ── */
+  .filter-bar-bg {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    padding: 6px 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .filter-bar-bg::-webkit-scrollbar {
+    display: none;
+  }
+  .filter-chip {
+    min-height: 30px;
+    border-radius: var(--radius-pill);
+    padding: 0 10px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+    flex-shrink: 0;
+  }
+  .filter-chip-active {
+    border: 1px solid var(--color-primary-500);
+    background: var(--color-primary-100, rgba(0, 82, 204, 0.10));
+    color: var(--color-primary-600);
+  }
+  .filter-chip-active-saved {
+    border: 1px solid var(--color-success);
+    background: rgba(24, 169, 87, 0.10);
+    color: #0E7F3F;
+  }
+  .filter-chip-inactive {
+    border: 1px solid var(--color-border-default);
+    background: var(--color-bg-surface, #FFFFFF);
+    color: var(--color-text-muted);
+  }
+  .filter-chip-inactive:hover {
+    background: var(--color-bg-interactive);
+    color: var(--color-text-primary);
+  }
+
+  /* ── Phase tab status dot (Mi Mundial subtabs) ── */
+  .phase-tab-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: var(--radius-pill);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .phase-tab-dot--complete {
+    background: var(--color-success);
+    color: #FFFFFF;
+  }
+  .phase-tab-dot--partial {
+    background: var(--color-gold, #D4A842);
+    color: #FFFFFF;
+  }
+  .phase-tab-dot--empty {
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border-default);
+  }
+  .phase-tab-dot--locked {
+    background: var(--color-bg-muted);
+    color: var(--color-text-muted);
+  }
+
+  /* ── Mode toggle (Mi Mundial: Predicciones / Resultados) ── */
+  .mode-toggle {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 4px;
+    padding: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-muted);
+    border: 1px solid var(--color-border-default);
+  }
+  .mode-toggle-option {
+    padding: 8px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease;
+  }
+  .mode-toggle-option:hover {
+    color: var(--color-text-primary);
+  }
+  .mode-toggle-option--active {
+    background: var(--color-bg-surface, #FFFFFF);
+    color: var(--color-text-primary);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  }
+
+  /* ── Group accordion (Mis Predicciones + Grupos) ── */
+  .group-accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    width: 100%;
+    text-align: left;
+    transition: background 120ms ease;
+  }
+  .group-accordion-header:hover {
+    background: var(--color-bg-interactive);
+  }
+  .group-accordion-chevron {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    width: 12px;
+    text-align: center;
+  }
+
+  /* ── Next Window Card ── */
+  .next-window-bg {
+    background: linear-gradient(180deg, var(--color-gold-soft) 0%, #FFFFFF 70%);
+    border: 1px solid rgba(212, 168, 66, 0.22);
+  }
+
+  /* ── Ad Slot ── */
+  .ad-slot-bg {
+    background: var(--color-bg-muted);
+    border: 1px dashed var(--color-border-default);
+  }
+
+  /* ── Group Table ── */
+  .group-row-qualified {
+    background: var(--color-primary-soft);
+    border: 1px solid rgba(0, 82, 204, 0.18);
+    border-left: 3px solid var(--color-primary-500);
+  }
+
+  /* ── Standings ── */
+  .standing-me { background: rgba(47, 107, 255, 0.14); border: 1px solid var(--color-primary-500); }
+  .standing-leader { background: rgba(231, 198, 106, 0.14); border: 1px solid var(--color-gold); }
+  .standing-podium { background: var(--color-gold-soft); border: 1px solid rgba(212, 168, 66, 0.22); }
+  .standing-default { background: var(--color-bg-surface); border: 1px solid var(--color-border-default); }
+
+  /* ── Toast ── */
+  .toast-base {
+    position: sticky;
+    top: 12px;
+    z-index: 20;
+    justify-self: center;
+    padding: 12px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+  .toast-success {
+    background: rgba(24, 169, 87, 0.10);
+    color: #0F7A3F;
+    border: 1px solid rgba(24, 169, 87, 0.24);
+  }
+  .toast-error {
+    background: rgba(229, 72, 77, 0.10);
+    color: #B42318;
+    border: 1px solid rgba(229, 72, 77, 0.24);
+  }
+  .toast-warning {
+    background: rgba(245, 166, 35, 0.10);
+    color: #8A5A00;
+    border: 1px solid rgba(245, 166, 35, 0.28);
+  }
+  .toast-info {
+    background: rgba(0, 82, 204, 0.08);
+    color: var(--color-primary-600);
+    border: 1px solid rgba(0, 82, 204, 0.18);
+  }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    background: var(--color-overlay);
+    backdrop-filter: blur(4px);
+    animation: fade-in 200ms ease-out;
+  }
+  .modal-content-bg {
+    background: var(--color-bg-elevated);
+  }
+  .modal-sheet-enter {
+    animation: slide-up 280ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  body.prediction-modal-open {
+    overflow: hidden;
+  }
+  body.prediction-modal-open [data-bottom-nav] {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* ── Matchup Panel ── */
+  .matchup-panel-bg {
+    background: var(--color-bg-muted);
+    border: 1px solid var(--color-border-default);
+  }
+
+  /* ── Prediction Row ── */
+  .prediction-row-bg {
+    background: var(--color-bg-muted);
+    border: 1px solid var(--color-border-default);
+  }
+
+  /* ── Classifier Options ── */
+  .classifier-option {
+    min-height: 48px;
+    border-radius: var(--radius-md);
+    text-align: left;
+    padding: 0 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+  .classifier-active {
+    border: 1px solid var(--color-primary-500);
+    background: var(--color-primary-soft);
+    color: var(--color-primary-600);
+  }
+  .classifier-inactive {
+    border: 1px solid var(--color-border-default);
+    background: #FFFFFF;
+  }
+  .classifier-inactive:hover:not(:disabled) {
+    background: var(--color-bg-interactive);
+  }
+
+  /* ── App Body Background ── light mode */
+  .app-body-bg {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Sora", "Manrope", "Inter", system-ui, sans-serif;
+    color: var(--color-text-primary);
+    color-scheme: light;
+    background:
+      radial-gradient(circle at top left, rgba(0, 82, 204, 0.05), transparent 32%),
+      radial-gradient(circle at top right, rgba(212, 168, 66, 0.05), transparent 24%),
+      linear-gradient(180deg, #F7F8FA 0%, #FFFFFF 42%, #F7F8FA 100%);
+  }
+
+  /* ── Rules Hero ── */
+  .rules-hero-bg {
+    background:
+      radial-gradient(circle at top right, rgba(47, 107, 255, 0.16), transparent 28%),
+      linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%);
+  }
+
+  /* ── Skeleton / Shimmer ── */
+  .skeleton {
+    background: linear-gradient(90deg, var(--color-bg-muted) 25%, var(--color-bg-interactive) 50%, var(--color-bg-muted) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--radius-md);
+  }
+  .skeleton-pill {
+    border-radius: var(--radius-pill);
+  }
+
+  /* ── Close Button ── */
+  .close-btn {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 80ms ease;
+  }
+  .close-btn:hover {
+    background: var(--color-bg-interactive);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-default);
+  }
+  .close-btn:active {
+    background: var(--color-bg-muted);
+    transform: scale(0.94);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0.8; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes score-bump {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/*
+ * Bracket Y-connectors (TournamentBracket)
+ * ----------------------------------------
+ * Each `.bracket-pair` wraps two sibling matches that feed the same child
+ * match in the next round. The wrapper uses `flex: 1 + justify-around` so
+ * cards sit at 25% / 75% of its height. The Y is drawn as two pseudo-elements
+ * that live in the horizontal gap to the right of the wrapper:
+ *
+ *   ::before = the `]` (top horizontal stub + right vertical + bottom stub)
+ *              spans from 25% to 75% of the pair — exactly from card center
+ *              to card center.
+ *
+ *   ::after  = a horizontal tail from the midpoint of the `]` to the left
+ *              edge of the next column, landing on the child card's center.
+ *
+ * The section uses gap: 32px, split 16+16 between the two pseudo-elements so
+ * the Y lands flush with the next card. Adjust both the gap and the widths
+ * together if you change this.
+ */
+.bracket-section {
+  gap: 32px;
+}
+
+.bracket-pair::before,
+.bracket-pair::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bracket-pair::before {
+  top: 25%;
+  bottom: 25%;
+  left: 100%;
+  width: 16px;
+  border-top: 2px solid var(--bracket-connector, rgba(110, 110, 130, 0.35));
+  border-right: 2px solid var(--bracket-connector, rgba(110, 110, 130, 0.35));
+  border-bottom: 2px solid var(--bracket-connector, rgba(110, 110, 130, 0.35));
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.bracket-pair::after {
+  top: calc(50% - 1px);
+  left: calc(100% + 16px);
+  width: 16px;
+  height: 2px;
+  background: var(--bracket-connector, rgba(110, 110, 130, 0.35));
+}
+
+/* Half-specific connector colors — match the card bg tint (A = blue, B = violet). */
+.bracket-pair--a {
+  --bracket-connector: rgba(37, 99, 235, 0.55);
+}
+.bracket-pair--b {
+  --bracket-connector: rgba(124, 58, 237, 0.55);
+}

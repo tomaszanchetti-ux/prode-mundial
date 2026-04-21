@@ -301,7 +301,7 @@ adjustment\_available \= true
 
 ## **Expiración**
 
-* kickoff octavos → false
+* kickoff primer partido knockout → false
 
 ---
 

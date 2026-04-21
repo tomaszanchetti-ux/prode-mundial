@@ -135,6 +135,7 @@ Esta épica debe obedecer estrictamente:
 * los contratos API ya definidos para `/matches`, `/matches/:matchId` y `/matches/:matchId/prediction`  
 * la state matrix oficial para estados derivados de partido y predicción  
 * el UX brief de listado de partidos y detalle/predicción  
+* el design system oficial para tokens, componentes base y patrón prioritario de prediction modal  
 * el data model canónico para `matches`, `teams` y `predictions`.
 
 ---
@@ -166,6 +167,51 @@ La épica se considera terminada solo si:
 # **7\. Cards de la épica**
 
 Voy a bajarla en cards ejecutables, igual que Epic 1\.
+
+---
+
+# **CARD 0 — UI Foundation for Matches Flow**
+
+## **Objetivo**
+
+Dejar lista la base visual y de componentes reutilizables que necesita Epic 2 para construir el flujo de partidos sin seguir ampliando estilos ad-hoc.
+
+## **Alcance**
+
+* tokens base del design system en `packages/ui`
+* primitives o wrappers mínimos para:
+  * `Button`
+  * `Card`
+  * `StatusTag`
+  * `TeamDisplay`
+* definición inicial de `MatchCard`
+* definición inicial de `ScoreInput`
+* base del `PredictionModal` para uso progresivo
+
+## **Tareas**
+
+### **Task 0.1**
+
+Crear tokens iniciales de color, spacing, radio y tipografía alineados a `docs/product/DESIGN_SYSTEM.md`.
+
+### **Task 0.2**
+
+Extraer o reemplazar componentes MVP simples que hoy ya existen en `packages/ui` para que pasen a usar tokens compartidos.
+
+### **Task 0.3**
+
+Definir `TeamDisplay`, `StatusTag` y `Button` con props mínimas reutilizables.
+
+### **Task 0.4**
+
+Definir una primera versión de `MatchCard`, `ScoreInput` y `PredictionModal` sin cerrar todavía toda la lógica de negocio.
+
+## **Acceptance Criteria**
+
+* el flujo visual de Epic 2 puede construirse sobre `packages/ui`
+* no hace falta inventar estilos por pantalla para matches/predictions
+* los estados visuales críticos (`editable`, `locked`, `live`, `scored`) tienen representación consistente
+* el patrón de prediction modal queda preparado aunque su activación progresiva pueda completarse luego dentro de la misma épica
 
 ---
 
@@ -281,9 +327,11 @@ Dejar disponible un dataset mínimo y consistente para poder desarrollar fixture
 * seed de partidos  
 * mezcla mínima de:  
   * fase de grupos  
+  * dieciseisavos  
   * octavos  
   * cuartos  
   * semifinal  
+  * partido por el tercer puesto  
   * final  
 * variantes de estado:  
   * `scheduled`  
@@ -420,7 +468,7 @@ Crear handler `GET /api/v1/matches`.
 
 Soportar query params definidos:
 
-* `stage=group|R16|QF|SF|FINAL`  
+* `stage=group|R32|R16|QF|SF|BRONZE|FINAL`  
 * `filter=all|today|upcoming|pending|scored|finished`  
 * `cursor`  
 * `limit`
