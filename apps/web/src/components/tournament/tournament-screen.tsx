@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   APP_ROUTES,
+  type BestPlayerPickResponse,
   type ChampionPickResponse,
   type MatchStage,
   type MatchSummary,
@@ -17,7 +18,7 @@ import { Card, ErrorCard, NextMatchHero, SkeletonCard } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useLocale } from "@/lib/i18n/locale-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
-import { ApiClientError, getChampionPick, getMatches, getPreTournamentSummary, getSubChampionPick, getTournamentProjection, getTuMundial } from "@/lib/api/client";
+import { ApiClientError, getBestPlayerPick, getChampionPick, getMatches, getPreTournamentSummary, getSubChampionPick, getTournamentProjection, getTuMundial } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
 import { pickContextualHeroMatch, type ContextualHero } from "@/lib/hero/pick-contextual-hero";
 import { toHeroProps } from "@/lib/hero/to-hero-props";
@@ -140,6 +141,7 @@ type TournamentScreenViewProps = {
   activePhase: TournamentPhase;
   championPick: ChampionPickResponse | null;
   subChampionPick: SubChampionPickResponse | null;
+  bestPlayerPick: BestPlayerPickResponse | null;
   errorMessage: string | null;
   groups: TuMundialGroupCard[];
   hero: ContextualHero | null;
@@ -162,6 +164,7 @@ export function TournamentScreenView({
   activePhase,
   championPick,
   subChampionPick,
+  bestPlayerPick,
   errorMessage,
   groups,
   hero,
@@ -205,6 +208,7 @@ export function TournamentScreenView({
       <MisPicksSection
         championPick={championPick}
         subChampionPick={subChampionPick}
+        bestPlayerPick={bestPlayerPick}
         onOpenPicks={onOpenPicks}
       />
 
@@ -261,6 +265,7 @@ export function TournamentScreen() {
   const [projection, setProjection] = useState<TournamentProjectionResponse | null>(null);
   const [championPick, setChampionPick] = useState<ChampionPickResponse | null>(null);
   const [subChampionPick, setSubChampionPick] = useState<SubChampionPickResponse | null>(null);
+  const [bestPlayerPick, setBestPlayerPick] = useState<BestPlayerPickResponse | null>(null);
   const [preTournamentSummary, setPreTournamentSummary] = useState<PreTournamentSummary | null>(null);
   const [items, setItems] = useState<MatchSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -279,6 +284,7 @@ export function TournamentScreen() {
         setProjection(null);
         setChampionPick(null);
         setSubChampionPick(null);
+        setBestPlayerPick(null);
         setPreTournamentSummary(null);
         setItems([]);
         setIsLoading(status === "loading");
@@ -290,11 +296,12 @@ export function TournamentScreen() {
 
       try {
         const token = await user.getIdToken();
-        const [nextData, nextProjection, nextChampion, nextSubChampion, nextSummary, matchesResponse] = await Promise.all([
+        const [nextData, nextProjection, nextChampion, nextSubChampion, nextBestPlayer, nextSummary, matchesResponse] = await Promise.all([
           getTuMundial(token),
           getTournamentProjection(token),
           getChampionPick(token),
           getSubChampionPick(token),
+          getBestPlayerPick(token),
           getPreTournamentSummary(token),
           getMatches(token, { limit: 200 })
         ]);
@@ -304,6 +311,7 @@ export function TournamentScreen() {
           setProjection(nextProjection);
           setChampionPick(nextChampion);
           setSubChampionPick(nextSubChampion);
+          setBestPlayerPick(nextBestPlayer);
           setPreTournamentSummary(nextSummary);
           setItems(matchesResponse.items);
         }
@@ -414,6 +422,7 @@ export function TournamentScreen() {
         activePhase={activePhase}
         championPick={championPick}
         subChampionPick={subChampionPick}
+        bestPlayerPick={bestPlayerPick}
         errorMessage={errorMessage}
         groups={data?.groups ?? []}
         hero={hero}

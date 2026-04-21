@@ -143,7 +143,8 @@ function renderView(
       preTournamentSummary: overrides.preTournamentSummary ?? buildPreTournamentSummary(),
       projection: null,
       championPick: null,
-      subChampionPick: null
+      subChampionPick: null,
+      bestPlayerPick: null
     })
   );
 }

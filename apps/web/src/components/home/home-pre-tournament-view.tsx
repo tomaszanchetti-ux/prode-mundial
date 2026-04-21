@@ -1,5 +1,5 @@
 import React from "react";
-import type { ChampionPickResponse, LeagueSummary, MatchSummary, PointsResponse, PreTournamentSummary, SubChampionPickResponse } from "@prode/shared";
+import type { BestPlayerPickResponse, ChampionPickResponse, LeagueSummary, MatchSummary, PointsResponse, PreTournamentSummary, SubChampionPickResponse } from "@prode/shared";
 import { AdSlotCard, Button, Card, NextMatchHero } from "@prode/ui";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { pickContextualHeroMatch } from "@/lib/hero/pick-contextual-hero";
@@ -15,6 +15,7 @@ type HomePreTournamentViewProps = {
   points: PointsResponse | null;
   championPick: ChampionPickResponse | null;
   subChampionPick: SubChampionPickResponse | null;
+  bestPlayerPick: BestPlayerPickResponse | null;
   preTournamentSummary: PreTournamentSummary;
   isLoading: boolean;
   errorMessage: string | null;
@@ -33,6 +34,7 @@ export function HomePreTournamentView({
   points,
   championPick,
   subChampionPick,
+  bestPlayerPick,
   preTournamentSummary,
   isLoading,
   errorMessage,
@@ -94,6 +96,7 @@ export function HomePreTournamentView({
       <MisPicksWidget
         championPick={championPick}
         subChampionPick={subChampionPick}
+        bestPlayerPick={bestPlayerPick}
         onOpenPicks={onOpenPicks}
       />
 

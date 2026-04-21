@@ -1,23 +1,31 @@
 import React from "react";
-import type { ChampionPickResponse, SubChampionPickResponse } from "@prode/shared";
+import type { BestPlayerPickResponse, ChampionPickResponse, SubChampionPickResponse } from "@prode/shared";
+import { getBestPlayerById } from "@prode/shared";
 import { Button, Card } from "@prode/ui";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 
 type MisPicksWidgetProps = {
   championPick: ChampionPickResponse | null;
   subChampionPick: SubChampionPickResponse | null;
+  bestPlayerPick: BestPlayerPickResponse | null;
   onOpenPicks: () => void;
 };
 
-export function MisPicksWidget({ championPick, subChampionPick, onOpenPicks }: MisPicksWidgetProps) {
+export function MisPicksWidget({
+  championPick,
+  subChampionPick,
+  bestPlayerPick,
+  onOpenPicks
+}: MisPicksWidgetProps) {
   const { locale } = useLocale();
 
   const championId = championPick?.adjustedChampionTeamId ?? championPick?.championTeamId ?? null;
   const subChampionId =
     subChampionPick?.adjustedSubChampionTeamId ?? subChampionPick?.subChampionTeamId ?? null;
+  const bestPlayerId = bestPlayerPick?.adjustedBestPlayerId ?? bestPlayerPick?.bestPlayerId ?? null;
+  const bestPlayerName = bestPlayerId ? getBestPlayerById(bestPlayerId)?.name ?? null : null;
 
   const emptyLabel = copyForLocale(locale, "sin elegir", "not picked");
-  const comingSoonLabel = copyForLocale(locale, "proximamente", "coming soon");
 
   return (
     <Card elevated style={{ gap: 12, padding: 16 }}>
@@ -38,9 +46,8 @@ export function MisPicksWidget({ championPick, subChampionPick, onOpenPicks }: M
         />
         <PickRow
           label={copyForLocale(locale, "Balon de Oro", "Golden Ball")}
-          value={null}
-          placeholder={comingSoonLabel}
-          placeholderTone="muted"
+          value={bestPlayerName}
+          placeholder={emptyLabel}
         />
       </ul>
 
