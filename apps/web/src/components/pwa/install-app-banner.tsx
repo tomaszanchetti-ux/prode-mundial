@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@prode/ui";
 import { track } from "@/lib/firebase/analytics";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
+import { InstallIOSModal } from "./install-ios-modal";
 import { useInstallPrompt } from "./use-install-prompt";
 
 const DISMISS_KEY = "prode_install_banner_dismissed_until";
@@ -22,12 +23,13 @@ function setDismissedUntil(timestamp: number) {
   window.localStorage.setItem(DISMISS_KEY, String(timestamp));
 }
 
-type BannerState = "visible" | "ios-hint" | "pending" | "hidden";
+type BannerState = "visible" | "pending" | "hidden";
 
 export function InstallAppBanner() {
   const { locale } = useLocale();
   const { canInstall, hasNativePrompt, isIOS, isStandalone, promptInstall } = useInstallPrompt();
   const [state, setState] = useState<BannerState>("hidden");
+  const [iosModalOpen, setIosModalOpen] = useState(false);
   const [shownTracked, setShownTracked] = useState(false);
 
   useEffect(() => {
@@ -70,7 +72,7 @@ export function InstallAppBanner() {
 
   const handleShowIOSHint = () => {
     track("install_banner_ios_hint_opened");
-    setState("ios-hint");
+    setIosModalOpen(true);
   };
 
   const handleDismiss = () => {
@@ -81,8 +83,8 @@ export function InstallAppBanner() {
   };
 
   return (
-    <div className="rounded-lg border border-border-default bg-surface-raised px-4 py-3 grid gap-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <>
+      <div className="rounded-lg border border-border-default bg-surface-raised px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
           <span className="text-2xl" aria-hidden>📲</span>
           <div className="grid gap-1">
@@ -114,26 +116,7 @@ export function InstallAppBanner() {
         </div>
       </div>
 
-      {state === "ios-hint" && isIOS ? (
-        <div className="p-[14px] surface-inset text-text-secondary text-[14px] leading-[1.45] grid gap-1">
-          <strong className="text-text-primary">
-            {copyForLocale(locale, "En iPhone / iPad:", "On iPhone / iPad:")}
-          </strong>
-          <span>
-            {locale === "en" ? (
-              <>
-                Tap the <strong>Share</strong> button in Safari and pick{" "}
-                <strong>Add to Home Screen</strong>.
-              </>
-            ) : (
-              <>
-                Tocá el botón <strong>Compartir</strong> en Safari y elegí{" "}
-                <strong>Agregar a pantalla de inicio</strong>.
-              </>
-            )}
-          </span>
-        </div>
-      ) : null}
-    </div>
+      <InstallIOSModal isOpen={iosModalOpen} onClose={() => setIosModalOpen(false)} />
+    </>
   );
 }
