@@ -10,6 +10,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { updateMyProfile } from "@/lib/api/client";
 import { InstallAppCard } from "@/components/pwa/install-app-card";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
+import { openConsentPreferences } from "@/lib/consent/consent-events";
 
 type FormState = {
   displayName: string;
@@ -143,7 +144,7 @@ export function ProfileScreen() {
 
       <InstallAppCard />
 
-      {/* ── Recursos: Reglas · Términos y Privacidad ── */}
+      {/* ── Recursos: Reglas · Términos y Privacidad · Cookies ── */}
       <Card elevated style={{ gap: 6, padding: 16 }}>
         <Link href="/rules" className="support-nav-card-row">
           <span>{t("Reglas", "Rules")}</span>
@@ -153,6 +154,14 @@ export function ProfileScreen() {
           <span>{t("Términos y Privacidad", "Terms & Privacy")}</span>
           <span aria-hidden="true">›</span>
         </Link>
+        <button
+          type="button"
+          onClick={openConsentPreferences}
+          className="support-nav-card-row w-full text-left cursor-pointer"
+        >
+          <span>{t("Preferencias de cookies", "Cookie preferences")}</span>
+          <span aria-hidden="true">›</span>
+        </button>
       </Card>
 
       {/* ── Cuenta + logout (último) ── */}

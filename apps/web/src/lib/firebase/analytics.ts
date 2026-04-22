@@ -4,6 +4,7 @@ import { webConfig } from "@/config/app";
 
 let analyticsPromise: Promise<Analytics | null> | null = null;
 let readyAnalytics: Analytics | null = null;
+let analyticsConsented = false;
 
 function isClient() {
   return typeof window !== "undefined";
@@ -11,6 +12,14 @@ function isClient() {
 
 function hasMeasurementId() {
   return webConfig.firebase.measurementId.length > 0;
+}
+
+export function setAnalyticsConsent(granted: boolean): void {
+  analyticsConsented = granted;
+}
+
+export function isAnalyticsConsented(): boolean {
+  return analyticsConsented;
 }
 
 async function resolveAnalytics(): Promise<Analytics | null> {
@@ -28,6 +37,9 @@ async function resolveAnalytics(): Promise<Analytics | null> {
 }
 
 export function initAnalytics(): Promise<Analytics | null> {
+  if (!analyticsConsented) {
+    return Promise.resolve(null);
+  }
   if (!analyticsPromise) {
     analyticsPromise = resolveAnalytics().catch((error) => {
       console.warn("[analytics] init failed", error);
@@ -57,6 +69,7 @@ export function track(
   params?: Record<string, string | number | boolean | null | undefined>
 ) {
   if (!isClient()) return;
+  if (!analyticsConsented) return;
 
   const emit = async () => {
     const instance = readyAnalytics ?? (await initAnalytics());
