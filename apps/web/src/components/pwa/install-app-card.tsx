@@ -22,7 +22,6 @@ export function InstallAppCard() {
   return (
     <Card elevated style={{ gap: 12, padding: 20 }}>
       <span className="typo-small text-primary-500">INSTALAR APP</span>
-      <h2 className="typo-h3 m-0 text-text-primary">Tené Prode a un toque</h2>
       <p className="typo-body m-0 text-text-secondary">
         Instalala en tu celular para abrirla como una app, sin barra del navegador y con acceso directo desde el home.
       </p>

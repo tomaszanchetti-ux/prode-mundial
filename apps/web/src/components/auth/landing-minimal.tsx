@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useEffect } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { SUPPORT_LINKS } from "@prode/shared";
 import { useAuth } from "./auth-provider";
 import { LoginBlock } from "./login-block";
 import { resolveNextRoute } from "./login-screen";
+import { SupportNav } from "@/components/layout/support-nav";
 
 /**
  * Home pública pre-auth (EPIC 23bis).
@@ -38,12 +37,8 @@ export function LandingMinimal() {
         <LoginBlock />
       </div>
 
-      <footer className="flex flex-wrap gap-4 justify-center py-6">
-        {SUPPORT_LINKS.map((link) => (
-          <Link key={link.href} href={link.href} className="landing-footer-link">
-            {link.label}
-          </Link>
-        ))}
+      <footer className="flex justify-center py-6">
+        <SupportNav />
       </footer>
     </main>
   );

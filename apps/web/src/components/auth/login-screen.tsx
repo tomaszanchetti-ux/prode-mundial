@@ -2,11 +2,11 @@
 
 import React from "react";
 import { useEffect } from "react";
-import Link from "next/link";
-import { APP_ROUTES, SUPPORT_LINKS } from "@prode/shared";
+import { APP_ROUTES } from "@prode/shared";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "./auth-provider";
 import { LoginBlock } from "./login-block";
+import { SupportNav } from "@/components/layout/support-nav";
 
 export function resolveNextRoute(next: string | null, profileCompleted: boolean | undefined) {
   if (profileCompleted === false) {
@@ -38,12 +38,8 @@ export function LoginScreen() {
         <LoginBlock />
       </div>
 
-      <footer className="flex flex-wrap gap-4 justify-center py-6">
-        {SUPPORT_LINKS.map((link) => (
-          <Link key={link.href} href={link.href} className="landing-footer-link">
-            {link.label}
-          </Link>
-        ))}
+      <footer className="flex justify-center py-6">
+        <SupportNav />
       </footer>
     </main>
   );

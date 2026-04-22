@@ -130,13 +130,13 @@
     background: var(--color-primary-surface);
   }
   .btn-destructive {
-    background: #FFFFFF;
-    color: var(--color-error);
-    border: 1px solid rgba(229, 72, 77, 0.32);
+    background: var(--color-error);
+    color: #FFFFFF;
+    border: 1px solid var(--color-error);
   }
   .btn-destructive:hover:not(:disabled) {
-    background: rgba(229, 72, 77, 0.06);
-    border-color: var(--color-error);
+    background: #B42318;
+    border-color: #B42318;
   }
 
   /* ── Status Pills ── */
@@ -359,14 +359,6 @@
     border: 1px solid rgba(24, 169, 87, 0.32);
     color: #BFF2D4;
   }
-  .landing-footer-link {
-    color: rgba(255,255,255,0.6);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
-  }
-  .landing-footer-link:hover { color: rgba(255,255,255,0.92); }
-
   /* ── Score Input ── */
   .score-panel-bg {
     background: var(--color-bg-muted);
@@ -696,6 +688,218 @@
   .rules-points-row-highlight {
     background: var(--color-primary-surface);
     border-color: rgba(0, 82, 204, 0.22);
+  }
+  .rules-points-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border-subtle);
+  }
+  .rules-points-card > * { min-width: 0; }
+  .rules-points-card-highlight {
+    background: var(--color-primary-surface);
+    border-color: rgba(0, 82, 204, 0.22);
+  }
+  .rules-points-card .rules-icon {
+    font-size: 22px;
+    line-height: 1;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-muted);
+  }
+  .rules-points-card .rules-value {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--color-primary-600);
+    line-height: 1;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  @media (min-width: 32rem) {
+    .rules-points-card { padding: 14px 16px; gap: 14px; }
+    .rules-points-card .rules-icon { font-size: 26px; width: 38px; height: 38px; }
+    .rules-points-card .rules-value { font-size: 26px; }
+  }
+  .rules-points-card .rules-value-muted {
+    color: var(--color-text-muted);
+  }
+  .rules-callout {
+    background: linear-gradient(180deg, rgba(0, 82, 204, 0.06) 0%, rgba(0, 82, 204, 0.02) 100%);
+    border: 1px solid rgba(0, 82, 204, 0.18);
+  }
+  .rules-gold-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    background: rgba(212, 168, 66, 0.14);
+    border: 1px solid rgba(212, 168, 66, 0.32);
+    color: #8A5A00;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .rules-plan-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  @media (min-width: 40rem) {
+    .rules-plan-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .rules-plan-card {
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-surface);
+    display: grid;
+    gap: 8px;
+  }
+  .rules-plan-card-gold {
+    border-color: rgba(212, 168, 66, 0.32);
+    background: linear-gradient(180deg, rgba(212, 168, 66, 0.06) 0%, rgba(212, 168, 66, 0.02) 100%);
+  }
+  .rules-plan-feature {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+  }
+  .rules-plan-feature::before {
+    content: "·";
+    color: var(--color-text-muted);
+    font-weight: 700;
+  }
+
+  /* ── Support Nav ── */
+  .support-nav-sticky {
+    position: sticky;
+    bottom: 12px;
+    z-index: 10;
+    margin-top: 8px;
+  }
+  .support-nav-public {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--color-border-subtle);
+    box-shadow: var(--shadow-soft);
+  }
+  .support-nav-link {
+    flex: 1 1 auto;
+    min-height: 40px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 140ms ease, color 140ms ease;
+    text-align: center;
+  }
+  .support-nav-link:hover {
+    background: var(--color-bg-interactive);
+    color: var(--color-text-primary);
+  }
+  .support-nav-link[data-active="true"] {
+    background: var(--color-primary-500);
+    color: #FFFFFF;
+  }
+  .support-nav-card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border-subtle);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 140ms ease;
+  }
+  .support-nav-card-row:hover {
+    background: var(--color-bg-interactive);
+  }
+  .support-nav-card-row > span:last-child {
+    color: var(--color-text-muted);
+    font-weight: 400;
+  }
+
+  /* ── Legal (Terms & Privacy) ── */
+  .legal-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-muted);
+    border: 1px solid var(--color-border-subtle);
+    overflow-x: auto;
+  }
+  .legal-tab {
+    flex: 1 1 auto;
+    min-height: 40px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 140ms ease, color 140ms ease;
+  }
+  .legal-tab[aria-selected="true"] {
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-soft);
+  }
+  .legal-section h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--color-text-primary);
+  }
+  .legal-section p,
+  .legal-section ul {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .legal-section ul {
+    padding-left: 18px;
+    display: grid;
+    gap: 4px;
+  }
+  .legal-callout-warning {
+    background: rgba(245, 166, 35, 0.06);
+    border: 1px solid rgba(245, 166, 35, 0.28);
   }
 
   /* ── Skeleton / Shimmer ── */

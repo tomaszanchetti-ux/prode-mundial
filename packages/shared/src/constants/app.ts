@@ -10,9 +10,9 @@ export const MAIN_TABS = [
 ] as const;
 
 export const SUPPORT_LINKS = [
-  { label: "Reglas y puntos", href: "/rules" },
-  { label: "Términos", href: "/terms" },
-  { label: "Privacidad", href: "/privacy" }
+  { label: "Inicio", href: "/" },
+  { label: "Reglas", href: "/rules" },
+  { label: "Términos y Privacidad", href: "/legal" }
 ] as const;
 
 export const DEFAULT_PUBLIC_BOOTSTRAP: PublicBootstrap = {
