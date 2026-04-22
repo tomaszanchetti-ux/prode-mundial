@@ -33,6 +33,8 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" }
@@ -58,6 +60,11 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false
+  },
+  other: {
+    "msapplication-TileColor": "#0052CC",
+    "msapplication-TileImage": "/icon-192.png",
+    "mobile-web-app-capable": "yes"
   }
 };
 
@@ -77,6 +84,36 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="es">
       <head>
         <GoogleConsentDefault />
+        {/* iPhone 12/13/14 Pro (390x844 @3x) */}
+        <link
+          rel="apple-touch-startup-image"
+          href="/apple-splash-1170x2532.png"
+          media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+        />
+        {/* iPhone 15 Pro / 16 Pro (393x852 @3x) */}
+        <link
+          rel="apple-touch-startup-image"
+          href="/apple-splash-1170x2532.png"
+          media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+        />
+        {/* iPhone 12/13/14 Pro Max (428x926 @3x) */}
+        <link
+          rel="apple-touch-startup-image"
+          href="/apple-splash-1284x2778.png"
+          media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+        />
+        {/* iPhone 15 Pro Max / 16 Pro Max (430x932 @3x) */}
+        <link
+          rel="apple-touch-startup-image"
+          href="/apple-splash-1284x2778.png"
+          media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+        />
+        {/* iPad Pro 12.9" (1024x1366 @2x) */}
+        <link
+          rel="apple-touch-startup-image"
+          href="/apple-splash-2048x2732.png"
+          media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+        />
       </head>
       <body className="app-body-bg">
         <LocaleProvider>

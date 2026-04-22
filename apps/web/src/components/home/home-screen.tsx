@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { APP_ROUTES, type BestPlayerPickResponse, type ChampionPickResponse, type LeagueSummary, type MatchSummary, type PointsResponse, type PreTournamentSummary, type SubChampionPickResponse } from "@prode/shared";
 import { useAuth } from "@/components/auth/auth-provider";
 import { EnableNotificationsBanner } from "@/components/notifications/enable-notifications-banner";
+import { InstallAfterPickPrompt } from "@/components/pwa/install-after-pick-prompt";
+import { InstallAppBanner } from "@/components/pwa/install-app-banner";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getBestPlayerPick, getChampionPick, getMatches, getMyLeagues, getPoints, getPreTournamentSummary, getSubChampionPick } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
@@ -133,6 +135,7 @@ export function HomeScreen() {
     <>
       <div className="grid gap-4">
         <EnableNotificationsBanner user={user} />
+        <InstallAppBanner />
         <HomeScreenView
         profileDisplayName={profile?.displayName ?? null}
         items={items}
@@ -152,6 +155,8 @@ export function HomeScreen() {
         onOpenPicks={() => router.push(APP_ROUTES.picks)}
       />
       </div>
+
+      <InstallAfterPickPrompt />
 
       <QuickPredictionModal
         matchId={activeMatchId}

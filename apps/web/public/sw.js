@@ -7,7 +7,7 @@
 //   - /api/*:            network-only (datos siempre frescos)
 //   - Cross-origin:      sin intercepción (Firebase, football-data, etc.)
 
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `prode-static-${VERSION}`;
 const RUNTIME_CACHE = `prode-runtime-${VERSION}`;
 
@@ -16,7 +16,10 @@ const PRECACHE_URLS = [
   "/manifest.webmanifest",
   "/icon-192.png",
   "/icon-512.png",
+  "/icon-512-maskable.png",
   "/apple-touch-icon.png",
+  "/favicon.ico",
+  "/favicon-16.png",
   "/favicon-32.png"
 ];
 
