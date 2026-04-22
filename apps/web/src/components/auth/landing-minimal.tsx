@@ -1,28 +1,21 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SUPPORT_LINKS } from "@prode/shared";
-import { Button } from "@prode/ui";
 import { useAuth } from "./auth-provider";
+import { LoginBlock } from "./login-block";
 import { resolveNextRoute } from "./login-screen";
 
 /**
- * Landing minimalista (WS50 · Fase 2 ronda 2).
- * Un solo viewport, sin scroll en mobile:
- *   - Logo grande centrado
- *   - Tagline 1 línea
- *   - CTA único "Continuar con Google"
- *   - Footer con links legales
- * Magic-link disponible vía /login como fallback, no visible acá.
+ * Home pública pre-auth (EPIC 23bis).
+ * Hero dark stadium + login block como CTA único.
  */
 export function LandingMinimal() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { clearError, errorMessage, isConfigured, profile, signInWithGoogle, status } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [localError, setLocalError] = useState<string | null>(null);
+  const { profile, status } = useAuth();
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -30,56 +23,24 @@ export function LandingMinimal() {
     }
   }, [profile?.profileCompleted, router, searchParams, status]);
 
-  async function handleGoogleLogin() {
-    setIsSubmitting(true);
-    setLocalError(null);
-    clearError();
-
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      setLocalError(error instanceof Error ? error.message : "No pudimos abrir Google Sign-In.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  const message = errorMessage ?? localError;
-
   return (
-    <main className="min-h-[100dvh] grid grid-rows-[1fr_auto] px-6">
-      <div className="flex flex-col items-center justify-center gap-8 py-8 max-w-[420px] mx-auto w-full">
+    <main className="landing-bg-dark min-h-[100dvh] grid grid-rows-[1fr_auto] px-6">
+      <div className="flex flex-col items-center justify-center gap-10 py-10 max-w-[420px] mx-auto w-full">
         <div className="grid gap-3 text-center">
-          <h1 className="m-0 typo-h1 text-text-primary">Prode Mundial</h1>
-          <p className="m-0 typo-body text-text-secondary">Predice rápido. Compite mejor.</p>
+          <h1 className="landing-title">
+            Tu Mundial te está
+            <br />
+            esperando.
+          </h1>
+          <p className="landing-subtitle">Cada predicción cuenta.</p>
         </div>
 
-        <div className="w-full grid gap-3">
-          <Button onClick={handleGoogleLogin} disabled={!isConfigured || isSubmitting} fullWidth>
-            {isSubmitting ? "Conectando..." : "Continuar con Google"}
-          </Button>
-
-          {!isConfigured ? (
-            <div className="p-3 rounded-md alert-error text-[13px] leading-[1.4] text-center">
-              Firebase no está configurado todavía en este entorno.
-            </div>
-          ) : null}
-
-          {message ? (
-            <div className="p-3 rounded-md alert-error text-[13px] leading-[1.4] text-center">
-              {message}
-            </div>
-          ) : null}
-        </div>
+        <LoginBlock />
       </div>
 
-      <footer className="flex flex-wrap gap-3 justify-center py-6">
+      <footer className="flex flex-wrap gap-4 justify-center py-6">
         {SUPPORT_LINKS.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="text-text-muted font-semibold no-underline text-[13px]"
-          >
+          <Link key={link.href} href={link.href} className="landing-footer-link">
             {link.label}
           </Link>
         ))}
