@@ -158,7 +158,7 @@ test("getForUser returns 'empty' when user has no stored best-player", async () 
     const result = await bestPlayerPickService.getForUser("usr_1", new Date("2026-06-10T18:00:00Z"));
     assert.equal(result.status, "empty");
     assert.equal(result.pickWindow, "A");
-    assert.equal(result.pickWindowPointValue, 25);
+    assert.equal(result.pickWindowPointValue, 20);
     assert.equal(result.bestPlayerId, null);
   } finally {
     getMock.mock.restore();

@@ -1,5 +1,5 @@
 import React from "react";
-import type { PointsResponse } from "@prode/shared";
+import { MATCH_SCORING_RULES, type PointsResponse } from "@prode/shared";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 
 export function MiScoreSection({ points }: { points: PointsResponse | null }) {
@@ -30,11 +30,11 @@ export function MiScoreSection({ points }: { points: PointsResponse | null }) {
         <p className="m-0 typo-small text-text-secondary tabular-nums">
           <span className="text-text-primary font-semibold">{exactHits}</span>{" "}
           {copyForLocale(locale, "exactos", "exact")}{" "}
-          <span className="text-text-muted">(4 pts)</span>
+          <span className="text-text-muted">({MATCH_SCORING_RULES.exact90Points} pts)</span>
           <span className="text-text-muted"> · </span>
           <span className="text-text-primary font-semibold">{correctSigns}</span>{" "}
           {copyForLocale(locale, "signos", "outcomes")}{" "}
-          <span className="text-text-muted">(2 pts)</span>
+          <span className="text-text-muted">({MATCH_SCORING_RULES.correctOutcome90Points} pts)</span>
           <span className="text-text-muted"> · </span>
           <span className="text-text-primary font-semibold">{macro}</span>{" "}
           {copyForLocale(locale, "pts picks", "pick pts")}

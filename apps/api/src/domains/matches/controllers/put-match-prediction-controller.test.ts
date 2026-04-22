@@ -74,13 +74,12 @@ test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and retu
   const upsertPredictionMock = mock.method(
     predictionsRepository,
     "upsertPrediction",
-    async (userId: string, matchId: string, input: { homeScorePred: number; awayScorePred: number; predictedQualifierTeamId: string | null }) => {
+    async (userId: string, matchId: string, input: { homeScorePred: number; awayScorePred: number }) => {
       assert.equal(userId, "usr_1");
       assert.equal(matchId, "m_073");
       assert.deepEqual(input, {
         homeScorePred: 1,
-        awayScorePred: 1,
-        predictedQualifierTeamId: "arg"
+        awayScorePred: 1
       });
 
       return {
@@ -89,8 +88,6 @@ test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and retu
         matchId,
         homeScorePred: input.homeScorePred,
         awayScorePred: input.awayScorePred,
-        predictedQualifierTeamId: input.predictedQualifierTeamId,
-        predictedWinnerTeamId: null,
         isLocked: false,
         isScored: false,
         pointsAwarded: 0,
@@ -110,8 +107,7 @@ test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and retu
       },
       body: JSON.stringify({
         homeScorePred: 1,
-        awayScorePred: 1,
-        predictedQualifierTeamId: "arg"
+        awayScorePred: 1
       })
     });
     const payload = (await response.json()) as {
@@ -121,7 +117,6 @@ test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and retu
         matchId: string;
         status: string;
         isEditable: boolean;
-        predictedQualifierTeamId: string | null;
         savedAt: string;
       };
     };
@@ -135,7 +130,6 @@ test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and retu
       isEditable: true,
       homeScorePred: 1,
       awayScorePred: 1,
-      predictedQualifierTeamId: "arg",
       savedAt: "2026-04-09T10:05:00Z"
     });
   } finally {
@@ -239,7 +233,7 @@ test("PUT /api/v1/matches/:matchId/prediction returns MATCH_LOCKED when domain r
   }
 });
 
-test("PUT /api/v1/matches/:matchId/prediction returns INVALID_KNOCKOUT_CLASSIFIER on draw without qualifier", async () => {
+test("PUT /api/v1/matches/:matchId/prediction accepts knockout draw without qualifier (EPIC 24)", async () => {
   const kickoffAt = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
   const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
     uid: "usr_1",
@@ -265,6 +259,23 @@ test("PUT /api/v1/matches/:matchId/prediction returns INVALID_KNOCKOUT_CLASSIFIE
     createdAt: "2026-04-09T00:00:00Z",
     updatedAt: "2026-04-09T00:00:00Z"
   }));
+  const upsertPredictionMock = mock.method(
+    predictionsRepository,
+    "upsertPrediction",
+    async (userId: string, matchId: string, input: { homeScorePred: number; awayScorePred: number }) => ({
+      predictionId: "pred_usr_1_m_073",
+      userId,
+      matchId,
+      homeScorePred: input.homeScorePred,
+      awayScorePred: input.awayScorePred,
+      isLocked: false,
+      isScored: false,
+      pointsAwarded: 0,
+      scoringBreakdown: null,
+      createdAt: "2026-04-09T10:00:00Z",
+      updatedAt: "2026-04-09T10:05:00Z"
+    })
+  );
 
   try {
     const response = await fetch(buildUrl("/api/v1/matches/m_073/prediction"), {
@@ -278,22 +289,15 @@ test("PUT /api/v1/matches/:matchId/prediction returns INVALID_KNOCKOUT_CLASSIFIE
         awayScorePred: 1
       })
     });
-    const payload = (await response.json()) as {
-      ok: boolean;
-      error: {
-        code: string;
-        message: string;
-      };
-    };
+    const payload = (await response.json()) as { ok: boolean };
 
-    assert.equal(response.status, 400);
-    assert.equal(payload.ok, false);
-    assert.equal(payload.error.code, "INVALID_KNOCKOUT_CLASSIFIER");
-    assert.equal(payload.error.message, "Predicted qualifier is required when a knockout prediction ends in a draw.");
+    assert.equal(response.status, 200);
+    assert.equal(payload.ok, true);
   } finally {
     verifyIdTokenMock.mock.restore();
     listMatchesMock.mock.restore();
     getMatchByIdMock.mock.restore();
+    upsertPredictionMock.mock.restore();
   }
 });
 

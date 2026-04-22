@@ -41,7 +41,6 @@ function ScoreStepper({
 
   return (
     <div className="flex flex-col items-center gap-1 w-full">
-      {/* Score display */}
       <div
         aria-live="polite"
         className="w-[106px] h-[106px] rounded-[26px] score-display-bg grid place-items-center text-[52px] font-extrabold leading-none select-none"
@@ -50,7 +49,6 @@ function ScoreStepper({
         {safeValue === "" ? "0" : safeValue}
       </div>
 
-      {/* +/- buttons */}
       <div className="grid grid-cols-2 gap-1.5 w-[106px]">
         <button
           type="button"
@@ -79,9 +77,6 @@ export function ScoreInput({
   awayLabel = "Visitante",
   awayTeam,
   awayValue,
-  classifierLabel = "Quien clasifica",
-  classifierOptions = [],
-  classifierValue = "",
   disabled,
   error,
   homeLabel = "Local",
@@ -89,12 +84,8 @@ export function ScoreInput({
   homeValue,
   justSaved,
   onAwayChange,
-  onClassifierChange,
   onHomeChange
 }: ScoreInputProps) {
-  const showClassifier = classifierOptions.length > 0;
-  const disabledCls = disabled ? "cursor-not-allowed opacity-70" : "cursor-pointer";
-
   return (
     <div className="grid gap-4">
       <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
@@ -104,29 +95,6 @@ export function ScoreInput({
         </span>
         <ScoreStepper label={awayLabel} team={awayTeam} value={awayValue} disabled={disabled} justSaved={justSaved} onChange={onAwayChange} />
       </div>
-
-      {showClassifier ? (
-        <div className="grid gap-2">
-          <span className="typo-small text-text-secondary">{classifierLabel}</span>
-          <div className="grid gap-2">
-            {classifierOptions.map((option) => {
-              const isActive = option.value === classifierValue;
-
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  disabled={disabled}
-                  className={`classifier-option ${isActive ? "classifier-active" : "classifier-inactive"} ${disabledCls}`}
-                  onClick={() => onClassifierChange?.(option.value)}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
 
       {error ? <p className="m-0 text-[13px] leading-[1.4] text-error">{error}</p> : null}
     </div>

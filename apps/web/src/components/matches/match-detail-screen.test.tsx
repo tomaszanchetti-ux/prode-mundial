@@ -41,32 +41,28 @@ function buildMatchDetail(overrides: Partial<MatchDetail> = {}): MatchDetail {
     homeSlot: null,
     awaySlot: null,
     winnerTeamId: null,
-    requiresQualifierIfDraw: true,
     officialResult: null,
     userPrediction: null,
     scoringRules: {
-      exact90Points: 4,
-      correctOutcome90Points: 2,
-      correctQualifierPoints: 2
+      exact90Points: 5,
+      correctOutcome90Points: 2
     },
     ...overrides
   };
 }
 
-test("MatchDetailScreenView renders qualifier selector only on knockout draw", () => {
+test("MatchDetailScreenView accepts knockout draws without needing qualifier (EPIC 24)", () => {
   const html = renderToStaticMarkup(
     createElement(MatchDetailScreenView, {
       detail: buildMatchDetail(),
       formState: {
         homeScorePred: "1",
-        awayScorePred: "1",
-        predictedQualifierTeamId: ""
+        awayScorePred: "1"
       },
       isLoading: false,
       isSaving: false,
       loadErrorMessage: null,
       onAwayChange: () => undefined,
-      onClassifierChange: () => undefined,
       onHomeChange: () => undefined,
       onRetryLoad: () => undefined,
       onSave: () => undefined,
@@ -74,8 +70,9 @@ test("MatchDetailScreenView renders qualifier selector only on knockout draw", (
     })
   );
 
-  assert.match(html, /Quien clasifica/);
-  assert.match(html, /Si eliges empate, marca quien clasifica\./);
+  assert.doesNotMatch(html, /Quien clasifica/);
+  assert.doesNotMatch(html, /quien clasifica/);
+  assert.match(html, /Marcador exacto: 5 pts/);
 });
 
 test("MatchDetailScreenView renders save success toast", () => {
@@ -84,14 +81,12 @@ test("MatchDetailScreenView renders save success toast", () => {
       detail: buildMatchDetail(),
       formState: {
         homeScorePred: "2",
-        awayScorePred: "1",
-        predictedQualifierTeamId: ""
+        awayScorePred: "1"
       },
       isLoading: false,
       isSaving: false,
       loadErrorMessage: null,
       onAwayChange: () => undefined,
-      onClassifierChange: () => undefined,
       onHomeChange: () => undefined,
       onRetryLoad: () => undefined,
       onSave: () => undefined,
@@ -116,14 +111,12 @@ test("MatchDetailScreenView renders locked state copy and disables editing inten
       }),
       formState: {
         homeScorePred: "2",
-        awayScorePred: "1",
-        predictedQualifierTeamId: ""
+        awayScorePred: "1"
       },
       isLoading: false,
       isSaving: false,
       loadErrorMessage: null,
       onAwayChange: () => undefined,
-      onClassifierChange: () => undefined,
       onHomeChange: () => undefined,
       onRetryLoad: () => undefined,
       onSave: () => undefined,
@@ -141,24 +134,22 @@ test("MatchDetailScreenView renders retry save UI on actionable error", () => {
       detail: buildMatchDetail(),
       formState: {
         homeScorePred: "1",
-        awayScorePred: "1",
-        predictedQualifierTeamId: ""
+        awayScorePred: "1"
       },
       isLoading: false,
       isSaving: false,
       loadErrorMessage: null,
       onAwayChange: () => undefined,
-      onClassifierChange: () => undefined,
       onHomeChange: () => undefined,
       onRetryLoad: () => undefined,
       onSave: () => undefined,
       saveNotice: {
         tone: "error",
-        message: "Si predices empate, debes elegir quién clasifica."
+        message: "Ingresa un marcador válido."
       }
     })
   );
 
   assert.match(html, /Reintentar guardado/);
-  assert.match(html, /Si predices empate, debes elegir quién clasifica\./);
+  assert.match(html, /Ingresa un marcador válido\./);
 });

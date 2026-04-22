@@ -264,7 +264,7 @@ export class BestPlayerPickService {
     return {
       ok: true,
       status: "adjusted",
-      penaltyNotice: "Si aciertas el Balón de Oro ajustado, sumas 10 pts en vez de 25."
+      penaltyNotice: "Si aciertas el Balón de Oro ajustado, sumas 10 pts en vez de 20."
     };
   }
 }

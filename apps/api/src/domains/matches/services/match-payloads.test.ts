@@ -37,7 +37,6 @@ function buildPrediction(overrides: Partial<StoredPrediction> = {}): StoredPredi
     matchId: "m_001",
     homeScorePred: 2,
     awayScorePred: 1,
-    predictedWinnerTeamId: null,
     isLocked: false,
     isScored: false,
     pointsAwarded: 0,

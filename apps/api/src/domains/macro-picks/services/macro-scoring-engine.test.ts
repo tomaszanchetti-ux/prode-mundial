@@ -48,10 +48,10 @@ function buildBestPlayerPick(overrides: Partial<StoredBestPlayerPick> = {}): Sto
   };
 }
 
-test("scoreChampionPick awards 25 points for correct original pick", () => {
+test("scoreChampionPick awards 20 points for correct original pick", () => {
   const result = scoreChampionPick(buildPick(), "ARG");
 
-  assert.deepEqual(result, { championPoints: 25, wasAdjusted: false });
+  assert.deepEqual(result, { championPoints: 20, wasAdjusted: false });
 });
 
 test("scoreChampionPick awards 0 points for incorrect original pick", () => {
@@ -78,9 +78,9 @@ test("scoreChampionPick awards 0 points for incorrect adjusted pick", () => {
   assert.deepEqual(result, { championPoints: 0, wasAdjusted: true });
 });
 
-test("scoreSubChampionPick awards 25 points for correct original pick", () => {
+test("scoreSubChampionPick awards 20 points for correct original pick", () => {
   const result = scoreSubChampionPick(buildSubPick(), "BRA");
-  assert.deepEqual(result, { subChampionPoints: 25, wasAdjusted: false });
+  assert.deepEqual(result, { subChampionPoints: 20, wasAdjusted: false });
 });
 
 test("scoreSubChampionPick awards 10 points for correct adjusted pick", () => {
@@ -96,9 +96,9 @@ test("scoreSubChampionPick awards 0 points for incorrect pick", () => {
   assert.deepEqual(result, { subChampionPoints: 0, wasAdjusted: false });
 });
 
-test("scoreBestPlayerPick awards 25 points for correct original pick", () => {
+test("scoreBestPlayerPick awards 20 points for correct original pick", () => {
   const result = scoreBestPlayerPick(buildBestPlayerPick(), "ply-messi");
-  assert.deepEqual(result, { bestPlayerPoints: 25, wasAdjusted: false });
+  assert.deepEqual(result, { bestPlayerPoints: 20, wasAdjusted: false });
 });
 
 test("scoreBestPlayerPick awards 10 points for correct adjusted pick", () => {

@@ -21,8 +21,6 @@ export function createStoredPrediction(input: UpsertPredictionInput, nowIso: str
     matchId: input.matchId,
     homeScorePred: input.homeScorePred,
     awayScorePred: input.awayScorePred,
-    predictedWinnerTeamId: input.predictedQualifierTeamId,
-    predictedQualifierTeamId: input.predictedQualifierTeamId,
     isLocked: false,
     isScored: false,
     pointsAwarded: 0,
@@ -43,8 +41,6 @@ export function mergeStoredPrediction(
     ...existing,
     homeScorePred: input.homeScorePred,
     awayScorePred: input.awayScorePred,
-    predictedWinnerTeamId: input.predictedQualifierTeamId,
-    predictedQualifierTeamId: input.predictedQualifierTeamId,
     updatedAt: nowIso
   };
 }

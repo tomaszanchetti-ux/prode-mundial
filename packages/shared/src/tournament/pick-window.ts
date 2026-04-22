@@ -5,7 +5,7 @@
  * only during two windows:
  *
  *   Window A — from signup through 1h before the inaugural match kicks off.
- *              A correct pick submitted in A scores 25 pts.
+ *              A correct pick submitted in A scores 20 pts.
  *
  *   Window B — from the moment groups close officially through 1h before the
  *              first R16 match kicks off. A pick submitted in B scores 10 pts
@@ -24,7 +24,7 @@ export type TournamentPickWindow = "A" | "B" | "closed";
 export const TOURNAMENT_PICK_LOCK_MINUTES_BEFORE_KICKOFF = 60 as const;
 
 export const PICK_WINDOW_POINT_VALUES = {
-  A: 25,
+  A: 20,
   B: 10,
   closed: 0
 } as const;

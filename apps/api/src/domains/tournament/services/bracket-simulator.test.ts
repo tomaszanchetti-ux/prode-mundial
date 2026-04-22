@@ -30,10 +30,9 @@ function buildMatch(
 function buildPrediction(
   matchId: string,
   homeScorePred: number,
-  awayScorePred: number,
-  predictedQualifierTeamId: string | null = null
+  awayScorePred: number
 ): BracketSimulatorPrediction {
-  return { matchId, homeScorePred, awayScorePred, predictedQualifierTeamId };
+  return { matchId, homeScorePred, awayScorePred };
 }
 
 /**
@@ -97,7 +96,7 @@ describe("simulateKnockoutBracket", () => {
       buildPrediction("m_077", 4, 2),
       buildPrediction("m_078", 0, 3),
       buildPrediction("m_079", 1, 0),
-      buildPrediction("m_080", 2, 2, "T16"),
+      buildPrediction("m_080", 1, 2),
 
       buildPrediction("m_089", 1, 0),
       buildPrediction("m_090", 2, 1),
@@ -168,43 +167,23 @@ describe("simulateKnockoutBracket", () => {
     assert.equal(r16?.awayTeamId, null);
   });
 
-  it("resolves draws via predictedQualifierTeamId when it matches home or away", () => {
+  it("treats knockout draws as unresolved (EPIC 24: bracket no avanza en empates)", () => {
     const matches = [buildMatch("m_073", 73, "R32", "1A", "2B", "T01", "T02")];
 
-    const winsByAway = simulateKnockoutBracket({
+    const drawScoreless = simulateKnockoutBracket({
       matches,
-      predictions: [buildPrediction("m_073", 1, 1, "T02")]
+      predictions: [buildPrediction("m_073", 0, 0)]
     });
 
-    assert.equal(winsByAway.matches[0]?.winnerTeamId, "T02");
-    assert.equal(winsByAway.matches[0]?.loserTeamId, "T01");
+    assert.equal(drawScoreless.matches[0]?.winnerTeamId, null);
+    assert.equal(drawScoreless.matches[0]?.loserTeamId, null);
 
-    const winsByHome = simulateKnockoutBracket({
+    const drawWithGoals = simulateKnockoutBracket({
       matches,
-      predictions: [buildPrediction("m_073", 0, 0, "T01")]
+      predictions: [buildPrediction("m_073", 2, 2)]
     });
 
-    assert.equal(winsByHome.matches[0]?.winnerTeamId, "T01");
-    assert.equal(winsByHome.matches[0]?.loserTeamId, "T02");
-  });
-
-  it("treats draws with missing or invalid qualifier as unresolved", () => {
-    const matches = [buildMatch("m_073", 73, "R32", "1A", "2B", "T01", "T02")];
-
-    const missingQualifier = simulateKnockoutBracket({
-      matches,
-      predictions: [buildPrediction("m_073", 1, 1)]
-    });
-
-    assert.equal(missingQualifier.matches[0]?.winnerTeamId, null);
-    assert.equal(missingQualifier.matches[0]?.loserTeamId, null);
-
-    const foreignQualifier = simulateKnockoutBracket({
-      matches,
-      predictions: [buildPrediction("m_073", 2, 2, "T99")]
-    });
-
-    assert.equal(foreignQualifier.matches[0]?.winnerTeamId, null);
+    assert.equal(drawWithGoals.matches[0]?.winnerTeamId, null);
   });
 
   it("prefers anchored team IDs over slot resolution and marks source as anchored", () => {

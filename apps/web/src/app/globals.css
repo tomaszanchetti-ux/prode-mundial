@@ -657,29 +657,6 @@
     border: 1px solid var(--color-border-default);
   }
 
-  /* ── Classifier Options ── */
-  .classifier-option {
-    min-height: 48px;
-    border-radius: var(--radius-md);
-    text-align: left;
-    padding: 0 14px;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--color-text-primary);
-  }
-  .classifier-active {
-    border: 1px solid var(--color-primary-500);
-    background: var(--color-primary-soft);
-    color: var(--color-primary-600);
-  }
-  .classifier-inactive {
-    border: 1px solid var(--color-border-default);
-    background: #FFFFFF;
-  }
-  .classifier-inactive:hover:not(:disabled) {
-    background: var(--color-bg-interactive);
-  }
-
   /* ── App Body Background ── light mode */
   .app-body-bg {
     margin: 0;
@@ -696,8 +673,29 @@
   /* ── Rules Hero ── */
   .rules-hero-bg {
     background:
-      radial-gradient(circle at top right, rgba(47, 107, 255, 0.16), transparent 28%),
-      linear-gradient(180deg, rgba(16, 29, 49, 0.98) 0%, rgba(10, 21, 35, 0.98) 100%);
+      linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.96) 60%),
+      url("/mundial/hero-stadium.jpg") center top / cover no-repeat;
+    border: 1px solid rgba(0, 82, 204, 0.14);
+  }
+  .rules-points-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border-subtle);
+  }
+  .rules-points-row strong {
+    color: var(--color-primary-600);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .rules-points-row-highlight {
+    background: var(--color-primary-surface);
+    border-color: rgba(0, 82, 204, 0.22);
   }
 
   /* ── Skeleton / Shimmer ── */

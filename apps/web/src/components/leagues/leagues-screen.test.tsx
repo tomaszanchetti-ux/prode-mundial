@@ -78,16 +78,14 @@ function buildPoints(overrides: Partial<PointsResponse> = {}): PointsResponse {
         stageLabel: "Grupo A",
         userPredictionSummary: "2-1",
         officialResultSummary: "2-1",
-        points: 6,
+        points: 5,
         scoredAt: "2026-06-11T21:00:00Z",
         breakdown: {
           exact90Hit: true,
-          correctOutcome90Hit: true,
-          correctQualifierHit: false,
-          pointsExact90: 4,
-          pointsOutcome90: 2,
-          pointsQualifier: 0,
-          pointsTotal: 6
+          correctOutcome90Hit: false,
+          pointsExact90: 5,
+          pointsOutcome90: 0,
+          pointsTotal: 5
         }
       }
     ],

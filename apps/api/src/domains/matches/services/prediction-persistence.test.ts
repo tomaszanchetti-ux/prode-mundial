@@ -17,8 +17,7 @@ test("createStoredPrediction initializes canonical base fields", () => {
       userId: "usr_1",
       matchId: "m_001",
       homeScorePred: 2,
-      awayScorePred: 1,
-      predictedQualifierTeamId: null
+      awayScorePred: 1
     },
     "2026-04-09T00:00:00Z"
   );
@@ -29,8 +28,6 @@ test("createStoredPrediction initializes canonical base fields", () => {
     matchId: "m_001",
     homeScorePred: 2,
     awayScorePred: 1,
-    predictedWinnerTeamId: null,
-    predictedQualifierTeamId: null,
     isLocked: false,
     isScored: false,
     pointsAwarded: 0,
@@ -50,16 +47,13 @@ test("mergeStoredPrediction overwrites editable fields and preserves scoring his
       matchId: "m_001",
       homeScorePred: 1,
       awayScorePred: 1,
-      predictedWinnerTeamId: "ARG",
-      predictedQualifierTeamId: "ARG",
       isLocked: false,
       isScored: true,
-      pointsAwarded: 6,
+      pointsAwarded: 5,
       scoringBreakdown: {
-        exact90Points: 4,
+        exact90Points: 5,
         outcome90Points: 0,
-        qualifierPoints: 2,
-        totalPoints: 6
+        totalPoints: 5
       },
       createdAt: "2026-04-01T00:00:00Z",
       updatedAt: "2026-04-02T00:00:00Z",
@@ -68,18 +62,15 @@ test("mergeStoredPrediction overwrites editable fields and preserves scoring his
     },
     {
       homeScorePred: 3,
-      awayScorePred: 2,
-      predictedQualifierTeamId: null
+      awayScorePred: 2
     },
     "2026-04-09T00:00:00Z"
   );
 
   assert.equal(updated.homeScorePred, 3);
   assert.equal(updated.awayScorePred, 2);
-  assert.equal(updated.predictedWinnerTeamId, null);
-  assert.equal(updated.predictedQualifierTeamId, null);
   assert.equal(updated.createdAt, "2026-04-01T00:00:00Z");
   assert.equal(updated.updatedAt, "2026-04-09T00:00:00Z");
-  assert.equal(updated.pointsAwarded, 6);
+  assert.equal(updated.pointsAwarded, 5);
   assert.equal(updated.isScored, true);
 });

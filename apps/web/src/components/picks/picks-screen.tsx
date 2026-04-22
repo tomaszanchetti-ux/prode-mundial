@@ -12,6 +12,7 @@ import type {
 import {
   APP_ROUTES,
   BEST_PLAYER_ROSTER,
+  PICK_WINDOW_POINT_VALUES,
   detectMacroPickWarnings,
   getBestPlayerById,
   resolveAliveTeamsAfterGroups,
@@ -474,7 +475,7 @@ export function PicksScreen() {
         </div>
         <h1 className="typo-h2 m-0 text-text-primary">Elegí al Campeón, Sub-Campeón y Balón de Oro.</h1>
         <p className="m-0 text-[13px] leading-[1.45] text-text-secondary">
-          25 pts por acierto inicial · 10 pts si ajustás post-grupos.
+          {PICK_WINDOW_POINT_VALUES.A} pts por acierto inicial · {PICK_WINDOW_POINT_VALUES.B} pts si ajustás post-grupos.
         </p>
       </Card>
 
@@ -530,7 +531,7 @@ export function PicksScreen() {
             <div className="grid gap-1 p-3 rounded-md alert-info">
               <strong className="text-[14px]">Ventana de ajuste abierta</strong>
               <p className="m-0 text-[13px] leading-[1.45]">
-                Podés cambiar tu campeón, pero si acertás sumás 10 pts en vez de 25.
+                Podés cambiar tu campeón, pero si acertás sumás 10 pts en vez de 20.
               </p>
             </div>
           ) : null}
@@ -660,7 +661,7 @@ export function PicksScreen() {
             <div className="grid gap-1 p-3 rounded-md alert-info">
               <strong className="text-[14px]">Ventana de ajuste abierta</strong>
               <p className="m-0 text-[13px] leading-[1.45]">
-                Podés cambiar tu Balón de Oro, pero si acertás sumás 10 pts en vez de 25.
+                Podés cambiar tu Balón de Oro, pero si acertás sumás 10 pts en vez de 20.
               </p>
             </div>
           ) : null}

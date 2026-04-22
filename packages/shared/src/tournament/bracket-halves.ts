@@ -151,7 +151,7 @@ export function classifyTeamBracketHalves(
  *   2. Both teams must be resolvable to a non-neutral half.
  *   3. The two teams must be in OPPOSITE halves of the bracket.
  *
- * Returning `{ valid: true }` does NOT imply "the user will win 10/25 pts" —
+ * Returning `{ valid: true }` does NOT imply "the user will win 10/20 pts" —
  * it only confirms the pick is accepted by the rules. Scoring happens later.
  */
 export function validateSubChampionHalf(

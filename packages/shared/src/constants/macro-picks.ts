@@ -1,5 +1,5 @@
 export const CHAMPION_SCORING_RULES = {
-  originalCorrectPoints: 25,
+  originalCorrectPoints: 20,
   adjustedCorrectPoints: 10,
 } as const;
 
@@ -21,7 +21,7 @@ export type ChampionPickStatus = (typeof CHAMPION_PICK_STATUSES)[number];
 // roster sin tocar infra.
 
 export const BEST_PLAYER_SCORING_RULES = {
-  originalCorrectPoints: 25,
+  originalCorrectPoints: 20,
   adjustedCorrectPoints: 10,
 } as const;
 

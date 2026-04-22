@@ -394,8 +394,7 @@ export class TuMundialService {
       simulatorPredictions.push({
         matchId: knockoutMatch.matchId,
         homeScorePred: prediction.homeScorePred,
-        awayScorePred: prediction.awayScorePred,
-        predictedQualifierTeamId: prediction.predictedQualifierTeamId ?? null
+        awayScorePred: prediction.awayScorePred
       });
     }
 

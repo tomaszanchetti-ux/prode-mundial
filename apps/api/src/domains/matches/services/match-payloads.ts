@@ -50,27 +50,12 @@ function isPhaseLockedForMatch(match: StoredMatch, context?: TournamentContext):
 
 const CURSOR_SEPARATOR = "::";
 
-export function resolvePredictedQualifierTeamId(prediction: StoredPrediction | null) {
-  if (!prediction) {
-    return null;
-  }
-
-  return prediction.predictedQualifierTeamId ?? prediction.predictedWinnerTeamId ?? null;
-}
-
 function formatPredictionSummary(prediction: StoredPrediction | null) {
   if (!prediction) {
     return null;
   }
 
-  const qualifier = resolvePredictedQualifierTeamId(prediction);
-  const baseSummary = `${prediction.homeScorePred}-${prediction.awayScorePred}`;
-
-  if (prediction.homeScorePred === prediction.awayScorePred && qualifier) {
-    return `${baseSummary} (${qualifier})`;
-  }
-
-  return baseSummary;
+  return `${prediction.homeScorePred}-${prediction.awayScorePred}`;
 }
 
 // For knockout matches with unresolved slots we surface the compact slot
@@ -150,8 +135,6 @@ export function deriveMatchViewState(
       }
     : baseState;
 
-  const requiresQualifierIfDraw = match.stage !== "group";
-  const qualifier = resolvePredictedQualifierTeamId(prediction);
   const userPredictionSummary = formatPredictionSummary(prediction);
 
   let ctaLabel: string;
@@ -170,19 +153,8 @@ export function deriveMatchViewState(
     ctaLabel = "Predecir";
   }
 
-  if (
-    requiresQualifierIfDraw &&
-    prediction &&
-    prediction.homeScorePred === prediction.awayScorePred &&
-    !qualifier &&
-    derivedState.isEditable
-  ) {
-    ctaLabel = "Editar";
-  }
-
   return {
     ...derivedState,
-    requiresQualifierIfDraw,
     userPredictionSummary,
     ctaLabel
   };
@@ -199,15 +171,12 @@ export function toUserMatchPrediction(
   }
 
   const state = deriveMatchViewState(match, prediction, now, context);
-  const qualifier = resolvePredictedQualifierTeamId(prediction);
   const scoringBreakdown = prediction.isScored && prediction.scoringBreakdown
     ? {
         exact90Hit: prediction.scoringBreakdown.exact90Points > 0,
         correctOutcome90Hit: prediction.scoringBreakdown.outcome90Points > 0,
-        correctQualifierHit: prediction.scoringBreakdown.qualifierPoints > 0,
         pointsExact90: prediction.scoringBreakdown.exact90Points,
         pointsOutcome90: prediction.scoringBreakdown.outcome90Points,
-        pointsQualifier: prediction.scoringBreakdown.qualifierPoints,
         pointsTotal: prediction.scoringBreakdown.totalPoints
       }
     : undefined;
@@ -216,7 +185,6 @@ export function toUserMatchPrediction(
     predictionId: prediction.predictionId,
     homeScorePred: prediction.homeScorePred,
     awayScorePred: prediction.awayScorePred,
-    predictedQualifierTeamId: qualifier,
     status: state.predictionStatus,
     pointsAwarded: prediction.isScored ? prediction.pointsAwarded : null,
     submittedAt: prediction.createdAt,
@@ -269,7 +237,6 @@ export function toMatchDetail(
   context?: TournamentContext
 ): MatchDetail {
   const summary = toMatchSummary(match, prediction, teamsById, now, context);
-  const state = deriveMatchViewState(match, prediction, now, context);
   const officialResult =
     summary.status === "finished" && match.homeScore90 !== null && match.awayScore90 !== null
       ? {
@@ -282,7 +249,6 @@ export function toMatchDetail(
 
   return {
     ...summary,
-    requiresQualifierIfDraw: state.requiresQualifierIfDraw,
     officialResult,
     userPrediction: toUserMatchPrediction(match, prediction, now, context),
     scoringRules: MATCH_SCORING_RULES
@@ -304,7 +270,6 @@ export function toSaveMatchPredictionResponse(
     isEditable: state.isEditable,
     homeScorePred: prediction.homeScorePred,
     awayScorePred: prediction.awayScorePred,
-    predictedQualifierTeamId: resolvePredictedQualifierTeamId(prediction),
     savedAt: prediction.updatedAt
   };
 }

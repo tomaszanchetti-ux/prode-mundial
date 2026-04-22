@@ -6,7 +6,6 @@ import type { TournamentContext } from "./match-payloads";
 export type ValidatedPredictionInput = {
   homeScorePred: number;
   awayScorePred: number;
-  predictedQualifierTeamId: string | null;
 };
 
 function isFiniteInteger(value: unknown): value is number {
@@ -17,28 +16,6 @@ function resolveEditableDeadline(match: StoredMatch) {
   return getPredictionDeadlineAt(match).getTime();
 }
 
-function isKnockoutMatch(match: StoredMatch) {
-  return match.stage !== "group";
-}
-
-function sanitizeOptionalQualifier(value: unknown) {
-  if (value == null) {
-    return null;
-  }
-
-  if (typeof value !== "string") {
-    throw new ApiError(400, "INVALID_KNOCKOUT_CLASSIFIER", "Predicted qualifier must be a valid team id.");
-  }
-
-  const trimmed = value.trim();
-
-  if (!trimmed) {
-    throw new ApiError(400, "INVALID_KNOCKOUT_CLASSIFIER", "Predicted qualifier must be a valid team id.");
-  }
-
-  return trimmed;
-}
-
 function assertValidScore(value: unknown, fieldName: "homeScorePred" | "awayScorePred") {
   if (!isFiniteInteger(value) || value < 0) {
     throw new ApiError(400, "INVALID_SCORE", `${fieldName} must be an integer greater than or equal to zero.`, {
@@ -47,26 +24,6 @@ function assertValidScore(value: unknown, fieldName: "homeScorePred" | "awayScor
   }
 
   return value;
-}
-
-function assertValidQualifierForMatch(match: StoredMatch, predictedQualifierTeamId: string | null) {
-  if (!predictedQualifierTeamId) {
-    return;
-  }
-
-  const participants = [match.homeTeamId, match.awayTeamId].filter((teamId): teamId is string => Boolean(teamId));
-
-  if (!participants.includes(predictedQualifierTeamId)) {
-    throw new ApiError(
-      400,
-      "INVALID_KNOCKOUT_CLASSIFIER",
-      "Predicted qualifier must belong to the selected match.",
-      {
-        predictedQualifierTeamId,
-        participants
-      }
-    );
-  }
 }
 
 export function assertMatchPredictionEditable(
@@ -143,37 +100,9 @@ export function validatePredictionInput(
   const record = input as Record<string, unknown>;
   const homeScorePred = assertValidScore(record.homeScorePred, "homeScorePred");
   const awayScorePred = assertValidScore(record.awayScorePred, "awayScorePred");
-  const predictedQualifierTeamId = sanitizeOptionalQualifier(record.predictedQualifierTeamId);
-
-  if (!isKnockoutMatch(match)) {
-    return {
-      homeScorePred,
-      awayScorePred,
-      predictedQualifierTeamId: null
-    };
-  }
-
-  if (homeScorePred === awayScorePred) {
-    if (!predictedQualifierTeamId) {
-      throw new ApiError(
-        400,
-        "INVALID_KNOCKOUT_CLASSIFIER",
-        "Predicted qualifier is required when a knockout prediction ends in a draw."
-      );
-    }
-
-    assertValidQualifierForMatch(match, predictedQualifierTeamId);
-
-    return {
-      homeScorePred,
-      awayScorePred,
-      predictedQualifierTeamId
-    };
-  }
 
   return {
     homeScorePred,
-    awayScorePred,
-    predictedQualifierTeamId: null
+    awayScorePred
   };
 }

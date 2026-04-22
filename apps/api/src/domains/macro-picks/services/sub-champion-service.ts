@@ -184,7 +184,7 @@ export class SubChampionPickService {
 
     // Cross-half rule — relaxed in window A (pre-tournament). Enforcing it
     // here would require the user to complete group predictions first (to
-    // hydrate the bracket), which defeats the point of a 25-pt blind bet.
+    // hydrate the bracket), which defeats the point of a 20-pt blind bet.
     // The rule is still enforced in `adjustForUser` (window B) where the
     // bracket is hydrated from finalized group results.
     if (nextTeamId === champion.championTeamId) {
@@ -297,7 +297,7 @@ export class SubChampionPickService {
     return {
       ok: true,
       status: "adjusted",
-      penaltyNotice: "Si aciertas el sub-campeon ajustado, sumas 10 pts en vez de 25."
+      penaltyNotice: "Si aciertas el sub-campeon ajustado, sumas 10 pts en vez de 20."
     };
   }
 }

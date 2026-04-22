@@ -57,10 +57,10 @@ test("GET /api/v1/points returns current user points summary", async () => {
       email: "tomas@example.com",
       country: "AR",
       photoUrl: null,
-      totalPoints: 18,
+      totalPoints: 11,
       macroPoints: 6,
-      exactHits: 2,
-      correctSigns: 4,
+      exactHits: 1,
+      correctSigns: 0,
       leaguesCount: 2,
       profileCompleted: true
     };
@@ -72,15 +72,13 @@ test("GET /api/v1/points returns current user points summary", async () => {
       matchId: "m_001",
       homeScorePred: 2,
       awayScorePred: 1,
-      predictedQualifierTeamId: null,
       isLocked: true,
       isScored: true,
-      pointsAwarded: 12,
+      pointsAwarded: 5,
       scoringBreakdown: {
-        exact90Points: 4,
-        outcome90Points: 2,
-        qualifierPoints: 6,
-        totalPoints: 12
+        exact90Points: 5,
+        outcome90Points: 0,
+        totalPoints: 5
       },
       createdAt: "2026-06-01T00:00:00Z",
       updatedAt: "2026-06-12T00:00:00Z",
@@ -145,10 +143,10 @@ test("GET /api/v1/points returns current user points summary", async () => {
 
     assert.equal(response.status, 200);
     assert.equal(payload.ok, true);
-    assert.equal(payload.data.totalPoints, 18);
-    assert.equal(payload.data.matchPoints, 12);
+    assert.equal(payload.data.totalPoints, 11);
+    assert.equal(payload.data.matchPoints, 5);
     assert.equal(payload.data.macroPoints, 6);
-    assert.equal(payload.data.byStage.group, 12);
+    assert.equal(payload.data.byStage.group, 5);
     assert.equal(payload.data.byStage.macro, 6);
   } finally {
     verifyIdTokenMock.mock.restore();

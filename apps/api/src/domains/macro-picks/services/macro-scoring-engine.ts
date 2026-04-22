@@ -24,7 +24,7 @@ export function scoreChampionPick(
 
 // ── Sub-Champion ────────────────────────────────────────
 //
-// Reglas de scoring idénticas a Champion (25 pts A / 10 pts B) — EPIC 17.
+// Reglas de scoring idénticas a Champion (20 pts A / 10 pts B) — EPIC 17.
 // Reutilizamos CHAMPION_SCORING_RULES porque son el mismo contrato.
 
 export function scoreSubChampionPick(

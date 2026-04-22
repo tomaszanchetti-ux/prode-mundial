@@ -9,9 +9,8 @@ export const MATCH_LIST_FILTERS = ["all", "today", "upcoming", "pending", "score
 export const PREDICTION_LOCK_MINUTES_BEFORE_KICKOFF = 60 as const;
 
 export const MATCH_SCORING_RULES = {
-  exact90Points: 4,
-  correctOutcome90Points: 2,
-  correctQualifierPoints: 2
+  exact90Points: 5,
+  correctOutcome90Points: 2
 } as const;
 
 export const MATCH_PREDICTION_ERROR_CODES = [
@@ -20,6 +19,5 @@ export const MATCH_PREDICTION_ERROR_CODES = [
   "PHASE_CLOSED",
   "MATCH_NOT_FOUND",
   "MATCH_NOT_EDITABLE",
-  "INVALID_SCORE",
-  "INVALID_KNOCKOUT_CLASSIFIER"
+  "INVALID_SCORE"
 ] as const;
