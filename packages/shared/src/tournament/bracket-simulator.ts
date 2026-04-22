@@ -1,30 +1,12 @@
 /**
  * Simulates a knockout bracket (R32 → Final) from user predictions.
  *
- * Given the knockout-stage match definitions (R32 through Final) plus the
- * user's predictions, the simulator walks the bracket round by round and
- * propagates winners/losers forward. Callers can anchor specific matches
- * by passing homeTeamId/awayTeamId (e.g. R32 teams already hydrated from
- * group standings via resolveR32Bracket, or later-round teams from an
- * officially closed round). Non-anchored matches are resolved from slots.
- *
- * Supported slot grammar:
- *   - "W<officialMatchNumber>"             → winner of the referenced match
- *   - "L<officialMatchNumber>"             → loser of the referenced match
- *                                             (used by BRONZE, which pulls
- *                                             the two SF losers)
- *   - R32 seed slots ("1A", "2B", "3ABCDF"): NOT resolved here. Anchor R32
- *     via homeTeamId/awayTeamId in the input; otherwise the match stays
- *     unresolved and downstream rounds cannot advance beyond it.
- *
  * Winner resolution from a prediction:
  *   - homeScorePred > awayScorePred → home wins
  *   - homeScorePred < awayScorePred → away wins
- *   - draw                          → predictedQualifierTeamId wins (must
- *                                      match home or away; otherwise the
- *                                      match is treated as unresolved)
- *
- * The simulator is pure — no storage access, no side effects.
+ *   - draw                          → unresolved (bracket no avanza; el user
+ *                                      queda sin proyección hasta que la
+ *                                      ronda se ancle con el resultado real)
  */
 
 export type KnockoutStage = "R32" | "R16" | "QF" | "SF" | "BRONZE" | "FINAL";
@@ -50,7 +32,6 @@ export type BracketSimulatorPrediction = {
   matchId: string;
   homeScorePred: number;
   awayScorePred: number;
-  predictedQualifierTeamId: string | null;
 };
 
 export type SimulatedMatchSource = "anchored" | "projected" | "unresolved";
@@ -100,16 +81,6 @@ function resolveWinnerFromPrediction(
   }
 
   if (prediction.homeScorePred < prediction.awayScorePred) {
-    return { winnerTeamId: awayTeamId, loserTeamId: homeTeamId };
-  }
-
-  const qualifier = prediction.predictedQualifierTeamId;
-
-  if (qualifier === homeTeamId) {
-    return { winnerTeamId: homeTeamId, loserTeamId: awayTeamId };
-  }
-
-  if (qualifier === awayTeamId) {
     return { winnerTeamId: awayTeamId, loserTeamId: homeTeamId };
   }
 

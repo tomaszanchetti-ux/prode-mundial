@@ -41,8 +41,8 @@ test("scoreChampionPredictionForUser persists champion points and rebuilds affec
     {
       userId: "usr_1",
       tournamentId: "wc2026",
-      totalPoints: 25,
-      championPoints: 25,
+      totalPoints: 20,
+      championPoints: 20,
       wasAdjusted: false,
       scoredAt: "2026-07-20T12:00:00Z"
     }
@@ -75,8 +75,8 @@ test("scoreChampionPredictionForUser persists champion points and rebuilds affec
       email: "tomas@test.dev",
       country: null,
       photoUrl: null,
-      totalPoints: 25,
-      macroPoints: 25,
+      totalPoints: 20,
+      macroPoints: 20,
       exactHits: 0,
       correctSigns: 0,
       leaguesCount: 1,
@@ -93,7 +93,7 @@ test("scoreChampionPredictionForUser persists champion points and rebuilds affec
       "2026-07-20T12:00:00Z"
     );
 
-    assert.equal(result.totalPoints, 25);
+    assert.equal(result.totalPoints, 20);
     assert.equal(upsertLogMock.mock.callCount(), 1);
     assert.equal(upsertProfileMock.mock.callCount(), 1);
     assert.equal(replaceStandingsMock.mock.callCount(), 1);

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { MatchDetail, SaveMatchPredictionInput } from "@prode/shared";
 import { Button, Card, ScoreInput, StatusTag, TeamIdentity } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -31,7 +31,6 @@ type MatchDetailScreenViewProps = {
   isSaving: boolean;
   loadErrorMessage: string | null;
   onAwayChange: (value: string) => void;
-  onClassifierChange: (value: string) => void;
   onHomeChange: (value: string) => void;
   onRetryLoad: () => void;
   onSave: () => void;
@@ -45,32 +44,11 @@ export function MatchDetailScreenView({
   isSaving,
   loadErrorMessage,
   onAwayChange,
-  onClassifierChange,
   onHomeChange,
   onRetryLoad,
   onSave,
   saveNotice
 }: MatchDetailScreenViewProps) {
-  const qualifierOptions = useMemo(() => {
-    if (!detail) {
-      return [];
-    }
-
-    const shouldShow =
-      detail.requiresQualifierIfDraw &&
-      formState.homeScorePred !== "" &&
-      formState.homeScorePred === formState.awayScorePred;
-
-    if (!shouldShow) {
-      return [];
-    }
-
-    return [
-      { label: detail.homeTeam.name, value: detail.homeTeam.teamId },
-      { label: detail.awayTeam.name, value: detail.awayTeam.teamId }
-    ];
-  }, [detail, formState.awayScorePred, formState.homeScorePred]);
-
   if (isLoading) {
     return (
       <div className="grid gap-[14px]">
@@ -133,10 +111,7 @@ export function MatchDetailScreenView({
             {isPredictionWindowNotOpen(detail) ? "Prediccion disponible desde la apertura" : "Editable hasta kickoff"}
           </span>
           <span className="text-[13px] leading-[1.35] text-text-secondary">
-            Exacto: {detail.scoringRules.exact90Points} pts
-          </span>
-          <span className="text-[13px] leading-[1.35] text-text-secondary">
-            Signo: {detail.scoringRules.correctOutcome90Points} pts · Clasificado: {detail.scoringRules.correctQualifierPoints} pts
+            Marcador exacto: {detail.scoringRules.exact90Points} pts · Solo resultado: {detail.scoringRules.correctOutcome90Points} pts
           </span>
         </div>
       </Card>
@@ -154,15 +129,11 @@ export function MatchDetailScreenView({
         <ScoreInput
           awayLabel={detail.awayTeam.name}
           awayValue={formState.awayScorePred}
-          classifierLabel="Quien clasifica"
-          classifierOptions={qualifierOptions}
-          classifierValue={formState.predictedQualifierTeamId}
           disabled={!canEditPrediction(detail) || isSaving}
           error={saveNotice?.tone === "error" ? saveNotice.message : undefined}
           homeLabel={detail.homeTeam.name}
           homeValue={formState.homeScorePred}
           onAwayChange={onAwayChange}
-          onClassifierChange={onClassifierChange}
           onHomeChange={onHomeChange}
         />
 
@@ -193,8 +164,7 @@ export function MatchDetailScreenView({
               </p>
               {detail.userPrediction.scoringBreakdown ? (
                 <p className="typo-body m-0 text-text-secondary">
-                  Breakdown: exacto {detail.userPrediction.scoringBreakdown.pointsExact90}, signo {detail.userPrediction.scoringBreakdown.pointsOutcome90},
-                  clasificado {detail.userPrediction.scoringBreakdown.pointsQualifier}.
+                  Breakdown: marcador exacto {detail.userPrediction.scoringBreakdown.pointsExact90} · solo resultado {detail.userPrediction.scoringBreakdown.pointsOutcome90}.
                 </p>
               ) : null}
             </div>
@@ -204,9 +174,6 @@ export function MatchDetailScreenView({
             <div className="grid gap-2">
               <p className="typo-body m-0 text-text-primary">
                 Resultado oficial: {detail.officialResult.homeScore90}-{detail.officialResult.awayScore90}
-              </p>
-              <p className="typo-body m-0 text-text-secondary">
-                Clasificado: {detail.officialResult.qualifiedTeamId ?? "No aplica"}
               </p>
             </div>
           ) : null}
@@ -221,8 +188,7 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
   const [detail, setDetail] = useState<MatchDetail | null>(null);
   const [formState, setFormState] = useState<FormState>({
     homeScorePred: "",
-    awayScorePred: "",
-    predictedQualifierTeamId: ""
+    awayScorePred: ""
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -293,14 +259,9 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
 
     try {
       const token = await user.getIdToken();
-      const showQualifierSelector =
-        detail.requiresQualifierIfDraw &&
-        formState.homeScorePred !== "" &&
-        formState.homeScorePred === formState.awayScorePred;
       const payload: SaveMatchPredictionInput = {
         homeScorePred: Number(formState.homeScorePred),
-        awayScorePred: Number(formState.awayScorePred),
-        predictedQualifierTeamId: showQualifierSelector ? formState.predictedQualifierTeamId || null : null
+        awayScorePred: Number(formState.awayScorePred)
       };
 
       await saveMatchPrediction(token, detail.matchId, payload);
@@ -329,7 +290,6 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
       isSaving={isSaving}
       loadErrorMessage={loadErrorMessage}
       onAwayChange={(value) => setFormState((current) => ({ ...current, awayScorePred: value }))}
-      onClassifierChange={(value) => setFormState((current) => ({ ...current, predictedQualifierTeamId: value }))}
       onHomeChange={(value) => setFormState((current) => ({ ...current, homeScorePred: value }))}
       onRetryLoad={() => setReloadKey((current) => current + 1)}
       onSave={handleSave}

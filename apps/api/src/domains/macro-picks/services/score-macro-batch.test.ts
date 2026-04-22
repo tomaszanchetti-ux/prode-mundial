@@ -286,8 +286,8 @@ test("scoreMacroBatch scores best-player picks when result is persisted", async 
     // Verify totalPoints = bestPlayerPoints (25) since no other pick.
     const upsertedLog = logUpsertMock.mock.calls[0]?.arguments[0];
     assert.ok(upsertedLog);
-    assert.equal(upsertedLog.bestPlayerPoints, 25);
-    assert.equal(upsertedLog.totalPoints, 25);
+    assert.equal(upsertedLog.bestPlayerPoints, 20);
+    assert.equal(upsertedLog.totalPoints, 20);
   } finally {
     championListMock.mock.restore();
     subListMock.mock.restore();

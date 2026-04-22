@@ -172,8 +172,8 @@ test("getForUser returns scored when a scoring log already exists", async () => 
     {
       userId: "usr_1",
       tournamentId: "wc2026",
-      totalPoints: 25,
-      championPoints: 25,
+      totalPoints: 20,
+      championPoints: 20,
       wasAdjusted: false,
       scoredAt: "2026-07-20T00:00:00Z"
     }
@@ -188,7 +188,7 @@ test("getForUser returns scored when a scoring log already exists", async () => 
 
     assert.equal(result.status, "scored");
     assert.equal(result.isLocked, true);
-    assert.deepEqual(result.scoringResult, { points: 25, wasAdjusted: false });
+    assert.deepEqual(result.scoringResult, { points: 20, wasAdjusted: false });
   } finally {
     getByUserIdMock.mock.restore();
     scoringLogsMock.mock.restore();

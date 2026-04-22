@@ -34,11 +34,10 @@ test("rebuildUserAggregates recomputes totalPoints including macro scoring logs"
       matchId: "m_1",
       homeScorePred: 2,
       awayScorePred: 1,
-      predictedQualifierTeamId: null,
       isLocked: true,
       isScored: true,
-      pointsAwarded: 6,
-      scoringBreakdown: { exact90Points: 4, outcome90Points: 2, qualifierPoints: 0, totalPoints: 6 },
+      pointsAwarded: 5,
+      scoringBreakdown: { exact90Points: 5, outcome90Points: 0, totalPoints: 5 },
       createdAt: "2026-06-01T00:00:00Z",
       updatedAt: "2026-06-01T00:00:00Z",
       lockedAt: "2026-06-11T19:00:00Z",
@@ -66,10 +65,10 @@ test("rebuildUserAggregates recomputes totalPoints including macro scoring logs"
   try {
     const profile = await rebuildUserAggregates("usr_1");
 
-    assert.equal(profile?.totalPoints, 53);
+    assert.equal(profile?.totalPoints, 52);
     assert.equal(profile?.macroPoints, 47);
     assert.equal(profile?.exactHits, 1);
-    assert.equal(profile?.correctSigns, 1);
+    assert.equal(profile?.correctSigns, 0);
     assert.equal(upsertMock.mock.callCount(), 1);
   } finally {
     findByUserIdMock.mock.restore();

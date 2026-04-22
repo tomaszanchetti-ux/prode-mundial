@@ -38,7 +38,6 @@ function buildPrediction(overrides: Partial<StoredPrediction> = {}): StoredPredi
     matchId: "m_001",
     homeScorePred: 1,
     awayScorePred: 0,
-    predictedQualifierTeamId: null,
     isLocked: false,
     isScored: false,
     pointsAwarded: 0,
@@ -49,74 +48,52 @@ function buildPrediction(overrides: Partial<StoredPrediction> = {}): StoredPredi
   };
 }
 
-test("validatePredictionInput sanitizes group predictions and drops redundant qualifier", () => {
+test("validatePredictionInput accepts group predictions", () => {
   const result = validatePredictionInput(
     buildMatch(),
     {
       homeScorePred: 2,
-      awayScorePred: 1,
-      predictedQualifierTeamId: "ARG"
+      awayScorePred: 1
     },
     new Date("2026-06-11T15:00:00Z")
   );
 
   assert.deepEqual(result, {
     homeScorePred: 2,
-    awayScorePred: 1,
-    predictedQualifierTeamId: null
+    awayScorePred: 1
   });
 });
 
-test("validatePredictionInput requires qualifier on knockout draws", () => {
-  assert.throws(
-    () =>
-      validatePredictionInput(
-        buildMatch({ stage: "R32", groupId: null }),
-        {
-          homeScorePred: 1,
-          awayScorePred: 1
-        },
-        new Date("2026-06-11T15:00:00Z")
-      ),
-    (error: unknown) =>
-      error instanceof ApiError &&
-      error.code === "INVALID_KNOCKOUT_CLASSIFIER"
+test("validatePredictionInput accepts knockout draws without needing qualifier", () => {
+  // EPIC 24: en knockouts solo cuenta el 90'. El empate es válido sin qualifier.
+  const result = validatePredictionInput(
+    buildMatch({ stage: "R32", groupId: null }),
+    {
+      homeScorePred: 1,
+      awayScorePred: 1
+    },
+    new Date("2026-06-11T15:00:00Z")
   );
+
+  assert.deepEqual(result, {
+    homeScorePred: 1,
+    awayScorePred: 1
+  });
 });
 
-test("validatePredictionInput rejects qualifier that does not belong to the match", () => {
-  assert.throws(
-    () =>
-      validatePredictionInput(
-        buildMatch({ stage: "R32", groupId: null }),
-        {
-          homeScorePred: 1,
-          awayScorePred: 1,
-          predictedQualifierTeamId: "MEX"
-        },
-        new Date("2026-06-11T15:00:00Z")
-      ),
-    (error: unknown) =>
-      error instanceof ApiError &&
-      error.code === "INVALID_KNOCKOUT_CLASSIFIER"
-  );
-});
-
-test("validatePredictionInput clears qualifier on knockout non-draw predictions", () => {
+test("validatePredictionInput accepts knockout non-draw predictions", () => {
   const result = validatePredictionInput(
     buildMatch({ stage: "R32", groupId: null }),
     {
       homeScorePred: 3,
-      awayScorePred: 1,
-      predictedQualifierTeamId: "ARG"
+      awayScorePred: 1
     },
     new Date("2026-06-11T15:00:00Z")
   );
 
   assert.deepEqual(result, {
     homeScorePred: 3,
-    awayScorePred: 1,
-    predictedQualifierTeamId: null
+    awayScorePred: 1
   });
 });
 

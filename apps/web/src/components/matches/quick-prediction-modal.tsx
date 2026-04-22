@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { MatchDetail, SaveMatchPredictionInput } from "@prode/shared";
 import { PredictionModal, ScoreInput } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -21,7 +21,6 @@ type QuickPredictionModalProps = {
 type FormState = {
   homeScorePred: string;
   awayScorePred: string;
-  predictedQualifierTeamId: string;
 };
 
 function toStageLabel(detail: MatchDetail) {
@@ -54,8 +53,7 @@ function toKickoffLabel(detail: MatchDetail) {
 function toFormState(detail: MatchDetail): FormState {
   return {
     homeScorePred: detail.userPrediction ? String(detail.userPrediction.homeScorePred) : "",
-    awayScorePred: detail.userPrediction ? String(detail.userPrediction.awayScorePred) : "",
-    predictedQualifierTeamId: detail.userPrediction?.predictedQualifierTeamId ?? ""
+    awayScorePred: detail.userPrediction ? String(detail.userPrediction.awayScorePred) : ""
   };
 }
 
@@ -67,10 +65,6 @@ function toErrorMessage(error: unknown) {
 
     if (error.code === "INVALID_SCORE") {
       return "Ingresa un marcador valido.";
-    }
-
-    if (error.code === "INVALID_KNOCKOUT_CLASSIFIER") {
-      return "Si eliges empate, tienes que marcar quien clasifica.";
     }
 
     return error.message;
@@ -85,8 +79,7 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
   const [detail, setDetail] = useState<MatchDetail | null>(null);
   const [formState, setFormState] = useState<FormState>({
     homeScorePred: "",
-    awayScorePred: "",
-    predictedQualifierTeamId: ""
+    awayScorePred: ""
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -131,25 +124,6 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
     };
   }, [isOpen, matchId, status, user]);
 
-  const classifierOptions = useMemo(() => {
-    if (!detail) {
-      return [];
-    }
-
-    const shouldShow =
-      detail.requiresQualifierIfDraw &&
-      formState.homeScorePred !== "" &&
-      formState.homeScorePred === formState.awayScorePred;
-
-    if (!shouldShow) {
-      return [];
-    }
-
-    return [
-      { label: detail.homeTeam.name, value: detail.homeTeam.teamId },
-      { label: detail.awayTeam.name, value: detail.awayTeam.teamId }
-    ];
-  }, [detail, formState.awayScorePred, formState.homeScorePred]);
   const isEditable = detail ? canEditPrediction(detail) : false;
 
   async function handleSave() {
@@ -162,14 +136,9 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
 
     try {
       const token = await user.getIdToken();
-      const shouldRequireQualifier =
-        detail.requiresQualifierIfDraw &&
-        formState.homeScorePred !== "" &&
-        formState.homeScorePred === formState.awayScorePred;
       const payload: SaveMatchPredictionInput = {
         homeScorePred: Number(formState.homeScorePred),
-        awayScorePred: Number(formState.awayScorePred),
-        predictedQualifierTeamId: shouldRequireQualifier ? formState.predictedQualifierTeamId || null : null
+        awayScorePred: Number(formState.awayScorePred)
       };
 
       await saveMatchPrediction(token, detail.matchId, payload);
@@ -222,9 +191,6 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
         awayLabel={detail?.awayTeam.name ?? "Visitante"}
         awayTeam={detail ? { teamName: detail.awayTeam.name, fifaCode: detail.awayTeam.fifaCode, flagAsset: detail.awayTeam.flagAsset, flagUrl: detail.awayTeam.flagUrl } : undefined}
         awayValue={formState.awayScorePred}
-        classifierLabel="Quien clasifica"
-        classifierOptions={classifierOptions}
-        classifierValue={formState.predictedQualifierTeamId}
         disabled={isLoading || isSaving || !isEditable}
         error={errorMessage ?? undefined}
         homeLabel={detail?.homeTeam.name ?? "Local"}
@@ -232,7 +198,6 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
         homeValue={formState.homeScorePred}
         justSaved={justSaved}
         onAwayChange={(value) => setFormState((current) => ({ ...current, awayScorePred: value }))}
-        onClassifierChange={(value) => setFormState((current) => ({ ...current, predictedQualifierTeamId: value }))}
         onHomeChange={(value) => setFormState((current) => ({ ...current, homeScorePred: value }))}
       />
     </PredictionModal>

@@ -73,17 +73,15 @@ export async function getPoints(userId: string): Promise<PointsResponse> {
         matchId: prediction.matchId,
         matchLabel: `${homeTeamLabel} vs ${awayTeamLabel}`,
         stageLabel: toStageLabel(match?.stage ?? "group", match?.groupId ?? null),
-        userPredictionSummary: formatPredictionSummary(prediction.homeScorePred, prediction.awayScorePred, prediction.predictedQualifierTeamId),
-        officialResultSummary: formatOfficialResultSummary(match?.homeScore90, match?.awayScore90, match?.winnerTeamId, match?.status),
+        userPredictionSummary: formatPredictionSummary(prediction.homeScorePred, prediction.awayScorePred),
+        officialResultSummary: formatOfficialResultSummary(match?.homeScore90, match?.awayScore90, match?.status),
         points: prediction.pointsAwarded,
         scoredAt: prediction.scoredAt ?? prediction.updatedAt,
         breakdown: {
           exact90Hit: scoringBreakdown.exact90Points > 0,
           correctOutcome90Hit: scoringBreakdown.outcome90Points > 0,
-          correctQualifierHit: scoringBreakdown.qualifierPoints > 0,
           pointsExact90: scoringBreakdown.exact90Points,
           pointsOutcome90: scoringBreakdown.outcome90Points,
-          pointsQualifier: scoringBreakdown.qualifierPoints,
           pointsTotal: scoringBreakdown.totalPoints
         }
       };
@@ -122,21 +120,18 @@ function createEmptyStageTotals(macroPoints: number): PointsByStage {
   };
 }
 
-function formatPredictionSummary(homeScore: number, awayScore: number, qualifierTeamId?: string | null) {
-  const summary = `${homeScore}-${awayScore}`;
-  return qualifierTeamId ? `${summary} (${qualifierTeamId})` : summary;
+function formatPredictionSummary(homeScore: number, awayScore: number) {
+  return `${homeScore}-${awayScore}`;
 }
 
 function formatOfficialResultSummary(
   homeScore90: number | null | undefined,
   awayScore90: number | null | undefined,
-  winnerTeamId: string | null | undefined,
   status: StoredMatchStatus | undefined
 ) {
   if (homeScore90 === null || awayScore90 === null || homeScore90 === undefined || awayScore90 === undefined) {
     return status === "finished" || status === "corrected" ? "Resultado cargado" : "Pendiente";
   }
 
-  const summary = `${homeScore90}-${awayScore90}`;
-  return winnerTeamId ? `${summary} (${winnerTeamId})` : summary;
+  return `${homeScore90}-${awayScore90}`;
 }

@@ -154,9 +154,6 @@ export type ScoreInputProps = {
   awayLabel?: string;
   awayTeam?: TeamData;
   awayValue: string;
-  classifierLabel?: string;
-  classifierOptions?: Array<{ label: string; value: string }>;
-  classifierValue?: string;
   disabled?: boolean;
   error?: string;
   homeLabel?: string;
@@ -164,7 +161,6 @@ export type ScoreInputProps = {
   homeValue: string;
   justSaved?: boolean;
   onAwayChange?: (value: string) => void;
-  onClassifierChange?: (value: string) => void;
   onHomeChange?: (value: string) => void;
 };
 

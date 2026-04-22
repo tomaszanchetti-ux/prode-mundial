@@ -60,7 +60,7 @@ test("GET /api/v1/macro-picks returns the authenticated champion pick state", as
       scoringResult: null,
       pickWindow: "A",
       pickWindowClosesAt: "2026-06-11T18:00:00Z",
-      pickWindowPointValue: 25
+      pickWindowPointValue: 20
     };
   });
 
@@ -145,7 +145,7 @@ test("POST /api/v1/macro-picks/adjustment confirms the authenticated champion ad
     return {
       ok: true as const,
       status: "adjusted" as const,
-      penaltyNotice: "Si aciertas el campeon ajustado, sumas 10 pts en vez de 25."
+      penaltyNotice: "Si aciertas el campeon ajustado, sumas 10 pts en vez de 20."
     };
     }
   );

@@ -22,7 +22,7 @@ export const championPickResponseSchema = z.object({
   scoringResult: championScoringResultSchema.nullable(),
   pickWindow: pickWindowSchema,
   pickWindowClosesAt: z.string().min(1).nullable(),
-  pickWindowPointValue: z.union([z.literal(25), z.literal(10), z.literal(0)])
+  pickWindowPointValue: z.union([z.literal(20), z.literal(10), z.literal(0)])
 });
 
 export const saveChampionPickInputSchema = z.object({
@@ -58,7 +58,7 @@ export const subChampionPickResponseSchema = z.object({
   scoringResult: championScoringResultSchema.nullable(),
   pickWindow: pickWindowSchema,
   pickWindowClosesAt: z.string().min(1).nullable(),
-  pickWindowPointValue: z.union([z.literal(25), z.literal(10), z.literal(0)])
+  pickWindowPointValue: z.union([z.literal(20), z.literal(10), z.literal(0)])
 });
 
 export const saveSubChampionPickInputSchema = z.object({

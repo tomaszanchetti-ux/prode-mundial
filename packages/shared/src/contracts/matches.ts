@@ -65,10 +65,8 @@ export type MatchOfficialResult = {
 export type MatchPredictionScoringBreakdown = {
   exact90Hit: boolean;
   correctOutcome90Hit: boolean;
-  correctQualifierHit: boolean;
   pointsExact90: number;
   pointsOutcome90: number;
-  pointsQualifier: number;
   pointsTotal: number;
 };
 
@@ -76,7 +74,6 @@ export type UserMatchPrediction = {
   predictionId: string;
   homeScorePred: number;
   awayScorePred: number;
-  predictedQualifierTeamId: string | null;
   status: PredictionStatus;
   pointsAwarded: number | null;
   submittedAt: string;
@@ -87,7 +84,6 @@ export type UserMatchPrediction = {
 export type MatchScoringRules = typeof MATCH_SCORING_RULES;
 
 export type MatchDetail = MatchSummary & {
-  requiresQualifierIfDraw: boolean;
   officialResult: MatchOfficialResult | null;
   userPrediction: UserMatchPrediction | null;
   scoringRules: MatchScoringRules;
@@ -108,7 +104,6 @@ export type ListMatchesResponse = {
 export type SaveMatchPredictionInput = {
   homeScorePred: number;
   awayScorePred: number;
-  predictedQualifierTeamId?: string | null;
 };
 
 export type SaveMatchPredictionResponse = {
@@ -118,6 +113,5 @@ export type SaveMatchPredictionResponse = {
   isEditable: boolean;
   homeScorePred: number;
   awayScorePred: number;
-  predictedQualifierTeamId: string | null;
   savedAt: string;
 };

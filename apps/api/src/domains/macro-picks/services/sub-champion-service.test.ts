@@ -189,7 +189,7 @@ test("getForUser returns 'empty' when user has no stored sub-champion", async ()
     const result = await subChampionPickService.getForUser("usr_1", new Date("2026-06-10T18:00:00Z"));
     assert.equal(result.status, "empty");
     assert.equal(result.pickWindow, "A");
-    assert.equal(result.pickWindowPointValue, 25);
+    assert.equal(result.pickWindowPointValue, 20);
   } finally {
     subMock.mock.restore();
     listMatchesMock.mock.restore();

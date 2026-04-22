@@ -56,10 +56,8 @@ export const matchOfficialResultSchema = z.object({
 export const matchPredictionScoringBreakdownSchema = z.object({
   exact90Hit: z.boolean(),
   correctOutcome90Hit: z.boolean(),
-  correctQualifierHit: z.boolean(),
   pointsExact90: z.number().int().nonnegative(),
   pointsOutcome90: z.number().int().nonnegative(),
-  pointsQualifier: z.number().int().nonnegative(),
   pointsTotal: z.number().int().nonnegative()
 });
 
@@ -67,7 +65,6 @@ export const userMatchPredictionSchema = z.object({
   predictionId: z.string().min(1),
   homeScorePred: z.number().int().nonnegative(),
   awayScorePred: z.number().int().nonnegative(),
-  predictedQualifierTeamId: z.string().min(1).nullable(),
   status: predictionStatusSchema,
   pointsAwarded: z.number().int().nonnegative().nullable(),
   submittedAt: isoTimestampSchema,
@@ -77,12 +74,10 @@ export const userMatchPredictionSchema = z.object({
 
 export const matchScoringRulesSchema = z.object({
   exact90Points: z.literal(MATCH_SCORING_RULES.exact90Points),
-  correctOutcome90Points: z.literal(MATCH_SCORING_RULES.correctOutcome90Points),
-  correctQualifierPoints: z.literal(MATCH_SCORING_RULES.correctQualifierPoints)
+  correctOutcome90Points: z.literal(MATCH_SCORING_RULES.correctOutcome90Points)
 });
 
 export const matchDetailSchema = matchSummarySchema.extend({
-  requiresQualifierIfDraw: z.boolean(),
   officialResult: matchOfficialResultSchema.nullable(),
   userPrediction: userMatchPredictionSchema.nullable(),
   scoringRules: matchScoringRulesSchema
@@ -100,20 +95,9 @@ export const listMatchesResponseSchema = z.object({
   nextCursor: z.string().min(1).nullable()
 });
 
-export const saveMatchPredictionInputSchema = z
-  .object({
-    homeScorePred: z.number().int().nonnegative(),
-    awayScorePred: z.number().int().nonnegative(),
-    predictedQualifierTeamId: z.string().min(1).nullable().optional()
-  });
-
-export const saveKnockoutMatchPredictionInputSchema = saveMatchPredictionInputSchema.superRefine((value, context) => {
-  if (value.homeScorePred === value.awayScorePred && !value.predictedQualifierTeamId) {
-    context.addIssue({
-      code: "custom",
-      message: "predictedQualifierTeamId is required when a knockout prediction ends in a draw."
-    });
-  }
+export const saveMatchPredictionInputSchema = z.object({
+  homeScorePred: z.number().int().nonnegative(),
+  awayScorePred: z.number().int().nonnegative()
 });
 
 export const saveMatchPredictionResponseSchema = z.object({
@@ -123,7 +107,6 @@ export const saveMatchPredictionResponseSchema = z.object({
   isEditable: z.boolean(),
   homeScorePred: z.number().int().nonnegative(),
   awayScorePred: z.number().int().nonnegative(),
-  predictedQualifierTeamId: z.string().min(1).nullable(),
   savedAt: isoTimestampSchema
 });
 

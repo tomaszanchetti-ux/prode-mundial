@@ -54,7 +54,6 @@ export type StoredMatch = {
 export type StoredPredictionScoringBreakdown = {
   exact90Points: number;
   outcome90Points: number;
-  qualifierPoints: number;
   totalPoints: number;
 };
 
@@ -64,8 +63,6 @@ export type StoredPrediction = {
   matchId: string;
   homeScorePred: number;
   awayScorePred: number;
-  predictedWinnerTeamId?: string | null;
-  predictedQualifierTeamId?: string | null;
   isLocked: boolean;
   isScored: boolean;
   pointsAwarded: number;
@@ -103,7 +100,6 @@ export type DerivedMatchViewState = {
   isEditable: boolean;
   isFinished: boolean;
   isScored: boolean;
-  requiresQualifierIfDraw: boolean;
   predictionStatus: PredictionStatus;
   userPredictionSummary: string | null;
   ctaLabel: string;

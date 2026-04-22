@@ -18,29 +18,18 @@ function scorePrediction(match: SyncStoredMatch, prediction: SyncStoredPredictio
   const homeScore = match.homeScore90!;
   const awayScore = match.awayScore90!;
 
-  const exact90Points =
-    prediction.homeScorePred === homeScore && prediction.awayScorePred === awayScore
-      ? MATCH_SCORING_RULES.exact90Points
-      : 0;
+  const isExact =
+    prediction.homeScorePred === homeScore && prediction.awayScorePred === awayScore;
+  const isCorrectOutcome =
+    resolveOutcome(prediction.homeScorePred, prediction.awayScorePred) === resolveOutcome(homeScore, awayScore);
 
-  const outcome90Points =
-    resolveOutcome(prediction.homeScorePred, prediction.awayScorePred) === resolveOutcome(homeScore, awayScore)
-      ? MATCH_SCORING_RULES.correctOutcome90Points
-      : 0;
-
-  const qualifierPoints =
-    match.stage !== "group" &&
-    match.winnerTeamId &&
-    prediction.predictedQualifierTeamId &&
-    prediction.predictedQualifierTeamId === match.winnerTeamId
-      ? MATCH_SCORING_RULES.correctQualifierPoints
-      : 0;
+  const exact90Points = isExact ? MATCH_SCORING_RULES.exact90Points : 0;
+  const outcome90Points = !isExact && isCorrectOutcome ? MATCH_SCORING_RULES.correctOutcome90Points : 0;
 
   return {
     exact90Points,
     outcome90Points,
-    qualifierPoints,
-    totalPoints: exact90Points + outcome90Points + qualifierPoints
+    totalPoints: exact90Points + outcome90Points
   };
 }
 

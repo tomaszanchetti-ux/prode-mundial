@@ -5,7 +5,6 @@ import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/edit
 export type FormState = {
   homeScorePred: string;
   awayScorePred: string;
-  predictedQualifierTeamId: string;
 };
 
 export type MatchDetailNotice = {
@@ -16,8 +15,7 @@ export type MatchDetailNotice = {
 export function toFormState(detail: MatchDetail): FormState {
   return {
     homeScorePred: detail.userPrediction ? String(detail.userPrediction.homeScorePred) : "",
-    awayScorePred: detail.userPrediction ? String(detail.userPrediction.awayScorePred) : "",
-    predictedQualifierTeamId: detail.userPrediction?.predictedQualifierTeamId ?? ""
+    awayScorePred: detail.userPrediction ? String(detail.userPrediction.awayScorePred) : ""
   };
 }
 
@@ -108,13 +106,9 @@ export function toStatusTone(detail: MatchDetail, now = new Date()) {
   return "editable" as const;
 }
 
-export function toHelperText(detail: MatchDetail, formState: FormState) {
+export function toHelperText(detail: MatchDetail, _formState: FormState) {
   if (isPredictionWindowNotOpen(detail)) {
     return `La prediccion abre ${toKickoffLabel(detail.predictionOpensAt)}.`;
-  }
-
-  if (detail.requiresQualifierIfDraw && formState.homeScorePred !== "" && formState.homeScorePred === formState.awayScorePred) {
-    return "Si eliges empate, marca quien clasifica.";
   }
 
   return "";
@@ -128,10 +122,6 @@ export function toErrorMessage(error: unknown) {
 
     if (error.code === "INVALID_SCORE") {
       return "Ingresa un marcador valido.";
-    }
-
-    if (error.code === "INVALID_KNOCKOUT_CLASSIFIER") {
-      return "Si eliges empate, tienes que marcar quien clasifica.";
     }
 
     return error.message;

@@ -67,13 +67,11 @@ test("GET /api/v1/matches/:matchId returns match detail envelope", async () => {
       userPredictionSummary: null,
       isEditable: true,
       ctaLabel: "Predecir",
-      requiresQualifierIfDraw: true,
       officialResult: null,
       userPrediction: null,
       scoringRules: {
-        exact90Points: 4,
-        correctOutcome90Points: 2,
-        correctQualifierPoints: 2
+        exact90Points: 5,
+        correctOutcome90Points: 2
       }
     };
   });
@@ -88,14 +86,14 @@ test("GET /api/v1/matches/:matchId returns match detail envelope", async () => {
       ok: boolean;
       data: {
         matchId: string;
-        requiresQualifierIfDraw: boolean;
+        scoringRules: { exact90Points: number; correctOutcome90Points: number };
       };
     };
 
     assert.equal(response.status, 200);
     assert.equal(payload.ok, true);
     assert.equal(payload.data.matchId, "m_073");
-    assert.equal(payload.data.requiresQualifierIfDraw, true);
+    assert.equal(payload.data.scoringRules.exact90Points, 5);
   } finally {
     verifyIdTokenMock.mock.restore();
     serviceMock.mock.restore();

@@ -28,7 +28,7 @@ describe("resolvePickWindow", () => {
     assert.equal(result.pointValue, 0);
   });
 
-  it("returns window A with 25 pts well before the inaugural kickoff", () => {
+  it("returns window A with 20 pts well before the inaugural kickoff", () => {
     const result = resolvePickWindow({
       now: at(INAUGURAL, -10 * 24 * 60), // 10 days before
       inauguralKickoffAt: INAUGURAL,
@@ -37,7 +37,7 @@ describe("resolvePickWindow", () => {
     });
     assert.equal(result.window, "A");
     assert.equal(result.pointValue, PICK_WINDOW_POINT_VALUES.A);
-    assert.equal(result.pointValue, 25);
+    assert.equal(result.pointValue, 20);
     // closesAt = inaugural - 1h
     assert.equal(
       result.closesAt,
@@ -137,6 +137,6 @@ describe("resolvePickWindow", () => {
       areGroupsOfficiallyClosed: true // impossible in practice but shouldn't break A
     });
     assert.equal(result.window, "A");
-    assert.equal(result.pointValue, 25);
+    assert.equal(result.pointValue, 20);
   });
 });
