@@ -8,6 +8,7 @@ import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/c
 import { track } from "@/lib/firebase/analytics";
 import { copyForLocale, formatDateTime, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
+import { recordPickCompletion } from "@/lib/pwa/pick-install-trigger";
 import { toStatusLabel, toStatusTone } from "./match-detail-helpers";
 
 type QuickPredictionModalProps = {
@@ -149,6 +150,7 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
         homeTeamId: detail.homeTeam.teamId,
         awayTeamId: detail.awayTeam.teamId
       });
+      recordPickCompletion();
       setIsSaving(false);
       setJustSaved(true);
       setTimeout(() => {
