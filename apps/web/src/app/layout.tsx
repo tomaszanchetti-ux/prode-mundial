@@ -2,8 +2,11 @@ import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { LocaleProvider } from "@/lib/i18n/locale-provider";
+import { ConsentProvider } from "@/lib/consent/consent-provider";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { AnalyticsInit } from "@/components/analytics/analytics-init";
+import { GoogleConsentDefault } from "@/components/consent/google-consent-default";
+import { ConsentBanner } from "@/components/consent/consent-banner";
 import "./globals.css";
 
 const SITE_URL =
@@ -72,12 +75,18 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
+      <head>
+        <GoogleConsentDefault />
+      </head>
       <body className="app-body-bg">
         <LocaleProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <ConsentProvider>
+            <AuthProvider>{children}</AuthProvider>
+            <ConsentBanner />
+            <AnalyticsInit />
+          </ConsentProvider>
         </LocaleProvider>
         <ServiceWorkerRegister />
-        <AnalyticsInit />
       </body>
     </html>
   );

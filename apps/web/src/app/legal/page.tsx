@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card } from "@prode/ui";
+import { Button, Card } from "@prode/ui";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { LanguageToggle } from "@/components/layout/language-toggle";
 import { SupportNav } from "@/components/layout/support-nav";
+import { openConsentPreferences } from "@/lib/consent/consent-events";
 
-type LegalTab = "summary" | "terms" | "privacy";
+type LegalTab = "summary" | "terms" | "privacy" | "cookies";
 
 export default function LegalPage() {
   const { locale } = useLocale();
@@ -16,7 +17,8 @@ export default function LegalPage() {
   const tabs: Array<{ key: LegalTab; label: string }> = [
     { key: "summary", label: t("Resumen", "Summary") },
     { key: "terms", label: t("Términos", "Terms") },
-    { key: "privacy", label: t("Privacidad", "Privacy") }
+    { key: "privacy", label: t("Privacidad", "Privacy") },
+    { key: "cookies", label: t("Cookies", "Cookies") }
   ];
 
   return (
@@ -57,6 +59,7 @@ export default function LegalPage() {
       {activeTab === "summary" ? <SummarySection t={t} /> : null}
       {activeTab === "terms" ? <TermsSection t={t} /> : null}
       {activeTab === "privacy" ? <PrivacySection t={t} /> : null}
+      {activeTab === "cookies" ? <CookiesSection t={t} /> : null}
 
       <Card elevated className="legal-callout-warning gap-2 p-5">
         <span className="typo-eyebrow">
@@ -300,6 +303,84 @@ function PrivacySection({ t }: { t: Copy }) {
             )}
           </p>
         </div>
+      </div>
+    </Card>
+  );
+}
+
+function CookiesSection({ t }: { t: Copy }) {
+  return (
+    <Card elevated className="gap-4 p-5">
+      <div className="grid gap-1">
+        <span className="typo-eyebrow">{t("🍪 COOKIES", "🍪 COOKIES")}</span>
+        <h2 className="typo-h3 m-0 text-text-primary">
+          {t("Política de cookies", "Cookie policy")}
+        </h2>
+      </div>
+
+      <div className="grid gap-4 legal-section">
+        <div className="grid gap-1">
+          <h3>{t("Qué son las cookies", "What cookies are")}</h3>
+          <p>
+            {t(
+              "Pequeños archivos que guardamos en tu dispositivo para que la app recuerde tu sesión, tus preferencias y, si lo permitís, para entender cómo se usa.",
+              "Small files stored on your device so the app remembers your session, preferences, and — if you allow it — how it's used."
+            )}
+          </p>
+        </div>
+
+        <div className="grid gap-1">
+          <h3>{t("Categorías que usamos", "Categories we use")}</h3>
+          <ul>
+            <li>
+              <strong>{t("Necesarias", "Essential")}</strong>
+              {t(
+                " — Firebase Auth (sesión), preferencia de idioma, consentimiento de cookies y tokens de notificación push (si activás notificaciones). Siempre activas.",
+                " — Firebase Auth (session), language preference, cookie consent, and push notification tokens (if you enable notifications). Always active."
+              )}
+            </li>
+            <li>
+              <strong>{t("Analíticas", "Analytics")}</strong>
+              {t(
+                " — Firebase Analytics (Google) para medir uso agregado. Solo con tu permiso.",
+                " — Firebase Analytics (Google) to measure aggregate usage. Only with your consent."
+              )}
+            </li>
+            <li>
+              <strong>{t("Marketing", "Marketing")}</strong>
+              {t(
+                " — Google AdSense para anuncios personalizados en el tier gratuito. Solo con tu permiso.",
+                " — Google AdSense for personalized ads on the free tier. Only with your consent."
+              )}
+            </li>
+          </ul>
+        </div>
+
+        <div className="grid gap-1">
+          <h3>{t("Cómo retiramos el consentimiento", "How to withdraw consent")}</h3>
+          <p>
+            {t(
+              "Podés cambiar tus preferencias en cualquier momento desde este panel. Tu navegador también te permite borrar cookies manualmente.",
+              "You can change your preferences any time from this panel. Your browser also lets you delete cookies manually."
+            )}
+          </p>
+        </div>
+
+        <div className="grid gap-1">
+          <h3>{t("Terceros", "Third parties")}</h3>
+          <p>
+            {t(
+              "Google Firebase (autenticación, analítica, notificaciones) y, en el tier gratuito, Google AdSense. No usamos cookies de marketing de redes sociales.",
+              "Google Firebase (auth, analytics, notifications) and, on the free tier, Google AdSense. We don't use social-media marketing cookies."
+            )}
+          </p>
+        </div>
+      </div>
+
+      <div className="pt-1">
+        <Button onClick={openConsentPreferences}>
+          {t("Gestionar preferencias", "Manage preferences")}
+        </Button>
       </div>
     </Card>
   );

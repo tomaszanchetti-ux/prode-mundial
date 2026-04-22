@@ -1,3 +1,4 @@
+export * from "./consent/types";
 export * from "./constants/app";
 export * from "./constants/best-player-roster";
 export * from "./constants/leagues";
