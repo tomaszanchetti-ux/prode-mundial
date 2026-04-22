@@ -193,11 +193,6 @@
     background: linear-gradient(180deg, var(--color-primary-surface) 0%, #FFFFFF 60%);
     border: 1px solid rgba(0, 82, 204, 0.14);
   }
-  .step-card {
-    background: #FFFFFF;
-    border: 1px solid var(--color-border-subtle);
-    box-shadow: var(--shadow-soft);
-  }
   .email-input {
     min-height: 52px;
     border-radius: var(--radius-md);
@@ -269,6 +264,108 @@
       url("/mundial/hero-stadium.jpg") center top / cover no-repeat;
     border: 1px solid rgba(212, 168, 66, 0.22);
   }
+
+  /* ── Landing (pre-auth) dark ── */
+  .landing-bg-dark {
+    background:
+      linear-gradient(180deg, rgba(5,8,16,0.88) 0%, rgba(5,8,16,0.78) 45%, rgba(5,8,16,0.92) 100%),
+      url("/mundial/hero-stadium.jpg") center top / cover no-repeat;
+    color: #FFFFFF;
+  }
+  .landing-title {
+    color: #FFFFFF;
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  @media (min-width: 48rem) {
+    .landing-title { font-size: 56px; }
+  }
+  .landing-subtitle {
+    color: rgba(255,255,255,0.78);
+    font-size: 17px;
+    line-height: 1.4;
+    margin: 0;
+  }
+  .landing-input-dark {
+    min-height: 52px;
+    width: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.06);
+    color: #FFFFFF;
+    padding: 0 14px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+  }
+  .landing-input-dark::placeholder { color: rgba(255,255,255,0.48); }
+  .landing-input-dark:focus {
+    border-color: rgba(255,255,255,0.55);
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+  }
+  .landing-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(255,255,255,0.48);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .landing-divider::before,
+  .landing-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.14);
+  }
+  .landing-btn-google {
+    background: #FFFFFF !important;
+    color: #0E1116 !important;
+    border: 1px solid #FFFFFF !important;
+  }
+  .landing-btn-google:hover:not(:disabled) {
+    background: rgba(255,255,255,0.92) !important;
+  }
+  .landing-btn-magic {
+    background: var(--color-primary-500) !important;
+    color: #FFFFFF !important;
+    border: 1px solid var(--color-primary-500) !important;
+  }
+  .landing-btn-ghost {
+    background: transparent !important;
+    color: rgba(255,255,255,0.88) !important;
+    border: 1px solid rgba(255,255,255,0.28) !important;
+  }
+  .landing-alert {
+    padding: 12px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    line-height: 1.45;
+    text-align: center;
+  }
+  .landing-alert-error {
+    background: rgba(229, 72, 77, 0.12);
+    border: 1px solid rgba(229, 72, 77, 0.32);
+    color: #FDD8D8;
+  }
+  .landing-alert-success {
+    background: rgba(24, 169, 87, 0.14);
+    border: 1px solid rgba(24, 169, 87, 0.32);
+    color: #BFF2D4;
+  }
+  .landing-footer-link {
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .landing-footer-link:hover { color: rgba(255,255,255,0.92); }
 
   /* ── Score Input ── */
   .score-panel-bg {
