@@ -62,7 +62,19 @@ export type TrackEvent =
   | "fcm_prompt_accepted"
   | "fcm_prompt_dismissed"
   | "fcm_permission_denied"
-  | "fcm_token_registered";
+  | "fcm_token_registered"
+  | "install_banner_shown"
+  | "install_banner_accepted"
+  | "install_banner_installed"
+  | "install_banner_rejected"
+  | "install_banner_dismissed"
+  | "install_banner_ios_hint_opened"
+  | "install_post_pick_shown"
+  | "install_post_pick_accepted"
+  | "install_post_pick_installed"
+  | "install_post_pick_rejected"
+  | "install_post_pick_dismissed"
+  | "install_post_pick_ios_hint_opened";
 
 export function track(
   event: TrackEvent,

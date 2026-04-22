@@ -8,6 +8,7 @@ import { InstallIOSModal } from "./install-ios-modal";
 import { useInstallPrompt } from "./use-install-prompt";
 
 const DISMISS_KEY = "prode_install_banner_dismissed_until";
+const SHOWN_KEY = "prode_install_banner_shown_tracked";
 const DISMISS_DAYS = 7;
 
 function getDismissedUntil(): number | null {
@@ -23,6 +24,16 @@ function setDismissedUntil(timestamp: number) {
   window.localStorage.setItem(DISMISS_KEY, String(timestamp));
 }
 
+function hasBeenTrackedShown(): boolean {
+  if (typeof window === "undefined") return true;
+  return window.localStorage.getItem(SHOWN_KEY) === "1";
+}
+
+function markTrackedShown() {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(SHOWN_KEY, "1");
+}
+
 type BannerState = "visible" | "pending" | "hidden";
 
 export function InstallAppBanner() {
@@ -30,7 +41,6 @@ export function InstallAppBanner() {
   const { canInstall, hasNativePrompt, isIOS, isStandalone, promptInstall } = useInstallPrompt();
   const [state, setState] = useState<BannerState>("hidden");
   const [iosModalOpen, setIosModalOpen] = useState(false);
-  const [shownTracked, setShownTracked] = useState(false);
 
   useEffect(() => {
     if (isStandalone || !canInstall) {
@@ -45,11 +55,11 @@ export function InstallAppBanner() {
     }
 
     setState("visible");
-    if (!shownTracked) {
+    if (!hasBeenTrackedShown()) {
       track("install_banner_shown");
-      setShownTracked(true);
+      markTrackedShown();
     }
-  }, [canInstall, isStandalone, shownTracked]);
+  }, [canInstall, isStandalone]);
 
   if (state === "hidden" || isStandalone || !canInstall) return null;
 

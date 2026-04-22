@@ -30,6 +30,10 @@ export function recordPickCompletion() {
   }
 }
 
+export function getPicksCount(): number {
+  return readCount();
+}
+
 export function hasPostPickPromptBeenShown(): boolean {
   if (typeof window === "undefined") return true;
   return window.localStorage.getItem(POST_PICK_PROMPT_SHOWN_KEY) === "1";

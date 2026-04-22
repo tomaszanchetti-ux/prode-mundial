@@ -40,21 +40,21 @@
       "short_name": "Inicio",
       "description": "Ir a la pantalla principal",
       "url": "/home",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "El Mundial",
       "short_name": "Partidos",
       "description": "Ver fixture y resultados",
       "url": "/tournament",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Tus Ligas",
       "short_name": "Ligas",
       "description": "Ir a tus ligas privadas",
       "url": "/leagues",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

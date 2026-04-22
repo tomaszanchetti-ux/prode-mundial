@@ -6,6 +6,7 @@ import { track } from "@/lib/firebase/analytics";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import {
   FIRST_PICK_COMPLETED_EVENT,
+  getPicksCount,
   hasPostPickPromptBeenShown,
   markPostPickPromptShown
 } from "@/lib/pwa/pick-install-trigger";
@@ -24,6 +25,14 @@ export function InstallAfterPickPrompt() {
     if (typeof window === "undefined") return;
     if (isStandalone || !canInstall) return;
     if (hasPostPickPromptBeenShown()) return;
+
+    // Safety net: if a pick was recorded before this component mounted
+    // (race at hydration), show the prompt anyway on mount.
+    if (getPicksCount() >= 1) {
+      setState("visible");
+      track("install_post_pick_shown");
+      return;
+    }
 
     function onFirstPick() {
       if (isStandalone || !canInstall) return;
