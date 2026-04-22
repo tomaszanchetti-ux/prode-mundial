@@ -1,14 +1,18 @@
 {
+  "id": "/",
   "name": "Prode Mundial",
   "short_name": "Prode",
   "description": "Pronosticá los partidos del Mundial 2026, competí en ligas privadas y sumá puntos.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "orientation": "portrait",
   "background_color": "#0052CC",
   "theme_color": "#0052CC",
   "lang": "es",
+  "dir": "ltr",
+  "prefer_related_applications": false,
   "categories": ["sports", "entertainment", "social"],
   "icons": [
     {
@@ -28,6 +32,29 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mi Mundial",
+      "short_name": "Inicio",
+      "description": "Ir a la pantalla principal",
+      "url": "/home",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "El Mundial",
+      "short_name": "Partidos",
+      "description": "Ver fixture y resultados",
+      "url": "/tournament",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Tus Ligas",
+      "short_name": "Ligas",
+      "description": "Ir a tus ligas privadas",
+      "url": "/leagues",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

@@ -60,6 +60,11 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false
+  },
+  other: {
+    "msapplication-TileColor": "#0052CC",
+    "msapplication-TileImage": "/icon-192.png",
+    "mobile-web-app-capable": "yes"
   }
 };
 
