@@ -2,7 +2,7 @@ import React from "react";
 import { MATCH_SCORING_RULES, type PointsResponse } from "@prode/shared";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 
-export function MiScoreSection({ points }: { points: PointsResponse | null }) {
+export function MiScoreSection({ points, compact = false }: { points: PointsResponse | null; compact?: boolean }) {
   const { locale } = useLocale();
 
   const total = points?.totalPoints ?? 0;
@@ -26,7 +26,7 @@ export function MiScoreSection({ points }: { points: PointsResponse | null }) {
         </span>
       </div>
 
-      {hasActivity ? (
+      {compact ? null : hasActivity ? (
         <p className="m-0 typo-small text-text-secondary tabular-nums">
           <span className="text-text-primary font-semibold">{exactHits}</span>{" "}
           {copyForLocale(locale, "exactos", "exact")}{" "}

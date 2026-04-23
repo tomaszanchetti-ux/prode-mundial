@@ -1,12 +1,13 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { APP_ROUTES } from "@prode/shared";
 import { useAuth } from "@/components/auth/auth-provider";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 
-type SupportNavVariant = "public" | "card";
+type SupportNavVariant = "public" | "card" | "footer";
 
 type SupportNavProps = {
   variant?: SupportNavVariant;
@@ -33,13 +34,30 @@ function useSupportItems(): SupportItem[] {
 }
 
 export function SupportNav({ variant = "public", sticky = false }: SupportNavProps) {
-  const items = useSupportItems();
+  const allItems = useSupportItems();
   const pathname = usePathname();
+
+  const items = variant === "footer" ? allItems.filter((item) => item.key !== "home") : allItems;
 
   const isActive = (item: SupportItem) =>
     item.key === "home"
       ? pathname === item.href
       : pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+  if (variant === "footer") {
+    return (
+      <nav aria-label="Navegación" className="support-nav-footer">
+        {items.map((item, index) => (
+          <React.Fragment key={item.key}>
+            {index > 0 ? <span aria-hidden="true" className="support-nav-footer-sep">·</span> : null}
+            <Link href={item.href} className="support-nav-footer-link">
+              {item.label}
+            </Link>
+          </React.Fragment>
+        ))}
+      </nav>
+    );
+  }
 
   if (variant === "card") {
     return (

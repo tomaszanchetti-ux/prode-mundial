@@ -81,38 +81,48 @@ export function LeaguesScreenView({
 
   return (
     <div className="grid gap-4">
-      <div className="flex gap-2 justify-end flex-wrap">
-        <Button
-          variant={mode === "create" ? "secondary" : "ghost"}
-          onClick={() => onChangeMode(mode === "create" ? null : "create")}
-        >
-          {mode === "create" ? "Cancelar" : "Crear liga"}
-        </Button>
-        <Button
-          variant={mode === "join" ? "secondary" : "ghost"}
-          onClick={() => onChangeMode(mode === "join" ? null : "join")}
-        >
-          {mode === "join" ? "Cancelar" : "Unirme"}
-        </Button>
+      <div className="flex gap-1.5 overflow-x-auto filter-bar-flush px-[2px]">
+        {options.map((option) => {
+          const isActive = option.leagueId === selectedLeagueId;
+
+          return (
+            <button
+              key={option.leagueId}
+              type="button"
+              onClick={() => onSelectLeague(option.leagueId)}
+              className={`filter-chip ${isActive ? "filter-chip-active" : "filter-chip-inactive"}`}
+            >
+              {option.name}
+            </button>
+          );
+        })}
       </div>
 
-      {mode === "create" ? (
-        <CreateLeagueForm
-          formState={formState}
-          isSubmitting={isSubmitting}
-          onFieldChange={onFieldChange}
-          onSubmit={onCreateLeague}
-        />
-      ) : null}
+      <Card elevated style={{ gap: 10 }}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <MiScoreSection points={points} compact />
+          </div>
+          {!isGlobal && summary.positionLabel !== "Sin puesto" ? (
+            <div className="grid gap-0.5 text-right shrink-0">
+              <span className="text-[28px] leading-none font-black text-primary-600 tabular-nums">
+                {summary.positionLabel}
+              </span>
+              {summary.gapLabel ? (
+                <span className="text-[12px] leading-[1.3] text-text-muted tabular-nums">
+                  {summary.gapLabel}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
 
-      {mode === "join" ? (
-        <JoinLeagueForm
-          formState={formState}
-          isSubmitting={isSubmitting}
-          onFieldChange={onFieldChange}
-          onSubmit={onJoinLeague}
-        />
-      ) : null}
+        {!isGlobal && selectedLeague ? (
+          <span className="typo-meta">
+            {selectedLeague.membersCount}/{selectedLeague.memberLimit} jugadores · código {selectedLeague.inviteCode}
+          </span>
+        ) : null}
+      </Card>
 
       {actionError ? (
         <Card elevated style={{ gap: 12 }}>
@@ -132,44 +142,6 @@ export function LeaguesScreenView({
       {errorMessage ? (
         <ErrorCard message={errorMessage} onRetry={onRetry} />
       ) : null}
-
-      <div className="flex gap-1.5 overflow-x-auto sticky top-0 z-[2] filter-bar-bg px-[2px]">
-        {options.map((option) => {
-          const isActive = option.leagueId === selectedLeagueId;
-
-          return (
-            <button
-              key={option.leagueId}
-              type="button"
-              onClick={() => onSelectLeague(option.leagueId)}
-              className={`filter-chip ${isActive ? "filter-chip-active" : "filter-chip-inactive"}`}
-            >
-              {option.name}
-            </button>
-          );
-        })}
-      </div>
-
-      <Card elevated style={{ gap: 12 }}>
-        {!isGlobal && summary.positionLabel !== "Sin puesto" ? (
-          <div className="flex items-baseline gap-2 flex-wrap">
-            <span className="text-[20px] font-extrabold text-text-primary tabular-nums leading-none">
-              {summary.positionLabel}
-            </span>
-            {summary.gapLabel ? (
-              <span className="text-[13px] text-text-muted leading-none">· {summary.gapLabel}</span>
-            ) : null}
-          </div>
-        ) : null}
-
-        <MiScoreSection points={points} />
-
-        {!isGlobal && selectedLeague ? (
-          <span className="text-[12px] leading-[1.35] text-text-muted">
-            {selectedLeague.membersCount}/{selectedLeague.memberLimit} jugadores · código {selectedLeague.inviteCode}
-          </span>
-        ) : null}
-      </Card>
 
       {isLoading ? (
         <div className="grid gap-2">
@@ -226,42 +198,118 @@ export function LeaguesScreenView({
 
       {!isGlobal && selectedLeague?.inviteLink ? (
         <div>
-          <CopyButton value={selectedLeague.inviteLink} label="Invitar" shareLeagueId={selectedLeague.leagueId} />
+          <CopyButton
+            value={selectedLeague.inviteLink}
+            label="Invitar"
+            shareLeagueId={selectedLeague.leagueId}
+            variant="ghost"
+          />
         </div>
       ) : null}
 
-      {isGlobal && items.length === 0 ? (
-        <Card elevated style={{ gap: 10 }}>
-          <span className="typo-eyebrow">SIN LIGAS PRIVADAS</span>
-          <h2 className="typo-h3 m-0 text-text-primary">Todavia no competis en ninguna</h2>
-          <p className="typo-body m-0 text-text-secondary">
-            Crea tu primera liga o unite con un codigo para sumar competencia social.
-          </p>
-        </Card>
-      ) : null}
-
-      {isGlobal && items.length > 0 ? (
+      {isGlobal ? (
         <div className="grid gap-3">
-          <span className="typo-eyebrow">MIS LIGAS PRIVADAS</span>
+          {items.length > 0 ? (
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <span className="typo-eyebrow">MIS LIGAS PRIVADAS</span>
+              <div className="flex gap-4 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => onChangeMode(mode === "create" ? null : "create")}
+                  className="leagues-text-action"
+                >
+                  {mode === "create" ? "Cancelar" : "+ Crear liga"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onChangeMode(mode === "join" ? null : "join")}
+                  className="leagues-text-action leagues-text-action--muted"
+                >
+                  {mode === "join" ? "Cancelar" : "Unirme"}
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {mode === "create" ? (
+            <CreateLeagueForm
+              formState={formState}
+              isSubmitting={isSubmitting}
+              onFieldChange={onFieldChange}
+              onSubmit={onCreateLeague}
+            />
+          ) : null}
+
+          {mode === "join" ? (
+            <JoinLeagueForm
+              formState={formState}
+              isSubmitting={isSubmitting}
+              onFieldChange={onFieldChange}
+              onSubmit={onJoinLeague}
+            />
+          ) : null}
+
+          {items.length === 0 && mode === null ? (
+            <Card elevated style={{ gap: 12 }}>
+              <h2 className="typo-h3 m-0 text-text-primary">No estás en ninguna liga</h2>
+              <p className="typo-body m-0 text-text-secondary">
+                Creá una o unite con un código para competir con amigos.
+              </p>
+              <div className="flex gap-2 flex-wrap">
+                <Button variant="primary" onClick={() => onChangeMode("create")}>
+                  + Crear liga
+                </Button>
+                <Button variant="ghost" onClick={() => onChangeMode("join")}>
+                  Unirme
+                </Button>
+              </div>
+            </Card>
+          ) : null}
+
           {items.map((league) => (
-            <Card key={league.leagueId} elevated style={{ gap: 10 }}>
-              <div className="flex justify-between gap-2 items-center">
-                <div className="grid gap-0.5">
-                  <h3 className="typo-h3 m-0 text-text-primary">{league.name}</h3>
-                  <span className="text-[13px] leading-[1.35] text-text-muted">
-                    {league.position ? `#${league.position}` : "—"} · {league.userPoints} pts · {league.membersCount} jugadores
+            <Card
+              key={league.leagueId}
+              elevated
+              role="button"
+              tabIndex={0}
+              aria-label={`Ver detalle de ${league.name}`}
+              onClick={() => onSelectLeague(league.leagueId)}
+              onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onSelectLeague(league.leagueId);
+                }
+              }}
+              style={{ gap: 8, cursor: "pointer" }}
+            >
+              <div className="flex justify-between gap-2 items-start">
+                <div className="grid gap-0.5 min-w-0">
+                  <h3 className="typo-h3 m-0 text-text-primary truncate">{league.name}</h3>
+                  <span className="text-[13px] leading-[1.35] font-medium text-text-secondary tabular-nums">
+                    {league.position ? `#${league.position} en la liga` : "Sin puesto todavía"}
+                  </span>
+                  <span className="text-[12px] leading-[1.35] text-text-muted tabular-nums">
+                    {league.userPoints} pts · {league.membersCount} jugadores
                   </span>
                 </div>
-                <StatusTag status={league.isActive ? "editable" : "neutral"} label={league.isActive ? "Activa" : "Cerrada"} />
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <Button variant="secondary" onClick={() => onSelectLeague(league.leagueId)}>
-                  Ver detalle
-                </Button>
-                {league.inviteLink ? (
-                  <CopyButton value={league.inviteLink} label="Invitar" shareLeagueId={league.leagueId} />
+                {!league.isActive ? (
+                  <StatusTag status="neutral" label="Cerrada" />
                 ) : null}
               </div>
+              {league.inviteLink ? (
+                <div
+                  className="flex gap-2 flex-wrap"
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                >
+                  <CopyButton
+                    value={league.inviteLink}
+                    label="Invitar"
+                    shareLeagueId={league.leagueId}
+                    variant="ghost"
+                  />
+                </div>
+              ) : null}
             </Card>
           ))}
         </div>
