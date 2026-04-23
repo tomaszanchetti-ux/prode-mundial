@@ -39,7 +39,7 @@ export function LoginScreen() {
       </div>
 
       <footer className="flex justify-center py-6">
-        <SupportNav />
+        <SupportNav variant="footer" />
       </footer>
     </main>
   );

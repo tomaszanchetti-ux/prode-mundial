@@ -9,9 +9,16 @@ type CopyButtonProps = {
   label?: string;
   copiedLabel?: string;
   shareLeagueId?: string;
+  variant?: "primary" | "secondary" | "ghost";
 };
 
-export function CopyButton({ value, label = "Copiar", copiedLabel = "Copiado", shareLeagueId }: CopyButtonProps) {
+export function CopyButton({
+  value,
+  label = "Copiar",
+  copiedLabel = "Copiado",
+  shareLeagueId,
+  variant = "primary"
+}: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -28,7 +35,7 @@ export function CopyButton({ value, label = "Copiar", copiedLabel = "Copiado", s
   }
 
   return (
-    <Button variant="primary" onClick={handleCopy} aria-label={`${label} ${value}`}>
+    <Button variant={variant} onClick={handleCopy} aria-label={`${label} ${value}`}>
       {copied ? copiedLabel : label}
     </Button>
   );
