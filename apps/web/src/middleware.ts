@@ -5,24 +5,20 @@ const CANONICAL_HOST = "app.prodemundial.org";
 const LEGACY_HOST_SUFFIX = ".hosted.app";
 
 export function middleware(request: NextRequest) {
-  const rawHost = request.headers.get("host") ?? "";
-  const forwardedHost = request.headers.get("x-forwarded-host") ?? "";
-  const host = forwardedHost || rawHost;
+  const host =
+    request.headers.get("x-forwarded-host") ??
+    request.headers.get("host") ??
+    "";
 
   if (host.endsWith(LEGACY_HOST_SUFFIX) && host !== CANONICAL_HOST) {
     const url = new URL(request.url);
-    url.host = CANONICAL_HOST;
+    url.hostname = CANONICAL_HOST;
+    url.port = "";
     url.protocol = "https:";
-    const response = NextResponse.redirect(url, 301);
-    response.headers.set("x-debug-host", rawHost);
-    response.headers.set("x-debug-fwd-host", forwardedHost);
-    return response;
+    return NextResponse.redirect(url, 301);
   }
 
-  const response = NextResponse.next();
-  response.headers.set("x-debug-host", rawHost);
-  response.headers.set("x-debug-fwd-host", forwardedHost);
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {
