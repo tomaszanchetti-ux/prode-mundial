@@ -17,8 +17,14 @@ env:
       - BUILD
       - RUNTIME
 
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: "https://app.prodemundial.org"
+    availability:
+      - BUILD
+      - RUNTIME
+
   - variable: NEXT_PUBLIC_WEB_URL
-    value: "https://prode-mundial-4e419.web.app"
+    value: "https://app.prodemundial.org"
     availability:
       - BUILD
       - RUNTIME

@@ -10,8 +10,7 @@ import { ConsentBanner } from "@/components/consent/consent-banner";
 import "./globals.css";
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  "https://prode-mundial-2026--prode-mundial-4e419.europe-west4.hosted.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://app.prodemundial.org";
 
 const SITE_NAME = "Prode Mundial";
 const SITE_DESCRIPTION =
