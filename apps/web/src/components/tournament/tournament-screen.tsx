@@ -248,7 +248,7 @@ export function TournamentScreen() {
     () => [
       {
         key: "matches",
-        label: "Grupos",
+        label: "Partidos",
         completed: countCompleted(groupMatches),
         total: groupMatches.length
       },
@@ -319,6 +319,13 @@ export function TournamentScreen() {
             setActiveMatchId(null);
           }
           setReloadKey((current) => current + 1);
+        }}
+        onSkip={() => {
+          const pendingMatches = editableMatches.filter(
+            (m) => m.predictionStatus === "empty" && m.matchId !== activeMatchId
+          );
+          const nextMatch = pendingMatches[0] ?? null;
+          setActiveMatchId(nextMatch ? nextMatch.matchId : null);
         }}
       />
     </>

@@ -8,7 +8,7 @@ import { Button, Card, ErrorCard } from "@prode/ui";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { updateMyProfile } from "@/lib/api/client";
-import { InstallAppCard } from "@/components/pwa/install-app-card";
+import { PreferencesSection } from "@/components/profile/preferences-section";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { openConsentPreferences } from "@/lib/consent/consent-events";
 
@@ -142,7 +142,7 @@ export function ProfileScreen() {
         </form>
       </Card>
 
-      <InstallAppCard />
+      <PreferencesSection user={user} />
 
       {/* ── Recursos: Reglas · Términos y Privacidad · Cookies ── */}
       <Card elevated style={{ gap: 6, padding: 16 }}>

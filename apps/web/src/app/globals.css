@@ -19,8 +19,20 @@
   --color-success: #18A957;
   --color-error: #E5484D;
   --color-warning: #F5A623;
-  --color-gold: #D4A842;
-  --color-gold-soft: rgba(212, 168, 66, 0.12);
+  /*
+   * Gold accent (EPIC 32 WS1) — alineado con landing prodemundial.org.
+   * Hex exactos: #E0B84A (main), #F4CC5A (bright), #B8902E (dim).
+   * Regla light mode:
+   *   --color-gold        → gold-dim, usar para TEXT y borders (AA large 3.4:1 sobre white).
+   *   --color-gold-soft   → fill transparente del main, decorativo (bg tints, chips soft).
+   *   --color-gold-fill   → fill solido del main, solo decorativo (no para text chico).
+   *   --color-gold-bright → solo en gradients hero o sobre fondos dark.
+   * NO usar gold como CTA primary. Primary queda azul #0052CC.
+   */
+  --color-gold: #B8902E;
+  --color-gold-soft: rgba(224, 184, 74, 0.12);
+  --color-gold-bright: #F4CC5A;
+  --color-gold-fill: #E0B84A;
 
   --color-bg-main: #F0F1F3;
   --color-bg-surface: #FFFFFF;
@@ -262,7 +274,7 @@
     background:
       linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.95) 60%),
       url("/mundial/hero-stadium.jpg") center top / cover no-repeat;
-    border: 1px solid rgba(212, 168, 66, 0.22);
+    border: 1px solid rgba(224, 184, 74, 0.22);
   }
 
   /* ── Landing (pre-auth) dark ── */
@@ -444,9 +456,9 @@
     border: 1px solid rgba(180, 130, 60, 0.16);
   }
   .stage-badge-final {
-    background: linear-gradient(135deg, rgba(212, 168, 66, 0.12) 0%, rgba(234, 179, 8, 0.08) 100%);
+    background: linear-gradient(135deg, rgba(224, 184, 74, 0.12) 0%, rgba(234, 179, 8, 0.08) 100%);
     color: #92650a;
-    border: 1px solid rgba(212, 168, 66, 0.24);
+    border: 1px solid rgba(224, 184, 74, 0.24);
     font-weight: 700;
   }
 
@@ -481,7 +493,7 @@
     color: #c2410c;
   }
   .section-divider-final .section-divider-line {
-    background: linear-gradient(90deg, transparent 0%, rgba(212, 168, 66, 0.4) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(224, 184, 74, 0.4) 50%, transparent 100%);
   }
   .section-divider-final .section-divider-label {
     color: #92650a;
@@ -556,7 +568,7 @@
   /* ── Next Window Card ── */
   .next-window-bg {
     background: linear-gradient(180deg, var(--color-gold-soft) 0%, #FFFFFF 70%);
-    border: 1px solid rgba(212, 168, 66, 0.22);
+    border: 1px solid rgba(224, 184, 74, 0.22);
   }
 
   /* ── Ad Slot ── */
@@ -658,7 +670,7 @@
     color-scheme: light;
     background:
       radial-gradient(circle at top left, rgba(0, 82, 204, 0.05), transparent 32%),
-      radial-gradient(circle at top right, rgba(212, 168, 66, 0.05), transparent 24%),
+      radial-gradient(circle at top right, rgba(224, 184, 74, 0.05), transparent 24%),
       linear-gradient(180deg, #F7F8FA 0%, #FFFFFF 42%, #F7F8FA 100%);
   }
 
@@ -742,8 +754,8 @@
     gap: 6px;
     padding: 3px 10px;
     border-radius: var(--radius-pill);
-    background: rgba(212, 168, 66, 0.14);
-    border: 1px solid rgba(212, 168, 66, 0.32);
+    background: rgba(224, 184, 74, 0.14);
+    border: 1px solid rgba(224, 184, 74, 0.32);
     color: #8A5A00;
     font-size: 11px;
     font-weight: 700;
@@ -767,8 +779,8 @@
     gap: 8px;
   }
   .rules-plan-card-gold {
-    border-color: rgba(212, 168, 66, 0.32);
-    background: linear-gradient(180deg, rgba(212, 168, 66, 0.06) 0%, rgba(212, 168, 66, 0.02) 100%);
+    border-color: rgba(224, 184, 74, 0.32);
+    background: linear-gradient(180deg, rgba(224, 184, 74, 0.06) 0%, rgba(224, 184, 74, 0.02) 100%);
   }
   .rules-plan-feature {
     display: flex;
