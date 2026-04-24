@@ -58,23 +58,27 @@ export type TrackEvent =
   | "league_created"
   | "league_joined"
   | "invite_shared"
-  | "fcm_prompt_shown"
-  | "fcm_prompt_accepted"
-  | "fcm_prompt_dismissed"
-  | "fcm_permission_denied"
+  // FCM token sync (utility — se llama al startup si ya hay permission)
   | "fcm_token_registered"
-  | "install_banner_shown"
-  | "install_banner_accepted"
-  | "install_banner_installed"
-  | "install_banner_rejected"
-  | "install_banner_dismissed"
-  | "install_banner_ios_hint_opened"
-  | "install_post_pick_shown"
-  | "install_post_pick_accepted"
-  | "install_post_pick_installed"
-  | "install_post_pick_rejected"
-  | "install_post_pick_dismissed"
-  | "install_post_pick_ios_hint_opened";
+  // EPIC 32 — Permissions rebuild (notif card al top del Home)
+  | "notif_home_card_shown"
+  | "notif_home_card_accepted"
+  | "notif_home_card_permission_denied"
+  | "notif_home_card_token_registered"
+  | "notif_home_card_dismissed"
+  // EPIC 32 — Permissions rebuild (install card al final del Home)
+  | "install_home_card_shown"
+  | "install_home_card_accepted"
+  | "install_home_card_installed"
+  | "install_home_card_rejected"
+  | "install_home_card_ios_hint_opened"
+  | "install_home_card_dismissed"
+  // EPIC 32 — Toggles en /profile (PreferencesSection)
+  | "profile_notif_toggle_clicked"
+  | "profile_notif_activated"
+  | "profile_install_toggle_clicked"
+  | "profile_install_installed"
+  | "profile_install_ios_hint_opened";
 
 export function track(
   event: TrackEvent,
