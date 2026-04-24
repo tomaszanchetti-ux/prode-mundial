@@ -112,10 +112,10 @@ test("TournamentScreenView renders next-match hero as clickable card", () => {
   assert.match(html, /aria-label="Mexico vs South Africa"/);
 });
 
-test("TournamentScreenView shows simplified tabs Grupos/Cruces", () => {
+test("TournamentScreenView shows simplified tabs Partidos/Cruces", () => {
   const html = renderView();
 
-  assert.match(html, /Grupos/);
+  assert.match(html, /Partidos/);
   assert.match(html, /Cruces/);
   assert.doesNotMatch(html, /Mis Resultados/);
   assert.doesNotMatch(html, /Mis Predicciones/);
