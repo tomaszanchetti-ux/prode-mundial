@@ -220,7 +220,7 @@ export default function RulesPage() {
         <span className="typo-eyebrow">{t("PREMIOS", "PRIZES")}</span>
         <p className="m-0 text-text-secondary text-[14px] leading-[1.5]">
           {t(
-            "El premio entre participantes se acuerda y se gestiona entre los propios amigos. Prode Mundial no interviene en la administración del premio.",
+            "El premio entre participantes se acuerda y se gestiona entre los propios colegas. Prode Mundial no interviene en la administración del premio.",
             "Any prize among participants is agreed and managed privately between friends. Prode Mundial does not administer or mediate prizes."
           )}
         </p>

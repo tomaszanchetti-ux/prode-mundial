@@ -19,6 +19,7 @@ import { APP_ROUTES } from "@prode/shared";
 import { webConfig } from "@/config/app";
 import { ApiClientError, getMyProfile } from "@/lib/api/client";
 import { ensureFirebaseAuthPersistence, firebaseAuth, firebaseClientEnabled } from "@/lib/firebase/client";
+import { markFirstLogin } from "@/lib/auth/first-login-tracker";
 
 const MAGIC_LINK_EMAIL_KEY = "prode-mundial:magic-link-email";
 
@@ -171,6 +172,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
           try {
             await refreshProfile(nextUser);
             if (isMounted) {
+              markFirstLogin();
               setStatus("authenticated");
             }
           } catch (error) {

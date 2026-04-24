@@ -4,10 +4,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { APP_ROUTES, type BestPlayerPickResponse, type ChampionPickResponse, type LeagueSummary, type MatchSummary, type PointsResponse, type PreTournamentSummary, type SubChampionPickResponse } from "@prode/shared";
 import { useAuth } from "@/components/auth/auth-provider";
-import { EnableNotificationsBanner } from "@/components/notifications/enable-notifications-banner";
-import { InstallAfterPickPrompt } from "@/components/pwa/install-after-pick-prompt";
-import { InstallAppBanner } from "@/components/pwa/install-app-banner";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
+import { NotifHomeCard } from "@/components/notifications/notif-home-card";
+import { DoubleDismissModal } from "@/components/permissions/double-dismiss-modal";
+import { InstallHomeCard } from "@/components/pwa/install-home-card";
 import { ApiClientError, getBestPlayerPick, getChampionPick, getMatches, getMyLeagues, getPoints, getPreTournamentSummary, getSubChampionPick } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
 import { compareMatchesChronologically, pickPriorityMatch } from "./home-helpers";
@@ -123,6 +123,18 @@ export function HomeScreen() {
 
   const priorityMatch = useMemo(() => pickPriorityMatch(items), [items]);
 
+  // Kickoff del primer match del torneo (tournament start). Se usa como
+  // re-trigger del NotifHomeCard post-dismiss. Null mientras items carga.
+  const tournamentStartAt = useMemo(() => {
+    if (items.length === 0) return null;
+    const earliest = items.reduce<number | null>((min, m) => {
+      const t = new Date(m.kickoffAt).getTime();
+      if (!Number.isFinite(t)) return min;
+      return min === null || t < min ? t : min;
+    }, null);
+    return earliest;
+  }, [items]);
+
   useEffect(() => {
     if (isLoading || dismissedCycle || activeMatchId || !priorityMatch || preTournamentSummary?.isPreTournament) {
       return;
@@ -134,8 +146,7 @@ export function HomeScreen() {
   return (
     <>
       <div className="grid gap-4">
-        <EnableNotificationsBanner user={user} />
-        <InstallAppBanner />
+        <NotifHomeCard user={user} tournamentStartAt={tournamentStartAt} />
         <HomeScreenView
         profileDisplayName={profile?.displayName ?? null}
         items={items}
@@ -154,9 +165,8 @@ export function HomeScreen() {
         onOpenTournament={() => router.push(APP_ROUTES.tournament)}
         onOpenPicks={() => router.push(APP_ROUTES.picks)}
       />
+        <InstallHomeCard />
       </div>
-
-      <InstallAfterPickPrompt />
 
       <QuickPredictionModal
         matchId={activeMatchId}
@@ -186,8 +196,23 @@ export function HomeScreen() {
             router.push(APP_ROUTES.tournament);
           }
         }}
+        onSkip={() => {
+          const pendingMatches = items
+            .filter((m) => canEditPrediction(m) && m.predictionStatus === "empty" && m.matchId !== activeMatchId)
+            .sort(compareMatchesChronologically);
+          const nextMatch = pendingMatches[0] ?? null;
+
+          if (nextMatch) {
+            setActiveMatchId(nextMatch.matchId);
+          } else {
+            setActiveMatchId(null);
+            setDismissedCycle(true);
+            router.push(APP_ROUTES.tournament);
+          }
+        }}
       />
 
+      <DoubleDismissModal />
     </>
   );
 }

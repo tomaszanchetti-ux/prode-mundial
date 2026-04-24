@@ -8,7 +8,6 @@ import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/c
 import { track } from "@/lib/firebase/analytics";
 import { copyForLocale, formatDateTime, useLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
-import { recordPickCompletion } from "@/lib/pwa/pick-install-trigger";
 import { toStatusLabel, toStatusTone } from "./match-detail-helpers";
 
 type QuickPredictionModalProps = {
@@ -17,6 +16,9 @@ type QuickPredictionModalProps = {
   hasNextPending?: boolean;
   onClose: () => void;
   onSaved?: () => void;
+  // Avanzar al siguiente match pendiente sin guardar. Si no se pasa, el
+  // boton secundario cae a "Mas tarde" (onClose).
+  onSkip?: () => void;
 };
 
 type FormState = {
@@ -74,7 +76,7 @@ function toErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "No pudimos guardar tu prediccion.";
 }
 
-export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, onClose, onSaved }: QuickPredictionModalProps) {
+export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, onClose, onSaved, onSkip }: QuickPredictionModalProps) {
   const { locale } = useLocale();
   const { status, user } = useAuth();
   const [detail, setDetail] = useState<MatchDetail | null>(null);
@@ -150,7 +152,6 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
         homeTeamId: detail.homeTeam.teamId,
         awayTeamId: detail.awayTeam.teamId
       });
-      recordPickCompletion();
       setIsSaving(false);
       setJustSaved(true);
       setTimeout(() => {
@@ -181,7 +182,9 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
       kickoffLabel={detail ? copyForLocale(locale, toKickoffLabel(detail), formatDateTime("en", detail.kickoffAt, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) : ""}
       onClose={onClose}
       onSubmit={handleSave}
-      closeLabel={hasNextPending ? copyForLocale(locale, "Saltar", "Skip") : copyForLocale(locale, "Mas tarde", "Later")}
+      closeLabel={copyForLocale(locale, "Mas tarde", "Later")}
+      skipLabel={copyForLocale(locale, "Completar despues", "Complete later")}
+      onSkip={hasNextPending && onSkip ? onSkip : undefined}
       saveLabel={hasNextPending ? copyForLocale(locale, "Guardar y seguir", "Save & next") : copyForLocale(locale, "Guardar", "Save")}
       saving={isSaving}
       stageLabel={detail ? (locale === "en" && detail.stage === "group" && detail.groupId ? `Group ${detail.groupId}` : toStageLabel(detail)) : copyForLocale(locale, "Partido", "Match")}

@@ -173,11 +173,16 @@ export type PredictionModalProps = {
   isOpen: boolean;
   kickoffLabel: string;
   onClose?: () => void;
+  // Dispara avanzar al siguiente match sin guardar. Si presente, el boton
+  // secundario muestra skipLabel; si no, cae al comportamiento anterior
+  // (closeLabel + onClose).
+  onSkip?: () => void;
   onSubmit?: () => void;
   progressCurrent?: number;
   progressTotal?: number;
   saveLabel?: string;
   saving?: boolean;
+  skipLabel?: string;
   stageLabel: string;
   statusLabel?: string;
   statusTone?: StatusTone;

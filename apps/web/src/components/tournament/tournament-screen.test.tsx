@@ -21,7 +21,7 @@ function buildPreTournamentSummary(overrides: Partial<PreTournamentSummary> = {}
 
 function buildTabItems(): PredictionsTabItem[] {
   return [
-    { key: "matches", label: "Grupos", completed: 2, total: 48 },
+    { key: "matches", label: "Partidos", completed: 2, total: 48 },
     { key: "knockouts", label: "Cruces", completed: 0, total: 16 }
   ];
 }

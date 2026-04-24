@@ -5,7 +5,7 @@ export default function NotFound() {
     <main className="min-h-screen flex items-center justify-center p-6">
       <div className="grid gap-5 max-w-[420px] text-center">
         <div className="grid gap-2">
-          <span className="typo-small text-primary-500">404</span>
+          <span className="typo-eyebrow text-primary-500">404</span>
           <h1 className="typo-h2 m-0 text-text-primary">
             Esta ruta no existe
           </h1>

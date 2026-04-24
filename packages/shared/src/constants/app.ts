@@ -17,7 +17,7 @@ export const SUPPORT_LINKS = [
 
 export const DEFAULT_PUBLIC_BOOTSTRAP: PublicBootstrap = {
   productName: APP_NAME,
-  tagline: "Predice el Mundial en segundos, compite con amigos y suma puntos cada día.",
+  tagline: "Predice el Mundial en segundos, compite con colegas y suma puntos cada día.",
   features: ["Predicciones de partidos", "Puntos diarios", "Ligas privadas"],
   authProviders: {
     google: true,

@@ -7,7 +7,6 @@ import { Button, Card, ScoreInput, StatusTag, TeamIdentity } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
 import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/editability";
-import { recordPickCompletion } from "@/lib/pwa/pick-install-trigger";
 import {
   type FormState,
   type MatchDetailNotice,
@@ -266,7 +265,6 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
       };
 
       await saveMatchPrediction(token, detail.matchId, payload);
-      recordPickCompletion();
       const nextDetail = await getMatchDetail(token, detail.matchId);
       setDetail(nextDetail);
       setFormState(toFormState(nextDetail));

@@ -253,7 +253,7 @@ export function LeaguesScreenView({
             <Card elevated style={{ gap: 12 }}>
               <h2 className="typo-h3 m-0 text-text-primary">No estás en ninguna liga</h2>
               <p className="typo-body m-0 text-text-secondary">
-                Creá una o unite con un código para competir con amigos.
+                Creá una o unite con un código para competir con colegas.
               </p>
               <div className="flex gap-2 flex-wrap">
                 <Button variant="primary" onClick={() => onChangeMode("create")}>

@@ -20,7 +20,7 @@ export function HomeChampionHero({
   return (
     <Card elevated className="hero-locked-bg" style={{ padding: 0, overflow: "hidden" }}>
       <div className="flex justify-between items-center px-4 pt-4 pb-0">
-        <span className="typo-eyebrow uppercase text-gold">{eyebrow}</span>
+        <span className="typo-eyebrow text-gold">{eyebrow}</span>
         <span className="typo-small text-gold" aria-hidden>
           ★
         </span>

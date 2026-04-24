@@ -287,6 +287,19 @@ export function MatchesScreen() {
           }
           setReloadKey((current) => current + 1);
         }}
+        onSkip={() => {
+          const pendingMatches = items
+            .filter((m) => canEditPrediction(m) && m.predictionStatus === "empty" && m.matchId !== activeMatchId)
+            .sort((a, b) => a.kickoffAt.localeCompare(b.kickoffAt));
+          const nextMatch = pendingMatches[0] ?? null;
+
+          if (nextMatch) {
+            setActiveMatchId(nextMatch.matchId);
+          } else {
+            setActiveMatchId(null);
+            setDismissedCycle(true);
+          }
+        }}
       />
     </>
   );

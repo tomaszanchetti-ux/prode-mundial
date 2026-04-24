@@ -15,11 +15,13 @@ export function PredictionModal({
   isOpen,
   kickoffLabel,
   onClose,
+  onSkip,
   onSubmit,
   progressCurrent,
   progressTotal,
   saveLabel = "Guardar prediccion",
   saving = false,
+  skipLabel = "Completar despues",
   stageLabel,
   statusLabel,
   statusTone,
@@ -100,17 +102,34 @@ export function PredictionModal({
         <div className="px-5">{children}</div>
 
         {/* ── CTAs ── */}
+        {/*
+         * 3 efectos distintos (EPIC 32 WS5):
+         *   - onSubmit (primary)  → guardar + avanzar al siguiente
+         *   - onSkip  (secondary) → avanzar al siguiente SIN guardar (solo si onSkip esta definido)
+         *   - onClose (X header)  → cerrar modal, NO avanzar
+         * Fallback backward-compat: si onSkip no esta, el secundario usa onClose + closeLabel.
+         */}
         <div className="grid gap-3 px-5 pb-5 pt-1 justify-items-center">
           <Button fullWidth onClick={onSubmit} loading={saving}>
             {saveLabel}
           </Button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-[14px] font-medium text-text-muted hover:text-text-primary transition-colors cursor-pointer py-1"
-          >
-            {closeLabel}
-          </button>
+          {onSkip ? (
+            <button
+              type="button"
+              onClick={onSkip}
+              className="text-[14px] font-medium text-text-muted hover:text-text-primary transition-colors cursor-pointer py-1"
+            >
+              {skipLabel}
+            </button>
+          ) : onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-[14px] font-medium text-text-muted hover:text-text-primary transition-colors cursor-pointer py-1"
+            >
+              {closeLabel}
+            </button>
+          ) : null}
         </div>
       </div>
     </div>
