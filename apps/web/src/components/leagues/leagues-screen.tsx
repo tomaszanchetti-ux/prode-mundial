@@ -10,7 +10,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { ApiClientError, createLeague, getLeagueStandings, getMyLeagues, getPoints, joinLeague } from "@/lib/api/client";
 import { track } from "@/lib/firebase/analytics";
-import { CopyButton } from "./copy-button";
+import { ShareInviteButton } from "./share-invite-button";
 import { MiScoreSection } from "@/components/home/mi-score-widget";
 import {
   GLOBAL_LEAGUE_ID,
@@ -198,9 +198,10 @@ export function LeaguesScreenView({
 
       {!isGlobal && selectedLeague?.inviteLink ? (
         <div>
-          <CopyButton
-            value={selectedLeague.inviteLink}
-            label="Invitar"
+          <ShareInviteButton
+            leagueName={selectedLeague.name}
+            inviteCode={selectedLeague.inviteCode}
+            inviteLink={selectedLeague.inviteLink}
             shareLeagueId={selectedLeague.leagueId}
             variant="ghost"
           />
@@ -302,9 +303,10 @@ export function LeaguesScreenView({
                   onClick={(event) => event.stopPropagation()}
                   onKeyDown={(event) => event.stopPropagation()}
                 >
-                  <CopyButton
-                    value={league.inviteLink}
-                    label="Invitar"
+                  <ShareInviteButton
+                    leagueName={league.name}
+                    inviteCode={league.inviteCode}
+                    inviteLink={league.inviteLink}
                     shareLeagueId={league.leagueId}
                     variant="ghost"
                   />
