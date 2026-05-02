@@ -2,6 +2,7 @@ import type { ListMyLeaguesResponse } from "@prode/shared";
 import { leagueMembersRepository } from "../repositories/league-members-repository";
 import { leaguesRepository } from "../repositories/leagues-repository";
 import { leagueStandingsRepository } from "../repositories/league-standings-repository";
+import { buildInviteLink } from "../services/league-domain";
 
 export async function listMyLeagues(userId: string): Promise<ListMyLeaguesResponse> {
   const memberships = await leagueMembersRepository.listMembershipsByUser(userId);
@@ -30,7 +31,7 @@ export async function listMyLeagues(userId: string): Promise<ListMyLeaguesRespon
         userPoints: myStanding?.totalPoints ?? 0,
         isActive: league.isActive,
         inviteCode: league.inviteCode,
-        inviteLink: league.inviteLink
+        inviteLink: buildInviteLink(league.inviteToken)
       };
     })
   );

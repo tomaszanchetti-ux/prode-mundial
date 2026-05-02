@@ -41,7 +41,7 @@ export function toLeagueDetailView(input: {
     membersCount: members.length,
     isActive: league.isActive,
     inviteCode: league.inviteCode,
-    inviteLink: league.inviteLink,
+    inviteLink: buildInviteLink(league.inviteToken),
     membershipRole: membership.role as StoredLeagueMemberRole,
     myStanding: myStanding
       ? {
