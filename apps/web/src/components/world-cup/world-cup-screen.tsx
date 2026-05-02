@@ -20,13 +20,13 @@ import { QuickPredictionModal } from "@/components/matches/quick-prediction-moda
 import { canEditPrediction } from "@/lib/matches/editability";
 import { SimpleTabs, type SimpleTabItem } from "@/components/ui/simple-tabs";
 import { WorldCupGroupCard } from "./world-cup-group-card";
+import { WorldCupMatchesList } from "./world-cup-matches-list";
 
-// World Cup uses 2 tabs: official groups + official knockout bracket.
-// Both are read-only projections of the SOT — no simulator, no predictions.
-type WorldCupTab = "groups" | "bracket";
+type WorldCupTab = "groups" | "matches" | "bracket";
 
 const TAB_LABELS: Record<WorldCupTab, string> = {
   groups: "Grupos",
+  matches: "Partidos",
   bracket: "Cruces"
 };
 
@@ -67,6 +67,7 @@ type WorldCupScreenViewProps = {
   bracket: ReturnType<typeof buildOfficialBracket>["bracket"];
   bracketReadiness: ReturnType<typeof buildOfficialBracket>["readiness"];
   errorMessage: string | null;
+  groupMatches: MatchSummary[];
   groups: FullGroupStandings[];
   hero: ContextualHero | null;
   isLoading: boolean;
@@ -82,6 +83,7 @@ export function WorldCupScreenView({
   bracket,
   bracketReadiness,
   errorMessage,
+  groupMatches,
   groups,
   hero,
   isLoading,
@@ -128,22 +130,26 @@ export function WorldCupScreenView({
 
       {!isLoading && !errorMessage ? (
         activeTab === "groups" ? (
-          <section className="grid gap-3">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {groups.map((group, idx) => (
               <React.Fragment key={group.groupId}>
                 <WorldCupGroupCard group={group} groupName={groupDisplayName(group.groupId)} />
                 {idx > 0 && (idx + 1) % 3 === 0 && idx < groups.length - 1 ? (
-                  <AdSlotCard
-                    description={copyForLocale(
-                      locale,
-                      "Espacio reservado para patrocinio nativo.",
-                      "Reserved slot for native sponsorship."
-                    )}
-                  />
+                  <div className="md:col-span-2 lg:col-span-3">
+                    <AdSlotCard
+                      description={copyForLocale(
+                        locale,
+                        "Espacio reservado para patrocinio nativo.",
+                        "Reserved slot for native sponsorship."
+                      )}
+                    />
+                  </div>
                 ) : null}
               </React.Fragment>
             ))}
           </section>
+        ) : activeTab === "matches" ? (
+          <WorldCupMatchesList matches={groupMatches} adSlotEvery={6} />
         ) : (
           <TournamentBracket
             bracket={bracket}
@@ -228,6 +234,7 @@ export function WorldCupScreen() {
   const tabItems = useMemo<SimpleTabItem<WorldCupTab>[]>(
     () => [
       { key: "groups", label: TAB_LABELS.groups },
+      { key: "matches", label: TAB_LABELS.matches },
       { key: "bracket", label: TAB_LABELS.bracket }
     ],
     []
@@ -250,6 +257,7 @@ export function WorldCupScreen() {
         bracket={bracket}
         bracketReadiness={bracketReadiness}
         errorMessage={errorMessage}
+        groupMatches={groupMatches}
         groups={groups}
         hero={hero}
         isLoading={isLoading}
