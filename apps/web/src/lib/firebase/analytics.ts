@@ -57,6 +57,8 @@ export type TrackEvent =
   | "best_player_saved"
   | "league_created"
   | "league_joined"
+  | "league_left"
+  | "league_deleted"
   | "invite_shared"
   // FCM token sync (utility — se llama al startup si ya hay permission)
   | "fcm_token_registered"

@@ -426,6 +426,28 @@ export async function getLeagueDetail(token: string, leagueId: string): Promise<
   return leagueDetailSchema.parse(await parseJson<LeagueDetail>(response));
 }
 
+export async function leaveLeague(token: string, leagueId: string): Promise<void> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues/${leagueId}/membership`, {
+    method: "DELETE",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to leave league (${response.status}).`);
+  }
+}
+
+export async function deleteLeague(token: string, leagueId: string): Promise<void> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues/${leagueId}`, {
+    method: "DELETE",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to delete league (${response.status}).`);
+  }
+}
+
 export async function getLeagueStandings(token: string, leagueId: string): Promise<LeagueStandingsResponse> {
   const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/leagues/${leagueId}/standings`, {
     cache: "no-store",

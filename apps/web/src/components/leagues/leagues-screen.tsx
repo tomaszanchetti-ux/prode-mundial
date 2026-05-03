@@ -8,7 +8,16 @@ import { AdSlotCard, Button, Card, ErrorCard, SkeletonCard, SkeletonStandingRow,
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
-import { ApiClientError, createLeague, getLeagueStandings, getMyLeagues, getPoints, joinLeague } from "@/lib/api/client";
+import {
+  ApiClientError,
+  createLeague,
+  deleteLeague,
+  getLeagueStandings,
+  getMyLeagues,
+  getPoints,
+  joinLeague,
+  leaveLeague
+} from "@/lib/api/client";
 import { track } from "@/lib/firebase/analytics";
 import { ShareInviteButton } from "./share-invite-button";
 import { MiScoreSection } from "@/components/home/mi-score-widget";
@@ -21,6 +30,10 @@ import {
   type LeagueOption
 } from "./leagues-helpers";
 import { ActionResultCard, CreateLeagueForm, JoinLeagueForm } from "./leagues-forms";
+import { LeagueConfirmModal, type LeagueConfirmAction } from "./league-confirm-modal";
+
+const USER_LEAGUE_LIMIT_COPY =
+  "Solo podés estar en 3 ligas a la vez. Salí de una actual para sumarte a otra o mejora tu plan para participar en ligas ilimitadas";
 
 type LeaguesScreenViewProps = {
   items: LeagueSummary[];
@@ -37,12 +50,14 @@ type LeaguesScreenViewProps = {
   lastActionLeague: LeagueDetail | null;
   isLoading: boolean;
   isSubmitting: boolean;
+  isOwnerOfSelected: boolean;
   errorMessage: string | null;
   onChangeMode: (mode: "create" | "join" | null) => void;
   onFieldChange: (event: ChangeEvent<HTMLInputElement>) => void;
   onCreateLeague: (event: FormEvent<HTMLFormElement>) => void;
   onJoinLeague: (event: FormEvent<HTMLFormElement>) => void;
   onSelectLeague: (leagueId: string) => void;
+  onRequestLeaveOrDelete: (action: LeagueConfirmAction, leagueId: string, leagueName: string) => void;
   onRetry: () => void;
 };
 
@@ -58,12 +73,14 @@ export function LeaguesScreenView({
   lastActionLeague,
   isLoading,
   isSubmitting,
+  isOwnerOfSelected,
   errorMessage,
   onChangeMode,
   onFieldChange,
   onCreateLeague,
   onJoinLeague,
   onSelectLeague,
+  onRequestLeaveOrDelete,
   onRetry
 }: LeaguesScreenViewProps) {
   const { locale } = useLocale();
@@ -205,6 +222,24 @@ export function LeaguesScreenView({
             shareLeagueId={selectedLeague.leagueId}
             variant="ghost"
           />
+        </div>
+      ) : null}
+
+      {!isGlobal && selectedLeague ? (
+        <div>
+          <button
+            type="button"
+            onClick={() =>
+              onRequestLeaveOrDelete(
+                isOwnerOfSelected ? "delete" : "leave",
+                selectedLeague.leagueId,
+                selectedLeague.name
+              )
+            }
+            className="w-full rounded-[var(--radius-md)] px-4 py-2.5 typo-body font-bold text-[var(--color-error,#DC2626)] border border-[var(--color-error,#DC2626)] bg-transparent hover:bg-[var(--color-error,#DC2626)] hover:text-white transition-colors"
+          >
+            {isOwnerOfSelected ? "Eliminar liga" : "Abandonar liga"}
+          </button>
         </div>
       ) : null}
 
@@ -357,6 +392,14 @@ export function LeaguesScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    action: LeagueConfirmAction;
+    leagueId: string;
+    leagueName: string;
+  } | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  const isOwnerOfSelected = standings?.items.find((entry) => entry.isMe)?.isOwner ?? false;
 
   useEffect(() => {
     let cancelled = false;
@@ -435,7 +478,11 @@ export function LeaguesScreen() {
       setMode(null);
       setReloadKey((value) => value + 1);
     } catch (error) {
-      setActionError(error instanceof ApiClientError ? error.message : "No pudimos crear la liga.");
+      if (error instanceof ApiClientError && error.code === "USER_LEAGUE_LIMIT_REACHED") {
+        setActionError(USER_LEAGUE_LIMIT_COPY);
+      } else {
+        setActionError(error instanceof ApiClientError ? error.message : "No pudimos crear la liga.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -466,41 +513,90 @@ export function LeaguesScreen() {
       setMode(null);
       setReloadKey((value) => value + 1);
     } catch (error) {
-      setActionError(error instanceof ApiClientError ? error.message : "No pudimos unirte a la liga.");
+      if (error instanceof ApiClientError && error.code === "USER_LEAGUE_LIMIT_REACHED") {
+        setActionError(USER_LEAGUE_LIMIT_COPY);
+      } else {
+        setActionError(error instanceof ApiClientError ? error.message : "No pudimos unirte a la liga.");
+      }
     } finally {
       setIsSubmitting(false);
     }
   }
 
+  function handleRequestLeaveOrDelete(action: LeagueConfirmAction, leagueId: string, leagueName: string) {
+    setConfirmDialog({ action, leagueId, leagueName });
+  }
+
+  async function handleConfirmDialog() {
+    if (!confirmDialog || !user) {
+      return;
+    }
+
+    setIsConfirming(true);
+    setActionError(null);
+
+    try {
+      const token = await user.getIdToken();
+      if (confirmDialog.action === "leave") {
+        await leaveLeague(token, confirmDialog.leagueId);
+        track("league_left", { leagueId: confirmDialog.leagueId });
+      } else {
+        await deleteLeague(token, confirmDialog.leagueId);
+        track("league_deleted", { leagueId: confirmDialog.leagueId });
+      }
+      setConfirmDialog(null);
+      setLastActionLeague(null);
+      router.replace("/leagues");
+      setReloadKey((value) => value + 1);
+    } catch (error) {
+      setActionError(error instanceof ApiClientError ? error.message : "No pudimos completar la acción.");
+      setConfirmDialog(null);
+    } finally {
+      setIsConfirming(false);
+    }
+  }
+
   return (
-    <LeaguesScreenView
-      items={items}
-      points={points}
-      standings={standings}
-      selectedLeagueId={selectedLeagueId}
-      mode={mode}
-      formState={formState}
-      actionError={actionError}
-      actionMessage={actionMessage}
-      lastActionLeague={lastActionLeague}
-      isLoading={isLoading}
-      isSubmitting={isSubmitting}
-      errorMessage={errorMessage}
-      onChangeMode={(nextMode) => {
-        setMode(nextMode);
-        setActionError(null);
-      }}
-      onFieldChange={handleFieldChange}
-      onCreateLeague={handleCreateLeague}
-      onJoinLeague={handleJoinLeague}
-      onSelectLeague={(leagueId) => {
-        if (leagueId === GLOBAL_LEAGUE_ID) {
-          router.replace("/leagues");
-        } else {
-          router.replace(`/leagues?leagueId=${leagueId}`);
-        }
-      }}
-      onRetry={() => setReloadKey((value) => value + 1)}
-    />
+    <>
+      <LeaguesScreenView
+        items={items}
+        points={points}
+        standings={standings}
+        selectedLeagueId={selectedLeagueId}
+        mode={mode}
+        formState={formState}
+        actionError={actionError}
+        actionMessage={actionMessage}
+        lastActionLeague={lastActionLeague}
+        isLoading={isLoading}
+        isSubmitting={isSubmitting}
+        isOwnerOfSelected={isOwnerOfSelected}
+        errorMessage={errorMessage}
+        onChangeMode={(nextMode) => {
+          setMode(nextMode);
+          setActionError(null);
+        }}
+        onFieldChange={handleFieldChange}
+        onCreateLeague={handleCreateLeague}
+        onJoinLeague={handleJoinLeague}
+        onSelectLeague={(leagueId) => {
+          if (leagueId === GLOBAL_LEAGUE_ID) {
+            router.replace("/leagues");
+          } else {
+            router.replace(`/leagues?leagueId=${leagueId}`);
+          }
+        }}
+        onRequestLeaveOrDelete={handleRequestLeaveOrDelete}
+        onRetry={() => setReloadKey((value) => value + 1)}
+      />
+      <LeagueConfirmModal
+        isOpen={confirmDialog !== null}
+        action={confirmDialog?.action ?? "leave"}
+        leagueName={confirmDialog?.leagueName ?? ""}
+        isSubmitting={isConfirming}
+        onConfirm={handleConfirmDialog}
+        onCancel={() => setConfirmDialog(null)}
+      />
+    </>
   );
 }

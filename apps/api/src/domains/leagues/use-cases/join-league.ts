@@ -1,4 +1,5 @@
 import type { JoinLeagueInput, LeagueDetail } from "@prode/shared";
+import { MAX_LEAGUES_PER_USER } from "@prode/shared";
 import { ApiError } from "../../../server/errors/api-error";
 import { leagueMembersRepository } from "../repositories/league-members-repository";
 import { leaguesRepository } from "../repositories/leagues-repository";
@@ -20,13 +21,21 @@ export async function joinLeague(userId: string, input: JoinLeagueInput): Promis
     throw new ApiError(409, "LEAGUE_INACTIVE", "League is not active.");
   }
 
-  const [membership, members] = await Promise.all([
+  const [membership, members, userMemberships] = await Promise.all([
     leagueMembersRepository.findMembership(league.leagueId, userId),
-    leagueMembersRepository.listMembershipsByLeague(league.leagueId)
+    leagueMembersRepository.listMembershipsByLeague(league.leagueId),
+    leagueMembersRepository.listMembershipsByUser(userId)
   ]);
 
   if (membership) {
     throw new ApiError(409, "ALREADY_LEAGUE_MEMBER", "You are already part of this league.");
+  }
+
+  if (userMemberships.length >= MAX_LEAGUES_PER_USER) {
+    throw new ApiError(409, "USER_LEAGUE_LIMIT_REACHED", "User reached the maximum number of leagues.", {
+      maxLeagues: MAX_LEAGUES_PER_USER,
+      currentCount: userMemberships.length
+    });
   }
 
   if (members.length >= league.memberLimit) {

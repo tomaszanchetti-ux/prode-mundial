@@ -346,6 +346,9 @@ test("POST /api/v1/leagues/join returns ALREADY_LEAGUE_MEMBER when the user is a
     joinedAt: "2026-01-02T00:00:00Z"
   }));
   const listMembershipsByLeagueMock = mock.method(leagueMembersRepository, "listMembershipsByLeague", async () => []);
+  const listMembershipsByUserMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => [
+    { membershipId: "lg_1__usr_2", leagueId: "lg_1", userId: "usr_2", role: "member", joinedAt: "2026-01-02T00:00:00Z" }
+  ]);
 
   try {
     const response = await fetch(buildUrl("/api/v1/leagues/join"), {
@@ -371,5 +374,296 @@ test("POST /api/v1/leagues/join returns ALREADY_LEAGUE_MEMBER when the user is a
     findLeagueByInviteCodeMock.mock.restore();
     findMembershipMock.mock.restore();
     listMembershipsByLeagueMock.mock.restore();
+    listMembershipsByUserMock.mock.restore();
+  }
+});
+
+test("POST /api/v1/leagues blocks creation when user already has MAX_LEAGUES_PER_USER", async () => {
+  const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
+    uid: "usr_full",
+    email: "tomas@example.com",
+    name: "Tomas"
+  }));
+  const listMembershipsByUserMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => [
+    { membershipId: "lg_a__usr_full", leagueId: "lg_a", userId: "usr_full", role: "owner", joinedAt: "2026-01-01T00:00:00Z" },
+    { membershipId: "lg_b__usr_full", leagueId: "lg_b", userId: "usr_full", role: "member", joinedAt: "2026-01-02T00:00:00Z" },
+    { membershipId: "lg_c__usr_full", leagueId: "lg_c", userId: "usr_full", role: "member", joinedAt: "2026-01-03T00:00:00Z" }
+  ]);
+  const upsertLeagueMock = mock.method(leaguesRepository, "upsertLeague", async () => undefined);
+
+  try {
+    const response = await fetch(buildUrl("/api/v1/leagues"), {
+      method: "POST",
+      headers: { Authorization: "Bearer valid-token", "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Cuarta Liga" })
+    });
+    const payload = (await response.json()) as { ok: boolean; error: { code: string } };
+
+    assert.equal(response.status, 409);
+    assert.equal(payload.error.code, "USER_LEAGUE_LIMIT_REACHED");
+    assert.equal(upsertLeagueMock.mock.callCount(), 0);
+  } finally {
+    verifyIdTokenMock.mock.restore();
+    listMembershipsByUserMock.mock.restore();
+    upsertLeagueMock.mock.restore();
+  }
+});
+
+test("POST /api/v1/leagues/join blocks join when user already has MAX_LEAGUES_PER_USER", async () => {
+  const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
+    uid: "usr_full",
+    email: "clara@example.com",
+    name: "Clara"
+  }));
+  const findLeagueByInviteCodeMock = mock.method(leaguesRepository, "findLeagueByInviteCode", async () => ({
+    leagueId: "lg_new",
+    name: "Liga Nueva",
+    ownerUserId: "usr_other",
+    memberLimit: 20,
+    inviteCode: "NEW26",
+    inviteToken: "tok-new",
+    inviteLink: "http://localhost:3000/leagues/join?token=tok-new",
+    isActive: true,
+    archivedAt: null,
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z"
+  }));
+  const findMembershipMock = mock.method(leagueMembersRepository, "findMembership", async () => null);
+  const listMembershipsByLeagueMock = mock.method(leagueMembersRepository, "listMembershipsByLeague", async () => [
+    { membershipId: "lg_new__usr_other", leagueId: "lg_new", userId: "usr_other", role: "owner", joinedAt: "2026-01-01T00:00:00Z" }
+  ]);
+  const listMembershipsByUserMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => [
+    { membershipId: "lg_a__usr_full", leagueId: "lg_a", userId: "usr_full", role: "owner", joinedAt: "2026-01-01T00:00:00Z" },
+    { membershipId: "lg_b__usr_full", leagueId: "lg_b", userId: "usr_full", role: "member", joinedAt: "2026-01-02T00:00:00Z" },
+    { membershipId: "lg_c__usr_full", leagueId: "lg_c", userId: "usr_full", role: "member", joinedAt: "2026-01-03T00:00:00Z" }
+  ]);
+  const upsertMembershipMock = mock.method(leagueMembersRepository, "upsertMembership", async () => undefined);
+
+  try {
+    const response = await fetch(buildUrl("/api/v1/leagues/join"), {
+      method: "POST",
+      headers: { Authorization: "Bearer valid-token", "Content-Type": "application/json" },
+      body: JSON.stringify({ inviteCode: "NEW26" })
+    });
+    const payload = (await response.json()) as { ok: boolean; error: { code: string } };
+
+    assert.equal(response.status, 409);
+    assert.equal(payload.error.code, "USER_LEAGUE_LIMIT_REACHED");
+    assert.equal(upsertMembershipMock.mock.callCount(), 0);
+  } finally {
+    verifyIdTokenMock.mock.restore();
+    findLeagueByInviteCodeMock.mock.restore();
+    findMembershipMock.mock.restore();
+    listMembershipsByLeagueMock.mock.restore();
+    listMembershipsByUserMock.mock.restore();
+    upsertMembershipMock.mock.restore();
+  }
+});
+
+test("DELETE /api/v1/leagues/:leagueId/membership lets a member leave the league", async () => {
+  const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
+    uid: "usr_member",
+    email: "clara@example.com",
+    name: "Clara"
+  }));
+  const getLeagueByIdMock = mock.method(leaguesRepository, "getLeagueById", async () => ({
+    leagueId: "lg_1",
+    name: "Liga del Asado",
+    ownerUserId: "usr_owner",
+    memberLimit: 20,
+    inviteCode: "ASADO26",
+    inviteToken: "tok",
+    inviteLink: "http://localhost:3000/leagues/join?token=tok",
+    isActive: true,
+    archivedAt: null,
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z"
+  }));
+  const findMembershipMock = mock.method(leagueMembersRepository, "findMembership", async () => ({
+    membershipId: "lg_1__usr_member",
+    leagueId: "lg_1",
+    userId: "usr_member",
+    role: "member",
+    joinedAt: "2026-01-02T00:00:00Z"
+  }));
+  const deleteMembershipMock = mock.method(leagueMembersRepository, "deleteMembership", async () => undefined);
+  const listMembershipsByLeagueMock = mock.method(leagueMembersRepository, "listMembershipsByLeague", async () => [
+    { membershipId: "lg_1__usr_owner", leagueId: "lg_1", userId: "usr_owner", role: "owner", joinedAt: "2026-01-01T00:00:00Z" }
+  ]);
+  const listMembershipsByUserMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => []);
+  const listByUserIdsMock = mock.method(usersRepository, "listByUserIds", async () => []);
+  const replaceStandingsMock = mock.method(leagueStandingsRepository, "replaceStandings", async () => undefined);
+  const findProfileMock = mock.method(usersRepository, "findByUserId", async () => ({
+    userId: "usr_member", displayName: "Clara", email: "clara@example.com", country: "ES", photoUrl: null,
+    totalPoints: 0, macroPoints: 0, exactHits: 0, correctSigns: 0, leaguesCount: 1, profileCompleted: true
+  }));
+  const upsertProfileMock = mock.method(usersRepository, "upsertProfile", async () => undefined);
+
+  try {
+    const response = await fetch(buildUrl("/api/v1/leagues/lg_1/membership"), {
+      method: "DELETE",
+      headers: { Authorization: "Bearer valid-token" }
+    });
+    const payload = (await response.json()) as { ok: boolean; data: { left: boolean } };
+
+    assert.equal(response.status, 200);
+    assert.equal(payload.ok, true);
+    assert.equal(payload.data.left, true);
+    assert.equal(deleteMembershipMock.mock.callCount(), 1);
+  } finally {
+    verifyIdTokenMock.mock.restore();
+    getLeagueByIdMock.mock.restore();
+    findMembershipMock.mock.restore();
+    deleteMembershipMock.mock.restore();
+    listMembershipsByLeagueMock.mock.restore();
+    listMembershipsByUserMock.mock.restore();
+    listByUserIdsMock.mock.restore();
+    replaceStandingsMock.mock.restore();
+    findProfileMock.mock.restore();
+    upsertProfileMock.mock.restore();
+  }
+});
+
+test("DELETE /api/v1/leagues/:leagueId/membership refuses when user is the owner", async () => {
+  const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
+    uid: "usr_owner",
+    email: "tomas@example.com",
+    name: "Tomas"
+  }));
+  const getLeagueByIdMock = mock.method(leaguesRepository, "getLeagueById", async () => ({
+    leagueId: "lg_1",
+    name: "Liga del Asado",
+    ownerUserId: "usr_owner",
+    memberLimit: 20,
+    inviteCode: "ASADO26",
+    inviteToken: "tok",
+    inviteLink: "http://localhost:3000/leagues/join?token=tok",
+    isActive: true,
+    archivedAt: null,
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z"
+  }));
+  const findMembershipMock = mock.method(leagueMembersRepository, "findMembership", async () => ({
+    membershipId: "lg_1__usr_owner",
+    leagueId: "lg_1",
+    userId: "usr_owner",
+    role: "owner",
+    joinedAt: "2026-01-01T00:00:00Z"
+  }));
+  const deleteMembershipMock = mock.method(leagueMembersRepository, "deleteMembership", async () => undefined);
+
+  try {
+    const response = await fetch(buildUrl("/api/v1/leagues/lg_1/membership"), {
+      method: "DELETE",
+      headers: { Authorization: "Bearer valid-token" }
+    });
+    const payload = (await response.json()) as { ok: boolean; error: { code: string } };
+
+    assert.equal(response.status, 409);
+    assert.equal(payload.error.code, "LEAGUE_OWNER_CANNOT_LEAVE");
+    assert.equal(deleteMembershipMock.mock.callCount(), 0);
+  } finally {
+    verifyIdTokenMock.mock.restore();
+    getLeagueByIdMock.mock.restore();
+    findMembershipMock.mock.restore();
+    deleteMembershipMock.mock.restore();
+  }
+});
+
+test("DELETE /api/v1/leagues/:leagueId lets the owner delete the league cascade", async () => {
+  const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
+    uid: "usr_owner",
+    email: "tomas@example.com",
+    name: "Tomas"
+  }));
+  const getLeagueByIdMock = mock.method(leaguesRepository, "getLeagueById", async () => ({
+    leagueId: "lg_1",
+    name: "Liga del Asado",
+    ownerUserId: "usr_owner",
+    memberLimit: 20,
+    inviteCode: "ASADO26",
+    inviteToken: "tok",
+    inviteLink: "http://localhost:3000/leagues/join?token=tok",
+    isActive: true,
+    archivedAt: null,
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z"
+  }));
+  const listMembershipsByLeagueMock = mock.method(leagueMembersRepository, "listMembershipsByLeague", async () => [
+    { membershipId: "lg_1__usr_owner", leagueId: "lg_1", userId: "usr_owner", role: "owner", joinedAt: "2026-01-01T00:00:00Z" },
+    { membershipId: "lg_1__usr_member", leagueId: "lg_1", userId: "usr_member", role: "member", joinedAt: "2026-01-02T00:00:00Z" }
+  ]);
+  const deleteMembershipsByLeagueMock = mock.method(leagueMembersRepository, "deleteMembershipsByLeague", async () => undefined);
+  const deleteStandingsMock = mock.method(leagueStandingsRepository, "deleteStandings", async () => undefined);
+  const deleteLeagueMock = mock.method(leaguesRepository, "deleteLeague", async () => undefined);
+  const listMembershipsByUserMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => []);
+  const findProfileMock = mock.method(usersRepository, "findByUserId", async () => ({
+    userId: "any", displayName: "Any", email: "any@example.com", country: null, photoUrl: null,
+    totalPoints: 0, macroPoints: 0, exactHits: 0, correctSigns: 0, leaguesCount: 1, profileCompleted: true
+  }));
+  const upsertProfileMock = mock.method(usersRepository, "upsertProfile", async () => undefined);
+
+  try {
+    const response = await fetch(buildUrl("/api/v1/leagues/lg_1"), {
+      method: "DELETE",
+      headers: { Authorization: "Bearer valid-token" }
+    });
+    const payload = (await response.json()) as { ok: boolean; data: { deleted: boolean } };
+
+    assert.equal(response.status, 200);
+    assert.equal(payload.ok, true);
+    assert.equal(payload.data.deleted, true);
+    assert.equal(deleteMembershipsByLeagueMock.mock.callCount(), 1);
+    assert.equal(deleteStandingsMock.mock.callCount(), 1);
+    assert.equal(deleteLeagueMock.mock.callCount(), 1);
+    assert.equal(upsertProfileMock.mock.callCount(), 2);
+  } finally {
+    verifyIdTokenMock.mock.restore();
+    getLeagueByIdMock.mock.restore();
+    listMembershipsByLeagueMock.mock.restore();
+    deleteMembershipsByLeagueMock.mock.restore();
+    deleteStandingsMock.mock.restore();
+    deleteLeagueMock.mock.restore();
+    listMembershipsByUserMock.mock.restore();
+    findProfileMock.mock.restore();
+    upsertProfileMock.mock.restore();
+  }
+});
+
+test("DELETE /api/v1/leagues/:leagueId refuses when caller is not the owner", async () => {
+  const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
+    uid: "usr_member",
+    email: "clara@example.com",
+    name: "Clara"
+  }));
+  const getLeagueByIdMock = mock.method(leaguesRepository, "getLeagueById", async () => ({
+    leagueId: "lg_1",
+    name: "Liga del Asado",
+    ownerUserId: "usr_owner",
+    memberLimit: 20,
+    inviteCode: "ASADO26",
+    inviteToken: "tok",
+    inviteLink: "http://localhost:3000/leagues/join?token=tok",
+    isActive: true,
+    archivedAt: null,
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z"
+  }));
+  const deleteLeagueMock = mock.method(leaguesRepository, "deleteLeague", async () => undefined);
+
+  try {
+    const response = await fetch(buildUrl("/api/v1/leagues/lg_1"), {
+      method: "DELETE",
+      headers: { Authorization: "Bearer valid-token" }
+    });
+    const payload = (await response.json()) as { ok: boolean; error: { code: string } };
+
+    assert.equal(response.status, 403);
+    assert.equal(payload.error.code, "LEAGUE_NOT_OWNER");
+    assert.equal(deleteLeagueMock.mock.callCount(), 0);
+  } finally {
+    verifyIdTokenMock.mock.restore();
+    getLeagueByIdMock.mock.restore();
+    deleteLeagueMock.mock.restore();
   }
 });

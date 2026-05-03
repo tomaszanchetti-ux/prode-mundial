@@ -49,6 +49,12 @@ export class LeagueStandingsRepository {
 
     await batch.commit();
   }
+
+  async deleteStandings(leagueId: string): Promise<void> {
+    const snapshot = await firestore.collection("leagueStandings").doc(leagueId).collection("table").get();
+    await Promise.all(snapshot.docs.map((doc) => doc.ref.delete()));
+    await firestore.collection("leagueStandings").doc(leagueId).delete().catch(() => undefined);
+  }
 }
 
 export const leagueStandingsRepository = new LeagueStandingsRepository();

@@ -36,6 +36,10 @@ export class LeaguesRepository {
   async upsertLeague(league: StoredLeague): Promise<void> {
     await leaguesCollection.doc(league.leagueId).set(league, { merge: true });
   }
+
+  async deleteLeague(leagueId: string): Promise<void> {
+    await leaguesCollection.doc(leagueId).delete();
+  }
 }
 
 export const leaguesRepository = new LeaguesRepository();

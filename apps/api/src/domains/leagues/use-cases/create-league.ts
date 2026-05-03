@@ -1,5 +1,6 @@
 import type { CreateLeagueInput, LeagueDetail } from "@prode/shared";
-import { LEAGUE_MEMBER_LIMIT } from "@prode/shared";
+import { LEAGUE_MEMBER_LIMIT, MAX_LEAGUES_PER_USER } from "@prode/shared";
+import { ApiError } from "../../../server/errors/api-error";
 import { leaguesRepository } from "../repositories/leagues-repository";
 import { leagueMembersRepository } from "../repositories/league-members-repository";
 import { rebuildLeagueStandings } from "../services/league-standings-builder";
@@ -41,6 +42,14 @@ async function generateUniqueInviteToken() {
 }
 
 export async function createLeague(userId: string, input: CreateLeagueInput): Promise<LeagueDetail> {
+  const existingMemberships = await leagueMembersRepository.listMembershipsByUser(userId);
+  if (existingMemberships.length >= MAX_LEAGUES_PER_USER) {
+    throw new ApiError(409, "USER_LEAGUE_LIMIT_REACHED", "User reached the maximum number of leagues.", {
+      maxLeagues: MAX_LEAGUES_PER_USER,
+      currentCount: existingMemberships.length
+    });
+  }
+
   const now = new Date().toISOString();
   const [inviteCode, inviteToken] = await Promise.all([generateUniqueInviteCode(), generateUniqueInviteToken()]);
   const leagueId = createLeagueId();

@@ -26,6 +26,15 @@ export class LeagueMembersRepository {
   async upsertMembership(membership: StoredLeagueMember): Promise<void> {
     await leagueMembersCollection.doc(membership.membershipId).set(membership, { merge: true });
   }
+
+  async deleteMembership(membershipId: string): Promise<void> {
+    await leagueMembersCollection.doc(membershipId).delete();
+  }
+
+  async deleteMembershipsByLeague(leagueId: string): Promise<void> {
+    const snapshot = await leagueMembersCollection.where("leagueId", "==", leagueId).get();
+    await Promise.all(snapshot.docs.map((doc) => doc.ref.delete()));
+  }
 }
 
 export const leagueMembersRepository = new LeagueMembersRepository();
