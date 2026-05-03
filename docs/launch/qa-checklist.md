@@ -6,13 +6,13 @@ Documento canónico para el proceso de QA Hardening pre-launch del V1 free. Cubr
 
 ---
 
-## 🚨 Gaps críticos detectados (bloquean launch)
+## 🚨 Gaps críticos — STATUS ACTUALIZADO 03/05 22:30
 
-Detectados via code-review exhaustivo el 2026-05-03 (3 agents en paralelo: backend, frontend, infra/jobs).
+Análisis inicial (3 agents en paralelo) reportó 3 críticos. Verificación con Tomás dejó **1 crítico real**.
 
-### CRITICAL · Free limits NO existen en backend
+### 🔴 CRITICAL #1 · Free limits — `MAX_LEAGUES_PER_USER` NO existe
 
-**Status:** ❌ NO IMPLEMENTADO
+**Status:** ❌ NO IMPLEMENTADO (único gap crítico real)
 
 | Lo que el plan canónico decía | Realidad en código |
 |---|---|
@@ -20,33 +20,50 @@ Detectados via code-review exhaustivo el 2026-05-03 (3 agents en paralelo: backe
 | "max 20 users por liga free" | ✅ SÍ existe (`LEAGUE_MEMBER_LIMIT = 20` en `packages/shared/src/constants/leagues.ts:1`, guard en [join-league.ts:32](apps/api/src/domains/leagues/use-cases/join-league.ts:32)) |
 | flag `plan: 'free' \| 'gold'` o `isGold` en user | NO existe. UserProfile schema solo tiene `totalPoints`, `macroPoints`, `leaguesCount`, `profileCompleted` |
 
-**Por qué importa:** sin el guard, un user puede crear 100 ligas. No hay path técnico para diferenciar free vs gold cuando se implemente Stripe (EPIC 29).
+**Decisión 03/05:** hardcodear `MAX_LEAGUES_PER_USER = 3` para todos en V1. Cuando llegue EPIC 29 (Stripe), agregar bypass para gold.
 
-**Decisión a tomar:** ¿Hardcodeamos `MAX_LEAGUES_PER_USER = 3` para todos en V1 (sin flag plan), o dejamos sin límite hasta EPIC 29?
-
----
-
-### CRITICAL · Firestore Security Rules ausentes del repo
-
-**Status:** ❌ NO ENCONTRADO archivo `firestore.rules` en el repo
-
-**Implicación:** Si Cloud Console no tiene rules custom seteadas, el default es **WIDE OPEN** (cualquiera con creds Firebase puede read/write toda la DB).
-
-**Acción inmediata:** verificar en Cloud Console → Firestore → Rules. Si está en modo permisivo, hay que escribir rules YA. Mínimo:
-- `allow read: if request.auth != null && request.auth.uid == userId` para `users/{userId}`
-- Deny all writes (todo va via API server con admin SDK que bypassa rules)
+**Implementación pendiente:**
+- [ ] Constante `MAX_LEAGUES_PER_USER = 3` en `packages/shared/src/constants/leagues.ts`
+- [ ] Guard en `POST /api/v1/leagues` (CREATE) → check count < 3 antes de crear
+- [ ] Guard en `POST /api/v1/leagues/join` (JOIN) → check count < 3 antes de aceptar invite
+- [ ] Source of truth = count runtime de `leagueMembers where userId = uid` (no `users.leaguesCount` cached)
+- [ ] Error code nuevo: `USER_LEAGUE_LIMIT_REACHED` (HTTP 409)
+- [ ] UI: copy del error friendly
+- [ ] **Prerequisite:** endpoint `leave-league` + UI "salir de la liga" — verificado 03/05: **NO EXISTE**. Sin esto el cap es trampa-ratonera. **Bloqueante.**
 
 ---
 
-### CRITICAL · Posible Firebase private key en `.env` committeado
+### ✅ Gap descartado #2 · Firestore Security Rules
 
-**Status:** ⚠️ VERIFICAR
+**Status:** ✅ **PERFECTAS** (verificado 03/05 con screenshot Cloud Console)
 
-Uno de los agents reportó que `.env` contendría `FIREBASE_PRIVATE_KEY`. Verificar:
-- ¿Está `.env` en `.gitignore`? (debería estarlo)
-- ¿El private key real apareció alguna vez en historia de git?
+Las rules son `deny-all` para acceso client-side:
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;  // DENY ALL — todo pasa por API + Admin SDK
+    }
+  }
+}
+```
 
-**Si apareció:** rotar la service account key inmediatamente (GCP Console → IAM → Service Accounts → revocar + crear nueva).
+Vector de ataque client-side completamente cerrado. Esto reduce drásticamente el blast radius de otras posibles vulnerabilidades.
+
+**Pendiente menor:** versionar las rules en el repo (`firestore.rules`) para que estén en git history y deploy esté reproducible. No urgente.
+
+---
+
+### ✅ Gap descartado #3 · Private key en `.env`
+
+**Status:** ✅ **FALSO POSITIVO**
+
+Verificación 03/05:
+- `.env` está en `.gitignore` desde commit inicial
+- `.env` NUNCA fue tracked por git
+- El "BEGIN PRIVATE KEY" detectado por el agent venía de `.env.example` con placeholder `replace-me` (template legítimo)
+- Private key real solo vive en GCP Secret Manager + `.env` local de Tomás (no committeado)
 
 ---
 
