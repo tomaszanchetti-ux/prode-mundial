@@ -5,6 +5,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { LeagueDetail, LeagueStandingsResponse, LeagueSummary, PointsResponse } from "@prode/shared";
 import { AdSlotCard, Button, Card, ErrorCard, SkeletonCard, SkeletonStandingRow, StatusTag } from "@prode/ui";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
@@ -33,7 +34,12 @@ import { ActionResultCard, CreateLeagueForm, JoinLeagueForm } from "./leagues-fo
 import { LeagueConfirmModal, type LeagueConfirmAction } from "./league-confirm-modal";
 
 const USER_LEAGUE_LIMIT_COPY =
-  "Solo podés estar en 3 ligas a la vez. Salí de una actual para sumarte a otra o mejora tu plan para participar en ligas ilimitadas";
+  "Solo podés estar en 3 ligas a la vez. Salí de una actual para sumarte a otra o mejorá tu plan para participar en ligas ilimitadas.";
+
+const LEAGUE_CAPACITY_COPY =
+  "Esta liga ya alcanzó el máximo de 20 jugadores. Conocé los planes Gold y Enterprise para ligas con más cupo.";
+
+type ActionErrorState = { message: string; showPlansCta?: boolean } | null;
 
 type LeaguesScreenViewProps = {
   items: LeagueSummary[];
@@ -45,7 +51,7 @@ type LeaguesScreenViewProps = {
     leagueName: string;
     inviteCode: string;
   };
-  actionError: string | null;
+  actionError: ActionErrorState;
   actionMessage: string | null;
   lastActionLeague: LeagueDetail | null;
   isLoading: boolean;
@@ -147,7 +153,15 @@ export function LeaguesScreenView({
       {actionError ? (
         <Card elevated style={{ gap: 12 }}>
           <span className="typo-small text-error">NO PUDIMOS COMPLETAR LA ACCION</span>
-          <p className="typo-body m-0 text-text-primary">{actionError}</p>
+          <p className="typo-body m-0 text-text-primary">{actionError.message}</p>
+          {actionError.showPlansCta ? (
+            <Link
+              href="/profile#planes"
+              className="typo-body font-bold text-primary-600 no-underline"
+            >
+              Ver planes →
+            </Link>
+          ) : null}
         </Card>
       ) : null}
 
@@ -389,7 +403,7 @@ export function LeaguesScreen() {
     leagueName: "",
     inviteCode: ""
   });
-  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<ActionErrorState>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [lastActionLeague, setLastActionLeague] = useState<LeagueDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -467,7 +481,7 @@ export function LeaguesScreen() {
     event.preventDefault();
 
     if (!user) {
-      setActionError("No encontramos una sesion activa.");
+      setActionError({ message: "No encontramos una sesion activa." });
       return;
     }
 
@@ -489,9 +503,11 @@ export function LeaguesScreen() {
       setReloadKey((value) => value + 1);
     } catch (error) {
       if (error instanceof ApiClientError && error.code === "USER_LEAGUE_LIMIT_REACHED") {
-        setActionError(USER_LEAGUE_LIMIT_COPY);
+        setActionError({ message: USER_LEAGUE_LIMIT_COPY, showPlansCta: true });
       } else {
-        setActionError(error instanceof ApiClientError ? error.message : "No pudimos crear la liga.");
+        setActionError({
+          message: error instanceof ApiClientError ? error.message : "No pudimos crear la liga."
+        });
       }
     } finally {
       setIsSubmitting(false);
@@ -502,7 +518,7 @@ export function LeaguesScreen() {
     event.preventDefault();
 
     if (!user) {
-      setActionError("No encontramos una sesion activa.");
+      setActionError({ message: "No encontramos una sesion activa." });
       return;
     }
 
@@ -524,9 +540,13 @@ export function LeaguesScreen() {
       setReloadKey((value) => value + 1);
     } catch (error) {
       if (error instanceof ApiClientError && error.code === "USER_LEAGUE_LIMIT_REACHED") {
-        setActionError(USER_LEAGUE_LIMIT_COPY);
+        setActionError({ message: USER_LEAGUE_LIMIT_COPY, showPlansCta: true });
+      } else if (error instanceof ApiClientError && error.code === "LEAGUE_CAPACITY_REACHED") {
+        setActionError({ message: LEAGUE_CAPACITY_COPY, showPlansCta: true });
       } else {
-        setActionError(error instanceof ApiClientError ? error.message : "No pudimos unirte a la liga.");
+        setActionError({
+          message: error instanceof ApiClientError ? error.message : "No pudimos unirte a la liga."
+        });
       }
     } finally {
       setIsSubmitting(false);
@@ -559,7 +579,9 @@ export function LeaguesScreen() {
       router.replace("/leagues");
       setReloadKey((value) => value + 1);
     } catch (error) {
-      setActionError(error instanceof ApiClientError ? error.message : "No pudimos completar la acción.");
+      setActionError({
+        message: error instanceof ApiClientError ? error.message : "No pudimos completar la acción."
+      });
       setConfirmDialog(null);
     } finally {
       setIsConfirming(false);

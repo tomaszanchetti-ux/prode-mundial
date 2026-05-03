@@ -190,27 +190,27 @@ export default function RulesPage() {
           </h2>
         </div>
 
-        <div className="rules-plan-grid">
-          <div className="rules-plan-card">
+        <div className="plan-grid">
+          <div className="plan-card">
             <div className="flex justify-between items-baseline gap-2">
               <strong className="text-[16px] text-text-primary">Standard</strong>
               <span className="text-[13px] text-text-muted font-semibold">{t("Gratis", "Free")}</span>
             </div>
             <div className="grid gap-1">
-              <span className="rules-plan-feature">{t("Hasta 3 ligas", "Up to 3 leagues")}</span>
-              <span className="rules-plan-feature">{t("20 jugadores por liga", "20 players per league")}</span>
-              <span className="rules-plan-feature">{t("Con anuncios", "With ads")}</span>
+              <span className="plan-feature">{t("Hasta 3 ligas", "Up to 3 leagues")}</span>
+              <span className="plan-feature">{t("20 jugadores por liga", "20 players per league")}</span>
+              <span className="plan-feature">{t("Con anuncios", "With ads")}</span>
             </div>
           </div>
-          <div className="rules-plan-card rules-plan-card-gold">
+          <div className="plan-card plan-card-gold">
             <div className="flex justify-between items-baseline gap-2">
               <strong className="text-[16px] text-text-primary">Gold</strong>
-              <span className="rules-gold-badge">$5</span>
+              <span className="plan-gold-badge">$5</span>
             </div>
             <div className="grid gap-1">
-              <span className="rules-plan-feature">{t("Ligas ilimitadas", "Unlimited leagues")}</span>
-              <span className="rules-plan-feature">{t("20 jugadores por liga", "20 players per league")}</span>
-              <span className="rules-plan-feature">{t("Sin anuncios", "No ads")}</span>
+              <span className="plan-feature">{t("Ligas ilimitadas", "Unlimited leagues")}</span>
+              <span className="plan-feature">{t("20 jugadores por liga", "20 players per league")}</span>
+              <span className="plan-feature">{t("Sin anuncios", "No ads")}</span>
             </div>
           </div>
         </div>

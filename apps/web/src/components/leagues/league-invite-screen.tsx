@@ -20,6 +20,7 @@ export function LeagueInviteScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorShowPlansCta, setErrorShowPlansCta] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
   const loginHref = useMemo(() => {
@@ -42,6 +43,7 @@ export function LeagueInviteScreen() {
 
       setIsLoading(true);
       setErrorMessage(null);
+      setErrorShowPlansCta(false);
 
       try {
         const response = await getLeagueInvitePreview(token);
@@ -76,6 +78,7 @@ export function LeagueInviteScreen() {
 
     setIsJoining(true);
     setErrorMessage(null);
+    setErrorShowPlansCta(false);
 
     try {
       const idToken = await user.getIdToken();
@@ -88,7 +91,19 @@ export function LeagueInviteScreen() {
         return;
       }
 
-      setErrorMessage(error instanceof ApiClientError ? error.message : "No pudimos unirte a la liga.");
+      if (error instanceof ApiClientError && error.code === "USER_LEAGUE_LIMIT_REACHED") {
+        setErrorMessage(
+          "Solo podés estar en 3 ligas a la vez. Salí de una actual para sumarte a otra o mejorá tu plan para participar en ligas ilimitadas."
+        );
+        setErrorShowPlansCta(true);
+      } else if (error instanceof ApiClientError && error.code === "LEAGUE_CAPACITY_REACHED") {
+        setErrorMessage(
+          "Esta liga ya alcanzó el máximo de 20 jugadores. Conocé los planes Gold y Enterprise para ligas con más cupo."
+        );
+        setErrorShowPlansCta(true);
+      } else {
+        setErrorMessage(error instanceof ApiClientError ? error.message : "No pudimos unirte a la liga.");
+      }
     } finally {
       setIsJoining(false);
     }
@@ -114,6 +129,14 @@ export function LeagueInviteScreen() {
       {errorMessage ? (
         <Card elevated className="gap-3">
           <p className="typo-body m-0 text-text-primary">{errorMessage}</p>
+          {errorShowPlansCta ? (
+            <Link
+              href="/profile#planes"
+              className="typo-body font-bold text-primary-600 no-underline"
+            >
+              Ver planes →
+            </Link>
+          ) : null}
           <Button variant="ghost" onClick={() => setReloadKey((value) => value + 1)}>
             Reintentar
           </Button>

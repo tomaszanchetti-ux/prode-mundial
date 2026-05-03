@@ -144,6 +144,53 @@ export function ProfileScreen() {
 
       <PreferencesSection user={user} />
 
+      {/* ── Planes: Gold + Enterprise (CTAs a la landing) ── */}
+      <Card id="planes" elevated className="gap-3 p-5">
+        <div className="grid gap-1">
+          <span className="typo-eyebrow text-primary-500">{t("PLANES", "PLANS")}</span>
+          <h2 className="typo-h3 m-0 text-text-primary">
+            {t("Gold y Enterprise", "Gold and Enterprise")}
+          </h2>
+        </div>
+
+        <div className="plan-grid">
+          <a
+            href="https://prodemundial.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="plan-card plan-card-gold"
+            aria-label={t("Conocer plan Gold", "Learn about Gold plan")}
+          >
+            <div className="flex justify-between items-baseline gap-2">
+              <strong className="text-[16px] text-text-primary">Gold</strong>
+              <span className="plan-gold-badge">$5</span>
+            </div>
+            <div className="grid gap-1">
+              <span className="plan-feature">{t("Ligas ilimitadas", "Unlimited leagues")}</span>
+              <span className="plan-feature">{t("20 jugadores por liga", "20 players per league")}</span>
+              <span className="plan-feature">{t("Sin anuncios", "No ads")}</span>
+            </div>
+          </a>
+          <a
+            href="https://prodemundial.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="plan-card plan-card-enterprise"
+            aria-label={t("Conocer plan Enterprise", "Learn about Enterprise plan")}
+          >
+            <div className="flex justify-between items-baseline gap-2">
+              <strong className="text-[16px] text-text-primary">Enterprise</strong>
+              <span className="plan-enterprise-badge">{t("Consultar", "Contact us")}</span>
+            </div>
+            <div className="grid gap-1">
+              <span className="plan-feature">{t("Para empresas", "For companies")}</span>
+              <span className="plan-feature">{t("+20 jugadores por liga", "20+ players per league")}</span>
+              <span className="plan-feature">{t("Ligas y logos personalizados", "Custom leagues and logos")}</span>
+            </div>
+          </a>
+        </div>
+      </Card>
+
       {/* ── Recursos: Reglas · Términos y Privacidad · Cookies ── */}
       <Card elevated style={{ gap: 6, padding: 16 }}>
         <Link href="/rules" className="support-nav-card-row">
