@@ -56,6 +56,7 @@ export function PickableList({
     <div className="grid gap-3">
       <input
         type="search"
+        aria-label={searchPlaceholder}
         placeholder={searchPlaceholder}
         value={query}
         onChange={(e) => setQuery(e.target.value)}

@@ -108,6 +108,7 @@ export function LeaguesScreenView({
             <button
               key={option.leagueId}
               type="button"
+              aria-current={isActive ? "page" : undefined}
               onClick={() => onSelectLeague(option.leagueId)}
               className={`filter-chip ${isActive ? "filter-chip-active" : "filter-chip-inactive"}`}
             >

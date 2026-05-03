@@ -83,6 +83,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="es">
       <head>
         <GoogleConsentDefault />
+        {/* Preconnect a Firebase + API para reducir handshake latency. EPIC 34 LCP fix. */}
+        <link rel="preconnect" href="https://firestore.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://securetoken.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://prode-api-59331857833.europe-west1.run.app" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fcm.googleapis.com" crossOrigin="anonymous" />
         {/* iPhone 12/13/14 Pro (390x844 @3x) */}
         <link
           rel="apple-touch-startup-image"

@@ -20,6 +20,7 @@ import {
 } from "@prode/shared";
 import { Button, Card, ErrorCard, SkeletonCard, StatusTag, TeamIdentity } from "@prode/ui";
 import type { StatusTone } from "@prode/ui";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -479,7 +480,14 @@ export function PicksScreen() {
 
       <Card elevated className="hero-worldcup-bg" style={{ gap: 8, padding: 20 }}>
         <div className="flex items-center gap-3">
-          <img src="/mundial/wc2026-logo.png" alt="" width={32} height={32} className="opacity-70" />
+          <Image
+            src="/mundial/wc2026-logo.png"
+            alt=""
+            width={32}
+            height={32}
+            className="opacity-70"
+            priority
+          />
           <span className="typo-eyebrow">MIS PICKS</span>
         </div>
         <h1 className="typo-h2 m-0 text-text-primary">Elegí al Campeón, Sub-Campeón y Balón de Oro.</h1>
