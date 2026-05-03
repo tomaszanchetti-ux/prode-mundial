@@ -37,6 +37,20 @@ export function PredictionModal({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (!isOpen || !onClose) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onClose?.();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const showProgress = progressCurrent != null && progressTotal != null && progressTotal > 0;
