@@ -3,10 +3,25 @@
 import React from "react";
 import { useEffect } from "react";
 import { APP_ROUTES } from "@prode/shared";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "./auth-provider";
-import { LoginBlock } from "./login-block";
 import { SupportNav } from "@/components/layout/support-nav";
+
+// Lazy-load del form de login: chunk separado del initial bundle.
+// Mientras carga mostramos un skeleton que matchea altura aprox del form
+// (3 botones apilados) para evitar layout shift.
+const LoginBlock = dynamic(() => import("./login-block").then((mod) => ({ default: mod.LoginBlock })), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full grid gap-3" aria-busy="true" aria-label="Cargando formulario de login">
+      <div className="h-[44px] rounded-md bg-white/10 animate-pulse" />
+      <div className="h-[20px] w-12 mx-auto rounded bg-white/10 animate-pulse" />
+      <div className="h-[44px] rounded-md bg-white/10 animate-pulse" />
+      <div className="h-[44px] rounded-md bg-white/10 animate-pulse" />
+    </div>
+  )
+});
 
 export function resolveNextRoute(next: string | null, profileCompleted: boolean | undefined) {
   if (profileCompleted === false) {

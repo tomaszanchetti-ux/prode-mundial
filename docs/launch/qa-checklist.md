@@ -382,12 +382,11 @@ A medida que vayamos validando, cada hallazgo serio se vuelve card propia:
 ✅ next/image en wc2026-logo (priority)
 
 ### Performance — deuda profunda (no urgente para V1)
-- [ ] **LCP optimization profunda:** Firebase SDK + Auth + Firestore client-side son ~250KB+ de JS antes de poder renderizar páginas con auth. LCP Lighthouse mobile 6.4s → meta <2.5s requiere refactor:
-  - Code-splitting del Firebase SDK por route
-  - SSR partial / server actions para data initial
-  - Considerar Edge runtime para endpoints rápidos
-  - Lazy-load Firestore solo cuando se necesita
-  - Estimado: varios días de trabajo. ROI real solo si los amigos reportan lentitud.
+- [ ] **🔴 Firebase Auth bundle = 392KB raw / ~110KB gzipped:** confirmado via build local 03/05. Es el chunk individual más pesado del initial bundle. Bottleneck del LCP Lighthouse 6.4s → meta <2.5s. Approaches:
+  - **Approach A (refactor profundo, 1-2 días, +15-20 pts Performance):** reemplazar Firebase Auth client-side por session cookies HttpOnly emitidas por el API tras validar magic link. AuthProvider deja de importar `firebase/auth`, solo consume cookie. Trade-offs: pierde refresh token automático de Firebase, hay que implementar rotation manual.
+  - **Approach B (auth state SSR, 2-3 días, +20-25 pts Performance):** mover el initial auth check al server (cookie) → SSR de páginas protegidas posible → FCP/LCP <1.5s. Requiere middleware Next.js + refactor del AuthProvider para hydratar desde SSR data.
+  - **Quick won 03/05 (LoginBlock lazy-load, 30 min, +3-5 pts):** ya aplicado.
+  - ROI real solo si los amigos reportan lentitud o el grupo crece >100 users.
 - [ ] **Bundle size analysis:** setup `@next/bundle-analyzer` para identificar libs grandes y tree-shake oportunidades. Diagnóstico, no optimización per se.
 - [ ] **Image optimization:** auditar otras imágenes (banderas, splash screens) si Lighthouse las flaggea post-launch.
 
