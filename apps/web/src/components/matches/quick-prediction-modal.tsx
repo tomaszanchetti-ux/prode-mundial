@@ -185,7 +185,15 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
       closeLabel={copyForLocale(locale, "Mas tarde", "Later")}
       skipLabel={copyForLocale(locale, "Completar despues", "Complete later")}
       onSkip={hasNextPending && onSkip ? onSkip : undefined}
-      saveLabel={hasNextPending ? copyForLocale(locale, "Guardar y seguir", "Save & next") : copyForLocale(locale, "Guardar", "Save")}
+      saveLabel={
+        detail?.userPrediction
+          ? hasNextPending
+            ? copyForLocale(locale, "Modificar y seguir", "Update & next")
+            : copyForLocale(locale, "Modificar", "Update")
+          : hasNextPending
+            ? copyForLocale(locale, "Guardar y seguir", "Save & next")
+            : copyForLocale(locale, "Guardar", "Save")
+      }
       saving={isSaving}
       stageLabel={detail ? (locale === "en" && detail.stage === "group" && detail.groupId ? `Group ${detail.groupId}` : toStageLabel(detail)) : copyForLocale(locale, "Partido", "Match")}
       statusLabel={detail && toStatusTone(detail) !== "saved" ? toStatusLabel(detail) : undefined}
