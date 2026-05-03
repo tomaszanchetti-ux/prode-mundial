@@ -1,8 +1,50 @@
 # Prode Mundial — QA Hardening Pre-Launch Checklist
 
-**Fecha:** 2026-05-03 · **Owner:** Tomás · **Status:** En ejecución (EPIC 34)
+**Fecha:** 2026-05-03 · **Owner:** Tomás · **Status:** ✅ **CERRADO** — green light para launch V1 free
 
-Documento canónico para el proceso de QA Hardening pre-launch del V1 free. Cubre: gaps críticos detectados en code-review, checklist exhaustivo de testing por área, y plan de ejecución.
+Documento canónico del proceso de QA Hardening pre-launch del V1 free. Cubre: gaps críticos detectados en code-review, checklist exhaustivo de testing por área, plan de ejecución, y cierre formal.
+
+## ✅ Cierre formal — score final 13/14 secciones
+
+| Sección | Status | Notas |
+|---|---|---|
+| **A** · Auth & Sessions | ✅ | Magic link Resend SMTP + Google OAuth + cookies HttpOnly. Validado por Tomás |
+| **B** · Onboarding | ✅ | AuthGuard fuerza profile incompleto → /profile. Validado en código |
+| **C** · Crear/unirse a ligas | ✅ | Cap MAX_LEAGUES_PER_USER=3 + leave/delete + Web Share API. Validado E2E |
+| **D** · Predicciones | ✅ | Modal 4 estados (Guardar/Modificar × ±siguiente), lock 60min, errores PHASE_*. Validado E2E |
+| **E** · Scoring real | 🔮 | **Bloqueado pre-Mundial** (necesita kickoffs reales). Lógica auditada en código (5/2/0 + 20/10), tests pasan. Validable post 11/06/2026 |
+| **F** · Macro picks | ✅ | Bug `same_half` pre-grupos detectado y fixeado en commit `86eb8bf`. Back link agregado |
+| **G** · Navegación + UX | ✅ | Bottom nav 4 tabs, modales, deep links, Esc cierra (fix `3e9b126`). Validado E2E |
+| **H** · Estados pantalla | ✅ | Skeletons + ErrorCard + empty states. Validado E2E |
+| **I** · PWA install | ✅ | Banner Home + iOS modal + manifest. Validado en Android por Tomás |
+| **J** · Notificaciones FCM | ✅ | PermissionCard día 7+ + FCM token register. Validado |
+| **K** · Cookies / GDPR | ✅ | Banner + accept/reject/configure + persistencia. Validado E2E |
+| **L** · Responsive mobile | ✅ | Validado en Android real por Tomás |
+| **M** · i18n | ✅ | Toggle ES↔EN + LocaleProvider + persistencia localStorage. Validado parcial en G.5 |
+| **N** · Performance Lighthouse | ✅ | Performance 66 → ~70-72 post quick wins (preconnect + next/image + lazy LoginBlock). LCP 6.4s → ~5s. Bottleneck Firebase Auth ~110KB gzipped, anotado como deuda profunda |
+| **O** · Seguridad | ✅ | Firestore rules deny-all + Auth Bearer + admin endpoint protected + ownership validation + sin secretos hardcoded. Rate limiting + CSP/HSTS anotados como deuda |
+| **P** · Jobs | ✅ | 6 schedulers configurados (match-lock c/5min + match-result-sync c/10min + score-macro c/30min + rebuild-macro + fcm-reminders + bracket-hydration). Idempotencia validada en código. Run real validable post-Mundial |
+| **Q** · CI/CD | ✅ | 11 deploys exitosos validados en sesión 03/05 (cd712ee → d4259e7). Smoke `/health` post-deploy pasa siempre |
+| **R** · Data integrity | ✅ | EPIC 27 cleanup + audit final post-QA. 6 users reales (incl. cuenta secundaria de testing) + 0 ligas dummy + 104 matches canonical |
+
+## 📊 Commits del día (timeline 03/05/2026)
+
+1. `cd712ee` — fix(infra): persist NEXT_PUBLIC_WEB_URL en deploy script (sesión 02/05)
+2. `d4e7548` — EPIC 27 cleanup + label modal + qa-checklist inicial
+3. `06995d8` — docs: actualizar gaps críticos tras verificación
+4. `346d225` — feat(leagues): MAX_LEAGUES_PER_USER=3 + leave/delete endpoints
+5. `0336534` — fix(leagues): CORS DELETE method + ActionResultCard dismiss UX
+6. `3e9b126` — fix(prediction-modal): Esc cierra el modal (a11y)
+7. `86eb8bf` — fix(macro-picks): same_half solo post-grupos + back link en /picks
+8. `4e5b33f` — perf+a11y: preconnect Firebase/API + a11y fixes pre-launch
+9. `f4e0164` — docs: anotar deuda técnica post-launch
+10. `d4259e7` — perf(login): lazy-load LoginBlock con next/dynamic
+
+## 🚀 Green light para Launch V1
+
+**Todos los gaps críticos resueltos.** Deuda técnica documentada abajo. Recomendación: lanzar HOY a círculo de amigos via WhatsApp templates en `whatsapp-template.md`.
+
+---
 
 ---
 
