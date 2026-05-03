@@ -19,9 +19,12 @@ import { resolveAliveTeamsAfterGroups } from "./alive-teams";
  *                    bracket post-grupos. Emitido una sola vez (no duplicado
  *                    por mitad). El front lo renderea en ambas cards.
  *
- * Nota: el warning 4 requiere que ambos picks estén seteados Y que ambos
- * teams estén resolvibles a una mitad no-neutral; si alguno no lo está, no
- * se emite (equivale a "no sabemos todavía").
+ * Nota: el warning 4 requiere `areGroupsOfficiallyClosed === true` Y que
+ * ambos picks estén seteados Y que ambos teams estén resolvibles a una mitad
+ * no-neutral. Pre-grupos-cerrados las "mitades" del bracket son proyecciones
+ * especulativas basadas en seedings asumidos — confunden al user reportando
+ * cruces tempranos que pueden no materializarse según cómo terminen los
+ * grupos. Por eso requiere el flag, igual que los warnings "eliminated".
  */
 
 export type MacroPickWarningKind =
@@ -69,20 +72,20 @@ export function detectMacroPickWarnings(
         warnings.push({ kind: "best_player_eliminated", picks: ["best_player"] });
       }
     }
-  }
 
-  if (championTeamId && subChampionTeamId && championTeamId !== subChampionTeamId) {
-    const halves = classifyTeamBracketHalves(bracket);
-    const champHalf = halves.get(championTeamId);
-    const subHalf = halves.get(subChampionTeamId);
-    if (
-      champHalf &&
-      subHalf &&
-      champHalf !== "neutral" &&
-      subHalf !== "neutral" &&
-      champHalf === subHalf
-    ) {
-      warnings.push({ kind: "same_half", picks: ["champion", "sub_champion"] });
+    if (championTeamId && subChampionTeamId && championTeamId !== subChampionTeamId) {
+      const halves = classifyTeamBracketHalves(bracket);
+      const champHalf = halves.get(championTeamId);
+      const subHalf = halves.get(subChampionTeamId);
+      if (
+        champHalf &&
+        subHalf &&
+        champHalf !== "neutral" &&
+        subHalf !== "neutral" &&
+        champHalf === subHalf
+      ) {
+        warnings.push({ kind: "same_half", picks: ["champion", "sub_champion"] });
+      }
     }
   }
 

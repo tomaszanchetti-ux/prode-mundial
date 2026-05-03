@@ -20,6 +20,7 @@ import {
 } from "@prode/shared";
 import { Button, Card, ErrorCard, SkeletonCard, StatusTag, TeamIdentity } from "@prode/ui";
 import type { StatusTone } from "@prode/ui";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
 import {
@@ -468,6 +469,14 @@ export function PicksScreen() {
 
   return (
     <div className="grid gap-4">
+      <Link
+        href={APP_ROUTES.tournament}
+        className="inline-flex items-center gap-1.5 text-[13px] leading-none font-medium text-text-muted hover:text-text-primary transition-colors no-underline w-fit"
+      >
+        <span aria-hidden="true">←</span>
+        <span>Volver a Predicciones</span>
+      </Link>
+
       <Card elevated className="hero-worldcup-bg" style={{ gap: 8, padding: 20 }}>
         <div className="flex items-center gap-3">
           <img src="/mundial/wc2026-logo.png" alt="" width={32} height={32} className="opacity-70" />

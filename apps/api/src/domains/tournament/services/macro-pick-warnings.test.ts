@@ -236,10 +236,12 @@ describe("detectMacroPickWarnings — same_half", () => {
     assert.equal(warnings.filter((w) => w.kind === "same_half").length, 0);
   });
 
-  it("emits same_half even when groups are NOT officially closed (pre-tournament projection)", () => {
-    // same_half es estructural (depende del bracket proyectado), no de
-    // que los grupos estén cerrados — se detecta incluso en ventana A
-    // si el bracket proyectado ya lo muestra.
+  it("does NOT emit same_half pre-grupos-cerrados (proyección especulativa, confunde al user)", () => {
+    // Pre-grupos cerrados las "mitades" del bracket son una proyección
+    // basada en seedings asumidos — pueden no materializarse según cómo
+    // terminen los grupos. Reportar "cruce temprano" en ventana A confunde
+    // al user. Igual que los warnings "eliminated", same_half ahora
+    // requiere areGroupsOfficiallyClosed === true.
     const bracket = buildFullBracket({ 73: ["ARG", null], 77: ["MEX", null] });
     const warnings = detectMacroPickWarnings({
       bracket,
@@ -248,8 +250,7 @@ describe("detectMacroPickWarnings — same_half", () => {
       bestPlayerTeamId: null,
       areGroupsOfficiallyClosed: false
     });
-    const sameHalf = warnings.find((w) => w.kind === "same_half");
-    assert.ok(sameHalf);
+    assert.equal(warnings.filter((w) => w.kind === "same_half").length, 0);
   });
 });
 
