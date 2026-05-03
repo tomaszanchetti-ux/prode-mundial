@@ -152,6 +152,7 @@ test("LeaguesScreenView renders synthetic summary and private league list in Glo
       onJoinLeague: () => undefined,
       onSelectLeague: () => undefined,
       onRequestLeaveOrDelete: () => undefined,
+      onDismissActionResult: () => undefined,
       isOwnerOfSelected: false,
       onRetry: () => undefined
     })
@@ -188,6 +189,7 @@ test("LeaguesScreenView renders standings table when a private league is selecte
       onJoinLeague: () => undefined,
       onSelectLeague: () => undefined,
       onRequestLeaveOrDelete: () => undefined,
+      onDismissActionResult: () => undefined,
       isOwnerOfSelected: false,
       onRetry: () => undefined
     })
@@ -223,6 +225,7 @@ test("LeaguesScreenView renders create success state", () => {
       onJoinLeague: () => undefined,
       onSelectLeague: () => undefined,
       onRequestLeaveOrDelete: () => undefined,
+      onDismissActionResult: () => undefined,
       isOwnerOfSelected: false,
       onRetry: () => undefined
     })

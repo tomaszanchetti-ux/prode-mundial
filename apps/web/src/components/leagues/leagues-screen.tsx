@@ -58,6 +58,7 @@ type LeaguesScreenViewProps = {
   onJoinLeague: (event: FormEvent<HTMLFormElement>) => void;
   onSelectLeague: (leagueId: string) => void;
   onRequestLeaveOrDelete: (action: LeagueConfirmAction, leagueId: string, leagueName: string) => void;
+  onDismissActionResult: () => void;
   onRetry: () => void;
 };
 
@@ -81,6 +82,7 @@ export function LeaguesScreenView({
   onJoinLeague,
   onSelectLeague,
   onRequestLeaveOrDelete,
+  onDismissActionResult,
   onRetry
 }: LeaguesScreenViewProps) {
   const { locale } = useLocale();
@@ -153,6 +155,7 @@ export function LeaguesScreenView({
           actionMessage={actionMessage}
           league={lastActionLeague}
           onOpenLeague={onSelectLeague}
+          onDismiss={onDismissActionResult}
         />
       ) : null}
 
@@ -401,6 +404,12 @@ export function LeaguesScreen() {
 
   const isOwnerOfSelected = standings?.items.find((entry) => entry.isMe)?.isOwner ?? false;
 
+  // Auto-limpia el card de "liga creada/joineada" cuando el user navega a otra liga.
+  useEffect(() => {
+    setLastActionLeague(null);
+    setActionMessage(null);
+  }, [selectedLeagueId]);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -587,6 +596,10 @@ export function LeaguesScreen() {
           }
         }}
         onRequestLeaveOrDelete={handleRequestLeaveOrDelete}
+        onDismissActionResult={() => {
+          setLastActionLeague(null);
+          setActionMessage(null);
+        }}
         onRetry={() => setReloadKey((value) => value + 1)}
       />
       <LeagueConfirmModal

@@ -22,6 +22,7 @@ type ActionResultCardProps = {
   actionMessage: string | null;
   league: LeagueDetail;
   onOpenLeague: (leagueId: string) => void;
+  onDismiss?: () => void;
 };
 
 export function CreateLeagueForm({ formState, isSubmitting, onFieldChange, onSubmit }: CreateLeagueFormProps) {
@@ -76,10 +77,20 @@ export function JoinLeagueForm({ formState, isSubmitting, onFieldChange, onSubmi
   );
 }
 
-export function ActionResultCard({ actionMessage, league, onOpenLeague }: ActionResultCardProps) {
+export function ActionResultCard({ actionMessage, league, onOpenLeague, onDismiss }: ActionResultCardProps) {
   return (
-    <Card elevated className="league-action-bg" style={{ gap: 12 }}>
-      <h2 className="typo-h3 m-0 text-text-primary">{league.name}</h2>
+    <Card elevated className="league-action-bg" style={{ gap: 12, position: "relative" }}>
+      {onDismiss ? (
+        <button
+          type="button"
+          aria-label="Cerrar"
+          onClick={onDismiss}
+          className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full text-text-muted hover:text-text-primary hover:bg-bg-inset transition-colors"
+        >
+          <span aria-hidden="true" className="text-[18px] leading-none font-light">×</span>
+        </button>
+      ) : null}
+      <h2 className="typo-h3 m-0 text-text-primary pr-8">{league.name}</h2>
       {actionMessage ? (
         <p className="typo-body m-0 text-text-secondary">{actionMessage}</p>
       ) : null}
