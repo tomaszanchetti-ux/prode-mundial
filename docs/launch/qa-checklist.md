@@ -372,3 +372,58 @@ A medida que vayamos validando, cada hallazgo serio se vuelve card propia:
 ---
 
 **Última actualización:** 2026-05-03 sesión EPIC 34 WS2.
+
+---
+
+## 📌 Deuda técnica post-launch (anotada 2026-05-03)
+
+### Performance — quick wins ya aplicados
+✅ Preconnect a Firebase + API (commit `4e5b33f`)
+✅ next/image en wc2026-logo (priority)
+
+### Performance — deuda profunda (no urgente para V1)
+- [ ] **LCP optimization profunda:** Firebase SDK + Auth + Firestore client-side son ~250KB+ de JS antes de poder renderizar páginas con auth. LCP Lighthouse mobile 6.4s → meta <2.5s requiere refactor:
+  - Code-splitting del Firebase SDK por route
+  - SSR partial / server actions para data initial
+  - Considerar Edge runtime para endpoints rápidos
+  - Lazy-load Firestore solo cuando se necesita
+  - Estimado: varios días de trabajo. ROI real solo si los amigos reportan lentitud.
+- [ ] **Bundle size analysis:** setup `@next/bundle-analyzer` para identificar libs grandes y tree-shake oportunidades. Diagnóstico, no optimización per se.
+- [ ] **Image optimization:** auditar otras imágenes (banderas, splash screens) si Lighthouse las flaggea post-launch.
+
+### Accessibility — fixes ya aplicados
+✅ Bottom nav focus-visible:ring (CRITICAL — keyboard users)
+✅ Search inputs aria-label (PickableList + PlayerPickableList)
+✅ League filter chips aria-current="page"
+✅ Bottom nav text 10px→11px + text-secondary (contraste)
+
+### Accessibility — NICE-to-have post-launch
+- [ ] `role="main"` en main content areas de cada pantalla
+- [ ] `aria-live="polite"` en async message containers (action errors, success messages en LeaguesScreen, profile, etc.)
+- [ ] Auditar contraste con tooling real (color-contrast checker) en text-[11px] sobre fondos light
+- [ ] Verificar que el alt="" del wc2026-logo es realmente decorativo (alternativa: alt="Mundial 2026")
+
+### Security — gaps conocidos
+- [ ] **Rate limiting** en API: `express-rate-limit` middleware o Cloud Armor
+- [ ] **Security headers**: `helmet.js` en Express (CSP, HSTS, X-Frame-Options)
+- [ ] **Sentry / Cloud Error Reporting** para alerting prod
+- [ ] **Firestore rules en repo:** versionar las rules (deny-all client) en `firestore.rules` para reproducibilidad de deploy. Hoy solo viven en Cloud Console.
+
+### Data / observability
+- [ ] **Backup automático Firestore** weekly (`gcloud firestore export` cron job)
+- [ ] **Cloud Monitoring dashboard** (latency p95, error rate, job failures)
+- [ ] **Alerts** básicos (job failures, error rate spike)
+
+### Tests
+- [ ] **E2E tests** con Playwright (cubrir golden path: signup → crear liga → invitar → predecir)
+- [ ] **Audit trail de scoring** (collection separada `scoringLogs` para compliance/debugging)
+
+### Race conditions (acceptable para V1)
+- [ ] **Prediction lock race window:** envolver save de prediction en Firestore transaction que re-valide deadline (mitiga el ~30s window post-deadline)
+- [ ] **League create/join race:** si user manda 5 requests CREATE simultáneos, los 5 pueden pasar el guard MAX_LEAGUES_PER_USER. Fix: transaction.
+
+### Otros
+- [ ] **Best player auto-derive:** hoy es manual via script `upsert:best-player-result`. Agregar fallback automático si FIFA publica el resultado en API conocido.
+- [ ] **Multi-admin support:** hoy `PRODE_ADMIN_EMAILS` es CSV en env. Considerar movido a Firestore para gestión runtime.
+- [ ] **Invite token expiration:** agregar `inviteExpiresAt` field + revoke endpoint. Acceptable para V1 (ligas son perpetuas).
+
