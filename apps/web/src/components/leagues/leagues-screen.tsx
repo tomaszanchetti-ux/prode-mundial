@@ -445,12 +445,34 @@ export function LeaguesScreen() {
         const [leaguesResponse, pointsResponse] = await Promise.all([getMyLeagues(token), getPoints(token)]);
 
         const isPrivateLeague = selectedLeagueId !== GLOBAL_LEAGUE_ID;
-        const standingsResponse = isPrivateLeague ? await getLeagueStandings(token, selectedLeagueId) : null;
+        let standingsResponse: LeagueStandingsResponse | null = null;
+        let leagueUnavailable = false;
+
+        if (isPrivateLeague) {
+          try {
+            standingsResponse = await getLeagueStandings(token, selectedLeagueId);
+          } catch (standingsError) {
+            // Stale ?leagueId=... in URL pointing to a deleted league or one
+            // the user was removed from. Fall back to Global silently instead
+            // of blanking the whole screen.
+            if (
+              standingsError instanceof ApiClientError &&
+              (standingsError.status === 404 || standingsError.status === 403)
+            ) {
+              leagueUnavailable = true;
+            } else {
+              throw standingsError;
+            }
+          }
+        }
 
         if (!cancelled) {
           setItems(leaguesResponse.items);
           setPoints(pointsResponse);
           setStandings(standingsResponse);
+          if (leagueUnavailable) {
+            router.replace("/leagues");
+          }
         }
       } catch (error) {
         if (cancelled) {
