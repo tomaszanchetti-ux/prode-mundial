@@ -8,7 +8,11 @@ import { rebuildLeagueStandings } from "../services/league-standings-builder";
 import { buildMembershipId, normalizeInviteCode, toLeagueDetailView } from "../services/league-domain";
 import { syncUserLeaguesCount } from "../services/league-profile-sync";
 
-export async function joinLeague(userId: string, input: JoinLeagueInput): Promise<LeagueDetail> {
+export async function joinLeague(
+  userId: string,
+  input: JoinLeagueInput,
+  options: { bypassUserLimit?: boolean } = {}
+): Promise<LeagueDetail> {
   const league = input.inviteToken
     ? await leaguesRepository.findLeagueByInviteToken(input.inviteToken.trim())
     : await leaguesRepository.findLeagueByInviteCode(normalizeInviteCode(input.inviteCode ?? ""));
@@ -31,7 +35,7 @@ export async function joinLeague(userId: string, input: JoinLeagueInput): Promis
     throw new ApiError(409, "ALREADY_LEAGUE_MEMBER", "You are already part of this league.");
   }
 
-  if (userMemberships.length >= MAX_LEAGUES_PER_USER) {
+  if (!options.bypassUserLimit && userMemberships.length >= MAX_LEAGUES_PER_USER) {
     throw new ApiError(409, "USER_LEAGUE_LIMIT_REACHED", "User reached the maximum number of leagues.", {
       maxLeagues: MAX_LEAGUES_PER_USER,
       currentCount: userMemberships.length

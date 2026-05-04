@@ -41,9 +41,13 @@ async function generateUniqueInviteToken() {
   throw new Error("Could not generate a unique invite token.");
 }
 
-export async function createLeague(userId: string, input: CreateLeagueInput): Promise<LeagueDetail> {
+export async function createLeague(
+  userId: string,
+  input: CreateLeagueInput,
+  options: { bypassUserLimit?: boolean } = {}
+): Promise<LeagueDetail> {
   const existingMemberships = await leagueMembersRepository.listMembershipsByUser(userId);
-  if (existingMemberships.length >= MAX_LEAGUES_PER_USER) {
+  if (!options.bypassUserLimit && existingMemberships.length >= MAX_LEAGUES_PER_USER) {
     throw new ApiError(409, "USER_LEAGUE_LIMIT_REACHED", "User reached the maximum number of leagues.", {
       maxLeagues: MAX_LEAGUES_PER_USER,
       currentCount: existingMemberships.length
