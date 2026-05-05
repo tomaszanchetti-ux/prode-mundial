@@ -1,6 +1,7 @@
 export const APP_ROUTES = {
   landing: "/",
   login: "/login",
+  authCallback: "/auth/callback",
   home: "/home",
   tournament: "/tournament",
   worldCup: "/world-cup",

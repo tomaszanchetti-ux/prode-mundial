@@ -12,10 +12,8 @@ type LoginBlockProps = {
 export function LoginBlock({ onCompleted }: LoginBlockProps) {
   const {
     clearError,
-    completeMagicLink,
     errorMessage,
     isConfigured,
-    isEmailLink,
     sendMagicLink,
     signInWithGoogle
   } = useAuth();
@@ -49,21 +47,6 @@ export function LoginBlock({ onCompleted }: LoginBlockProps) {
       setLocalMessage("Te enviamos un link. Revisá tu email.");
     } catch (error) {
       setLocalMessage(error instanceof Error ? error.message : "No pudimos enviar el link.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  async function handleCompleteMagicLink() {
-    setIsSubmitting(true);
-    setLocalMessage(null);
-    clearError();
-
-    try {
-      await completeMagicLink(email);
-      onCompleted?.();
-    } catch (error) {
-      setLocalMessage(error instanceof Error ? error.message : "No pudimos completar el ingreso.");
     } finally {
       setIsSubmitting(false);
     }
@@ -107,18 +90,6 @@ export function LoginBlock({ onCompleted }: LoginBlockProps) {
           {isSubmitting ? "Enviando..." : "Enviar link"}
         </Button>
       </form>
-
-      {isEmailLink ? (
-        <Button
-          variant="ghost"
-          onClick={handleCompleteMagicLink}
-          disabled={!isConfigured || isSubmitting}
-          fullWidth
-          className="landing-btn-ghost"
-        >
-          Completar ingreso con este link
-        </Button>
-      ) : null}
 
       {!isConfigured ? (
         <div className="landing-alert landing-alert-error" role="status">

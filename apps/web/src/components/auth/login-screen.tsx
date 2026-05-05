@@ -34,13 +34,22 @@ export function resolveNextRoute(next: string | null, profileCompleted: boolean 
 export function LoginScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { profile, status } = useAuth();
+  const { profile, status, isEmailLink } = useAuth();
 
   useEffect(() => {
     if (status === "authenticated") {
       router.replace(resolveNextRoute(searchParams.get("next"), profile?.profileCompleted));
     }
   }, [profile?.profileCompleted, router, searchParams, status]);
+
+  // Backwards-compat: si un magic link viejo (que apuntaba a /login)
+  // todavía circula, redirigimos al callback dedicado preservando los query
+  // params (incluido el `oobCode` que `signInWithEmailLink` necesita).
+  useEffect(() => {
+    if (isEmailLink && typeof window !== "undefined") {
+      router.replace(`${APP_ROUTES.authCallback}${window.location.search}`);
+    }
+  }, [isEmailLink, router]);
 
   return (
     <main className="landing-bg-dark min-h-[100dvh] grid grid-rows-[1fr_auto] px-6">

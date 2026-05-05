@@ -42,7 +42,7 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function readStoredMagicLinkEmail() {
+export function readStoredMagicLinkEmail() {
   if (typeof window === "undefined") {
     return null;
   }
@@ -234,8 +234,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setErrorMessage(null);
     try {
       await ensureFirebaseAuthPersistence();
+      // Redirigimos al callback dedicado (NO a /login) para que el user reciba
+      // una pantalla con un solo CTA "Ingresá aquí" y los pre-fetchers de Gmail/
+      // Outlook no consuman el oobCode antes que el user real.
       await sendSignInLinkToEmail(firebaseAuth, email, {
-        url: `${webConfig.webUrl}${APP_ROUTES.login}`,
+        url: `${webConfig.webUrl}${APP_ROUTES.authCallback}`,
         handleCodeInApp: true
       });
       storeMagicLinkEmail(email);
