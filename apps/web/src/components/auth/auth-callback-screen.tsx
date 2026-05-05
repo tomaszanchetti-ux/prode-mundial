@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,7 @@ import { resolveNextRoute } from "./login-screen";
 import { readStoredMagicLinkEmail, useAuth } from "./auth-provider";
 
 type CallbackState =
+  | { kind: "loading" }
   | { kind: "ready"; email: string }
   | { kind: "ask-email" }
   | { kind: "submitting" }
@@ -24,19 +25,27 @@ type CallbackState =
 // el oobCode antes que el user real.
 export function AuthCallbackScreen() {
   const router = useRouter();
-  const { status, profile, completeMagicLink, clearError } = useAuth();
-  const [state, setState] = useState<CallbackState>(() => {
-    // Inicialización lazy SOLO para resolver UI inicial. NO consume el oobCode.
+  const { status, profile, errorMessage, completeMagicLink, clearError } = useAuth();
+  // Estado inicial neutro para evitar hydration mismatch — `window` y
+  // `localStorage` solo existen en client. Resolvemos el estado real en el
+  // useEffect que sigue.
+  const [state, setState] = useState<CallbackState>({ kind: "loading" });
+  const [emailInput, setEmailInput] = useState("");
+  const submittedRef = useRef(false);
+
+  // Resolución del estado inicial post-hydration (client-only).
+  useEffect(() => {
     if (typeof window === "undefined" || !firebaseAuth) {
-      return { kind: "ask-email" };
+      setState({ kind: "ask-email" });
+      return;
     }
     if (!isSignInWithEmailLink(firebaseAuth, window.location.href)) {
-      return { kind: "invalid-link" };
+      setState({ kind: "invalid-link" });
+      return;
     }
     const stored = readStoredMagicLinkEmail();
-    return stored ? { kind: "ready", email: stored } : { kind: "ask-email" };
-  });
-  const [emailInput, setEmailInput] = useState("");
+    setState(stored ? { kind: "ready", email: stored } : { kind: "ask-email" });
+  }, []);
 
   // Si el user ya está autenticado (caso: completó el link, o ya tenía sesión),
   // redirigir al home (o a profile si está incompleto).
@@ -46,9 +55,34 @@ export function AuthCallbackScreen() {
     }
   }, [profile?.profileCompleted, router, status]);
 
+  // Si post-submit el provider entra en "error" o vuelve a "unauthenticated"
+  // (ej: signInWithEmailLink OK pero `getMyProfile` falló), reflejarlo en la
+  // UI en vez de quedar pegados en "Ingresando...".
+  useEffect(() => {
+    if (!submittedRef.current) {
+      return;
+    }
+    if (status === "error") {
+      setState({
+        kind: "error",
+        message: errorMessage ?? "No pudimos completar el ingreso. Intentalo de nuevo."
+      });
+      submittedRef.current = false;
+    } else if (status === "unauthenticated") {
+      setState({
+        kind: "error",
+        message: errorMessage ?? "El link expiró o ya fue usado. Pedí uno nuevo."
+      });
+      submittedRef.current = false;
+    } else if (status === "authenticated") {
+      submittedRef.current = false;
+    }
+  }, [errorMessage, status]);
+
   async function handleConfirm(emailOverride?: string) {
     const email = (emailOverride ?? (state.kind === "ready" ? state.email : "")).trim();
     setState({ kind: "submitting" });
+    submittedRef.current = true;
     clearError();
 
     try {
@@ -60,6 +94,7 @@ export function AuthCallbackScreen() {
         ? error.message
         : "No pudimos completar el ingreso por email.";
       setState({ kind: "error", message });
+      submittedRef.current = false;
     }
   }
 
@@ -81,6 +116,14 @@ export function AuthCallbackScreen() {
             Hacé click para entrar a tu Mundial.
           </p>
         </div>
+
+        {state.kind === "loading" ? (
+          <div className="grid gap-3">
+            <Button disabled fullWidth className="landing-btn-magic">
+              Verificando link...
+            </Button>
+          </div>
+        ) : null}
 
         {state.kind === "invalid-link" ? (
           <div className="grid gap-4">
