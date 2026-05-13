@@ -36,6 +36,7 @@ export const matchSummarySchema = z.object({
   isScored: z.boolean(),
   predictionStatus: predictionStatusSchema,
   userPredictionSummary: z.string().min(1).nullable(),
+  userPredictionPoints: z.number().int().nonnegative().nullable(),
   isEditable: z.boolean(),
   ctaLabel: z.string().min(1),
   homeScore90: z.number().int().nonnegative().nullable(),

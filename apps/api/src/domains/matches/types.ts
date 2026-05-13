@@ -102,6 +102,7 @@ export type DerivedMatchViewState = {
   isScored: boolean;
   predictionStatus: PredictionStatus;
   userPredictionSummary: string | null;
+  userPredictionPoints: number | null;
   ctaLabel: string;
 };
 

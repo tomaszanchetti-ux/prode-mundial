@@ -33,6 +33,7 @@ function buildMatchSummary(overrides: Partial<MatchSummary> = {}): MatchSummary 
     isScored: false,
     predictionStatus: "empty",
     userPredictionSummary: null,
+    userPredictionPoints: null,
     isEditable: true,
     ctaLabel: "Predecir",
     homeScore90: null,

@@ -65,6 +65,7 @@ test("GET /api/v1/matches/:matchId returns match detail envelope", async () => {
       isScored: false,
       predictionStatus: "empty",
       userPredictionSummary: null,
+      userPredictionPoints: null,
       isEditable: true,
       ctaLabel: "Predecir",
       officialResult: null,

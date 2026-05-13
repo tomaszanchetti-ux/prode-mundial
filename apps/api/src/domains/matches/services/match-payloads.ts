@@ -136,6 +136,7 @@ export function deriveMatchViewState(
     : baseState;
 
   const userPredictionSummary = formatPredictionSummary(prediction);
+  const userPredictionPoints = prediction?.isScored ? prediction.pointsAwarded : null;
 
   let ctaLabel: string;
   if (derivedState.predictionStatus === "saved_editable") {
@@ -156,6 +157,7 @@ export function deriveMatchViewState(
   return {
     ...derivedState,
     userPredictionSummary,
+    userPredictionPoints,
     ctaLabel
   };
 }
@@ -218,6 +220,7 @@ export function toMatchSummary(
     isScored: state.isScored,
     predictionStatus: state.predictionStatus,
     userPredictionSummary: state.userPredictionSummary,
+    userPredictionPoints: state.userPredictionPoints,
     isEditable: state.isEditable,
     ctaLabel: state.ctaLabel,
     homeScore90: match.homeScore90,

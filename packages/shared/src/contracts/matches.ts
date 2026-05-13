@@ -40,6 +40,7 @@ export type MatchSummary = {
   isScored: boolean;
   predictionStatus: PredictionStatus;
   userPredictionSummary: UserPredictionSummary;
+  userPredictionPoints: number | null;
   isEditable: boolean;
   ctaLabel: string;
   homeScore90: number | null;

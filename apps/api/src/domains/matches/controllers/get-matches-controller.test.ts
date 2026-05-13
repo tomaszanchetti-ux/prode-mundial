@@ -72,6 +72,7 @@ test("GET /api/v1/matches returns envelope with validated query forwarded to ser
           isScored: false,
           predictionStatus: "empty",
           userPredictionSummary: null,
+          userPredictionPoints: null,
           isEditable: true,
           ctaLabel: "Predecir"
         }
