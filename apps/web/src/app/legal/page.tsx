@@ -1,22 +1,45 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Card } from "@prode/ui";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { LanguageToggle } from "@/components/layout/language-toggle";
 import { SupportNav } from "@/components/layout/support-nav";
 import { openConsentPreferences } from "@/lib/consent/consent-events";
 
-type LegalTab = "summary" | "terms" | "privacy" | "cookies";
+type LegalTab = "summary" | "terms" | "payments" | "privacy" | "cookies";
+
+const HASH_TO_TAB: Record<string, LegalTab> = {
+  "#pagos": "payments",
+  "#payments": "payments",
+  "#refunds": "payments",
+  "#reembolsos": "payments",
+  "#terminos": "terms",
+  "#terms": "terms",
+  "#privacy": "privacy",
+  "#privacidad": "privacy",
+  "#cookies": "cookies"
+};
 
 export default function LegalPage() {
   const { locale } = useLocale();
   const t = (es: string, en: string) => copyForLocale(locale, es, en);
   const [activeTab, setActiveTab] = useState<LegalTab>("summary");
 
+  // Permite linkear directo a una tab desde URLs externas (ej. Stripe Dashboard
+  // → Public details → Refund policy URL: prodemundial.org/legal#pagos).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const initialTab = HASH_TO_TAB[window.location.hash.toLowerCase()];
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, []);
+
   const tabs: Array<{ key: LegalTab; label: string }> = [
     { key: "summary", label: t("Resumen", "Summary") },
     { key: "terms", label: t("Términos", "Terms") },
+    { key: "payments", label: t("Pagos", "Payments") },
     { key: "privacy", label: t("Privacidad", "Privacy") },
     { key: "cookies", label: t("Cookies", "Cookies") }
   ];
@@ -58,6 +81,7 @@ export default function LegalPage() {
 
       {activeTab === "summary" ? <SummarySection t={t} /> : null}
       {activeTab === "terms" ? <TermsSection t={t} /> : null}
+      {activeTab === "payments" ? <PaymentsSection t={t} /> : null}
       {activeTab === "privacy" ? <PrivacySection t={t} /> : null}
       {activeTab === "cookies" ? <CookiesSection t={t} /> : null}
 
@@ -206,6 +230,113 @@ function TermsSection({ t }: { t: Copy }) {
             <li>{t("Decisiones tomadas en base al juego", "Decisions taken based on the game")}</li>
             <li>{t("Fallos técnicos externos", "External technical failures")}</li>
           </ul>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function PaymentsSection({ t }: { t: Copy }) {
+  return (
+    <Card elevated className="gap-4 p-5">
+      <div className="grid gap-1">
+        <span className="typo-eyebrow">{t("💳 PAGOS Y REEMBOLSOS", "💳 PAYMENTS & REFUNDS")}</span>
+        <h2 className="typo-h3 m-0 text-text-primary">
+          {t("Plan Gold y política de reembolsos", "Gold plan and refund policy")}
+        </h2>
+      </div>
+
+      <div className="grid gap-4 legal-section">
+        <div className="grid gap-1">
+          <h3>{t("1. Plan Gold", "1. Gold plan")}</h3>
+          <p>
+            {t(
+              "El plan Gold es un pago único de $5 USD que da acceso a ligas ilimitadas y experiencia sin anuncios durante todo el ciclo del Mundial 2026. No es una suscripción recurrente: no se renueva automáticamente ni se cobra de nuevo al finalizar el torneo.",
+              "Gold is a one-time payment of $5 USD that grants unlimited leagues and an ad-free experience for the full World Cup 2026 cycle. It is not a recurring subscription: it does not auto-renew and is not charged again after the tournament."
+            )}
+          </p>
+        </div>
+
+        <div className="grid gap-1">
+          <h3>{t("2. Procesamiento del pago", "2. Payment processing")}</h3>
+          <p>
+            {t(
+              "Los pagos se procesan a través de Stripe, un proveedor PCI DSS Level 1 certificado. Prode Mundial no almacena ni accede a los datos de tu tarjeta. Recibimos solo la confirmación del pago.",
+              "Payments are processed through Stripe, a PCI DSS Level 1 certified provider. Prode Mundial does not store or access your card details. We only receive the payment confirmation."
+            )}
+          </p>
+        </div>
+
+        <div className="grid gap-1">
+          <h3 id="refunds">{t("3. Reembolsos", "3. Refunds")}</h3>
+          <p>
+            {t(
+              "El plan Gold es un pago único por un servicio digital de acceso inmediato. Al completar el pago, aceptás expresamente que el servicio comienza a ejecutarse y renunciás al derecho de desistimiento de 14 días previsto por la normativa de consumo de la UE (Directiva 2011/83/UE, art. 16.m).",
+              "Gold is a one-time payment for an immediately accessible digital service. By completing the purchase you expressly accept that the service starts executing and you waive the 14-day right of withdrawal granted by EU consumer law (Directive 2011/83/EU, art. 16.m)."
+            )}
+          </p>
+          <p>
+            {t(
+              "Aun así, reembolsamos íntegramente en los siguientes casos:",
+              "Even so, we issue a full refund in the following cases:"
+            )}
+          </p>
+          <ul>
+            <li>
+              {t(
+                "Cobro duplicado: dos o más cargos por el mismo pago.",
+                "Duplicate charge: two or more charges for the same payment."
+              )}
+            </li>
+            <li>
+              {t(
+                "Error técnico verificable que impida usar el servicio Gold durante más de 48 horas.",
+                "Verifiable technical error preventing use of the Gold service for more than 48 hours."
+              )}
+            </li>
+            <li>
+              {t(
+                "Cargo no autorizado o fraude reportado dentro de los 30 días.",
+                "Unauthorized charge or fraud reported within 30 days."
+              )}
+            </li>
+          </ul>
+          <p>
+            {t(
+              "Las solicitudes de reembolso deben enviarse a hola@prode-mundial.app dentro de los 7 días desde el cobro, incluyendo el email de la cuenta y el ID de la transacción (recibo de Stripe). Procesamos el reembolso dentro de los 7 días hábiles desde la aprobación; el dinero puede tardar 5-10 días adicionales en aparecer en tu cuenta según tu banco.",
+              "Refund requests must be sent to hola@prode-mundial.app within 7 days of the charge, including the account email and the transaction ID (Stripe receipt). We process approved refunds within 7 business days; the money may take an additional 5-10 days to appear in your account depending on your bank."
+            )}
+          </p>
+        </div>
+
+        <div className="grid gap-1">
+          <h3>{t("4. Disputas (chargebacks)", "4. Disputes (chargebacks)")}</h3>
+          <p>
+            {t(
+              "Si tenés un problema con un cargo, escribinos primero a hola@prode-mundial.app antes de iniciar una disputa con tu banco. Es lo más rápido y siempre intentamos resolver de buena fe. Las disputas iniciadas sin contacto previo pueden resultar en la suspensión de la cuenta mientras se resuelve el caso.",
+              "If you have an issue with a charge, please write to hola@prode-mundial.app before initiating a dispute with your bank. It's the fastest path and we always try to resolve in good faith. Disputes opened without prior contact may result in the account being suspended while the case is resolved."
+            )}
+          </p>
+        </div>
+
+        <div className="grid gap-1">
+          <h3>{t("5. Impuestos (IVA)", "5. Taxes (VAT)")}</h3>
+          <p>
+            {t(
+              "El precio de $5 USD incluye el IVA aplicable según tu país de residencia (21% en España). Si necesitás una factura con tu NIF/CIF para deducir IVA como empresa o autónomo, escribinos a hola@prode-mundial.app dentro de los 30 días del cobro.",
+              "The $5 USD price includes applicable VAT according to your country of residence (21% in Spain). If you need an invoice with your VAT number to deduct VAT as a company or freelancer, write to hola@prode-mundial.app within 30 days of the charge."
+            )}
+          </p>
+        </div>
+
+        <div className="grid gap-1">
+          <h3>{t("6. Cambios al plan", "6. Plan changes")}</h3>
+          <p>
+            {t(
+              "Si en algún momento modificamos el alcance del plan Gold (features incluidas, precio, etc.), los cambios solo aplicarán a nuevas compras. Quienes ya hayan comprado Gold mantienen las condiciones vigentes al momento del pago hasta el final del Mundial 2026.",
+              "If at any point we modify the scope of the Gold plan (included features, pricing, etc.), the changes only apply to new purchases. Users who already bought Gold keep the conditions in effect at the time of payment until the end of the World Cup 2026."
+            )}
+          </p>
         </div>
       </div>
     </Card>
