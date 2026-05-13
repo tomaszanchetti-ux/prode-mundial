@@ -79,8 +79,8 @@ gcloud run deploy "$SERVICE_NAME" \
   --min-instances=0 \
   --max-instances=5 \
   --timeout=60s \
-  --set-env-vars="^@@^NODE_ENV=production@@PRODE_ALLOWED_ORIGINS=${PRODE_ALLOWED_ORIGINS:-https://app.prodemundial.org,https://prodemundial.org,https://prode-mundial-2026--prode-mundial-4e419.europe-west4.hosted.app,https://prode-mundial-4e419.web.app,https://prode-mundial-4e419.firebaseapp.com,http://localhost:3000}@@NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL:-https://app.prodemundial.org}" \
-  --set-secrets="FIREBASE_PROJECT_ID=FIREBASE_PROJECT_ID:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest,FOOTBALL_DATA_API_KEY=FOOTBALL_DATA_API_KEY:latest,PRODE_ADMIN_EMAILS=PRODE_ADMIN_EMAILS:latest"
+  --set-env-vars="^@@^NODE_ENV=production@@PRODE_ALLOWED_ORIGINS=${PRODE_ALLOWED_ORIGINS:-https://app.prodemundial.org,https://prodemundial.org,https://prode-mundial-2026--prode-mundial-4e419.europe-west4.hosted.app,https://prode-mundial-4e419.web.app,https://prode-mundial-4e419.firebaseapp.com,http://localhost:3000}@@NEXT_PUBLIC_WEB_URL=${NEXT_PUBLIC_WEB_URL:-https://app.prodemundial.org}@@STRIPE_ENABLED=${STRIPE_ENABLED:-true}@@STRIPE_GOLD_PRICE_ID=${STRIPE_GOLD_PRICE_ID:-price_1TWdDHKGvpi7gVv5rtdkD3bb}" \
+  --set-secrets="FIREBASE_PROJECT_ID=FIREBASE_PROJECT_ID:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest,FOOTBALL_DATA_API_KEY=FOOTBALL_DATA_API_KEY:latest,PRODE_ADMIN_EMAILS=PRODE_ADMIN_EMAILS:latest,STRIPE_SECRET_KEY=STRIPE_SECRET_KEY:latest,STRIPE_WEBHOOK_SECRET=STRIPE_WEBHOOK_SECRET:latest"
 
 URL="$(gcloud run services describe "$SERVICE_NAME" \
   --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')"
