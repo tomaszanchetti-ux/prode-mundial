@@ -31,7 +31,9 @@ export const DEMO_GUEST_USERS: UserProfile[] = [
     exactHits: 0,
     correctSigns: 0,
     leaguesCount: 0,
-    profileCompleted: true
+    profileCompleted: true,
+    plan: "free",
+    goldUpgradedAt: null
   },
   {
     userId: "usr_demo_guest_2",
@@ -44,7 +46,9 @@ export const DEMO_GUEST_USERS: UserProfile[] = [
     exactHits: 0,
     correctSigns: 0,
     leaguesCount: 0,
-    profileCompleted: true
+    profileCompleted: true,
+    plan: "free",
+    goldUpgradedAt: null
   },
   {
     userId: "usr_demo_guest_3",
@@ -57,7 +61,9 @@ export const DEMO_GUEST_USERS: UserProfile[] = [
     exactHits: 0,
     correctSigns: 0,
     leaguesCount: 0,
-    profileCompleted: true
+    profileCompleted: true,
+    plan: "free",
+    goldUpgradedAt: null
   }
 ];
 
@@ -72,7 +78,9 @@ export const DEMO_ANCHOR_FALLBACK: UserProfile = {
   exactHits: 0,
   correctSigns: 0,
   leaguesCount: 0,
-  profileCompleted: true
+  profileCompleted: true,
+  plan: "free",
+  goldUpgradedAt: null
 };
 
 export function buildMembershipId(leagueId: string, userId: string) {

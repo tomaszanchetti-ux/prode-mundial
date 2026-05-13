@@ -1,3 +1,5 @@
+import type { UserPlan } from "./billing";
+
 export type AuthProvider = "google" | "magic_link";
 
 export type UserProfile = {
@@ -12,4 +14,6 @@ export type UserProfile = {
   correctSigns: number;
   leaguesCount: number;
   profileCompleted: boolean;
+  plan: UserPlan;
+  goldUpgradedAt: string | null;
 };

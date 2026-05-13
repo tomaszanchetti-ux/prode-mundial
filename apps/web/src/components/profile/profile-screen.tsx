@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import type { UpdateProfileInput } from "@prode/shared";
 import Link from "next/link";
 import { Button, Card, ErrorCard } from "@prode/ui";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
-import { updateMyProfile } from "@/lib/api/client";
+import { ApiClientError, createBillingCheckout, updateMyProfile } from "@/lib/api/client";
 import { PreferencesSection } from "@/components/profile/preferences-section";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { openConsentPreferences } from "@/lib/consent/consent-events";
@@ -28,12 +28,17 @@ export function ProfileScreen() {
   const [formState, setFormState] = useState<FormState>({ displayName: "", country: "" });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
+  const [upgradeNotice, setUpgradeNotice] = useState<string | null>(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { logout, profile, refreshProfile, user } = useAuth();
   const { locale } = useLocale();
   const t = (es: string, en: string) => copyForLocale(locale, es, en);
+
+  const isGold = profile?.plan === "gold";
 
   useEffect(() => {
     if (!profile) {
@@ -42,6 +47,42 @@ export function ProfileScreen() {
 
     setFormState(toFormState(profile.displayName, profile.country));
   }, [profile]);
+
+  useEffect(() => {
+    const upgradeStatus = searchParams.get("upgrade");
+    if (upgradeStatus === "cancelled") {
+      setUpgradeNotice(
+        t("Cancelaste el upgrade. Podés volver a intentarlo cuando quieras.", "You cancelled the upgrade. You can try again anytime.")
+      );
+    }
+  }, [searchParams, t]);
+
+  async function handleUpgradeClick() {
+    if (!user || isUpgrading) {
+      return;
+    }
+    setIsUpgrading(true);
+    setUpgradeNotice(null);
+    try {
+      const token = await user.getIdToken();
+      const { url } = await createBillingCheckout(token);
+      window.location.href = url;
+    } catch (error) {
+      if (error instanceof ApiClientError && error.code === "STRIPE_DISABLED") {
+        setUpgradeNotice(
+          t("El pago no está disponible todavía. Volvé en unas horas.", "Payments are not enabled yet. Please try again later.")
+        );
+      } else if (error instanceof ApiClientError && error.code === "STRIPE_ALREADY_GOLD") {
+        setUpgradeNotice(t("Ya tenés el plan Gold activo.", "You already have Gold."));
+        await refreshProfile();
+      } else {
+        setUpgradeNotice(
+          error instanceof Error ? error.message : t("No pudimos iniciar el pago.", "Could not start checkout.")
+        );
+      }
+      setIsUpgrading(false);
+    }
+  }
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target;
@@ -153,24 +194,44 @@ export function ProfileScreen() {
           </h2>
         </div>
 
+        {upgradeNotice ? (
+          <div className="rounded-md border border-border-default bg-bg-interactive px-3 py-2 text-[13px] text-text-secondary">
+            {upgradeNotice}
+          </div>
+        ) : null}
+
         <div className="plan-grid">
-          <a
-            href="https://prodemundial.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="plan-card plan-card-gold"
-            aria-label={t("Conocer plan Gold", "Learn about Gold plan")}
-          >
-            <div className="flex justify-between items-baseline gap-2">
-              <strong className="text-[16px] text-text-primary">Gold</strong>
-              <span className="plan-gold-badge">$5</span>
+          {isGold ? (
+            <div className="plan-card plan-card-gold" aria-label={t("Plan Gold activo", "Gold plan active")}>
+              <div className="flex justify-between items-baseline gap-2">
+                <strong className="text-[16px] text-text-primary">Gold</strong>
+                <span className="plan-gold-badge">{t("ACTIVO ✓", "ACTIVE ✓")}</span>
+              </div>
+              <div className="grid gap-1">
+                <span className="plan-feature">{t("Ligas ilimitadas", "Unlimited leagues")}</span>
+                <span className="plan-feature">{t("20 jugadores por liga", "20 players per league")}</span>
+                <span className="plan-feature">{t("Sin anuncios", "No ads")}</span>
+              </div>
             </div>
-            <div className="grid gap-1">
-              <span className="plan-feature">{t("Ligas ilimitadas", "Unlimited leagues")}</span>
-              <span className="plan-feature">{t("20 jugadores por liga", "20 players per league")}</span>
-              <span className="plan-feature">{t("Sin anuncios", "No ads")}</span>
-            </div>
-          </a>
+          ) : (
+            <button
+              type="button"
+              onClick={handleUpgradeClick}
+              disabled={isUpgrading}
+              className="plan-card plan-card-gold text-left disabled:opacity-60 disabled:cursor-wait"
+              aria-label={t("Hacerse Gold por $5", "Become Gold for $5")}
+            >
+              <div className="flex justify-between items-baseline gap-2">
+                <strong className="text-[16px] text-text-primary">Gold</strong>
+                <span className="plan-gold-badge">{isUpgrading ? t("Procesando…", "Processing…") : "$5"}</span>
+              </div>
+              <div className="grid gap-1">
+                <span className="plan-feature">{t("Ligas ilimitadas", "Unlimited leagues")}</span>
+                <span className="plan-feature">{t("20 jugadores por liga", "20 players per league")}</span>
+                <span className="plan-feature">{t("Sin anuncios", "No ads")}</span>
+              </div>
+            </button>
+          )}
           <a
             href="https://prodemundial.org"
             target="_blank"

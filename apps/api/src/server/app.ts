@@ -1,4 +1,6 @@
 import express from "express";
+import { postCreateCheckoutSessionController } from "../domains/billing/controllers/post-create-checkout-session-controller";
+import { postStripeWebhookController } from "../domains/billing/controllers/post-stripe-webhook-controller";
 import { getHealthController } from "../domains/health/controllers/get-health-controller";
 import { deleteLeagueController } from "../domains/leagues/controllers/delete-league-controller";
 import { deleteLeagueMembershipController } from "../domains/leagues/controllers/delete-league-membership-controller";
@@ -62,6 +64,15 @@ export function createApp() {
 
     next();
   });
+
+  // Stripe webhook needs the raw request body to validate the HMAC signature.
+  // Mount it BEFORE express.json() so the global parser does not consume it.
+  app.post(
+    "/api/v1/billing/webhook",
+    express.raw({ type: "application/json" }),
+    postStripeWebhookController
+  );
+
   app.use(express.json());
 
   app.get("/health", getHealthController);
@@ -94,6 +105,7 @@ export function createApp() {
   app.post("/api/v1/admin/matches/:matchId/result", requireAuth, requireAdmin, postMatchResultController);
   app.patch("/api/v1/me", requireAuth, patchMeController);
   app.post("/api/v1/me/fcm-tokens", requireAuth, postFcmTokenController);
+  app.post("/api/v1/billing/checkout", requireAuth, postCreateCheckoutSessionController);
 
   app.use(errorHandler);
 

@@ -40,5 +40,7 @@ export * from "./schemas/matches";
 export * from "./schemas/points";
 export * from "./schemas/profile";
 export * from "./schemas/tournament";
+export * from "./schemas/billing";
 export * from "./types/api";
+export * from "./types/billing";
 export * from "./types/profile";

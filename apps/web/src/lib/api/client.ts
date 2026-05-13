@@ -32,7 +32,8 @@ import type {
   TournamentProjectionResponse,
   TuMundialResponse,
   UpdateProfileInput,
-  UserProfile
+  UserProfile,
+  CreateBillingCheckoutResponse
 } from "@prode/shared";
 import {
   adjustBestPlayerInputSchema,
@@ -64,7 +65,8 @@ import {
   subChampionPickResponseSchema,
   tournamentProjectionResponseSchema,
   tuMundialResponseSchema,
-  userProfileSchema
+  userProfileSchema,
+  createBillingCheckoutResponseSchema
 } from "@prode/shared";
 import { webConfig } from "@/config/app";
 
@@ -459,6 +461,24 @@ export async function getLeagueStandings(token: string, leagueId: string): Promi
   }
 
   return leagueStandingsResponseSchema.parse(await parseJson<LeagueStandingsResponse>(response));
+}
+
+export async function createBillingCheckout(token: string): Promise<CreateBillingCheckoutResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/billing/checkout`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...withBearer(token)
+    }
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to create checkout (${response.status}).`);
+  }
+
+  return createBillingCheckoutResponseSchema.parse(
+    await parseJson<CreateBillingCheckoutResponse>(response)
+  );
 }
 
 export async function updateMyProfile(token: string, input: UpdateProfileInput): Promise<UserProfile> {

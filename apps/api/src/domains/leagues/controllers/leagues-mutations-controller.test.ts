@@ -75,7 +75,9 @@ test("POST /api/v1/leagues creates a league for the authenticated user", async (
     exactHits: 0,
     correctSigns: 0,
     leaguesCount: 0,
-    profileCompleted: true
+    profileCompleted: true,
+    plan: "free",
+    goldUpgradedAt: null
   }));
   const listMembershipsByUserMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => [
     { membershipId: "lg_1__usr_1", leagueId: "lg_1", userId: "usr_1", role: "owner", joinedAt: "2026-01-01T00:00:00Z" }
@@ -178,7 +180,9 @@ test("POST /api/v1/leagues/join joins an active league by invite code", async ()
     exactHits: 0,
     correctSigns: 0,
     leaguesCount: 0,
-    profileCompleted: true
+    profileCompleted: true,
+    plan: "free",
+    goldUpgradedAt: null
   }));
   const listMembershipsByUserMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => [
     { membershipId: "lg_1__usr_2", leagueId: "lg_1", userId: "usr_2", role: "member", joinedAt: "2026-01-02T00:00:00Z" }
@@ -278,7 +282,9 @@ test("POST /api/v1/leagues/join joins an active league by invite token", async (
     exactHits: 0,
     correctSigns: 0,
     leaguesCount: 0,
-    profileCompleted: true
+    profileCompleted: true,
+    plan: "free",
+    goldUpgradedAt: null
   }));
   const listMembershipsByUserMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => [
     { membershipId: "lg_2__usr_3", leagueId: "lg_2", userId: "usr_3", role: "member", joinedAt: "2026-01-02T00:00:00Z" }
@@ -349,6 +355,7 @@ test("POST /api/v1/leagues/join returns ALREADY_LEAGUE_MEMBER when the user is a
   const listMembershipsByUserMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => [
     { membershipId: "lg_1__usr_2", leagueId: "lg_1", userId: "usr_2", role: "member", joinedAt: "2026-01-02T00:00:00Z" }
   ]);
+  const findProfileMock = mock.method(usersRepository, "findByUserId", async () => null);
 
   try {
     const response = await fetch(buildUrl("/api/v1/leagues/join"), {
@@ -375,6 +382,7 @@ test("POST /api/v1/leagues/join returns ALREADY_LEAGUE_MEMBER when the user is a
     findMembershipMock.mock.restore();
     listMembershipsByLeagueMock.mock.restore();
     listMembershipsByUserMock.mock.restore();
+    findProfileMock.mock.restore();
   }
 });
 
@@ -390,6 +398,7 @@ test("POST /api/v1/leagues blocks creation when user already has MAX_LEAGUES_PER
     { membershipId: "lg_c__usr_full", leagueId: "lg_c", userId: "usr_full", role: "member", joinedAt: "2026-01-03T00:00:00Z" }
   ]);
   const upsertLeagueMock = mock.method(leaguesRepository, "upsertLeague", async () => undefined);
+  const findProfileMock = mock.method(usersRepository, "findByUserId", async () => null);
 
   try {
     const response = await fetch(buildUrl("/api/v1/leagues"), {
@@ -406,6 +415,7 @@ test("POST /api/v1/leagues blocks creation when user already has MAX_LEAGUES_PER
     verifyIdTokenMock.mock.restore();
     listMembershipsByUserMock.mock.restore();
     upsertLeagueMock.mock.restore();
+    findProfileMock.mock.restore();
   }
 });
 
@@ -438,6 +448,7 @@ test("POST /api/v1/leagues/join blocks join when user already has MAX_LEAGUES_PE
     { membershipId: "lg_c__usr_full", leagueId: "lg_c", userId: "usr_full", role: "member", joinedAt: "2026-01-03T00:00:00Z" }
   ]);
   const upsertMembershipMock = mock.method(leagueMembersRepository, "upsertMembership", async () => undefined);
+  const findProfileMock = mock.method(usersRepository, "findByUserId", async () => null);
 
   try {
     const response = await fetch(buildUrl("/api/v1/leagues/join"), {
@@ -457,6 +468,7 @@ test("POST /api/v1/leagues/join blocks join when user already has MAX_LEAGUES_PE
     listMembershipsByLeagueMock.mock.restore();
     listMembershipsByUserMock.mock.restore();
     upsertMembershipMock.mock.restore();
+    findProfileMock.mock.restore();
   }
 });
 
@@ -495,7 +507,7 @@ test("DELETE /api/v1/leagues/:leagueId/membership lets a member leave the league
   const replaceStandingsMock = mock.method(leagueStandingsRepository, "replaceStandings", async () => undefined);
   const findProfileMock = mock.method(usersRepository, "findByUserId", async () => ({
     userId: "usr_member", displayName: "Clara", email: "clara@example.com", country: "ES", photoUrl: null,
-    totalPoints: 0, macroPoints: 0, exactHits: 0, correctSigns: 0, leaguesCount: 1, profileCompleted: true
+    totalPoints: 0, macroPoints: 0, exactHits: 0, correctSigns: 0, leaguesCount: 1, profileCompleted: true, plan: "free", goldUpgradedAt: null
   }));
   const upsertProfileMock = mock.method(usersRepository, "upsertProfile", async () => undefined);
 
@@ -599,7 +611,7 @@ test("DELETE /api/v1/leagues/:leagueId lets the owner delete the league cascade"
   const listMembershipsByUserMock = mock.method(leagueMembersRepository, "listMembershipsByUser", async () => []);
   const findProfileMock = mock.method(usersRepository, "findByUserId", async () => ({
     userId: "any", displayName: "Any", email: "any@example.com", country: null, photoUrl: null,
-    totalPoints: 0, macroPoints: 0, exactHits: 0, correctSigns: 0, leaguesCount: 1, profileCompleted: true
+    totalPoints: 0, macroPoints: 0, exactHits: 0, correctSigns: 0, leaguesCount: 1, profileCompleted: true, plan: "free", goldUpgradedAt: null
   }));
   const upsertProfileMock = mock.method(usersRepository, "upsertProfile", async () => undefined);
 

@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { USER_PLANS } from "../types/billing";
+
+export const userPlanSchema = z.enum(USER_PLANS);
 
 export const userProfileSchema = z.object({
   userId: z.string().min(1),
@@ -11,7 +14,9 @@ export const userProfileSchema = z.object({
   exactHits: z.number().int().nonnegative(),
   correctSigns: z.number().int().nonnegative(),
   leaguesCount: z.number().int().nonnegative(),
-  profileCompleted: z.boolean()
+  profileCompleted: z.boolean(),
+  plan: userPlanSchema,
+  goldUpgradedAt: z.string().min(1).nullable()
 });
 
 export const updateProfileInputSchema = z.object({
