@@ -18,7 +18,8 @@
     "upsert:macro-results": "tsx src/domains/macro-picks/scripts/upsert-macro-results.ts",
     "upsert:best-player-result": "tsx src/domains/macro-picks/scripts/upsert-best-player-result.ts",
     "score:macro": "tsx src/domains/macro-picks/scripts/score-macro.ts",
-    "rebuild:macro": "tsx src/domains/macro-picks/scripts/rebuild-macro-scoring.ts"
+    "rebuild:macro": "tsx src/domains/macro-picks/scripts/rebuild-macro-scoring.ts",
+    "reset:stripe-test": "tsx src/domains/billing/scripts/reset-stripe-test-state.ts"
   },
   "dependencies": {
     "@prode/shared": "workspace:*",
