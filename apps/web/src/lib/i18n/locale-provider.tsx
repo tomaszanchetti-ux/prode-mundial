@@ -54,6 +54,15 @@ export function LocaleProvider({ children }: PropsWithChildren) {
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 
+/**
+ * Lectura no-reactiva del locale actual, para usar fuera del árbol de React
+ * (handlers async, funciones module-level que generan mensajes de error).
+ * Mismo origen que el provider: localStorage → navigator → "es".
+ */
+export function readCurrentLocale(): AppLocale {
+  return readInitialLocale();
+}
+
 export function useLocale() {
   const context = useContext(LocaleContext);
 

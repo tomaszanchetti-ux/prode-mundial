@@ -8,6 +8,7 @@ import { isSignInWithEmailLink } from "firebase/auth";
 import { Button } from "@prode/ui";
 import { APP_ROUTES } from "@prode/shared";
 import { firebaseAuth } from "@/lib/firebase/client";
+import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { resolveNextRoute } from "./login-screen";
 import { readStoredMagicLinkEmail, useAuth } from "./auth-provider";
 
@@ -26,6 +27,8 @@ type CallbackState =
 export function AuthCallbackScreen() {
   const router = useRouter();
   const { status, profile, errorMessage, completeMagicLink, clearError } = useAuth();
+  const { locale } = useLocale();
+  const t = (es: string, en: string) => copyForLocale(locale, es, en);
   // Estado inicial neutro para evitar hydration mismatch — `window` y
   // `localStorage` solo existen en client. Resolvemos el estado real en el
   // useEffect que sigue.
@@ -65,13 +68,13 @@ export function AuthCallbackScreen() {
     if (status === "error") {
       setState({
         kind: "error",
-        message: errorMessage ?? "No pudimos completar el ingreso. Intentalo de nuevo."
+        message: errorMessage ?? t("No pudimos completar el ingreso. Intentalo de nuevo.", "We couldn't complete your sign-in. Try again.")
       });
       submittedRef.current = false;
     } else if (status === "unauthenticated") {
       setState({
         kind: "error",
-        message: errorMessage ?? "El link expiró o ya fue usado. Pedí uno nuevo."
+        message: errorMessage ?? t("El link expiró o ya fue usado. Pedí uno nuevo.", "The link expired or was already used. Request a new one.")
       });
       submittedRef.current = false;
     } else if (status === "authenticated") {
@@ -92,7 +95,7 @@ export function AuthCallbackScreen() {
     } catch (error) {
       const message = error instanceof Error
         ? error.message
-        : "No pudimos completar el ingreso por email.";
+        : t("No pudimos completar el ingreso por email.", "We couldn't complete your email sign-in.");
       setState({ kind: "error", message });
       submittedRef.current = false;
     }
@@ -111,16 +114,16 @@ export function AuthCallbackScreen() {
     <main className="landing-bg-dark min-h-[100dvh] grid place-items-center px-6">
       <div className="w-full max-w-[420px] grid gap-8 text-center">
         <div className="grid gap-3">
-          <h1 className="landing-title">Confirmá tu ingreso.</h1>
+          <h1 className="landing-title">{t("Confirmá tu ingreso.", "Confirm your sign-in.")}</h1>
           <p className="landing-subtitle">
-            Hacé click para entrar a tu Mundial.
+            {t("Hacé click para entrar a tu Mundial.", "Click to enter your World Cup.")}
           </p>
         </div>
 
         {state.kind === "loading" ? (
           <div className="grid gap-3">
             <Button disabled fullWidth className="landing-btn-magic">
-              Verificando link...
+              {t("Verificando link...", "Verifying link...")}
             </Button>
           </div>
         ) : null}
@@ -128,11 +131,11 @@ export function AuthCallbackScreen() {
         {state.kind === "invalid-link" ? (
           <div className="grid gap-4">
             <div className="landing-alert landing-alert-error" role="status">
-              Este link no es válido o ya expiró. Pedí uno nuevo desde el login.
+              {t("Este link no es válido o ya expiró. Pedí uno nuevo desde el login.", "This link is invalid or has expired. Request a new one from the login.")}
             </div>
             <Link href={APP_ROUTES.login} className="block">
               <Button variant="secondary" fullWidth className="landing-btn-magic">
-                Volver al login
+                {t("Volver al login", "Back to login")}
               </Button>
             </Link>
           </div>
@@ -144,12 +147,12 @@ export function AuthCallbackScreen() {
               onClick={() => handleConfirm()}
               fullWidth
               className="landing-btn-magic"
-              aria-label={`Ingresar como ${state.email}`}
+              aria-label={t(`Ingresar como ${state.email}`, `Sign in as ${state.email}`)}
             >
-              Ingresá aquí
+              {t("Ingresá aquí", "Sign in here")}
             </Button>
             <p className="text-white/56 text-[13px] leading-[1.45]">
-              Vas a entrar como <span className="text-white/82">{state.email}</span>
+              {t("Vas a entrar como", "You'll sign in as")} <span className="text-white/82">{state.email}</span>
             </p>
           </div>
         ) : null}
@@ -157,7 +160,7 @@ export function AuthCallbackScreen() {
         {state.kind === "ask-email" ? (
           <form onSubmit={handleEmailSubmit} className="grid gap-3">
             <p className="text-white/72 text-[14px] leading-[1.5]">
-              Confirmá el email donde recibiste el link para continuar.
+              {t("Confirmá el email donde recibiste el link para continuar.", "Confirm the email where you received the link to continue.")}
             </p>
             <input
               type="email"
@@ -170,7 +173,7 @@ export function AuthCallbackScreen() {
               aria-label="Email"
             />
             <Button type="submit" fullWidth className="landing-btn-magic">
-              Ingresá aquí
+              {t("Ingresá aquí", "Sign in here")}
             </Button>
           </form>
         ) : null}
@@ -178,7 +181,7 @@ export function AuthCallbackScreen() {
         {state.kind === "submitting" ? (
           <div className="grid gap-3">
             <Button disabled fullWidth className="landing-btn-magic">
-              Ingresando...
+              {t("Ingresando...", "Signing in...")}
             </Button>
           </div>
         ) : null}
@@ -190,18 +193,18 @@ export function AuthCallbackScreen() {
             </div>
             <Link href={APP_ROUTES.login} className="block">
               <Button variant="secondary" fullWidth className="landing-btn-magic">
-                Volver a empezar
+                {t("Volver a empezar", "Start over")}
               </Button>
             </Link>
           </div>
         ) : null}
 
         <p className="text-white/40 text-[12px] leading-[1.45]">
-          Si el enlace expiró, volvé al{" "}
+          {t("Si el enlace expiró, volvé al", "If the link expired, go back to the")}{" "}
           <Link href={APP_ROUTES.login} className="text-white/72 underline-offset-2 underline">
-            login
+            {t("login", "login")}
           </Link>{" "}
-          y pedí uno nuevo.
+          {t("y pedí uno nuevo.", "and request a new one.")}
         </p>
       </div>
     </main>

@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "./auth-provider";
+import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { LoginBlock } from "./login-block";
 import { resolveNextRoute } from "./login-screen";
 import { SupportNav } from "@/components/layout/support-nav";
@@ -15,6 +16,8 @@ export function LandingMinimal() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { profile, status } = useAuth();
+  const { locale } = useLocale();
+  const t = (es: string, en: string) => copyForLocale(locale, es, en);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -27,11 +30,21 @@ export function LandingMinimal() {
       <div className="flex flex-col items-center justify-center gap-10 py-10 max-w-[420px] mx-auto w-full">
         <div className="grid gap-3 text-center">
           <h1 className="landing-title">
-            Tu Mundial te está
-            <br />
-            esperando.
+            {locale === "en" ? (
+              <>
+                Your World Cup is
+                <br />
+                waiting.
+              </>
+            ) : (
+              <>
+                Tu Mundial te está
+                <br />
+                esperando.
+              </>
+            )}
           </h1>
-          <p className="landing-subtitle">Cada predicción cuenta.</p>
+          <p className="landing-subtitle">{t("Cada predicción cuenta.", "Every prediction counts.")}</p>
         </div>
 
         <LoginBlock />

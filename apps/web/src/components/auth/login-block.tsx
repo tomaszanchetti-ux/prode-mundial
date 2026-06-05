@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import type { FormEvent } from "react";
 import { Button } from "@prode/ui";
+import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { useAuth } from "./auth-provider";
 
 type LoginBlockProps = {
@@ -17,20 +18,25 @@ export function LoginBlock({ onCompleted }: LoginBlockProps) {
     sendMagicLink,
     signInWithGoogle
   } = useAuth();
+  const { locale } = useLocale();
+  const t = (es: string, en: string) => copyForLocale(locale, es, en);
   const [email, setEmail] = useState("");
   const [localMessage, setLocalMessage] = useState<string | null>(null);
+  const [localTone, setLocalTone] = useState<"success" | "error" | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleGoogleLogin() {
     setIsSubmitting(true);
     setLocalMessage(null);
+    setLocalTone(null);
     clearError();
 
     try {
       await signInWithGoogle();
       onCompleted?.();
     } catch (error) {
-      setLocalMessage(error instanceof Error ? error.message : "No pudimos abrir Google Sign-In.");
+      setLocalMessage(error instanceof Error ? error.message : t("No pudimos abrir Google Sign-In.", "We couldn't open Google Sign-In."));
+      setLocalTone("error");
     } finally {
       setIsSubmitting(false);
     }
@@ -40,20 +46,24 @@ export function LoginBlock({ onCompleted }: LoginBlockProps) {
     event.preventDefault();
     setIsSubmitting(true);
     setLocalMessage(null);
+    setLocalTone(null);
     clearError();
 
     try {
       await sendMagicLink(email.trim());
-      setLocalMessage("Te enviamos un link. Revisá tu email.");
+      setLocalMessage(t("Te enviamos un link. Revisá tu email.", "We sent you a link. Check your email."));
+      setLocalTone("success");
     } catch (error) {
-      setLocalMessage(error instanceof Error ? error.message : "No pudimos enviar el link.");
+      setLocalMessage(error instanceof Error ? error.message : t("No pudimos enviar el link.", "We couldn't send the link."));
+      setLocalTone("error");
     } finally {
       setIsSubmitting(false);
     }
   }
 
   const helperMessage = errorMessage ?? localMessage;
-  const isSuccess = helperMessage?.includes("Te enviamos") ?? false;
+  // errorMessage del provider siempre es error; localMessage trae su propio tono.
+  const isSuccess = !errorMessage && localTone === "success";
 
   return (
     <div className="w-full grid gap-3">
@@ -63,11 +73,11 @@ export function LoginBlock({ onCompleted }: LoginBlockProps) {
         fullWidth
         className="landing-btn-google"
       >
-        {isSubmitting ? "Conectando..." : "Continuar con Google"}
+        {isSubmitting ? t("Conectando...", "Connecting...") : t("Continuar con Google", "Continue with Google")}
       </Button>
 
       <div className="landing-divider">
-        <span>o</span>
+        <span>{t("o", "or")}</span>
       </div>
 
       <form onSubmit={handleSendMagicLink} className="grid gap-3">
@@ -87,13 +97,13 @@ export function LoginBlock({ onCompleted }: LoginBlockProps) {
           fullWidth
           className="landing-btn-magic"
         >
-          {isSubmitting ? "Enviando..." : "Enviar link"}
+          {isSubmitting ? t("Enviando...", "Sending...") : t("Enviar link", "Send link")}
         </Button>
       </form>
 
       {!isConfigured ? (
         <div className="landing-alert landing-alert-error" role="status">
-          Firebase no está configurado en este entorno.
+          {t("Firebase no está configurado en este entorno.", "Firebase is not configured in this environment.")}
         </div>
       ) : null}
 

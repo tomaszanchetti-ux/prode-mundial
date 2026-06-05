@@ -8,7 +8,7 @@ import { AdSlotCard, Button, Card, ErrorCard, SkeletonCard, SkeletonStandingRow,
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
-import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
+import { copyForLocale, useLocale, type AppLocale } from "@/lib/i18n/locale-provider";
 import {
   ApiClientError,
   createLeague,
@@ -33,11 +33,19 @@ import {
 import { ActionResultCard, CreateLeagueForm, JoinLeagueForm } from "./leagues-forms";
 import { LeagueConfirmModal, type LeagueConfirmAction } from "./league-confirm-modal";
 
-const USER_LEAGUE_LIMIT_COPY =
-  "Solo podés estar en 3 ligas a la vez. Salí de una actual para sumarte a otra o mejorá tu plan para participar en ligas ilimitadas.";
+const userLeagueLimitCopy = (locale: AppLocale) =>
+  copyForLocale(
+    locale,
+    "Solo podés estar en 3 ligas a la vez. Salí de una actual para sumarte a otra o mejorá tu plan para participar en ligas ilimitadas.",
+    "You can only be in 3 leagues at a time. Leave one to join another, or upgrade your plan for unlimited leagues."
+  );
 
-const LEAGUE_CAPACITY_COPY =
-  "Esta liga ya alcanzó el máximo de 20 jugadores. Conocé los planes Gold y Enterprise para ligas con más cupo.";
+const leagueCapacityCopy = (locale: AppLocale) =>
+  copyForLocale(
+    locale,
+    "Esta liga ya alcanzó el máximo de 20 jugadores. Conocé los planes Gold y Enterprise para ligas con más cupo.",
+    "This league already reached the 20-player limit. Check out the Gold and Enterprise plans for larger leagues."
+  );
 
 type ActionErrorState = { message: string; showPlansCta?: boolean } | null;
 
@@ -92,6 +100,7 @@ export function LeaguesScreenView({
   onRetry
 }: LeaguesScreenViewProps) {
   const { locale } = useLocale();
+  const t = (es: string, en: string) => copyForLocale(locale, es, en);
   const options = useMemo<LeagueOption[]>(
     () => [
       { leagueId: GLOBAL_LEAGUE_ID, name: GLOBAL_LEAGUE_NAME, isGlobal: true },
@@ -101,7 +110,7 @@ export function LeaguesScreenView({
   );
 
   const isGlobal = selectedLeagueId === GLOBAL_LEAGUE_ID;
-  const summary = buildSyntheticSummary(points, standings, isGlobal);
+  const summary = buildSyntheticSummary(points, standings, isGlobal, locale);
   const selectedLeague = items.find((league) => league.leagueId === selectedLeagueId) ?? null;
 
   return (
@@ -129,7 +138,7 @@ export function LeaguesScreenView({
           <div className="min-w-0 flex-1">
             <MiScoreSection points={points} compact />
           </div>
-          {!isGlobal && summary.positionLabel !== "Sin puesto" ? (
+          {!isGlobal && summary.hasStanding ? (
             <div className="grid gap-0.5 text-right shrink-0">
               <span className="text-[28px] leading-none font-black text-primary-600 tabular-nums">
                 {summary.positionLabel}
@@ -145,21 +154,21 @@ export function LeaguesScreenView({
 
         {!isGlobal && selectedLeague ? (
           <span className="typo-meta">
-            {selectedLeague.membersCount}/{selectedLeague.memberLimit} jugadores · código {selectedLeague.inviteCode}
+            {selectedLeague.membersCount}/{selectedLeague.memberLimit} {t("jugadores · código", "players · code")} {selectedLeague.inviteCode}
           </span>
         ) : null}
       </Card>
 
       {actionError ? (
         <Card elevated style={{ gap: 12 }}>
-          <span className="typo-small text-error">NO PUDIMOS COMPLETAR LA ACCION</span>
+          <span className="typo-small text-error">{t("NO PUDIMOS COMPLETAR LA ACCIÓN", "WE COULDN'T COMPLETE THE ACTION")}</span>
           <p className="typo-body m-0 text-text-primary">{actionError.message}</p>
           {actionError.showPlansCta ? (
             <Link
               href="/profile#planes"
               className="typo-body font-bold text-primary-600 no-underline"
             >
-              Ver planes →
+              {t("Ver planes →", "View plans →")}
             </Link>
           ) : null}
         </Card>
@@ -265,21 +274,21 @@ export function LeaguesScreenView({
         <div className="grid gap-3">
           {items.length > 0 ? (
             <div className="flex items-center justify-between gap-3 flex-wrap">
-              <span className="typo-eyebrow">MIS LIGAS PRIVADAS</span>
+              <span className="typo-eyebrow">{t("MIS LIGAS PRIVADAS", "MY PRIVATE LEAGUES")}</span>
               <div className="flex gap-4 flex-wrap">
                 <button
                   type="button"
                   onClick={() => onChangeMode(mode === "create" ? null : "create")}
                   className="leagues-text-action"
                 >
-                  {mode === "create" ? "Cancelar" : "+ Crear liga"}
+                  {mode === "create" ? t("Cancelar", "Cancel") : t("+ Crear liga", "+ Create league")}
                 </button>
                 <button
                   type="button"
                   onClick={() => onChangeMode(mode === "join" ? null : "join")}
                   className="leagues-text-action leagues-text-action--muted"
                 >
-                  {mode === "join" ? "Cancelar" : "Unirme"}
+                  {mode === "join" ? t("Cancelar", "Cancel") : t("Unirme", "Join")}
                 </button>
               </div>
             </div>
@@ -305,16 +314,19 @@ export function LeaguesScreenView({
 
           {items.length === 0 && mode === null ? (
             <Card elevated style={{ gap: 12 }}>
-              <h2 className="typo-h3 m-0 text-text-primary">No estás en ninguna liga</h2>
+              <h2 className="typo-h3 m-0 text-text-primary">{t("No estás en ninguna liga", "You're not in any league")}</h2>
               <p className="typo-body m-0 text-text-secondary">
-                Creá una o unite con un código para competir con colegas.
+                {t(
+                  "Creá una o unite con un código para competir con colegas.",
+                  "Create one or join with a code to compete with friends."
+                )}
               </p>
               <div className="flex gap-2 flex-wrap">
                 <Button variant="primary" onClick={() => onChangeMode("create")}>
-                  + Crear liga
+                  {t("+ Crear liga", "+ Create league")}
                 </Button>
                 <Button variant="ghost" onClick={() => onChangeMode("join")}>
-                  Unirme
+                  {t("Unirme", "Join")}
                 </Button>
               </div>
             </Card>
@@ -340,7 +352,9 @@ export function LeaguesScreenView({
                 <div className="grid gap-0.5 min-w-0">
                   <h3 className="typo-h3 m-0 text-text-primary truncate">{league.name}</h3>
                   <span className="text-[13px] leading-[1.35] font-medium text-text-secondary tabular-nums">
-                    {league.position ? `#${league.position} en la liga` : "Sin puesto todavía"}
+                    {league.position
+                      ? t(`#${league.position} en la liga`, `#${league.position} in the league`)
+                      : t("Sin puesto todavía", "No rank yet")}
                   </span>
                   <span className="text-[12px] leading-[1.35] text-text-muted tabular-nums">
                     {league.userPoints} pts · {league.membersCount} jugadores
@@ -387,6 +401,7 @@ export function LeaguesScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status, user } = useAuth();
+  const { locale } = useLocale();
   const [items, setItems] = useState<LeagueSummary[]>([]);
   const [points, setPoints] = useState<PointsResponse | null>(null);
   const [standings, setStandings] = useState<LeagueStandingsResponse | null>(null);
@@ -525,7 +540,7 @@ export function LeaguesScreen() {
       setReloadKey((value) => value + 1);
     } catch (error) {
       if (error instanceof ApiClientError && error.code === "USER_LEAGUE_LIMIT_REACHED") {
-        setActionError({ message: USER_LEAGUE_LIMIT_COPY, showPlansCta: true });
+        setActionError({ message: userLeagueLimitCopy(locale), showPlansCta: true });
       } else {
         setActionError({
           message: error instanceof ApiClientError ? error.message : "No pudimos crear la liga."
@@ -562,9 +577,9 @@ export function LeaguesScreen() {
       setReloadKey((value) => value + 1);
     } catch (error) {
       if (error instanceof ApiClientError && error.code === "USER_LEAGUE_LIMIT_REACHED") {
-        setActionError({ message: USER_LEAGUE_LIMIT_COPY, showPlansCta: true });
+        setActionError({ message: userLeagueLimitCopy(locale), showPlansCta: true });
       } else if (error instanceof ApiClientError && error.code === "LEAGUE_CAPACITY_REACHED") {
-        setActionError({ message: LEAGUE_CAPACITY_COPY, showPlansCta: true });
+        setActionError({ message: leagueCapacityCopy(locale), showPlansCta: true });
       } else {
         setActionError({
           message: error instanceof ApiClientError ? error.message : "No pudimos unirte a la liga."
@@ -602,7 +617,7 @@ export function LeaguesScreen() {
       setReloadKey((value) => value + 1);
     } catch (error) {
       setActionError({
-        message: error instanceof ApiClientError ? error.message : "No pudimos completar la acción."
+        message: error instanceof ApiClientError ? error.message : copyForLocale(locale, "No pudimos completar la acción.", "We couldn't complete the action.")
       });
       setConfirmDialog(null);
     } finally {

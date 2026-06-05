@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { MatchDetail, SaveMatchPredictionInput } from "@prode/shared";
 import { Button, Card, ScoreInput, StatusTag, TeamIdentity } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
+import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
 import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/editability";
 import {
@@ -49,6 +50,9 @@ export function MatchDetailScreenView({
   onSave,
   saveNotice
 }: MatchDetailScreenViewProps) {
+  const { locale } = useLocale();
+  const t = (es: string, en: string) => copyForLocale(locale, es, en);
+
   if (isLoading) {
     return (
       <div className="grid gap-[14px]">
@@ -61,13 +65,13 @@ export function MatchDetailScreenView({
   if (!detail) {
     return (
       <Card elevated style={{ gap: 12 }}>
-        <h1 className="typo-h2 m-0 text-text-primary">Partido no disponible</h1>
+        <h1 className="typo-h2 m-0 text-text-primary">{t("Partido no disponible", "Match not available")}</h1>
         <p className="typo-body m-0 text-text-secondary">
-          {loadErrorMessage ?? "No pudimos cargar este partido."}
+          {loadErrorMessage ?? t("No pudimos cargar este partido.", "We couldn't load this match.")}
         </p>
         <div>
           <Button variant="secondary" onClick={onRetryLoad}>
-            Reintentar
+            {t("Reintentar", "Retry")}
           </Button>
         </div>
       </Card>
@@ -84,8 +88,8 @@ export function MatchDetailScreenView({
 
       <Card elevated style={{ gap: 14, padding: 18 }}>
         <div className="flex justify-between gap-3 items-start">
-          <span className="typo-eyebrow">{toStageLabel(detail)}</span>
-          <StatusTag status={toStatusTone(detail)} label={toStatusLabel(detail)} />
+          <span className="typo-eyebrow">{toStageLabel(detail, locale)}</span>
+          <StatusTag status={toStatusTone(detail)} label={toStatusLabel(detail, locale)} />
         </div>
 
         <div className="grid gap-2.5">
@@ -95,23 +99,25 @@ export function MatchDetailScreenView({
         </div>
 
         <div className="grid gap-1.5">
-          <span className="text-[15px] leading-[1.4] text-text-primary font-semibold">{toKickoffLabel(detail.kickoffAt)}</span>
+          <span className="text-[15px] leading-[1.4] text-text-primary font-semibold">{toKickoffLabel(detail.kickoffAt, locale)}</span>
           <span className="text-[14px] leading-[1.4] text-text-secondary">
-            Deadline: {toKickoffLabel(detail.deadlineAt)}
+            {t("Cierre", "Deadline")}: {toKickoffLabel(detail.deadlineAt, locale)}
           </span>
           {isPredictionWindowNotOpen(detail) ? (
             <span className="text-[14px] leading-[1.4] text-text-secondary">
-              Apertura: {toKickoffLabel(detail.predictionOpensAt)}
+              {t("Apertura", "Opens")}: {toKickoffLabel(detail.predictionOpensAt, locale)}
             </span>
           ) : null}
         </div>
 
         <div className="grid gap-2 p-[14px] surface-inset">
           <span className="text-[14px] leading-[1.35] text-text-primary">
-            {isPredictionWindowNotOpen(detail) ? "Prediccion disponible desde la apertura" : "Editable hasta kickoff"}
+            {isPredictionWindowNotOpen(detail)
+              ? t("Predicción disponible desde la apertura", "Prediction available once the window opens")
+              : t("Editable hasta el inicio", "Editable until kickoff")}
           </span>
           <span className="text-[13px] leading-[1.35] text-text-secondary">
-            Marcador exacto: {detail.scoringRules.exact90Points} pts · Solo resultado: {detail.scoringRules.correctOutcome90Points} pts
+            {t("Marcador exacto", "Exact score")}: {detail.scoringRules.exact90Points} pts · {t("Solo resultado", "Outcome only")}: {detail.scoringRules.correctOutcome90Points} pts
           </span>
         </div>
       </Card>
@@ -121,7 +127,7 @@ export function MatchDetailScreenView({
           <div className="grid gap-3 p-[14px] rounded-md alert-error">
             <p className="typo-body m-0">{saveNotice.message}</p>
             <Button variant="secondary" onClick={onSave} disabled={isSaving}>
-              Reintentar guardado
+              {t("Reintentar guardado", "Retry save")}
             </Button>
           </div>
         ) : null}
@@ -137,7 +143,7 @@ export function MatchDetailScreenView({
           onHomeChange={onHomeChange}
         />
 
-        <p className="typo-body m-0 text-text-secondary">{toHelperText(detail, formState)}</p>
+        <p className="typo-body m-0 text-text-secondary">{toHelperText(detail, formState, locale)}</p>
 
         <Button
           fullWidth
@@ -145,26 +151,26 @@ export function MatchDetailScreenView({
           loading={isSaving}
           onClick={onSave}
         >
-          Guardar
+          {t("Guardar", "Save")}
         </Button>
       </Card>
 
       {detail.officialResult || detail.userPrediction ? (
         <Card elevated style={{ gap: 12, padding: 16 }}>
-          <h2 className="typo-h3 m-0 text-text-primary">Resultado y puntos</h2>
+          <h2 className="typo-h3 m-0 text-text-primary">{t("Resultado y puntos", "Result and points")}</h2>
 
           {detail.userPrediction ? (
             <div className="grid gap-2">
               <p className="typo-body m-0 text-text-primary">
-                Tu prediccion: {detail.userPrediction.homeScorePred}-{detail.userPrediction.awayScorePred}
+                {t("Tu predicción", "Your prediction")}: {detail.userPrediction.homeScorePred}-{detail.userPrediction.awayScorePred}
               </p>
               <p className="typo-body m-0 text-text-secondary">
-                Estado: {detail.userPrediction.status}
+                {t("Estado", "Status")}: {detail.userPrediction.status}
                 {detail.userPrediction.pointsAwarded !== null ? ` · ${detail.userPrediction.pointsAwarded} pts` : ""}
               </p>
               {detail.userPrediction.scoringBreakdown ? (
                 <p className="typo-body m-0 text-text-secondary">
-                  Breakdown: marcador exacto {detail.userPrediction.scoringBreakdown.pointsExact90} · solo resultado {detail.userPrediction.scoringBreakdown.pointsOutcome90}.
+                  {t("Desglose", "Breakdown")}: {t("marcador exacto", "exact score")} {detail.userPrediction.scoringBreakdown.pointsExact90} · {t("solo resultado", "outcome only")} {detail.userPrediction.scoringBreakdown.pointsOutcome90}.
                 </p>
               ) : null}
             </div>
@@ -173,7 +179,7 @@ export function MatchDetailScreenView({
           {detail.officialResult ? (
             <div className="grid gap-2">
               <p className="typo-body m-0 text-text-primary">
-                Resultado oficial: {detail.officialResult.homeScore90}-{detail.officialResult.awayScore90}
+                {t("Resultado oficial", "Official result")}: {detail.officialResult.homeScore90}-{detail.officialResult.awayScore90}
               </p>
             </div>
           ) : null}
@@ -185,6 +191,7 @@ export function MatchDetailScreenView({
 
 export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
   const { status, user } = useAuth();
+  const { locale } = useLocale();
   const [detail, setDetail] = useState<MatchDetail | null>(null);
   const [formState, setFormState] = useState<FormState>({
     homeScorePred: "",
@@ -221,7 +228,7 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
       } catch (error) {
         if (!cancelled) {
           setDetail(null);
-          setLoadErrorMessage(toLoadErrorMessage(error));
+          setLoadErrorMessage(toLoadErrorMessage(error, locale));
         }
       } finally {
         if (!cancelled) {
@@ -235,7 +242,7 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
     return () => {
       cancelled = true;
     };
-  }, [matchId, reloadKey, status, user]);
+  }, [matchId, reloadKey, status, user, locale]);
 
   useEffect(() => {
     if (!saveNotice || saveNotice.tone !== "success") {
@@ -270,12 +277,12 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
       setFormState(toFormState(nextDetail));
       setSaveNotice({
         tone: "success",
-        message: "Prediccion guardada."
+        message: copyForLocale(locale, "Predicción guardada.", "Prediction saved.")
       });
     } catch (error) {
       setSaveNotice({
         tone: "error",
-        message: toErrorMessage(error)
+        message: toErrorMessage(error, locale)
       });
     } finally {
       setIsSaving(false);

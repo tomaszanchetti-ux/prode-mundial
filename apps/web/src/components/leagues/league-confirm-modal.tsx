@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Button } from "@prode/ui";
+import { copyForLocale, useLocale, type AppLocale } from "@/lib/i18n/locale-provider";
 
 export type LeagueConfirmAction = "leave" | "delete";
 
@@ -14,25 +15,39 @@ type Props = {
   onCancel: () => void;
 };
 
-const COPY: Record<LeagueConfirmAction, { title: string; body: string; confirmLabel: string; submittingLabel: string }> = {
-  leave: {
-    title: "Abandonar liga",
-    body: "Si abandonás esta liga vas a salir del ranking. Podés volver a entrar más adelante con el código de invitación.",
-    confirmLabel: "Sí, abandonar",
-    submittingLabel: "Abandonando..."
-  },
-  delete: {
-    title: "Eliminar liga",
-    body: "Vas a eliminar la liga para todos los miembros. Se borran las posiciones y los miembros pierden acceso. Esta acción no se puede deshacer.",
-    confirmLabel: "Sí, eliminar",
-    submittingLabel: "Eliminando..."
+function buildCopy(
+  action: LeagueConfirmAction,
+  locale: AppLocale
+): { title: string; body: string; confirmLabel: string; submittingLabel: string } {
+  const t = (es: string, en: string) => copyForLocale(locale, es, en);
+  if (action === "delete") {
+    return {
+      title: t("Eliminar liga", "Delete league"),
+      body: t(
+        "Vas a eliminar la liga para todos los miembros. Se borran las posiciones y los miembros pierden acceso. Esta acción no se puede deshacer.",
+        "You're about to delete the league for every member. Standings are erased and members lose access. This action can't be undone."
+      ),
+      confirmLabel: t("Sí, eliminar", "Yes, delete"),
+      submittingLabel: t("Eliminando...", "Deleting...")
+    };
   }
-};
+  return {
+    title: t("Abandonar liga", "Leave league"),
+    body: t(
+      "Si abandonás esta liga vas a salir del ranking. Podés volver a entrar más adelante con el código de invitación.",
+      "If you leave this league you'll drop out of the standings. You can rejoin later with the invite code."
+    ),
+    confirmLabel: t("Sí, abandonar", "Yes, leave"),
+    submittingLabel: t("Abandonando...", "Leaving...")
+  };
+}
 
 export function LeagueConfirmModal({ isOpen, action, leagueName, isSubmitting, onConfirm, onCancel }: Props) {
+  const { locale } = useLocale();
+
   if (!isOpen) return null;
 
-  const copy = COPY[action];
+  const copy = buildCopy(action, locale);
 
   return (
     <div
@@ -66,7 +81,7 @@ export function LeagueConfirmModal({ isOpen, action, leagueName, isSubmitting, o
             {isSubmitting ? copy.submittingLabel : copy.confirmLabel}
           </button>
           <Button variant="ghost" onClick={onCancel} disabled={isSubmitting}>
-            Cancelar
+            {copyForLocale(locale, "Cancelar", "Cancel")}
           </Button>
         </div>
       </div>

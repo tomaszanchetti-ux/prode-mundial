@@ -9,7 +9,7 @@ import {
 } from "@prode/shared";
 import { AdSlotCard, Card, ErrorCard, NextMatchHero, SkeletonCard } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
-import { useLocale, copyForLocale } from "@/lib/i18n/locale-provider";
+import { useLocale, copyForLocale, type AppLocale } from "@/lib/i18n/locale-provider";
 import { ApiClientError, getMatches } from "@/lib/api/client";
 import { pickContextualHeroMatch, type ContextualHero } from "@/lib/hero/pick-contextual-hero";
 import { toHeroProps } from "@/lib/hero/to-hero-props";
@@ -24,11 +24,16 @@ import { WorldCupMatchesList } from "./world-cup-matches-list";
 
 type WorldCupTab = "groups" | "matches" | "bracket";
 
-const TAB_LABELS: Record<WorldCupTab, string> = {
-  groups: "Grupos",
-  matches: "Partidos",
-  bracket: "Cruces"
-};
+function tabLabel(tab: WorldCupTab, locale: AppLocale): string {
+  switch (tab) {
+    case "groups":
+      return copyForLocale(locale, "Grupos", "Groups");
+    case "matches":
+      return copyForLocale(locale, "Partidos", "Matches");
+    case "bracket":
+      return copyForLocale(locale, "Cruces", "Knockouts");
+  }
+}
 
 function compareMatchesChronologically(left: MatchSummary, right: MatchSummary) {
   const kickoffDifference = new Date(left.kickoffAt).getTime() - new Date(right.kickoffAt).getTime();
@@ -165,6 +170,7 @@ export function WorldCupScreenView({
 
 export function WorldCupScreen() {
   const { status, user } = useAuth();
+  const { locale } = useLocale();
   const [items, setItems] = useState<MatchSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -233,11 +239,11 @@ export function WorldCupScreen() {
 
   const tabItems = useMemo<SimpleTabItem<WorldCupTab>[]>(
     () => [
-      { key: "groups", label: TAB_LABELS.groups },
-      { key: "matches", label: TAB_LABELS.matches },
-      { key: "bracket", label: TAB_LABELS.bracket }
+      { key: "groups", label: tabLabel("groups", locale) },
+      { key: "matches", label: tabLabel("matches", locale) },
+      { key: "bracket", label: tabLabel("bracket", locale) }
     ],
-    []
+    [locale]
   );
 
   const hero = useMemo(

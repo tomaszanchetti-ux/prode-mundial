@@ -17,6 +17,7 @@ import {
 import type { UserProfile } from "@prode/shared";
 import { APP_ROUTES } from "@prode/shared";
 import { webConfig } from "@/config/app";
+import { copyForLocale, readCurrentLocale } from "@/lib/i18n/locale-provider";
 import { ApiClientError, getMyProfile } from "@/lib/api/client";
 import { ensureFirebaseAuthPersistence, firebaseAuth, firebaseClientEnabled } from "@/lib/firebase/client";
 import { markFirstLogin } from "@/lib/auth/first-login-tracker";
@@ -74,10 +75,13 @@ function getFirebaseErrorCode(error: unknown) {
   return null;
 }
 
-function toFriendlyAuthError(error: unknown, fallbackMessage: string) {
+function toFriendlyAuthError(error: unknown, esFallback: string, enFallback: string) {
+  const locale = readCurrentLocale();
+  const t = (es: string, en: string) => copyForLocale(locale, es, en);
+
   if (error instanceof ApiClientError) {
     if (error.status === 401) {
-      return new Error("Tu sesión venció o dejó de ser válida. Volvé a iniciar sesión.");
+      return new Error(t("Tu sesión venció o dejó de ser válida. Volvé a iniciar sesión.", "Your session expired or is no longer valid. Sign in again."));
     }
 
     return new Error(error.message);
@@ -87,27 +91,27 @@ function toFriendlyAuthError(error: unknown, fallbackMessage: string) {
 
   switch (code) {
     case "auth/popup-closed-by-user":
-      return new Error("Cerraste la ventana de Google antes de terminar el ingreso.");
+      return new Error(t("Cerraste la ventana de Google antes de terminar el ingreso.", "You closed the Google window before finishing sign-in."));
     case "auth/cancelled-popup-request":
-      return new Error("Ya había un intento de login con Google en curso. Esperá un instante e intentá de nuevo.");
+      return new Error(t("Ya había un intento de login con Google en curso. Esperá un instante e intentá de nuevo.", "A Google sign-in attempt was already in progress. Wait a moment and try again."));
     case "auth/popup-blocked":
-      return new Error("Tu navegador bloqueó la ventana de Google. Habilitá popups e intentá nuevamente.");
+      return new Error(t("Tu navegador bloqueó la ventana de Google. Habilitá popups e intentá nuevamente.", "Your browser blocked the Google window. Enable pop-ups and try again."));
     case "auth/invalid-email":
-      return new Error("El email ingresado no es válido.");
+      return new Error(t("El email ingresado no es válido.", "The email you entered is not valid."));
     case "auth/missing-email":
-      return new Error("Necesitamos tu email para enviarte el magic link.");
+      return new Error(t("Necesitamos tu email para enviarte el magic link.", "We need your email to send you the magic link."));
     case "auth/invalid-action-code":
-      return new Error("Este magic link no es válido o ya fue usado.");
+      return new Error(t("Este magic link no es válido o ya fue usado.", "This magic link is invalid or has already been used."));
     case "auth/expired-action-code":
-      return new Error("Este magic link expiró. Pedí uno nuevo para volver a entrar.");
+      return new Error(t("Este magic link expiró. Pedí uno nuevo para volver a entrar.", "This magic link expired. Request a new one to sign in again."));
     case "auth/network-request-failed":
-      return new Error("Tuvimos un problema de red. Revisá tu conexión e intentá nuevamente.");
+      return new Error(t("Tuvimos un problema de red. Revisá tu conexión e intentá nuevamente.", "We hit a network problem. Check your connection and try again."));
     default:
       if (error instanceof Error && error.message.trim().length > 0) {
         return new Error(error.message);
       }
 
-      return new Error(fallbackMessage);
+      return new Error(t(esFallback, enFallback));
   }
 }
 
@@ -182,7 +186,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
               if (isMounted) {
                 setUser(null);
                 setProfile(null);
-                setErrorMessage("Tu sesión venció o dejó de ser válida. Volvé a iniciar sesión.");
+                setErrorMessage(copyForLocale(readCurrentLocale(), "Tu sesión venció o dejó de ser válida. Volvé a iniciar sesión.", "Your session expired or is no longer valid. Sign in again."));
                 setStatus("unauthenticated");
               }
 
@@ -190,7 +194,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
             }
 
             if (isMounted) {
-              setErrorMessage(toFriendlyAuthError(error, "No se pudo cargar la sesión.").message);
+              setErrorMessage(toFriendlyAuthError(error, "No se pudo cargar la sesión.", "We couldn't load your session.").message);
               setStatus("error");
             }
           }
@@ -198,7 +202,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       })
       .catch((error) => {
         if (isMounted) {
-          setErrorMessage(toFriendlyAuthError(error, "No se pudo inicializar Firebase Auth.").message);
+          setErrorMessage(toFriendlyAuthError(error, "No se pudo inicializar Firebase Auth.", "We couldn't initialize Firebase Auth.").message);
           setStatus("error");
         }
       });
@@ -211,7 +215,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   async function signInWithGoogleAction() {
     if (!firebaseAuth) {
-      throw new Error("Firebase Auth no está configurado.");
+      throw new Error(copyForLocale(readCurrentLocale(), "Firebase Auth no está configurado.", "Firebase Auth is not configured."));
     }
 
     setErrorMessage(null);
@@ -222,13 +226,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
       await signInWithPopup(firebaseAuth, new GoogleAuthProvider());
     } catch (error) {
       setStatus(user ? "authenticated" : "unauthenticated");
-      throw toFriendlyAuthError(error, "No pudimos iniciar con Google.");
+      throw toFriendlyAuthError(error, "No pudimos iniciar con Google.", "We couldn't sign you in with Google.");
     }
   }
 
   async function sendMagicLinkAction(email: string) {
     if (!firebaseAuth) {
-      throw new Error("Firebase Auth no está configurado.");
+      throw new Error(copyForLocale(readCurrentLocale(), "Firebase Auth no está configurado.", "Firebase Auth is not configured."));
     }
 
     setErrorMessage(null);
@@ -243,13 +247,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
       });
       storeMagicLinkEmail(email);
     } catch (error) {
-      throw toFriendlyAuthError(error, "No pudimos enviar el magic link.");
+      throw toFriendlyAuthError(error, "No pudimos enviar el magic link.", "We couldn't send the magic link.");
     }
   }
 
   async function completeMagicLinkAction(email: string) {
     if (!firebaseAuth || typeof window === "undefined") {
-      throw new Error("Firebase Auth no está configurado.");
+      throw new Error(copyForLocale(readCurrentLocale(), "Firebase Auth no está configurado.", "Firebase Auth is not configured."));
     }
 
     setErrorMessage(null);
@@ -260,7 +264,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       clearStoredMagicLinkEmail();
     } catch (error) {
       setStatus(user ? "authenticated" : "unauthenticated");
-      throw toFriendlyAuthError(error, "No pudimos completar el ingreso por email.");
+      throw toFriendlyAuthError(error, "No pudimos completar el ingreso por email.", "We couldn't complete your email sign-in.");
     }
   }
 

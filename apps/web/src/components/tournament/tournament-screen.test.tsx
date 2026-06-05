@@ -144,5 +144,5 @@ test("TournamentScreenView renders knockouts empty state when no projection avai
 test("TournamentScreenView shows fallback hero when no hero match is available", () => {
   const html = renderView({ hero: null });
 
-  assert.match(html, /Todo al dia/);
+  assert.match(html, /Todo al día/);
 });

@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { resolveTeamIdentity, type BestPlayerRosterEntry } from "@prode/shared";
 import { TeamIdentity } from "@prode/ui";
+import { copyForLocale, useLocale, type AppLocale } from "@/lib/i18n/locale-provider";
 
 export type PlayerPickableListProps = {
   items: readonly BestPlayerRosterEntry[];
@@ -14,12 +15,23 @@ export type PlayerPickableListProps = {
   emptyMessage?: string;
 };
 
-const POSITION_LABEL: Record<BestPlayerRosterEntry["position"], string> = {
+const POSITION_LABEL_ES: Record<BestPlayerRosterEntry["position"], string> = {
   GK: "ARQ",
   DEF: "DEF",
   MID: "MED",
   FWD: "DEL"
 };
+
+const POSITION_LABEL_EN: Record<BestPlayerRosterEntry["position"], string> = {
+  GK: "GK",
+  DEF: "DEF",
+  MID: "MID",
+  FWD: "FWD"
+};
+
+function positionLabel(position: BestPlayerRosterEntry["position"], locale: AppLocale): string {
+  return locale === "en" ? POSITION_LABEL_EN[position] : POSITION_LABEL_ES[position];
+}
 
 // Orden de jugadores dentro de cada equipo: por posición y luego por nombre.
 const POSITION_ORDER: Record<BestPlayerRosterEntry["position"], number> = {
@@ -44,8 +56,24 @@ const COUNTRY_ES: Record<string, string> = {
   URU: "Uruguay", USA: "Estados Unidos", UZB: "Uzbekistán"
 };
 
-function teamName(teamId: string): string {
-  return COUNTRY_ES[teamId] ?? teamId;
+// Nombres de selección en inglés por fifaCode (para chips y búsqueda).
+const COUNTRY_EN: Record<string, string> = {
+  ALG: "Algeria", ARG: "Argentina", AUS: "Australia", AUT: "Austria",
+  BEL: "Belgium", BIH: "Bosnia and Herzegovina", BRA: "Brazil", CAN: "Canada",
+  CIV: "Ivory Coast", COD: "DR Congo", COL: "Colombia", CPV: "Cape Verde",
+  CRO: "Croatia", CUW: "Curaçao", CZE: "Czechia", ECU: "Ecuador", EGY: "Egypt",
+  ENG: "England", ESP: "Spain", FRA: "France", GER: "Germany", GHA: "Ghana",
+  HAI: "Haiti", IRN: "Iran", IRQ: "Iraq", JOR: "Jordan", JPN: "Japan",
+  KOR: "South Korea", KSA: "Saudi Arabia", MAR: "Morocco", MEX: "Mexico",
+  NED: "Netherlands", NOR: "Norway", NZL: "New Zealand", PAN: "Panama",
+  PAR: "Paraguay", POR: "Portugal", QAT: "Qatar", RSA: "South Africa", SCO: "Scotland",
+  SEN: "Senegal", SUI: "Switzerland", SWE: "Sweden", TUN: "Tunisia", TUR: "Türkiye",
+  URU: "Uruguay", USA: "United States", UZB: "Uzbekistan"
+};
+
+function teamName(teamId: string, locale: AppLocale): string {
+  const map = locale === "en" ? COUNTRY_EN : COUNTRY_ES;
+  return map[teamId] ?? COUNTRY_ES[teamId] ?? teamId;
 }
 
 function fold(s: string): string {
@@ -66,9 +94,13 @@ export function PlayerPickableList({
   onSelect,
   disabledItems,
   disabledHint,
-  searchPlaceholder = "Buscar jugador o equipo...",
-  emptyMessage = "No se encontraron jugadores."
+  searchPlaceholder,
+  emptyMessage
 }: PlayerPickableListProps) {
+  const { locale } = useLocale();
+  const t = (es: string, en: string) => copyForLocale(locale, es, en);
+  const placeholder = searchPlaceholder ?? t("Buscar jugador o equipo...", "Search player or team...");
+  const noResults = emptyMessage ?? t("No se encontraron jugadores.", "No players found.");
   const [query, setQuery] = useState("");
   // Si ya hay un pick guardado, arrancamos parados en su selección.
   const initialTeam = useMemo(() => {
@@ -93,8 +125,8 @@ export function PlayerPickableList({
   }, [items]);
 
   const teamCodes = useMemo(
-    () => Array.from(byTeam.keys()).sort((a, b) => teamName(a).localeCompare(teamName(b))),
-    [byTeam]
+    () => Array.from(byTeam.keys()).sort((a, b) => teamName(a, locale).localeCompare(teamName(b, locale))),
+    [byTeam, locale]
   );
 
   // Resultados de búsqueda global, agrupados por equipo.
@@ -105,7 +137,9 @@ export function PlayerPickableList({
         fold(p.name).includes(q) ||
         fold(p.club).includes(q) ||
         fold(p.teamId).includes(q) ||
-        fold(teamName(p.teamId)).includes(q)
+        fold(teamName(p.teamId, locale)).includes(q) ||
+        fold(teamName(p.teamId, "es")).includes(q) ||
+        fold(teamName(p.teamId, "en")).includes(q)
     );
     const map = new Map<string, BestPlayerRosterEntry[]>();
     for (const p of matches) {
@@ -115,8 +149,8 @@ export function PlayerPickableList({
     }
     return Array.from(map.entries())
       .map(([code, players]) => [code, sortPlayers(players)] as const)
-      .sort(([a], [b]) => teamName(a).localeCompare(teamName(b)));
-  }, [items, q, isSearching]);
+      .sort(([a], [b]) => teamName(a, locale).localeCompare(teamName(b, locale)));
+  }, [items, q, isSearching, locale]);
 
   const teamAllDisabled = (code: string): boolean => {
     if (!disabledItems || disabledItems.size === 0) return false;
@@ -149,10 +183,10 @@ export function PlayerPickableList({
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-[11px] text-text-muted px-1.5 py-0.5 rounded bg-surface-raised">
-              {POSITION_LABEL[player.position]}
+              {positionLabel(player.position, locale)}
             </span>
             {isSelected ? (
-              <span className="text-[13px] text-accent-primary whitespace-nowrap">✓ elegido</span>
+              <span className="text-[13px] text-accent-primary whitespace-nowrap">{t("✓ elegido", "✓ picked")}</span>
             ) : isDisabled && disabledHint ? (
               <span className="text-[11px] text-text-muted whitespace-nowrap">{disabledHint}</span>
             ) : null}
@@ -167,13 +201,13 @@ export function PlayerPickableList({
     return (
       <div className="flex items-center gap-2">
         <TeamIdentity
-          team={{ teamName: teamName(code), fifaCode: identity.fifaCode, flagAsset: identity.flagAsset, flagUrl: identity.flagUrl }}
+          team={{ teamName: teamName(code, locale), fifaCode: identity.fifaCode, flagAsset: identity.flagAsset, flagUrl: identity.flagUrl }}
           size="sm"
           showFlag
           showName={false}
           emphasis="compact"
         />
-        <span className="text-[14px] font-medium text-text-primary">{teamName(code)}</span>
+        <span className="text-[14px] font-medium text-text-primary">{teamName(code, locale)}</span>
         <span className="typo-small text-text-muted">{code}</span>
       </div>
     );
@@ -183,8 +217,8 @@ export function PlayerPickableList({
     <div className="grid gap-3">
       <input
         type="search"
-        aria-label={searchPlaceholder}
-        placeholder={searchPlaceholder}
+        aria-label={placeholder}
+        placeholder={placeholder}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="w-full rounded-md border border-border-default bg-surface-default px-3 py-2 text-[14px] text-text-primary placeholder:text-text-muted outline-none focus:border-accent-primary"
@@ -193,13 +227,13 @@ export function PlayerPickableList({
       {/* MODO BÚSQUEDA: resultados globales agrupados por equipo */}
       {isSearching ? (
         searchGroups.length === 0 ? (
-          <p className="text-[14px] text-text-muted text-center py-4 m-0">{emptyMessage}</p>
+          <p className="text-[14px] text-text-muted text-center py-4 m-0">{noResults}</p>
         ) : (
           <div className="grid gap-3">
             {searchGroups.map(([code, players]) => (
               <div key={code} className="grid gap-1.5">
                 <TeamHeader code={code} />
-                <ul className="grid gap-1 m-0 p-0 list-none" role="listbox" aria-label={`Jugadores de ${teamName(code)}`}>
+                <ul className="grid gap-1 m-0 p-0 list-none" role="listbox" aria-label={t(`Jugadores de ${teamName(code, "es")}`, `${teamName(code, "en")} players`)}>
                   {players.map((player) => (
                     <PlayerRow key={player.playerId} player={player} />
                   ))}
@@ -216,10 +250,10 @@ export function PlayerPickableList({
             onClick={() => setSelectedTeam(null)}
             className="flex items-center gap-1.5 text-[13px] text-text-muted hover:text-text-primary cursor-pointer w-fit"
           >
-            <span aria-hidden>←</span> Todas las selecciones
+            <span aria-hidden>←</span> {t("Todas las selecciones", "All teams")}
           </button>
           <TeamHeader code={selectedTeam} />
-          <ul className="grid gap-1 m-0 p-0 list-none" role="listbox" aria-label={`Jugadores de ${teamName(selectedTeam)}`}>
+          <ul className="grid gap-1 m-0 p-0 list-none" role="listbox" aria-label={t(`Jugadores de ${teamName(selectedTeam, "es")}`, `${teamName(selectedTeam, "en")} players`)}>
             {sortPlayers(byTeam.get(selectedTeam) ?? []).map((player) => (
               <PlayerRow key={player.playerId} player={player} />
             ))}
@@ -228,7 +262,7 @@ export function PlayerPickableList({
       ) : (
         /* MODO SELECTOR: grilla de las 48 selecciones */
         <div className="grid gap-2">
-          <p className="text-[13px] text-text-muted m-0">Elegí una selección o buscá un jugador por nombre.</p>
+          <p className="text-[13px] text-text-muted m-0">{t("Elegí una selección o buscá un jugador por nombre.", "Pick a team or search for a player by name.")}</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {teamCodes.map((code) => {
               const identity = resolveTeamIdentity(code);
@@ -250,16 +284,20 @@ export function PlayerPickableList({
                   }`}
                 >
                   <TeamIdentity
-                    team={{ teamName: teamName(code), fifaCode: identity.fifaCode, flagAsset: identity.flagAsset, flagUrl: identity.flagUrl }}
+                    team={{ teamName: teamName(code, locale), fifaCode: identity.fifaCode, flagAsset: identity.flagAsset, flagUrl: identity.flagUrl }}
                     size="sm"
                     showFlag
                     showName={false}
                     emphasis="compact"
                   />
                   <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-[13px] font-medium text-text-primary truncate">{teamName(code)}</span>
+                    <span className="text-[13px] font-medium text-text-primary truncate">{teamName(code, locale)}</span>
                     <span className="text-[11px] text-text-muted">
-                      {hasPick ? "✓ tu elección" : allOut && disabledHint ? disabledHint : `${count} jugadores`}
+                      {hasPick
+                        ? t("✓ tu elección", "✓ your pick")
+                        : allOut && disabledHint
+                          ? disabledHint
+                          : t(`${count} jugadores`, `${count} players`)}
                     </span>
                   </div>
                 </button>

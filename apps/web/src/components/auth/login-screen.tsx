@@ -6,6 +6,7 @@ import { APP_ROUTES } from "@prode/shared";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "./auth-provider";
+import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { SupportNav } from "@/components/layout/support-nav";
 
 // Lazy-load del form de login: chunk separado del initial bundle.
@@ -35,6 +36,8 @@ export function LoginScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { profile, status, isEmailLink } = useAuth();
+  const { locale } = useLocale();
+  const t = (es: string, en: string) => copyForLocale(locale, es, en);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -55,8 +58,8 @@ export function LoginScreen() {
     <main className="landing-bg-dark min-h-[100dvh] grid grid-rows-[1fr_auto] px-6">
       <div className="flex flex-col items-center justify-center gap-10 py-10 max-w-[420px] mx-auto w-full">
         <div className="grid gap-3 text-center">
-          <h1 className="landing-title">Volvé a tu Mundial.</h1>
-          <p className="landing-subtitle">Entrá para seguir jugando.</p>
+          <h1 className="landing-title">{t("Volvé a tu Mundial.", "Back to your World Cup.")}</h1>
+          <p className="landing-subtitle">{t("Entrá para seguir jugando.", "Sign in to keep playing.")}</p>
         </div>
 
         <LoginBlock />

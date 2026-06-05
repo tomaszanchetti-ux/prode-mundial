@@ -1,4 +1,5 @@
 import type { LeagueStandingEntry, LeagueStandingsResponse, PointsResponse } from "@prode/shared";
+import { copyForLocale, type AppLocale } from "@/lib/i18n/locale-provider";
 
 export const GLOBAL_LEAGUE_ID = "__global__";
 export const GLOBAL_LEAGUE_NAME = "Global";
@@ -13,18 +14,23 @@ export type SyntheticSummary = {
   positionLabel: string;
   pointsLabel: string;
   gapLabel: string | null;
+  // Flag estable (no depende del label localizado) para que la UI decida si
+  // mostrar el chip de posición sin comparar contra un string traducido.
+  hasStanding: boolean;
 };
 
 export function buildSyntheticSummary(
   points: PointsResponse | null,
   standings: LeagueStandingsResponse | null,
-  isGlobal: boolean
+  isGlobal: boolean,
+  locale: AppLocale
 ): SyntheticSummary {
   if (isGlobal) {
     return {
       positionLabel: "Global",
       pointsLabel: `${points?.totalPoints ?? 0} pts`,
-      gapLabel: null
+      gapLabel: null,
+      hasStanding: false
     };
   }
 
@@ -32,22 +38,28 @@ export function buildSyntheticSummary(
 
   if (!myStanding) {
     return {
-      positionLabel: "Sin puesto",
+      positionLabel: copyForLocale(locale, "Sin puesto", "No rank"),
       pointsLabel: `${points?.totalPoints ?? 0} pts`,
-      gapLabel: null
+      gapLabel: null,
+      hasStanding: false
     };
   }
 
-  const gapLabel = buildGapLabel(standings, myStanding.position);
+  const gapLabel = buildGapLabel(standings, myStanding.position, locale);
 
   return {
     positionLabel: `#${myStanding.position}`,
     pointsLabel: `${myStanding.totalPoints} pts`,
-    gapLabel
+    gapLabel,
+    hasStanding: true
   };
 }
 
-function buildGapLabel(standings: LeagueStandingsResponse | null, myPosition: number): string | null {
+function buildGapLabel(
+  standings: LeagueStandingsResponse | null,
+  myPosition: number,
+  locale: AppLocale
+): string | null {
   if (!standings || standings.items.length < 2) {
     return null;
   }
@@ -60,7 +72,11 @@ function buildGapLabel(standings: LeagueStandingsResponse | null, myPosition: nu
       return null;
     }
 
-    return `+${me.totalPoints - runnerUp.totalPoints} al 2°`;
+    return copyForLocale(
+      locale,
+      `+${me.totalPoints - runnerUp.totalPoints} al 2°`,
+      `+${me.totalPoints - runnerUp.totalPoints} over 2nd`
+    );
   }
 
   const leader = standings.items[0];
@@ -71,7 +87,9 @@ function buildGapLabel(standings: LeagueStandingsResponse | null, myPosition: nu
   }
 
   const gap = leader.totalPoints - me.totalPoints;
-  return gap === 0 ? "Empatado con la punta" : `-${gap} de la punta`;
+  return gap === 0
+    ? copyForLocale(locale, "Empatado con la punta", "Tied for the lead")
+    : copyForLocale(locale, `-${gap} de la punta`, `-${gap} off the lead`);
 }
 
 export function toStandingRowClass(entry: Pick<LeagueStandingEntry, "isMe" | "position">) {

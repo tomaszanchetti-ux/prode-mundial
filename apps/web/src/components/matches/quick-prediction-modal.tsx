@@ -6,7 +6,7 @@ import { PredictionModal, ScoreInput } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiClientError, getMatchDetail, saveMatchPrediction } from "@/lib/api/client";
 import { track } from "@/lib/firebase/analytics";
-import { copyForLocale, formatDateTime, useLocale } from "@/lib/i18n/locale-provider";
+import { copyForLocale, formatDateTime, useLocale, type AppLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
 import { toStatusLabel, toStatusTone } from "./match-detail-helpers";
 
@@ -26,12 +26,12 @@ type FormState = {
   awayScorePred: string;
 };
 
-function toStageLabel(detail: MatchDetail) {
+function toStageLabel(detail: MatchDetail, locale: AppLocale) {
   if (detail.stage === "group" && detail.groupId) {
-    return `Grupo ${detail.groupId}`;
+    return copyForLocale(locale, `Grupo ${detail.groupId}`, `Group ${detail.groupId}`);
   }
 
-  const labels: Record<string, string> = {
+  const labelsEs: Record<string, string> = {
     R32: "16vos",
     R16: "Octavos",
     QF: "Cuartos",
@@ -40,6 +40,16 @@ function toStageLabel(detail: MatchDetail) {
     FINAL: "Final"
   };
 
+  const labelsEn: Record<string, string> = {
+    R32: "Round of 32",
+    R16: "Round of 16",
+    QF: "Quarterfinals",
+    SF: "Semifinal",
+    BRONZE: "Third place",
+    FINAL: "Final"
+  };
+
+  const labels = locale === "en" ? labelsEn : labelsEs;
   return labels[detail.stage] ?? detail.stage;
 }
 
@@ -60,20 +70,22 @@ function toFormState(detail: MatchDetail): FormState {
   };
 }
 
-function toErrorMessage(error: unknown) {
+function toErrorMessage(error: unknown, locale: AppLocale) {
   if (error instanceof ApiClientError) {
     if (error.code === "MATCH_LOCKED") {
-      return "Este partido ya se cerro.";
+      return copyForLocale(locale, "Este partido ya se cerró.", "This match is already closed.");
     }
 
     if (error.code === "INVALID_SCORE") {
-      return "Ingresa un marcador valido.";
+      return copyForLocale(locale, "Ingresá un marcador válido.", "Enter a valid score.");
     }
 
     return error.message;
   }
 
-  return error instanceof Error ? error.message : "No pudimos guardar tu prediccion.";
+  return error instanceof Error
+    ? error.message
+    : copyForLocale(locale, "No pudimos guardar tu predicción.", "We couldn't save your prediction.");
 }
 
 export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, onClose, onSaved, onSkip }: QuickPredictionModalProps) {
@@ -159,7 +171,7 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
         onSaved?.();
       }, 320);
     } catch (error) {
-      setErrorMessage(toErrorMessage(error));
+      setErrorMessage(toErrorMessage(error, locale));
       setIsSaving(false);
     }
   }
@@ -195,8 +207,8 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
             : copyForLocale(locale, "Guardar", "Save")
       }
       saving={isSaving}
-      stageLabel={detail ? (locale === "en" && detail.stage === "group" && detail.groupId ? `Group ${detail.groupId}` : toStageLabel(detail)) : copyForLocale(locale, "Partido", "Match")}
-      statusLabel={detail && toStatusTone(detail) !== "saved" ? toStatusLabel(detail) : undefined}
+      stageLabel={detail ? toStageLabel(detail, locale) : copyForLocale(locale, "Partido", "Match")}
+      statusLabel={detail && toStatusTone(detail) !== "saved" ? toStatusLabel(detail, locale) : undefined}
       statusTone={detail && toStatusTone(detail) !== "saved" ? toStatusTone(detail) : undefined}
       title={detail ? `${detail.homeTeam.name} vs ${detail.awayTeam.name}` : copyForLocale(locale, "Tu proximo pendiente", "Your next pending match")}
     >

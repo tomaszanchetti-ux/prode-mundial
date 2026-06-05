@@ -14,7 +14,7 @@ import {
 } from "@prode/shared";
 import { Card, ErrorCard, NextMatchHero, SkeletonCard } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
-import { useLocale } from "@/lib/i18n/locale-provider";
+import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
 import { ApiClientError, getBestPlayerPick, getChampionPick, getMatches, getPreTournamentSummary, getSubChampionPick, getTournamentProjection } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
@@ -85,6 +85,7 @@ export function TournamentScreenView({
   tabItems
 }: TournamentScreenViewProps) {
   const { locale } = useLocale();
+  const t = (es: string, en: string) => copyForLocale(locale, es, en);
 
   const heroProps = hero
     ? toHeroProps({
@@ -97,7 +98,10 @@ export function TournamentScreenView({
 
   const activeTabItem = tabItems.find((item) => item.key === activeTab);
   const progressLabel = activeTabItem
-    ? `${activeTabItem.completed} / ${activeTabItem.total} predicciones guardadas`
+    ? t(
+        `${activeTabItem.completed} / ${activeTabItem.total} predicciones guardadas`,
+        `${activeTabItem.completed} / ${activeTabItem.total} predictions saved`
+      )
     : null;
 
   return (
@@ -106,10 +110,13 @@ export function TournamentScreenView({
         <NextMatchHero {...heroProps} />
       ) : (
         <Card elevated className="hero-worldcup-bg" style={{ gap: 8, padding: 20 }}>
-          <span className="typo-eyebrow">MI MUNDIAL</span>
-          <h1 className="typo-h2 m-0 text-text-primary">Todo al dia</h1>
+          <span className="typo-eyebrow">{t("MI MUNDIAL", "MY WORLD CUP")}</span>
+          <h1 className="typo-h2 m-0 text-text-primary">{t("Todo al día", "All caught up")}</h1>
           <p className="m-0 text-[14px] leading-[1.45] text-text-secondary">
-            No tenes predicciones pendientes ahora. Aprovecha para revisar tus tablas o elegir a tu campeon.
+            {t(
+              "No tenés predicciones pendientes ahora. Aprovechá para revisar tus tablas o elegir a tu campeón.",
+              "You have no pending predictions right now. Take the chance to check your standings or pick your champion."
+            )}
           </p>
         </Card>
       )}
@@ -136,7 +143,7 @@ export function TournamentScreenView({
       ) : null}
 
       {errorMessage ? (
-        <ErrorCard title="No pudimos cargar Predicciones" message={errorMessage} onRetry={onRetry} />
+        <ErrorCard title={t("No pudimos cargar Predicciones", "We couldn't load Predictions")} message={errorMessage} onRetry={onRetry} />
       ) : null}
 
       {!isLoading && !errorMessage ? (
@@ -147,14 +154,17 @@ export function TournamentScreenView({
         ) : projection ? (
           <div className="grid gap-2">
             <span className="typo-small text-text-muted px-1">
-              Se habilitan al cerrar la fase de grupos. Vista preliminar de los cruces:
+              {t(
+                "Se habilitan al cerrar la fase de grupos. Vista preliminar de los cruces:",
+                "They unlock once the group stage closes. Preview of the knockouts:"
+              )}
             </span>
             <BracketPlaceholdersList bracket={projection.bracket} />
           </div>
         ) : (
           <Card elevated style={{ gap: 8, textAlign: "center", justifyItems: "center", padding: 24 }}>
-            <span className="typo-eyebrow">KNOCKOUTS</span>
-            <h2 className="typo-h2 m-0 text-text-primary">Se habilitan al cerrar la fase de grupos.</h2>
+            <span className="typo-eyebrow">{t("CRUCES", "KNOCKOUTS")}</span>
+            <h2 className="typo-h2 m-0 text-text-primary">{t("Se habilitan al cerrar la fase de grupos.", "They unlock once the group stage closes.")}</h2>
           </Card>
         )
       ) : null}
@@ -165,6 +175,7 @@ export function TournamentScreenView({
 export function TournamentScreen() {
   const router = useRouter();
   const { status, user } = useAuth();
+  const { locale } = useLocale();
   const [projection, setProjection] = useState<TournamentProjectionResponse | null>(null);
   const [championPick, setChampionPick] = useState<ChampionPickResponse | null>(null);
   const [subChampionPick, setSubChampionPick] = useState<SubChampionPickResponse | null>(null);
@@ -248,18 +259,18 @@ export function TournamentScreen() {
     () => [
       {
         key: "matches",
-        label: "Partidos",
+        label: copyForLocale(locale, "Partidos", "Matches"),
         completed: countCompleted(groupMatches),
         total: groupMatches.length
       },
       {
         key: "knockouts",
-        label: "Cruces",
+        label: copyForLocale(locale, "Cruces", "Knockouts"),
         completed: countCompleted(knockoutMatches),
         total: knockoutMatches.length
       }
     ],
-    [groupMatches, knockoutMatches]
+    [groupMatches, knockoutMatches, locale]
   );
 
   const hero = useMemo(

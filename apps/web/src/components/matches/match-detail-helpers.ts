@@ -1,6 +1,7 @@
 import type { MatchDetail } from "@prode/shared";
 import { ApiClientError } from "@/lib/api/client";
 import { canEditPrediction, isPredictionWindowNotOpen } from "@/lib/matches/editability";
+import { copyForLocale, toIntlLocale, type AppLocale } from "@/lib/i18n/locale-provider";
 
 export type FormState = {
   homeScorePred: string;
@@ -19,12 +20,12 @@ export function toFormState(detail: MatchDetail): FormState {
   };
 }
 
-export function toStageLabel(detail: MatchDetail) {
+export function toStageLabel(detail: MatchDetail, locale: AppLocale) {
   if (detail.stage === "group" && detail.groupId) {
-    return `Grupo ${detail.groupId}`;
+    return copyForLocale(locale, `Grupo ${detail.groupId}`, `Group ${detail.groupId}`);
   }
 
-  const labels: Record<string, string> = {
+  const labelsEs: Record<string, string> = {
     R32: "Octavos",
     R16: "R16",
     QF: "Cuartos",
@@ -33,11 +34,21 @@ export function toStageLabel(detail: MatchDetail) {
     FINAL: "Final"
   };
 
+  const labelsEn: Record<string, string> = {
+    R32: "Round of 32",
+    R16: "Round of 16",
+    QF: "Quarterfinals",
+    SF: "Semifinal",
+    BRONZE: "Third place",
+    FINAL: "Final"
+  };
+
+  const labels = locale === "en" ? labelsEn : labelsEs;
   return labels[detail.stage] ?? detail.stage;
 }
 
-export function toKickoffLabel(iso: string) {
-  return new Intl.DateTimeFormat("es-AR", {
+export function toKickoffLabel(iso: string, locale: AppLocale) {
+  return new Intl.DateTimeFormat(toIntlLocale(locale), {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -54,32 +65,32 @@ function isClosingSoon(deadlineIso: string, now = new Date()) {
   return diffMs > 0 && diffMs <= CLOSING_SOON_THRESHOLD_MS;
 }
 
-export function toStatusLabel(detail: MatchDetail, now = new Date()) {
+export function toStatusLabel(detail: MatchDetail, locale: AppLocale, now = new Date()) {
   if (detail.predictionStatus === "scored") {
-    return "Puntuado";
+    return copyForLocale(locale, "Puntuado", "Scored");
   }
 
   if (detail.status === "live") {
-    return "En vivo";
+    return copyForLocale(locale, "En vivo", "Live");
   }
 
   if (!canEditPrediction(detail)) {
     if (isPredictionWindowNotOpen(detail, now)) {
-      return "Abre pronto";
+      return copyForLocale(locale, "Abre pronto", "Opens soon");
     }
 
-    return "Cerrado";
+    return copyForLocale(locale, "Cerrado", "Closed");
   }
 
   if (detail.userPrediction) {
-    return "Guardado";
+    return copyForLocale(locale, "Guardado", "Saved");
   }
 
   if (isClosingSoon(detail.deadlineAt, now)) {
-    return "Cierra pronto";
+    return copyForLocale(locale, "Cierra pronto", "Closing soon");
   }
 
-  return "Pendiente";
+  return copyForLocale(locale, "Pendiente", "Pending");
 }
 
 export function toStatusTone(detail: MatchDetail, now = new Date()) {
@@ -106,46 +117,70 @@ export function toStatusTone(detail: MatchDetail, now = new Date()) {
   return "editable" as const;
 }
 
-export function toHelperText(detail: MatchDetail, _formState: FormState) {
+export function toHelperText(detail: MatchDetail, _formState: FormState, locale: AppLocale) {
   if (isPredictionWindowNotOpen(detail)) {
-    return `La prediccion abre ${toKickoffLabel(detail.predictionOpensAt)}.`;
+    return copyForLocale(
+      locale,
+      `La predicción abre ${toKickoffLabel(detail.predictionOpensAt, locale)}.`,
+      `Predictions open ${toKickoffLabel(detail.predictionOpensAt, locale)}.`
+    );
   }
 
   return "";
 }
 
-export function toErrorMessage(error: unknown) {
+export function toErrorMessage(error: unknown, locale: AppLocale) {
   if (error instanceof ApiClientError) {
     if (error.code === "MATCH_LOCKED") {
-      return "Este partido ya esta bloqueado.";
+      return copyForLocale(locale, "Este partido ya está bloqueado.", "This match is already locked.");
     }
 
     if (error.code === "INVALID_SCORE") {
-      return "Ingresa un marcador valido.";
+      return copyForLocale(locale, "Ingresá un marcador válido.", "Enter a valid score.");
     }
 
     return error.message;
   }
 
   if (error instanceof TypeError && error.message === "Failed to fetch") {
-    return "Sin conexion. Revisa tu internet e intentalo de nuevo.";
+    return copyForLocale(
+      locale,
+      "Sin conexión. Revisá tu internet e intentalo de nuevo.",
+      "No connection. Check your internet and try again."
+    );
   }
 
   if (error instanceof DOMException && error.name === "AbortError") {
-    return "La solicitud tardo demasiado. Intentalo de nuevo.";
+    return copyForLocale(
+      locale,
+      "La solicitud tardó demasiado. Intentalo de nuevo.",
+      "The request took too long. Try again."
+    );
   }
 
-  return error instanceof Error ? error.message : "No pudimos guardar tu prediccion. Intentalo de nuevo.";
+  return error instanceof Error
+    ? error.message
+    : copyForLocale(
+        locale,
+        "No pudimos guardar tu predicción. Intentalo de nuevo.",
+        "We couldn't save your prediction. Try again."
+      );
 }
 
-export function toLoadErrorMessage(error: unknown) {
+export function toLoadErrorMessage(error: unknown, locale: AppLocale) {
   if (error instanceof ApiClientError && error.status === 404) {
-    return "No encontramos este partido.";
+    return copyForLocale(locale, "No encontramos este partido.", "We couldn't find this match.");
   }
 
   if (error instanceof TypeError && error.message === "Failed to fetch") {
-    return "Sin conexion. Revisa tu internet e intentalo de nuevo.";
+    return copyForLocale(
+      locale,
+      "Sin conexión. Revisá tu internet e intentalo de nuevo.",
+      "No connection. Check your internet and try again."
+    );
   }
 
-  return error instanceof Error ? error.message : "No pudimos cargar el partido.";
+  return error instanceof Error
+    ? error.message
+    : copyForLocale(locale, "No pudimos cargar el partido.", "We couldn't load the match.");
 }

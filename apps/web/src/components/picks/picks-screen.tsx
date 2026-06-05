@@ -24,6 +24,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
+import { copyForLocale, useLocale, type AppLocale } from "@/lib/i18n/locale-provider";
 import {
   ApiClientError,
   adjustBestPlayerPick,
@@ -44,10 +45,10 @@ import { PlayerPickableList } from "@/components/tournament/player-pickable-list
 
 type PickTab = "champion" | "sub-champion" | "best-player";
 
-const TABS: { id: PickTab; label: string }[] = [
-  { id: "champion", label: "Campeón" },
-  { id: "sub-champion", label: "Sub-Campeón" },
-  { id: "best-player", label: "Balón de Oro" }
+const TABS: { id: PickTab; es: string; en: string }[] = [
+  { id: "champion", es: "Campeón", en: "Champion" },
+  { id: "sub-champion", es: "Sub-Campeón", en: "Runner-up" },
+  { id: "best-player", es: "Balón de Oro", en: "Golden Ball" }
 ];
 
 const ALL_TEAMS: PickableListItem[] = WORLD_CUP_2026_OFFICIAL_GROUPS.flatMap((group) =>
@@ -70,24 +71,27 @@ function resolveTeamData(teamId: string) {
   };
 }
 
-function resolveStatusMeta(status: ChampionPickResponse["status"] | null | undefined): {
+function resolveStatusMeta(
+  status: ChampionPickResponse["status"] | null | undefined,
+  locale: AppLocale
+): {
   label: string;
   tone: StatusTone;
 } {
   switch (status) {
     case "picked":
-      return { label: "Guardado", tone: "saved" };
+      return { label: copyForLocale(locale, "Guardado", "Saved"), tone: "saved" };
     case "locked":
-      return { label: "Bloqueado", tone: "neutral" };
+      return { label: copyForLocale(locale, "Bloqueado", "Locked"), tone: "neutral" };
     case "adjustment_available":
-      return { label: "Ajuste disponible", tone: "live" };
+      return { label: copyForLocale(locale, "Ajuste disponible", "Adjustment available"), tone: "live" };
     case "adjusted":
-      return { label: "Ajustado", tone: "neutral" };
+      return { label: copyForLocale(locale, "Ajustado", "Adjusted"), tone: "neutral" };
     case "scored":
-      return { label: "Puntuado", tone: "scored" };
+      return { label: copyForLocale(locale, "Puntuado", "Scored"), tone: "scored" };
     case "empty":
     default:
-      return { label: "Pendiente", tone: "editable" };
+      return { label: copyForLocale(locale, "Pendiente", "Pending"), tone: "editable" };
   }
 }
 
@@ -119,13 +123,19 @@ type WindowChipProps = {
 };
 
 function WindowChip({ pickWindow, pointValue, closesAt }: WindowChipProps) {
+  const { locale } = useLocale();
   const nowMs = useTicker();
   if (pickWindow === "closed") {
-    return <StatusTag status="neutral" label="Ventana cerrada" />;
+    return <StatusTag status="neutral" label={copyForLocale(locale, "Ventana cerrada", "Window closed")} />;
   }
   const remaining = closesAt ? formatRemaining(new Date(closesAt).getTime(), nowMs) : null;
-  const labelBase = pickWindow === "A" ? `Ventana A · ${pointValue} pts` : `Ventana B · ${pointValue} pts`;
-  const label = remaining ? `${labelBase} · cierra en ${remaining}` : labelBase;
+  const labelBase =
+    pickWindow === "A"
+      ? copyForLocale(locale, `Ventana A · ${pointValue} pts`, `Window A · ${pointValue} pts`)
+      : copyForLocale(locale, `Ventana B · ${pointValue} pts`, `Window B · ${pointValue} pts`);
+  const label = remaining
+    ? copyForLocale(locale, `${labelBase} · cierra en ${remaining}`, `${labelBase} · closes in ${remaining}`)
+    : labelBase;
   return <StatusTag status={pickWindow === "A" ? "live" : "closing-soon"} label={label} />;
 }
 
@@ -153,11 +163,12 @@ type TabsBarProps = {
 };
 
 function TabsBar({ activeTab, onSelect }: TabsBarProps) {
+  const { locale } = useLocale();
   return (
     <div
       className="flex gap-1.5 overflow-x-auto filter-bar-bg px-[2px]"
       role="tablist"
-      aria-label="Tipos de picks"
+      aria-label={copyForLocale(locale, "Tipos de picks", "Pick types")}
     >
       {TABS.map((t) => {
         const isActive = t.id === activeTab;
@@ -172,7 +183,7 @@ function TabsBar({ activeTab, onSelect }: TabsBarProps) {
               isActive ? "filter-chip-active" : "filter-chip-inactive"
             }`}
           >
-            {t.label}
+            {copyForLocale(locale, t.es, t.en)}
           </button>
         );
       })}
@@ -187,6 +198,8 @@ export function PicksScreen() {
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get("tab") as PickTab | null) ?? "champion";
   const { status, user } = useAuth();
+  const { locale } = useLocale();
+  const t = (es: string, en: string) => copyForLocale(locale, es, en);
 
   const [activeTab, setActiveTab] = useState<PickTab>(
     TABS.some((t) => t.id === initialTab) ? initialTab : "champion"
@@ -243,7 +256,7 @@ export function PicksScreen() {
               ? error.message
               : error instanceof Error
                 ? error.message
-                : "No pudimos cargar tus picks."
+                : t("No pudimos cargar tus picks.", "We couldn't load your picks.")
           );
         }
       } finally {
@@ -282,7 +295,7 @@ export function PicksScreen() {
         setFeedbackMessage(response.penaltyNotice);
       } else {
         await saveChampionPick(token, { championTeamId: championSelected });
-        setFeedbackMessage("Mi campeón quedó guardado.");
+        setFeedbackMessage(t("Mi campeón quedó guardado.", "Your champion was saved."));
       }
       track("champion_saved", {
         teamId: championSelected,
@@ -296,7 +309,7 @@ export function PicksScreen() {
           ? error.message
           : error instanceof Error
             ? error.message
-            : "No pudimos guardar tu campeón."
+            : t("No pudimos guardar tu campeón.", "We couldn't save your champion.")
       );
     } finally {
       setIsSaving(false);
@@ -316,7 +329,7 @@ export function PicksScreen() {
         setFeedbackMessage(response.penaltyNotice);
       } else {
         await saveSubChampionPick(token, { subChampionTeamId: subChampionSelected });
-        setFeedbackMessage("Mi sub-campeón quedó guardado.");
+        setFeedbackMessage(t("Mi sub-campeón quedó guardado.", "Your runner-up was saved."));
       }
       track("sub_champion_saved", {
         teamId: subChampionSelected,
@@ -330,7 +343,7 @@ export function PicksScreen() {
           ? error.message
           : error instanceof Error
             ? error.message
-            : "No pudimos guardar tu sub-campeón."
+            : t("No pudimos guardar tu sub-campeón.", "We couldn't save your runner-up.")
       );
     } finally {
       setIsSaving(false);
@@ -350,7 +363,7 @@ export function PicksScreen() {
         setFeedbackMessage(response.penaltyNotice);
       } else {
         await saveBestPlayerPick(token, { bestPlayerId: bestPlayerSelected });
-        setFeedbackMessage("Mi Balón de Oro quedó guardado.");
+        setFeedbackMessage(t("Mi Balón de Oro quedó guardado.", "Your Golden Ball was saved."));
       }
       track("best_player_saved", {
         playerId: bestPlayerSelected,
@@ -364,7 +377,7 @@ export function PicksScreen() {
           ? error.message
           : error instanceof Error
             ? error.message
-            : "No pudimos guardar tu Balón de Oro."
+            : t("No pudimos guardar tu Balón de Oro.", "We couldn't save your Golden Ball.")
       );
     } finally {
       setIsSaving(false);
@@ -372,7 +385,7 @@ export function PicksScreen() {
   }
 
   // Champion tab derived state
-  const championStatusMeta = resolveStatusMeta(championPick?.status);
+  const championStatusMeta = resolveStatusMeta(championPick?.status, locale);
   const championCanEdit = championPick?.status === "empty" || championPick?.status === "picked";
   const championCanAdjust = championPick?.status === "adjustment_available";
   const championInteractive = championCanEdit || championCanAdjust;
@@ -381,7 +394,7 @@ export function PicksScreen() {
     isSaving || !championSelected || championSelected === championPersistedId;
 
   // Sub-champion tab derived state
-  const subStatusMeta = resolveStatusMeta(subChampionPick?.status);
+  const subStatusMeta = resolveStatusMeta(subChampionPick?.status, locale);
   const subCanEdit = subChampionPick?.status === "empty" || subChampionPick?.status === "picked";
   const subCanAdjust = subChampionPick?.status === "adjustment_available";
   const subInteractive = subCanEdit || subCanAdjust;
@@ -391,7 +404,7 @@ export function PicksScreen() {
     isSaving || !subChampionSelected || subChampionSelected === subPersistedId;
 
   // Best-player tab derived state
-  const bestPlayerStatusMeta = resolveStatusMeta(bestPlayerPick?.status);
+  const bestPlayerStatusMeta = resolveStatusMeta(bestPlayerPick?.status, locale);
   const bestPlayerCanEdit = bestPlayerPick?.status === "empty" || bestPlayerPick?.status === "picked";
   const bestPlayerCanAdjust = bestPlayerPick?.status === "adjustment_available";
   const bestPlayerInteractive = bestPlayerCanEdit || bestPlayerCanAdjust;
@@ -468,6 +481,19 @@ export function PicksScreen() {
   const hasSubChampionEliminatedWarning = warnings.some((w) => w.kind === "sub_champion_eliminated");
   const hasBestPlayerEliminatedWarning = warnings.some((w) => w.kind === "best_player_eliminated");
 
+  const eliminatedTeamMessage = t(
+    "El equipo que elegiste no pasó de grupos. Ajustá tu pick para sumar 10 pts.",
+    "The team you picked didn't make it past the group stage. Adjust your pick to score 10 pts."
+  );
+  const sameHalfMessage = t(
+    "Tu campeón y sub-campeón quedaron en la misma mitad del bracket: solo uno puede llegar a la final. Podés ajustar alguno.",
+    "Your champion and runner-up landed in the same half of the bracket: only one can reach the final. You can adjust either one."
+  );
+  const adjustWindowTitle = t("Ventana de ajuste abierta", "Adjustment window open");
+  const savingLabel = t("Guardando...", "Saving...");
+  const adjustLabel = t("Ajustar", "Adjust");
+  const saveLabel = t("Guardar", "Save");
+
   return (
     <div className="grid gap-4">
       <Link
@@ -475,7 +501,7 @@ export function PicksScreen() {
         className="inline-flex items-center gap-1.5 text-[13px] leading-none font-medium text-text-muted hover:text-text-primary transition-colors no-underline w-fit"
       >
         <span aria-hidden="true">←</span>
-        <span>Volver a Predicciones</span>
+        <span>{t("Volver a Predicciones", "Back to Predictions")}</span>
       </Link>
 
       <Card elevated className="hero-worldcup-bg" style={{ gap: 8, padding: 20 }}>
@@ -488,11 +514,19 @@ export function PicksScreen() {
             className="opacity-70"
             priority
           />
-          <span className="typo-eyebrow">MIS PICKS</span>
+          <span className="typo-eyebrow">{t("MIS PICKS", "MY PICKS")}</span>
         </div>
-        <h1 className="typo-h2 m-0 text-text-primary">Elegí al Campeón, Sub-Campeón y Balón de Oro.</h1>
+        <h1 className="typo-h2 m-0 text-text-primary">
+          {t(
+            "Elegí al Campeón, Sub-Campeón y Balón de Oro.",
+            "Pick your Champion, Runner-up and Golden Ball."
+          )}
+        </h1>
         <p className="m-0 text-[13px] leading-[1.45] text-text-secondary">
-          {PICK_WINDOW_POINT_VALUES.A} pts por acierto inicial · {PICK_WINDOW_POINT_VALUES.B} pts si ajustás post-grupos.
+          {t(
+            `${PICK_WINDOW_POINT_VALUES.A} pts por acierto inicial · ${PICK_WINDOW_POINT_VALUES.B} pts si ajustás post-grupos.`,
+            `${PICK_WINDOW_POINT_VALUES.A} pts for an initial correct pick · ${PICK_WINDOW_POINT_VALUES.B} pts if you adjust after the group stage.`
+          )}
         </p>
       </Card>
 
@@ -502,14 +536,14 @@ export function PicksScreen() {
 
       {feedbackMessage ? (
         <div className="grid gap-2 p-4 rounded-md alert-info">
-          <strong className="text-[16px]">Listo</strong>
+          <strong className="text-[16px]">{t("Listo", "Done")}</strong>
           <p className="m-0 text-[14px] leading-[1.45]">{feedbackMessage}</p>
         </div>
       ) : null}
 
       {errorMessage ? (
         <ErrorCard
-          title="No pudimos procesar tu pick"
+          title={t("No pudimos procesar tu pick", "We couldn't process your pick")}
           message={errorMessage}
           onRetry={() => setReloadKey((k) => k + 1)}
         />
@@ -519,7 +553,7 @@ export function PicksScreen() {
       {activeTab === "champion" && !isLoading ? (
         <Card elevated style={{ gap: 12, padding: 16 }}>
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <span className="typo-eyebrow">MI CAMPEÓN</span>
+            <span className="typo-eyebrow">{t("MI CAMPEÓN", "MY CHAMPION")}</span>
             <StatusTag status={championStatusMeta.tone} label={championStatusMeta.label} />
           </div>
           {championPick ? (
@@ -532,23 +566,26 @@ export function PicksScreen() {
 
           {hasChampionEliminatedWarning ? (
             <WarningBanner
-              title="Tu campeón fue eliminado"
-              message="El equipo que elegiste no pasó de grupos. Ajustá tu pick para sumar 10 pts."
+              title={t("Tu campeón fue eliminado", "Your champion is out")}
+              message={eliminatedTeamMessage}
             />
           ) : null}
 
           {hasSameHalfWarning ? (
             <WarningBanner
-              title="Cruce temprano con tu sub-campeón"
-              message="Tu campeón y sub-campeón quedaron en la misma mitad del bracket: solo uno puede llegar a la final. Podés ajustar alguno."
+              title={t("Cruce temprano con tu sub-campeón", "Early clash with your runner-up")}
+              message={sameHalfMessage}
             />
           ) : null}
 
           {championCanAdjust ? (
             <div className="grid gap-1 p-3 rounded-md alert-info">
-              <strong className="text-[14px]">Ventana de ajuste abierta</strong>
+              <strong className="text-[14px]">{adjustWindowTitle}</strong>
               <p className="m-0 text-[13px] leading-[1.45]">
-                Podés cambiar tu campeón, pero si acertás sumás 10 pts en vez de 20.
+                {t(
+                  "Podés cambiar tu campeón, pero si acertás sumás 10 pts en vez de 20.",
+                  "You can change your champion, but a correct pick now scores 10 pts instead of 20."
+                )}
               </p>
             </div>
           ) : null}
@@ -559,7 +596,7 @@ export function PicksScreen() {
               selectedTeamId={championSelected}
               onSelect={(teamId) => setChampionSelected(teamId)}
               disabledItems={championDisabledItems}
-              disabledHint="eliminado"
+              disabledHint={t("eliminado", "eliminated")}
             />
           ) : championPersistedId ? (
             <div className="flex items-center gap-3">
@@ -570,7 +607,7 @@ export function PicksScreen() {
           {championInteractive ? (
             <div className="flex justify-end">
               <Button onClick={() => void handleSaveChampion()} disabled={championSaveDisabled}>
-                {isSaving ? "Guardando..." : championCanAdjust ? "Ajustar" : "Guardar"}
+                {isSaving ? savingLabel : championCanAdjust ? adjustLabel : saveLabel}
               </Button>
             </div>
           ) : null}
@@ -581,7 +618,7 @@ export function PicksScreen() {
       {activeTab === "sub-champion" && !isLoading ? (
         <Card elevated style={{ gap: 12, padding: 16 }}>
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <span className="typo-eyebrow">MI SUB-CAMPEÓN</span>
+            <span className="typo-eyebrow">{t("MI SUB-CAMPEÓN", "MY RUNNER-UP")}</span>
             <StatusTag status={subStatusMeta.tone} label={subStatusMeta.label} />
           </div>
           {subChampionPick ? (
@@ -594,26 +631,26 @@ export function PicksScreen() {
 
           {hasSubChampionEliminatedWarning ? (
             <WarningBanner
-              title="Tu sub-campeón fue eliminado"
-              message="El equipo que elegiste no pasó de grupos. Ajustá tu pick para sumar 10 pts."
+              title={t("Tu sub-campeón fue eliminado", "Your runner-up is out")}
+              message={eliminatedTeamMessage}
             />
           ) : null}
 
           {hasSameHalfWarning ? (
             <WarningBanner
-              title="Cruce temprano con tu campeón"
-              message="Tu campeón y sub-campeón quedaron en la misma mitad del bracket: solo uno puede llegar a la final. Podés ajustar alguno."
+              title={t("Cruce temprano con tu campeón", "Early clash with your champion")}
+              message={sameHalfMessage}
             />
           ) : null}
 
           {subInteractive && !hasChampion ? (
             <div className="grid gap-2 p-3 rounded-md alert-info">
               <p className="m-0 text-[13px] leading-[1.45]">
-                Elegí tu campeón primero.
+                {t("Elegí tu campeón primero.", "Pick your champion first.")}
               </p>
               <div>
                 <Button variant="secondary" onClick={() => switchTab("champion")}>
-                  Elegir campeón
+                  {t("Elegir campeón", "Pick champion")}
                 </Button>
               </div>
             </div>
@@ -621,9 +658,12 @@ export function PicksScreen() {
 
           {subCanAdjust ? (
             <div className="grid gap-1 p-3 rounded-md alert-info">
-              <strong className="text-[14px]">Ventana de ajuste abierta</strong>
+              <strong className="text-[14px]">{adjustWindowTitle}</strong>
               <p className="m-0 text-[13px] leading-[1.45]">
-                Podés cambiar tu sub-campeón. Si comparte mitad con el campeón verás un aviso, pero el pick se guarda igual.
+                {t(
+                  "Podés cambiar tu sub-campeón. Si comparte mitad con el campeón verás un aviso, pero el pick se guarda igual.",
+                  "You can change your runner-up. If it shares a half with your champion you'll see a warning, but the pick is saved anyway."
+                )}
               </p>
             </div>
           ) : null}
@@ -634,7 +674,11 @@ export function PicksScreen() {
               selectedTeamId={subChampionSelected}
               onSelect={(teamId) => setSubChampionSelected(teamId)}
               disabledItems={subDisabledItems}
-              disabledHint={subCanAdjust ? "eliminado / campeón" : "es tu campeón"}
+              disabledHint={
+                subCanAdjust
+                  ? t("eliminado / campeón", "eliminated / champion")
+                  : t("es tu campeón", "your champion")
+              }
             />
           ) : !subInteractive && subPersistedId ? (
             <div className="flex items-center gap-3">
@@ -645,7 +689,7 @@ export function PicksScreen() {
           {subInteractive && hasChampion ? (
             <div className="flex justify-end">
               <Button onClick={() => void handleSaveSubChampion()} disabled={subSaveDisabled}>
-                {isSaving ? "Guardando..." : subCanAdjust ? "Ajustar" : "Guardar"}
+                {isSaving ? savingLabel : subCanAdjust ? adjustLabel : saveLabel}
               </Button>
             </div>
           ) : null}
@@ -656,7 +700,7 @@ export function PicksScreen() {
       {activeTab === "best-player" && !isLoading ? (
         <Card elevated style={{ gap: 12, padding: 16 }}>
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <span className="typo-eyebrow">MI BALÓN DE ORO</span>
+            <span className="typo-eyebrow">{t("MI BALÓN DE ORO", "MY GOLDEN BALL")}</span>
             <StatusTag status={bestPlayerStatusMeta.tone} label={bestPlayerStatusMeta.label} />
           </div>
           {bestPlayerPick ? (
@@ -669,22 +713,31 @@ export function PicksScreen() {
 
           {hasBestPlayerEliminatedWarning ? (
             <WarningBanner
-              title="El equipo de tu jugador fue eliminado"
-              message="El jugador que elegiste quedó fuera del torneo. Ajustá tu pick para sumar 10 pts."
+              title={t("El equipo de tu jugador fue eliminado", "Your player's team is out")}
+              message={t(
+                "El jugador que elegiste quedó fuera del torneo. Ajustá tu pick para sumar 10 pts.",
+                "The player you picked is out of the tournament. Adjust your pick to score 10 pts."
+              )}
             />
           ) : null}
 
           {bestPlayerCanAdjust ? (
             <div className="grid gap-1 p-3 rounded-md alert-info">
-              <strong className="text-[14px]">Ventana de ajuste abierta</strong>
+              <strong className="text-[14px]">{adjustWindowTitle}</strong>
               <p className="m-0 text-[13px] leading-[1.45]">
-                Podés cambiar tu Balón de Oro, pero si acertás sumás 10 pts en vez de 20.
+                {t(
+                  "Podés cambiar tu Balón de Oro, pero si acertás sumás 10 pts en vez de 20.",
+                  "You can change your Golden Ball, but a correct pick now scores 10 pts instead of 20."
+                )}
               </p>
             </div>
           ) : null}
 
           <p className="m-0 text-[13px] leading-[1.45] text-text-secondary">
-            Roster provisional — cuando FIFA publique la nómina oficial vamos a sincronizar los jugadores.
+            {t(
+              "Roster provisional — cuando FIFA publique la nómina oficial vamos a sincronizar los jugadores.",
+              "Provisional roster — once FIFA publishes the official squad lists we'll sync the players."
+            )}
           </p>
 
           {bestPlayerInteractive ? (
@@ -693,7 +746,7 @@ export function PicksScreen() {
               selectedPlayerId={bestPlayerSelected}
               onSelect={(playerId) => setBestPlayerSelected(playerId)}
               disabledItems={bestPlayerDisabledItems}
-              disabledHint="equipo eliminado"
+              disabledHint={t("equipo eliminado", "team eliminated")}
             />
           ) : bestPlayerPersistedId ? (
             <BestPlayerSummary playerId={bestPlayerPersistedId} />
@@ -702,7 +755,7 @@ export function PicksScreen() {
           {bestPlayerInteractive ? (
             <div className="flex justify-end">
               <Button onClick={() => void handleSaveBestPlayer()} disabled={bestPlayerSaveDisabled}>
-                {isSaving ? "Guardando..." : bestPlayerCanAdjust ? "Ajustar" : "Guardar"}
+                {isSaving ? savingLabel : bestPlayerCanAdjust ? adjustLabel : saveLabel}
               </Button>
             </div>
           ) : null}
@@ -713,10 +766,13 @@ export function PicksScreen() {
 }
 
 function BestPlayerSummary({ playerId }: { playerId: string }) {
+  const { locale } = useLocale();
   const player = getBestPlayerById(playerId);
   if (!player) {
     return (
-      <p className="m-0 text-[13px] text-text-muted">Jugador no disponible en el roster actual.</p>
+      <p className="m-0 text-[13px] text-text-muted">
+        {copyForLocale(locale, "Jugador no disponible en el roster actual.", "Player not available in the current roster.")}
+      </p>
     );
   }
   const identity = resolveTeamIdentity(player.teamId);

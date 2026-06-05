@@ -8,6 +8,7 @@ import type {
 } from "@prode/shared";
 import { getBestPlayerById, resolveTeamIdentity } from "@prode/shared";
 import { Card, TeamIdentity } from "@prode/ui";
+import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 
 type PicksTab = "champion" | "sub-champion" | "best-player";
 
@@ -81,6 +82,8 @@ export function MisPicksSection({
   bestPlayerPick,
   onOpenPicks
 }: MisPicksSectionProps) {
+  const { locale } = useLocale();
+  const t = (es: string, en: string) => copyForLocale(locale, es, en);
   const championTeamId =
     championPick?.adjustedChampionTeamId ?? championPick?.championTeamId ?? null;
   const subTeamId =
@@ -128,21 +131,21 @@ export function MisPicksSection({
   return (
     <Card elevated style={{ padding: 0, gap: 0 }} aria-labelledby="mis-picks-heading">
       <CompactPickRow
-        eyebrow="Mi Campeón"
-        placeholder="Elegí tu campeón"
+        eyebrow={t("Mi Campeón", "My Champion")}
+        placeholder={t("Elegí tu campeón", "Pick your champion")}
         onClick={() => onOpenPicks("champion")}
         team={championTeam}
         isFirst
       />
       <CompactPickRow
-        eyebrow="Mi Sub-Campeón"
-        placeholder="Elegí tu sub-campeón"
+        eyebrow={t("Mi Sub-Campeón", "My Runner-up")}
+        placeholder={t("Elegí tu sub-campeón", "Pick your runner-up")}
         onClick={() => onOpenPicks("sub-champion")}
         team={subTeam}
       />
       <CompactPickRow
-        eyebrow="Balón de Oro"
-        placeholder="Elegí al mejor jugador"
+        eyebrow={t("Balón de Oro", "Golden Ball")}
+        placeholder={t("Elegí al mejor jugador", "Pick the best player")}
         onClick={() => onOpenPicks("best-player")}
         team={playerTeam}
         primaryLabel={player?.name ?? null}
