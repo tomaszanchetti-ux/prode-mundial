@@ -3,15 +3,21 @@ import type { AggregatesLeagueStanding } from "../types";
 
 export class AggregatesLeagueStandingsRepository {
   async replaceStandings(leagueId: string, standings: AggregatesLeagueStanding[]): Promise<void> {
+    const tableRef = firestore.collection("leagueStandings").doc(leagueId).collection("table");
     const batch = firestore.batch();
 
+    // Borrar filas de ex-miembros: sin esto, quien abandona la liga queda
+    // como fila fantasma con posición duplicada.
+    const currentUserIds = new Set(standings.map((standing) => standing.userId));
+    const existing = await tableRef.get();
+    for (const doc of existing.docs) {
+      if (!currentUserIds.has(doc.id)) {
+        batch.delete(doc.ref);
+      }
+    }
+
     for (const standing of standings) {
-      const ref = firestore
-        .collection("leagueStandings")
-        .doc(leagueId)
-        .collection("table")
-        .doc(standing.userId);
-      batch.set(ref, standing, { merge: true });
+      batch.set(tableRef.doc(standing.userId), standing, { merge: true });
     }
 
     await batch.commit();
