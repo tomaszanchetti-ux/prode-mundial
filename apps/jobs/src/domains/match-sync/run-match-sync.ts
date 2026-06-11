@@ -1,7 +1,7 @@
 import { rebuildAggregatesForUsers } from "../aggregates/run-aggregates-rebuild";
 import { runBracketHydration } from "../bracket-hydration/run-bracket-hydration";
 import { matchSyncMatchesRepository } from "./repositories/matches-repository";
-import { fetchSyncableMatches, mapExternalStatus } from "./services/football-data-client";
+import { fetchSyncableMatches, mapExternalStatus, resolveScore90 } from "./services/football-data-client";
 import { findInternalMatch, needsUpdate, resolveWinnerTeamId } from "./services/match-sync-logic";
 import { scoreMatchPredictions } from "./services/score-match";
 import type { MatchSyncExecutionSummary, SyncStoredMatch } from "./types";
@@ -47,26 +47,36 @@ export async function runMatchSync(
     }
 
     if (internal.isScored) continue;
-    if (!needsUpdate(internal, external)) continue;
+
+    const hasUpdate = needsUpdate(internal, external);
+    // Recuperación: una corrida anterior pudo dejar el match finished con
+    // scores correctos pero sin puntuar (falla a mitad del scoring). En ese
+    // caso needsUpdate da false; reintentamos solo el scoring.
+    const needsScoringRetry =
+      !hasUpdate && mappedStatus === "finished" && internal.status === "finished";
+
+    if (!hasUpdate && !needsScoringRetry) continue;
 
     const wasGroupFinalization =
       internal.stage === "group" && mappedStatus === "finished" && internal.status !== "finished";
 
-    // Aplicar update
+    const score90 = resolveScore90(external);
     const winnerTeamId = resolveWinnerTeamId(internal, external, mappedStatus);
 
-    await matchSyncMatchesRepository.updateMatch(internal.matchId, {
-      status: mappedStatus,
-      homeScore90: external.score.fullTime.home,
-      awayScore90: external.score.fullTime.away,
-      winnerTeamId,
-      isLocked: true,
-      sourceProvider: "football-data.org",
-      sourceLastSyncedAt: nowIso,
-      updatedAt: nowIso
-    });
+    if (hasUpdate) {
+      await matchSyncMatchesRepository.updateMatch(internal.matchId, {
+        status: mappedStatus,
+        homeScore90: score90.home,
+        awayScore90: score90.away,
+        winnerTeamId,
+        isLocked: true,
+        sourceProvider: "football-data.org",
+        sourceLastSyncedAt: nowIso,
+        updatedAt: nowIso
+      });
 
-    result.matchesUpdated++;
+      result.matchesUpdated++;
+    }
 
     // Si finished → trigger scoring
     if (mappedStatus === "finished") {
@@ -74,8 +84,8 @@ export async function runMatchSync(
         const updatedMatch: SyncStoredMatch = {
           ...internal,
           status: "finished",
-          homeScore90: external.score.fullTime.home,
-          awayScore90: external.score.fullTime.away,
+          homeScore90: score90.home,
+          awayScore90: score90.away,
           winnerTeamId,
           isLocked: true,
           isScored: false,

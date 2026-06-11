@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { FootballDataMatch } from "./services/football-data-client";
-import { mapExternalStatus } from "./services/football-data-client";
+import { mapExternalStatus, normalizeTeamCode, resolveScore90 } from "./services/football-data-client";
 import { findInternalMatch, needsUpdate, resolveWinnerTeamId } from "./services/match-sync-logic";
 import type { SyncStoredMatch } from "./types";
 
@@ -74,6 +74,83 @@ test("mapExternalStatus: unknown → null", () => {
   assert.equal(mapExternalStatus("WHATEVER"), null);
 });
 
+// ─── normalizeTeamCode ──────────────────────────────────────────────
+
+test("normalizeTeamCode: URY (football-data) → URU (código FIFA del seed)", () => {
+  assert.equal(normalizeTeamCode("URY"), "URU");
+});
+
+test("normalizeTeamCode: códigos coincidentes pasan sin cambios", () => {
+  assert.equal(normalizeTeamCode("ARG"), "ARG");
+  assert.equal(normalizeTeamCode("MEX"), "MEX");
+});
+
+// ─── resolveScore90 ─────────────────────────────────────────────────
+
+test("resolveScore90: duration REGULAR → fullTime", () => {
+  const external = buildExternalMatch({
+    score: {
+      winner: "HOME_TEAM",
+      duration: "REGULAR",
+      fullTime: { home: 2, away: 1 },
+      halfTime: { home: 1, away: 0 }
+    }
+  });
+
+  assert.deepEqual(resolveScore90(external), { home: 2, away: 1 });
+});
+
+test("resolveScore90: sin duration (campo ausente) → fullTime", () => {
+  const external = buildExternalMatch();
+  assert.deepEqual(resolveScore90(external), { home: 2, away: 1 });
+});
+
+test("resolveScore90: EXTRA_TIME → regularTime, no fullTime", () => {
+  // 1-1 a los 90', 2-1 tras prórroga: fullTime acumula la prórroga en v4.
+  const external = buildExternalMatch({
+    score: {
+      winner: "HOME_TEAM",
+      duration: "EXTRA_TIME",
+      fullTime: { home: 2, away: 1 },
+      halfTime: { home: 0, away: 1 },
+      regularTime: { home: 1, away: 1 },
+      extraTime: { home: 1, away: 0 }
+    }
+  });
+
+  assert.deepEqual(resolveScore90(external), { home: 1, away: 1 });
+});
+
+test("resolveScore90: PENALTY_SHOOTOUT → regularTime (fullTime incluye penales en v4)", () => {
+  // 1-1 a los 90' y 120', 4-2 en penales: v4 reporta fullTime 5-3.
+  const external = buildExternalMatch({
+    score: {
+      winner: "HOME_TEAM",
+      duration: "PENALTY_SHOOTOUT",
+      fullTime: { home: 5, away: 3 },
+      halfTime: { home: 1, away: 0 },
+      regularTime: { home: 1, away: 1 },
+      extraTime: { home: 0, away: 0 },
+      penalties: { home: 4, away: 2 }
+    }
+  });
+
+  assert.deepEqual(resolveScore90(external), { home: 1, away: 1 });
+});
+
+test("resolveScore90: duration no REGULAR pero sin regularTime → fallback fullTime", () => {
+  const external = buildExternalMatch({
+    score: {
+      winner: "HOME_TEAM",
+      duration: "EXTRA_TIME",
+      fullTime: { home: 2, away: 1 },
+      halfTime: { home: 0, away: 0 }
+    }
+  });
+
+  assert.deepEqual(resolveScore90(external), { home: 2, away: 1 });
+});
+
 // ─── findInternalMatch ──────────────────────────────────────────────
 
 test("findInternalMatch: matches by homeTeamId + awayTeamId (TLA)", () => {
@@ -143,6 +220,25 @@ test("needsUpdate: false for unhandled external status", () => {
   assert.equal(needsUpdate(internal, external), false);
 });
 
+test("needsUpdate: compara contra el 90' (regularTime), no contra fullTime con prórroga", () => {
+  // El match interno ya tiene el 1-1 de los 90' guardado; el fullTime 2-1
+  // de la prórroga no debe gatillar otro update.
+  const internal = buildInternalMatch({ status: "finished", homeScore90: 1, awayScore90: 1 });
+  const external = buildExternalMatch({
+    status: "FINISHED",
+    score: {
+      winner: "HOME_TEAM",
+      duration: "EXTRA_TIME",
+      fullTime: { home: 2, away: 1 },
+      halfTime: { home: 0, away: 0 },
+      regularTime: { home: 1, away: 1 },
+      extraTime: { home: 1, away: 0 }
+    }
+  });
+
+  assert.equal(needsUpdate(internal, external), false);
+});
+
 // ─── resolveWinnerTeamId ────────────────────────────────────────────
 
 test("resolveWinnerTeamId: home team wins", () => {
@@ -163,22 +259,56 @@ test("resolveWinnerTeamId: away team wins", () => {
   assert.equal(resolveWinnerTeamId(internal, external, "finished"), "BRA");
 });
 
-test("resolveWinnerTeamId: draw with penalty winner (HOME_TEAM)", () => {
+test("resolveWinnerTeamId: draw with penalty winner (HOME_TEAM, shape real v4)", () => {
   const internal = buildInternalMatch({ homeTeamId: "ARG", awayTeamId: "BRA" });
   const external = buildExternalMatch({
-    score: { winner: "HOME_TEAM", fullTime: { home: 1, away: 1 }, halfTime: { home: 0, away: 1 } }
+    score: {
+      winner: "HOME_TEAM",
+      duration: "PENALTY_SHOOTOUT",
+      fullTime: { home: 5, away: 3 },
+      halfTime: { home: 0, away: 1 },
+      regularTime: { home: 1, away: 1 },
+      extraTime: { home: 0, away: 0 },
+      penalties: { home: 4, away: 2 }
+    }
   });
 
   assert.equal(resolveWinnerTeamId(internal, external, "finished"), "ARG");
 });
 
-test("resolveWinnerTeamId: draw with penalty winner (AWAY_TEAM)", () => {
+test("resolveWinnerTeamId: draw with penalty winner (AWAY_TEAM, shape real v4)", () => {
   const internal = buildInternalMatch({ homeTeamId: "ARG", awayTeamId: "BRA" });
   const external = buildExternalMatch({
-    score: { winner: "AWAY_TEAM", fullTime: { home: 2, away: 2 }, halfTime: { home: 1, away: 1 } }
+    score: {
+      winner: "AWAY_TEAM",
+      duration: "PENALTY_SHOOTOUT",
+      fullTime: { home: 5, away: 6 },
+      halfTime: { home: 1, away: 1 },
+      regularTime: { home: 2, away: 2 },
+      extraTime: { home: 0, away: 0 },
+      penalties: { home: 3, away: 4 }
+    }
   });
 
   assert.equal(resolveWinnerTeamId(internal, external, "finished"), "BRA");
+});
+
+test("resolveWinnerTeamId: prórroga sin penales → ganador por score.winner, no por fullTime", () => {
+  // 1-1 a los 90', 2-1 tras prórroga: el winnerTeamId sale de score.winner
+  // porque el marcador de 90' (regularTime) quedó empatado.
+  const internal = buildInternalMatch({ homeTeamId: "ARG", awayTeamId: "BRA" });
+  const external = buildExternalMatch({
+    score: {
+      winner: "HOME_TEAM",
+      duration: "EXTRA_TIME",
+      fullTime: { home: 2, away: 1 },
+      halfTime: { home: 1, away: 1 },
+      regularTime: { home: 1, away: 1 },
+      extraTime: { home: 1, away: 0 }
+    }
+  });
+
+  assert.equal(resolveWinnerTeamId(internal, external, "finished"), "ARG");
 });
 
 test("resolveWinnerTeamId: group stage draw → null (no winner)", () => {

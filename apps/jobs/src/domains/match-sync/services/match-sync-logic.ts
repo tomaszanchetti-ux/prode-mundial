@@ -3,12 +3,13 @@
  * Exportadas para testing.
  */
 
-import { mapExternalStatus, type FootballDataMatch } from "./football-data-client";
+import { mapExternalStatus, resolveScore90, type FootballDataMatch } from "./football-data-client";
 import type { SyncStoredMatch } from "../types";
 
 /**
  * Busca el match interno que corresponde al match externo por equipos.
- * football-data.org TLAs coinciden con nuestros teamIds (códigos FIFA).
+ * Los TLAs externos llegan ya normalizados a códigos FIFA por el cliente
+ * (ver TEAM_CODE_ALIASES en football-data-client).
  */
 export function findInternalMatch(
   external: FootballDataMatch,
@@ -28,10 +29,9 @@ export function needsUpdate(internal: SyncStoredMatch, external: FootballDataMat
 
   if (internal.status !== newStatus) return true;
 
-  const extHome = external.score.fullTime.home;
-  const extAway = external.score.fullTime.away;
-  if (extHome !== null && extHome !== internal.homeScore90) return true;
-  if (extAway !== null && extAway !== internal.awayScore90) return true;
+  const score90 = resolveScore90(external);
+  if (score90.home !== null && score90.home !== internal.homeScore90) return true;
+  if (score90.away !== null && score90.away !== internal.awayScore90) return true;
 
   return false;
 }
@@ -41,8 +41,7 @@ export function resolveWinnerTeamId(
   external: FootballDataMatch,
   newStatus: string
 ): string | null {
-  const extHome = external.score.fullTime.home;
-  const extAway = external.score.fullTime.away;
+  const { home: extHome, away: extAway } = resolveScore90(external);
 
   if (newStatus !== "finished" || extHome === null || extAway === null) {
     return internal.winnerTeamId;
@@ -51,7 +50,7 @@ export function resolveWinnerTeamId(
   if (extHome > extAway) return internal.homeTeamId;
   if (extAway > extHome) return internal.awayTeamId;
 
-  // Empate en 90 min — football-data.org indica ganador por penales en score.winner
+  // Empate en 90 min — football-data.org indica ganador por prórroga/penales en score.winner
   if (external.score.winner === "HOME_TEAM") return internal.homeTeamId;
   if (external.score.winner === "AWAY_TEAM") return internal.awayTeamId;
 
