@@ -16,11 +16,12 @@ SA_NAME="prode-scheduler-invoker"
 SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
 
-# Crons por job. Frecuencias bajas porque pre-launch del Mundial, todavía
-# no hay datos reales. Ajustar al arrancar el torneo.
+# Crons por job. Frecuencias de torneo en curso (Mundial 2026: 11/06–19/07).
+# match-result-sync hace 1 request a football-data.org por corrida; el plan
+# free permite 10/min, así que */2 usa el 5% del rate limit.
 #   (job_id,cron_expression,description)
 SCHEDULES=(
-  "prode-job-match-result-sync|*/10 * * * *|Sync de resultados desde football-data.org (cada 10 min)"
+  "prode-job-match-result-sync|*/2 * * * *|Sync de resultados desde football-data.org (cada 2 min)"
   "prode-job-match-lock-enforcement|*/5 * * * *|Bloqueo de picks cuando arrancan los matches (cada 5 min)"
   "prode-job-score-macro|*/30 * * * *|Scoring de picks macro (cada 30 min)"
 )
