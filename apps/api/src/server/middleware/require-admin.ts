@@ -12,7 +12,9 @@ export async function requireAdmin(req: Request, res: Response, next: NextFuncti
     return res.status(401).json(errorPayload("UNAUTHENTICATED", "Missing auth context."));
   }
 
-  if (!isAdminEmail(auth.email)) {
+  // emailVerified evita que una cuenta registrada con el email del admin
+  // sin verificar (p.ej. provider email/password) pase la allowlist.
+  if (!auth.emailVerified || !isAdminEmail(auth.email)) {
     return res.status(403).json(errorPayload("FORBIDDEN", "Admin access required."));
   }
 

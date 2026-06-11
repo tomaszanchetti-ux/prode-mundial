@@ -17,6 +17,7 @@ async function buildAuthContext(token: string): Promise<AuthContext> {
   return {
     userId: decodedToken.uid,
     email: decodedToken.email,
+    emailVerified: decodedToken.email_verified === true,
     displayName: typeof decodedToken.name === "string" && decodedToken.name.trim().length > 0 ? decodedToken.name : fallbackName,
     photoUrl: typeof decodedToken.picture === "string" ? decodedToken.picture : null
   };

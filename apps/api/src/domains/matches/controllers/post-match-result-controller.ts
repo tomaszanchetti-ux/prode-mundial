@@ -9,7 +9,11 @@ import { scoreMatch } from "../services/score-match";
 const postMatchResultSchema = z.object({
   homeScore90: z.number().int().min(0),
   awayScore90: z.number().int().min(0),
-  winnerTeamId: z.string().nullable().optional()
+  winnerTeamId: z.string().nullable().optional(),
+  // Permite corregir un resultado ya puntuado (rescoring). El pipeline de
+  // scoring asigna puntos (no incrementa) y reconstruye agregados desde cero,
+  // así que re-ejecutarlo con el resultado corregido es seguro.
+  force: z.boolean().optional()
 });
 
 type PostMatchResultInput = z.infer<typeof postMatchResultSchema>;
@@ -28,8 +32,12 @@ export async function postMatchResultController(req: Request, res: Response) {
     throw new ApiError(404, "MATCH_NOT_FOUND", "Match not found.", { matchId });
   }
 
-  if (match.isScored) {
-    throw new ApiError(409, "MATCH_LOCKED", "Match already scored.", { matchId });
+  const isRescore = match.isScored;
+
+  if (isRescore && input.force !== true) {
+    throw new ApiError(409, "MATCH_LOCKED", "Match already scored. Pass force=true to rescore with a corrected result.", {
+      matchId
+    });
   }
 
   const nowIso = new Date().toISOString();
@@ -81,6 +89,7 @@ export async function postMatchResultController(req: Request, res: Response) {
       homeScore90: input.homeScore90,
       awayScore90: input.awayScore90,
       winnerTeamId,
+      rescored: isRescore,
       scoring: {
         predictionsProcessed: scoringResult.predictionsProcessed,
         affectedUsers: scoringResult.affectedUsers,
