@@ -46,6 +46,8 @@ export function HomeScreenView(props: HomeScreenViewProps) {
   return <HomeInTournamentView {...props} />;
 }
 
+const QUICK_CYCLE_DISMISSED_KEY = "prode.home.quickCycleDismissed";
+
 export function HomeScreen() {
   const router = useRouter();
   const { profile, status, user } = useAuth();
@@ -140,8 +142,26 @@ export function HomeScreen() {
       return;
     }
 
+    if (priorityMatch.predictionStatus !== "empty") {
+      return;
+    }
+
+    if (window.sessionStorage.getItem(QUICK_CYCLE_DISMISSED_KEY) === "1") {
+      return;
+    }
+
     setActiveMatchId(priorityMatch.matchId);
   }, [activeMatchId, dismissedCycle, isLoading, preTournamentSummary?.isPreTournament, priorityMatch]);
+
+  const dismissQuickCycle = () => {
+    setActiveMatchId(null);
+    setDismissedCycle(true);
+    try {
+      window.sessionStorage.setItem(QUICK_CYCLE_DISMISSED_KEY, "1");
+    } catch {
+      // sessionStorage puede no estar disponible (modo privado); el estado local alcanza.
+    }
+  };
 
   return (
     <>
@@ -176,11 +196,7 @@ export function HomeScreen() {
             (m) => canEditPrediction(m) && m.predictionStatus === "empty" && m.matchId !== activeMatchId
           ).length > 0
         }
-        onClose={() => {
-          setActiveMatchId(null);
-          setDismissedCycle(true);
-          router.push(APP_ROUTES.tournament);
-        }}
+        onClose={dismissQuickCycle}
         onSaved={() => {
           const pendingMatches = items
             .filter((m) => canEditPrediction(m) && m.predictionStatus === "empty" && m.matchId !== activeMatchId)
@@ -189,12 +205,10 @@ export function HomeScreen() {
 
           if (nextMatch) {
             setActiveMatchId(nextMatch.matchId);
-            setReloadKey((current) => current + 1);
           } else {
-            setActiveMatchId(null);
-            setDismissedCycle(true);
-            router.push(APP_ROUTES.tournament);
+            dismissQuickCycle();
           }
+          setReloadKey((current) => current + 1);
         }}
         onSkip={() => {
           const pendingMatches = items
@@ -205,9 +219,7 @@ export function HomeScreen() {
           if (nextMatch) {
             setActiveMatchId(nextMatch.matchId);
           } else {
-            setActiveMatchId(null);
-            setDismissedCycle(true);
-            router.push(APP_ROUTES.tournament);
+            dismissQuickCycle();
           }
         }}
       />
