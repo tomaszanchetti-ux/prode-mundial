@@ -4,6 +4,11 @@ import type { StoredTeam } from "../types";
 const teamsCollection = firestore.collection("teams");
 
 export class TeamsRepository {
+  async listTeams(): Promise<StoredTeam[]> {
+    const snapshot = await teamsCollection.get();
+    return snapshot.docs.map((doc) => doc.data() as StoredTeam);
+  }
+
   async getTeamsByIds(teamIds: string[]): Promise<Map<string, StoredTeam>> {
     const uniqueIds = [...new Set(teamIds.filter(Boolean))];
 

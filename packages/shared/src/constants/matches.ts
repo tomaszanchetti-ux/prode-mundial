@@ -6,6 +6,9 @@ export const PREDICTION_STATUSES = ["empty", "saved_editable", "locked_unscored"
 
 export const MATCH_LIST_FILTERS = ["all", "today", "upcoming", "pending", "scored", "finished"] as const;
 
+// Public hub filters: the subset of list filters that carry no user state.
+export const PUBLIC_MATCH_LIST_FILTERS = ["all", "today", "upcoming", "finished"] as const;
+
 export const PREDICTION_LOCK_MINUTES_BEFORE_KICKOFF = 60 as const;
 
 export const MATCH_SCORING_RULES = {

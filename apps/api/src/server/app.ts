@@ -25,6 +25,10 @@ import { postMatchResultController } from "../domains/matches/controllers/post-m
 import { putMatchPredictionController } from "../domains/matches/controllers/put-match-prediction-controller";
 import { getPointsController } from "../domains/points/controllers/get-points-controller";
 import { getBootstrapController } from "../domains/public/controllers/get-bootstrap-controller";
+import { getPublicMatchDetailController } from "../domains/public/controllers/get-public-match-detail-controller";
+import { getPublicMatchesController } from "../domains/public/controllers/get-public-matches-controller";
+import { getPublicStandingsController } from "../domains/public/controllers/get-public-standings-controller";
+import { getPublicTeamsController } from "../domains/public/controllers/get-public-teams-controller";
 import { getPreTournamentSummaryController } from "../domains/tournament/controllers/get-pre-tournament-summary-controller";
 import { getTournamentProjectionController } from "../domains/tournament/controllers/get-tournament-projection-controller";
 import { getTuMundialController } from "../domains/tournament/controllers/get-tu-mundial-controller";
@@ -78,6 +82,11 @@ export function createApp() {
   app.get("/health", getHealthController);
   app.get("/api/v1/public/bootstrap", getBootstrapController);
   app.get("/api/v1/public/leagues/invite/:inviteToken", getLeagueInvitePreviewController);
+  // Login-free tournament content for the indexable SSR hub (SEO + AdSense).
+  app.get("/api/v1/public/matches", getPublicMatchesController);
+  app.get("/api/v1/public/matches/:matchId", getPublicMatchDetailController);
+  app.get("/api/v1/public/standings", getPublicStandingsController);
+  app.get("/api/v1/public/teams", getPublicTeamsController);
   app.get("/api/v1/me", requireAuth, getMeController);
   app.get("/api/v1/me/pre-tournament", requireAuth, getPreTournamentSummaryController);
   app.get("/api/v1/me/tournament", requireAuth, getTuMundialController);
