@@ -41,11 +41,21 @@ export type ScoreMatchResult = {
 /**
  * Score all predictions for a finished match.
  * Returns count of predictions scored + userIds whose totals need rebuild.
+ *
+ * `rescore`: en una corrida normal solo puntuamos pronósticos sin puntuar
+ * (forward-only, barato cada 2 min). Cuando la fuente CORRIGE el resultado de
+ * un partido ya puntuado, pasamos `rescore: true` para recalcular también los
+ * ya puntuados: re-asigna `pointsAwarded` desde cero (no incrementa), igual que
+ * el rescore de apps/api. Los agregados se reconstruyen leyendo `pointsAwarded`,
+ * así que quedan correctos.
  */
 export async function scoreMatchPredictions(
   match: SyncStoredMatch,
-  nowIso: string
+  nowIso: string,
+  options: { rescore?: boolean } = {}
 ): Promise<ScoreMatchResult> {
+  const { rescore = false } = options;
+
   if (match.homeScore90 === null || match.awayScore90 === null) {
     throw new Error(`Cannot score match ${match.matchId} without official scores.`);
   }
@@ -54,7 +64,7 @@ export async function scoreMatchPredictions(
   const scoredUserIds: string[] = [];
 
   for (const prediction of predictions) {
-    if (prediction.isScored) continue;
+    if (prediction.isScored && !rescore) continue;
 
     const breakdown = scorePrediction(match, prediction);
 

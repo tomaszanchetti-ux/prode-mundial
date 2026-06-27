@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { FootballDataMatch } from "./services/football-data-client";
 import { mapExternalStatus, normalizeTeamCode, resolveScore90 } from "./services/football-data-client";
-import { findInternalMatch, needsUpdate, resolveWinnerTeamId } from "./services/match-sync-logic";
+import { decideSyncAction, findInternalMatch, needsUpdate, resolveWinnerTeamId } from "./services/match-sync-logic";
 import type { SyncStoredMatch } from "./types";
 
 // ─── Helpers ────────────────────────────────────────────────────────
@@ -237,6 +237,112 @@ test("needsUpdate: compara contra el 90' (regularTime), no contra fullTime con p
   });
 
   assert.equal(needsUpdate(internal, external), false);
+});
+
+// ─── decideSyncAction ───────────────────────────────────────────────
+
+test("decideSyncAction: corrección post-final (ya puntuado + feed cambió) → rescore", () => {
+  // Egipto-Irán: guardamos 1-2 ya puntuado; la fuente lo corrige a 1-1.
+  const internal = buildInternalMatch({
+    status: "finished",
+    isScored: true,
+    homeScore90: 1,
+    awayScore90: 2,
+    sourceProvider: "football-data.org"
+  });
+  const external = buildExternalMatch({
+    status: "FINISHED",
+    score: { winner: "DRAW", fullTime: { home: 1, away: 1 }, halfTime: { home: 1, away: 1 } }
+  });
+
+  assert.deepEqual(decideSyncAction(internal, external), {
+    action: "process",
+    rescore: true,
+    hasUpdate: true
+  });
+});
+
+test("decideSyncAction: override manual (admin-manual) nunca se pisa, aunque el feed difiera", () => {
+  const internal = buildInternalMatch({
+    status: "finished",
+    isScored: true,
+    homeScore90: 1,
+    awayScore90: 1,
+    sourceProvider: "admin-manual"
+  });
+  const external = buildExternalMatch({
+    status: "FINISHED",
+    score: { winner: "AWAY_TEAM", fullTime: { home: 1, away: 2 }, halfTime: { home: 1, away: 1 } }
+  });
+
+  assert.equal(decideSyncAction(internal, external).action, "skip");
+});
+
+test("decideSyncAction: ya puntuado y el feed no cambió → skip (sin re-trabajo)", () => {
+  const internal = buildInternalMatch({
+    status: "finished",
+    isScored: true,
+    homeScore90: 2,
+    awayScore90: 1,
+    sourceProvider: "football-data.org"
+  });
+  const external = buildExternalMatch(); // FINISHED 2-1, igual a lo guardado
+
+  assert.deepEqual(decideSyncAction(internal, external), {
+    action: "skip",
+    rescore: false,
+    hasUpdate: false
+  });
+});
+
+test("decideSyncAction: ya puntuado pero el feed revierte a live → skip (no pisa la fila final)", () => {
+  // football-data a veces marca FINISHED prematuro y lo revierte a IN_PLAY.
+  // Un partido ya puntuado no debe tocarse en ese caso.
+  const internal = buildInternalMatch({
+    status: "finished",
+    isScored: true,
+    homeScore90: 2,
+    awayScore90: 1,
+    sourceProvider: "football-data.org"
+  });
+  const external = buildExternalMatch({
+    status: "IN_PLAY",
+    score: { winner: null, fullTime: { home: 2, away: 2 }, halfTime: { home: 1, away: 0 } }
+  });
+
+  assert.equal(decideSyncAction(internal, external).action, "skip");
+});
+
+test("decideSyncAction: sin puntuar + el feed cambió → process normal (rescore false)", () => {
+  const internal = buildInternalMatch({ status: "live", isScored: false, homeScore90: 0, awayScore90: 0 });
+  const external = buildExternalMatch(); // FINISHED 2-1
+
+  assert.deepEqual(decideSyncAction(internal, external), {
+    action: "process",
+    rescore: false,
+    hasUpdate: true
+  });
+});
+
+test("decideSyncAction: finished sin puntuar y sin cambios → retry de scoring (process, rescore false)", () => {
+  const internal = buildInternalMatch({ status: "finished", isScored: false, homeScore90: 2, awayScore90: 1 });
+  const external = buildExternalMatch(); // FINISHED 2-1, mismo score
+
+  assert.deepEqual(decideSyncAction(internal, external), {
+    action: "process",
+    rescore: false,
+    hasUpdate: false
+  });
+});
+
+test("decideSyncAction: scheduled sin cambios → skip", () => {
+  const internal = buildInternalMatch({ status: "scheduled" });
+  const external = buildExternalMatch({
+    status: "SCHEDULED",
+    score: { winner: null, fullTime: { home: null, away: null }, halfTime: { home: null, away: null } }
+  });
+
+  assert.equal(decideSyncAction(internal, external).action, "skip");
 });
 
 // ─── resolveWinnerTeamId ────────────────────────────────────────────

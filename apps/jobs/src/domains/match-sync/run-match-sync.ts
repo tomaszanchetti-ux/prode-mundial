@@ -2,7 +2,7 @@ import { rebuildAggregatesForUsers } from "../aggregates/run-aggregates-rebuild"
 import { runBracketHydration } from "../bracket-hydration/run-bracket-hydration";
 import { matchSyncMatchesRepository } from "./repositories/matches-repository";
 import { fetchSyncableMatches, mapExternalStatus, resolveScore90 } from "./services/football-data-client";
-import { findInternalMatch, needsUpdate, resolveWinnerTeamId } from "./services/match-sync-logic";
+import { decideSyncAction, findInternalMatch, resolveWinnerTeamId } from "./services/match-sync-logic";
 import { scoreMatchPredictions } from "./services/score-match";
 import type { MatchSyncExecutionSummary, SyncStoredMatch } from "./types";
 
@@ -14,6 +14,7 @@ export async function runMatchSync(
     externalMatchesFetched: 0,
     matchesUpdated: 0,
     matchesScored: 0,
+    matchesCorrected: 0,
     skipped: [],
     errors: []
   };
@@ -46,16 +47,10 @@ export async function runMatchSync(
       continue;
     }
 
-    if (internal.isScored) continue;
+    const decision = decideSyncAction(internal, external);
+    if (decision.action === "skip") continue;
 
-    const hasUpdate = needsUpdate(internal, external);
-    // Recuperación: una corrida anterior pudo dejar el match finished con
-    // scores correctos pero sin puntuar (falla a mitad del scoring). En ese
-    // caso needsUpdate da false; reintentamos solo el scoring.
-    const needsScoringRetry =
-      !hasUpdate && mappedStatus === "finished" && internal.status === "finished";
-
-    if (!hasUpdate && !needsScoringRetry) continue;
+    const { hasUpdate, rescore: isCorrection } = decision;
 
     const wasGroupFinalization =
       internal.stage === "group" && mappedStatus === "finished" && internal.status !== "finished";
@@ -92,12 +87,24 @@ export async function runMatchSync(
           updatedAt: nowIso
         };
 
-        const scored = await scoreMatchPredictions(updatedMatch, nowIso);
+        const scored = await scoreMatchPredictions(updatedMatch, nowIso, { rescore: isCorrection });
         result.matchesScored++;
         for (const userId of scored.affectedUserIds) {
           affectedUserIds.add(userId);
         }
-        console.log(`Scored ${scored.scoredCount} predictions for ${internal.matchId}`);
+
+        if (isCorrection) {
+          // Auto-corrección: la fuente cambió un resultado ya puntuado. Lo dejamos
+          // en el log (mueve puntos post-final) para que quede rastro auditable.
+          result.matchesCorrected = (result.matchesCorrected ?? 0) + 1;
+          console.warn(
+            `[CORRECTION] ${internal.matchId} re-scored from feed correction: ` +
+              `${internal.homeScore90}-${internal.awayScore90} → ${score90.home}-${score90.away} ` +
+              `(${scored.scoredCount} predictions)`
+          );
+        } else {
+          console.log(`Scored ${scored.scoredCount} predictions for ${internal.matchId}`);
+        }
       } catch (err) {
         result.errors.push({
           matchId: internal.matchId,

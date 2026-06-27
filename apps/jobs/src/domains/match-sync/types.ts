@@ -42,6 +42,8 @@ export type MatchSyncExecutionSummary = {
   externalMatchesFetched: number;
   matchesUpdated: number;
   matchesScored: number;
+  /** Partidos ya puntuados re-puntuados por una corrección de la fuente. */
+  matchesCorrected?: number;
   skipped: Array<{ externalId: number; reason: string }>;
   errors: Array<{ matchId: string; error: string }>;
   groupMatchesFinalized?: number;
