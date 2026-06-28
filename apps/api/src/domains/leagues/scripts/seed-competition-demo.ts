@@ -166,14 +166,14 @@ async function main() {
   );
 
   const predictions = [
-    ["demo_m_001", anchor.userId, { homeScorePred: 2, awayScorePred: 1 }],
-    ["demo_m_001", DEMO_GUEST_USERS[0].userId, { homeScorePred: 1, awayScorePred: 0 }],
-    ["demo_m_001", DEMO_GUEST_USERS[1].userId, { homeScorePred: 0, awayScorePred: 1 }],
-    ["demo_m_001", DEMO_GUEST_USERS[2].userId, { homeScorePred: 2, awayScorePred: 1 }],
-    ["demo_m_002", anchor.userId, { homeScorePred: 1, awayScorePred: 1 }],
-    ["demo_m_002", DEMO_GUEST_USERS[0].userId, { homeScorePred: 0, awayScorePred: 0 }],
-    ["demo_m_002", DEMO_GUEST_USERS[1].userId, { homeScorePred: 1, awayScorePred: 1 }],
-    ["demo_m_002", DEMO_GUEST_USERS[2].userId, { homeScorePred: 2, awayScorePred: 1 }]
+    ["demo_m_001", anchor.userId, { homeScorePred: 2, awayScorePred: 1, advancesTeamPred: null }],
+    ["demo_m_001", DEMO_GUEST_USERS[0].userId, { homeScorePred: 1, awayScorePred: 0, advancesTeamPred: null }],
+    ["demo_m_001", DEMO_GUEST_USERS[1].userId, { homeScorePred: 0, awayScorePred: 1, advancesTeamPred: null }],
+    ["demo_m_001", DEMO_GUEST_USERS[2].userId, { homeScorePred: 2, awayScorePred: 1, advancesTeamPred: null }],
+    ["demo_m_002", anchor.userId, { homeScorePred: 1, awayScorePred: 1, advancesTeamPred: null }],
+    ["demo_m_002", DEMO_GUEST_USERS[0].userId, { homeScorePred: 0, awayScorePred: 0, advancesTeamPred: null }],
+    ["demo_m_002", DEMO_GUEST_USERS[1].userId, { homeScorePred: 1, awayScorePred: 1, advancesTeamPred: null }],
+    ["demo_m_002", DEMO_GUEST_USERS[2].userId, { homeScorePred: 2, awayScorePred: 1, advancesTeamPred: null }]
   ] as const;
 
   await Promise.all(

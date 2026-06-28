@@ -17,7 +17,8 @@ test("createStoredPrediction initializes canonical base fields", () => {
       userId: "usr_1",
       matchId: "m_001",
       homeScorePred: 2,
-      awayScorePred: 1
+      awayScorePred: 1,
+      advancesTeamPred: null
     },
     "2026-04-09T00:00:00Z"
   );
@@ -28,6 +29,7 @@ test("createStoredPrediction initializes canonical base fields", () => {
     matchId: "m_001",
     homeScorePred: 2,
     awayScorePred: 1,
+    advancesTeamPred: null,
     isLocked: false,
     isScored: false,
     pointsAwarded: 0,
@@ -63,13 +65,15 @@ test("mergeStoredPrediction overwrites editable fields and preserves scoring his
     },
     {
       homeScorePred: 3,
-      awayScorePred: 2
+      awayScorePred: 2,
+      advancesTeamPred: null
     },
     "2026-04-09T00:00:00Z"
   );
 
   assert.equal(updated.homeScorePred, 3);
   assert.equal(updated.awayScorePred, 2);
+  assert.equal(updated.advancesTeamPred, null);
   assert.equal(updated.createdAt, "2026-04-01T00:00:00Z");
   assert.equal(updated.updatedAt, "2026-04-09T00:00:00Z");
   assert.equal(updated.pointsAwarded, 5);

@@ -105,6 +105,7 @@ export type ListMatchesResponse = {
 export type SaveMatchPredictionInput = {
   homeScorePred: number;
   awayScorePred: number;
+  advancesTeamPred?: string | null;
 };
 
 export type SaveMatchPredictionResponse = {

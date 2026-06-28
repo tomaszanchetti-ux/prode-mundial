@@ -98,7 +98,10 @@ export const listMatchesResponseSchema = z.object({
 
 export const saveMatchPredictionInputSchema = z.object({
   homeScorePred: z.number().int().nonnegative(),
-  awayScorePred: z.number().int().nonnegative()
+  awayScorePred: z.number().int().nonnegative(),
+  // Equipo que clasifica cuando se predice empate en un cruce. La regla condicional
+  // (obligatorio solo en knockout + empate) se valida en el dominio, con el match a mano.
+  advancesTeamPred: z.string().min(1).nullable().optional()
 });
 
 export const saveMatchPredictionResponseSchema = z.object({

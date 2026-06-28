@@ -48,7 +48,7 @@ function buildPrediction(overrides: Partial<StoredPrediction> = {}): StoredPredi
   };
 }
 
-test("validatePredictionInput accepts group predictions", () => {
+test("validatePredictionInput accepts group predictions (advancesTeamPred forced to null)", () => {
   const result = validatePredictionInput(
     buildMatch(),
     {
@@ -60,40 +60,94 @@ test("validatePredictionInput accepts group predictions", () => {
 
   assert.deepEqual(result, {
     homeScorePred: 2,
-    awayScorePred: 1
+    awayScorePred: 1,
+    advancesTeamPred: null
   });
 });
 
-test("validatePredictionInput accepts knockout draws without needing qualifier", () => {
-  // EPIC 24: en knockouts solo cuenta el 90'. El empate es válido sin qualifier.
+test("validatePredictionInput ignores advancesTeamPred for group-stage draws", () => {
+  // En grupos no hay penales: aunque manden el campo, se descarta a null.
   const result = validatePredictionInput(
-    buildMatch({ stage: "R32", groupId: null }),
+    buildMatch(),
     {
       homeScorePred: 1,
-      awayScorePred: 1
+      awayScorePred: 1,
+      advancesTeamPred: "ARG"
     },
     new Date("2026-06-11T15:00:00Z")
   );
 
   assert.deepEqual(result, {
     homeScorePred: 1,
-    awayScorePred: 1
+    awayScorePred: 1,
+    advancesTeamPred: null
   });
 });
 
-test("validatePredictionInput accepts knockout non-draw predictions", () => {
+test("validatePredictionInput accepts knockout draw WITH a valid advancer", () => {
+  const result = validatePredictionInput(
+    buildMatch({ stage: "R32", groupId: null }),
+    {
+      homeScorePred: 1,
+      awayScorePred: 1,
+      advancesTeamPred: "BRA"
+    },
+    new Date("2026-06-11T15:00:00Z")
+  );
+
+  assert.deepEqual(result, {
+    homeScorePred: 1,
+    awayScorePred: 1,
+    advancesTeamPred: "BRA"
+  });
+});
+
+test("validatePredictionInput rejects knockout draw WITHOUT an advancer (ADVANCER_REQUIRED)", () => {
+  assert.throws(
+    () =>
+      validatePredictionInput(
+        buildMatch({ stage: "R32", groupId: null }),
+        {
+          homeScorePred: 1,
+          awayScorePred: 1
+        },
+        new Date("2026-06-11T15:00:00Z")
+      ),
+    (error: unknown) => error instanceof ApiError && error.code === "ADVANCER_REQUIRED"
+  );
+});
+
+test("validatePredictionInput rejects an advancer that isn't one of the two teams (INVALID_ADVANCER)", () => {
+  assert.throws(
+    () =>
+      validatePredictionInput(
+        buildMatch({ stage: "R32", groupId: null }),
+        {
+          homeScorePred: 1,
+          awayScorePred: 1,
+          advancesTeamPred: "FRA"
+        },
+        new Date("2026-06-11T15:00:00Z")
+      ),
+    (error: unknown) => error instanceof ApiError && error.code === "INVALID_ADVANCER"
+  );
+});
+
+test("validatePredictionInput accepts knockout non-draw predictions (advancesTeamPred forced to null)", () => {
   const result = validatePredictionInput(
     buildMatch({ stage: "R32", groupId: null }),
     {
       homeScorePred: 3,
-      awayScorePred: 1
+      awayScorePred: 1,
+      advancesTeamPred: "ARG"
     },
     new Date("2026-06-11T15:00:00Z")
   );
 
   assert.deepEqual(result, {
     homeScorePred: 3,
-    awayScorePred: 1
+    awayScorePred: 1,
+    advancesTeamPred: null
   });
 });
 
