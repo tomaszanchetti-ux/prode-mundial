@@ -204,11 +204,17 @@ function chunkIntoPairs<T>(items: T[]): T[][] {
 function BracketSideRow({
   side,
   isWinner,
-  hasWinnerDecided
+  hasWinnerDecided,
+  score = null,
+  advancedViaPens = false
 }: {
   side: TournamentProjectionMatch["home"];
   isWinner: boolean;
   hasWinnerDecided: boolean;
+  /** Goles oficiales al 90' de este lado (null si el cruce no terminó). */
+  score?: number | null;
+  /** El cruce terminó empatado y este lado clasificó por penales. */
+  advancedViaPens?: boolean;
 }) {
   const winnerClass = isWinner
     ? "text-primary-600 font-bold bg-primary-soft border-l-4 border-primary-500"
@@ -218,19 +224,27 @@ function BracketSideRow({
 
   if (side.team) {
     return (
-      <div className={`flex items-center gap-1.5 min-w-0 rounded-sm pl-1.5 py-0.5 transition-colors ${winnerClass}`}>
-        <TeamIdentity
-          team={{
-            teamName: side.team.name,
-            fifaCode: side.team.fifaCode,
-            flagAsset: side.team.flagAsset,
-            flagUrl: side.team.flagUrl
-          }}
-          size="sm"
-          showFlag
-          showName
-          emphasis="compact"
-        />
+      <div className={`flex items-center gap-1.5 min-w-0 rounded-sm pl-1.5 pr-1 py-0.5 transition-colors ${winnerClass}`}>
+        <div className="flex-1 min-w-0">
+          <TeamIdentity
+            team={{
+              teamName: side.team.name,
+              fifaCode: side.team.fifaCode,
+              flagAsset: side.team.flagAsset,
+              flagUrl: side.team.flagUrl
+            }}
+            size="sm"
+            showFlag
+            showName
+            emphasis="compact"
+          />
+        </div>
+        {advancedViaPens ? (
+          <span className="text-[8px] uppercase tracking-wide text-text-muted shrink-0">pen.</span>
+        ) : null}
+        {score !== null ? (
+          <span className="text-[13px] font-semibold tabular-nums shrink-0">{score}</span>
+        ) : null}
       </div>
     );
   }
@@ -262,6 +276,17 @@ function MatchCard({
   const awayIsWinner = match.winnerTeamId !== null && match.winnerTeamId === match.away.team?.teamId;
   const hasWinnerDecided = match.winnerTeamId !== null;
 
+  const homeScore = match.homeScore90 ?? null;
+  const awayScore = match.awayScore90 ?? null;
+  const hasResult = homeScore !== null && awayScore !== null;
+  // Empate al 90' resuelto por penales → marcamos "pen." en quien clasificó.
+  const wasPenaltyShootout = hasResult && homeScore === awayScore && hasWinnerDecided;
+
+  // Chip de puntos: solo si el cruce ya fue puntuado y el usuario tenía pronóstico.
+  const points = match.userPredictionPoints ?? null;
+  const showPoints = match.isScored === true && points !== null;
+  const pointsChipClass = (points ?? 0) > 0 ? "text-success bg-success-soft" : "text-text-muted bg-bg-interactive";
+
   const sideBgClass =
     accentTone === "bronze"
       ? "bg-surface-raised"
@@ -292,9 +317,30 @@ function MatchCard({
         </span>
         <span className="text-[9px] text-text-muted tabular-nums leading-none">{kickoffLabel}</span>
       </div>
-      <div className="grid gap-0.5">
-        <BracketSideRow side={match.home} isWinner={homeIsWinner} hasWinnerDecided={hasWinnerDecided} />
-        <BracketSideRow side={match.away} isWinner={awayIsWinner} hasWinnerDecided={hasWinnerDecided} />
+      <div className="flex items-center gap-2">
+        <div className="grid gap-0.5 flex-1 min-w-0">
+          <BracketSideRow
+            side={match.home}
+            isWinner={homeIsWinner}
+            hasWinnerDecided={hasWinnerDecided}
+            score={homeScore}
+            advancedViaPens={wasPenaltyShootout && homeIsWinner}
+          />
+          <BracketSideRow
+            side={match.away}
+            isWinner={awayIsWinner}
+            hasWinnerDecided={hasWinnerDecided}
+            score={awayScore}
+            advancedViaPens={wasPenaltyShootout && awayIsWinner}
+          />
+        </div>
+        {showPoints ? (
+          <span
+            className={`self-center shrink-0 text-[11px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-pill whitespace-nowrap ${pointsChipClass}`}
+          >
+            +{points} pts
+          </span>
+        ) : null}
       </div>
     </button>
   );
