@@ -77,7 +77,13 @@ function toProjectionMatch(match: MatchSummary): TournamentProjectionMatch {
     home,
     away,
     winnerTeamId: match.winnerTeamId,
-    source
+    source,
+    // Overlay para la caja del bracket: resultado real + predicción + puntos.
+    homeScore90: match.homeScore90,
+    awayScore90: match.awayScore90,
+    userPredictionSummary: match.userPredictionSummary,
+    userPredictionPoints: match.userPredictionPoints,
+    isScored: match.isScored
   };
 }
 

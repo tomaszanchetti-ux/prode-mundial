@@ -60,6 +60,13 @@ export type TournamentProjectionMatch = {
   away: TournamentProjectionSide;
   winnerTeamId: string | null;
   source: TournamentProjectionMatchSource;
+  // Overlay de resultado oficial + predicción (lo puebla el bracket oficial de
+  // /world-cup desde MatchSummary; la simulación de /tournament los omite).
+  homeScore90?: number | null;
+  awayScore90?: number | null;
+  userPredictionSummary?: string | null;
+  userPredictionPoints?: number | null;
+  isScored?: boolean;
 };
 
 export type TournamentProjectionBracket = {
