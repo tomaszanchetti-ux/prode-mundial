@@ -66,6 +66,7 @@ export const userMatchPredictionSchema = z.object({
   predictionId: z.string().min(1),
   homeScorePred: z.number().int().nonnegative(),
   awayScorePred: z.number().int().nonnegative(),
+  advancesTeamPred: z.string().min(1).nullable().optional(),
   status: predictionStatusSchema,
   pointsAwarded: z.number().int().nonnegative().nullable(),
   submittedAt: isoTimestampSchema,
@@ -75,7 +76,8 @@ export const userMatchPredictionSchema = z.object({
 
 export const matchScoringRulesSchema = z.object({
   exact90Points: z.literal(MATCH_SCORING_RULES.exact90Points),
-  correctOutcome90Points: z.literal(MATCH_SCORING_RULES.correctOutcome90Points)
+  correctOutcome90Points: z.literal(MATCH_SCORING_RULES.correctOutcome90Points),
+  penaltyWinnerPoints: z.literal(MATCH_SCORING_RULES.penaltyWinnerPoints)
 });
 
 export const matchDetailSchema = matchSummarySchema.extend({

@@ -187,6 +187,7 @@ export function toUserMatchPrediction(
     predictionId: prediction.predictionId,
     homeScorePred: prediction.homeScorePred,
     awayScorePred: prediction.awayScorePred,
+    advancesTeamPred: prediction.advancesTeamPred ?? null,
     status: state.predictionStatus,
     pointsAwarded: prediction.isScored ? prediction.pointsAwarded : null,
     submittedAt: prediction.createdAt,

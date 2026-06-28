@@ -75,6 +75,8 @@ export type UserMatchPrediction = {
   predictionId: string;
   homeScorePred: number;
   awayScorePred: number;
+  // Equipo elegido para clasificar (solo cruces con empate). Precarga el selector al reabrir.
+  advancesTeamPred?: string | null;
   status: PredictionStatus;
   pointsAwarded: number | null;
   submittedAt: string;

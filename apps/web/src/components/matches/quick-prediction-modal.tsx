@@ -9,6 +9,7 @@ import { track } from "@/lib/firebase/analytics";
 import { copyForLocale, formatDateTime, useLocale, type AppLocale } from "@/lib/i18n/locale-provider";
 import { canEditPrediction } from "@/lib/matches/editability";
 import { toStatusLabel, toStatusTone } from "./match-detail-helpers";
+import { AdvancerSelect, asksAdvancer } from "./advancer-select";
 
 type QuickPredictionModalProps = {
   matchId: string | null;
@@ -24,6 +25,7 @@ type QuickPredictionModalProps = {
 type FormState = {
   homeScorePred: string;
   awayScorePred: string;
+  advancesTeamPred: string | null;
 };
 
 function toStageLabel(detail: MatchDetail, locale: AppLocale) {
@@ -66,7 +68,8 @@ function toKickoffLabel(detail: MatchDetail) {
 function toFormState(detail: MatchDetail): FormState {
   return {
     homeScorePred: detail.userPrediction ? String(detail.userPrediction.homeScorePred) : "",
-    awayScorePred: detail.userPrediction ? String(detail.userPrediction.awayScorePred) : ""
+    awayScorePred: detail.userPrediction ? String(detail.userPrediction.awayScorePred) : "",
+    advancesTeamPred: detail.userPrediction?.advancesTeamPred ?? null
   };
 }
 
@@ -78,6 +81,10 @@ function toErrorMessage(error: unknown, locale: AppLocale) {
 
     if (error.code === "INVALID_SCORE") {
       return copyForLocale(locale, "Ingresá un marcador válido.", "Enter a valid score.");
+    }
+
+    if (error.code === "ADVANCER_REQUIRED" || error.code === "INVALID_ADVANCER") {
+      return copyForLocale(locale, "Elegí quién pasa de fase.", "Pick who advances.");
     }
 
     return error.message;
@@ -94,12 +101,14 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
   const [detail, setDetail] = useState<MatchDetail | null>(null);
   const [formState, setFormState] = useState<FormState>({
     homeScorePred: "",
-    awayScorePred: ""
+    awayScorePred: "",
+    advancesTeamPred: null
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showAdvancerError, setShowAdvancerError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -146,6 +155,12 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
       return;
     }
 
+    const needsAdvancer = asksAdvancer(detail.stage, formState.homeScorePred, formState.awayScorePred);
+    if (needsAdvancer && !formState.advancesTeamPred) {
+      setShowAdvancerError(true);
+      return;
+    }
+
     setIsSaving(true);
     setErrorMessage(null);
 
@@ -153,7 +168,8 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
       const token = await user.getIdToken();
       const payload: SaveMatchPredictionInput = {
         homeScorePred: Number(formState.homeScorePred),
-        awayScorePred: Number(formState.awayScorePred)
+        awayScorePred: Number(formState.awayScorePred),
+        advancesTeamPred: needsAdvancer ? formState.advancesTeamPred : null
       };
 
       await saveMatchPrediction(token, detail.matchId, payload);
@@ -225,6 +241,22 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
         onAwayChange={(value) => setFormState((current) => ({ ...current, awayScorePred: value }))}
         onHomeChange={(value) => setFormState((current) => ({ ...current, homeScorePred: value }))}
       />
+      {detail && asksAdvancer(detail.stage, formState.homeScorePred, formState.awayScorePred) ? (
+        <div className="mt-4">
+          <AdvancerSelect
+            homeTeam={detail.homeTeam}
+            awayTeam={detail.awayTeam}
+            value={formState.advancesTeamPred}
+            disabled={isLoading || isSaving || !isEditable}
+            locale={locale}
+            invalid={showAdvancerError && !formState.advancesTeamPred}
+            onChange={(teamId) => {
+              setShowAdvancerError(false);
+              setFormState((current) => ({ ...current, advancesTeamPred: teamId }));
+            }}
+          />
+        </div>
+      ) : null}
     </PredictionModal>
   );
 }

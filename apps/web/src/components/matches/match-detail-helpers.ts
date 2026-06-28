@@ -6,6 +6,7 @@ import { copyForLocale, toIntlLocale, type AppLocale } from "@/lib/i18n/locale-p
 export type FormState = {
   homeScorePred: string;
   awayScorePred: string;
+  advancesTeamPred: string | null;
 };
 
 export type MatchDetailNotice = {
@@ -16,7 +17,8 @@ export type MatchDetailNotice = {
 export function toFormState(detail: MatchDetail): FormState {
   return {
     homeScorePred: detail.userPrediction ? String(detail.userPrediction.homeScorePred) : "",
-    awayScorePred: detail.userPrediction ? String(detail.userPrediction.awayScorePred) : ""
+    awayScorePred: detail.userPrediction ? String(detail.userPrediction.awayScorePred) : "",
+    advancesTeamPred: detail.userPrediction?.advancesTeamPred ?? null
   };
 }
 
@@ -137,6 +139,10 @@ export function toErrorMessage(error: unknown, locale: AppLocale) {
 
     if (error.code === "INVALID_SCORE") {
       return copyForLocale(locale, "Ingresá un marcador válido.", "Enter a valid score.");
+    }
+
+    if (error.code === "ADVANCER_REQUIRED" || error.code === "INVALID_ADVANCER") {
+      return copyForLocale(locale, "Elegí quién pasa de fase.", "Pick who advances.");
     }
 
     return error.message;
