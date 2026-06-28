@@ -74,12 +74,17 @@ test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and retu
   const upsertPredictionMock = mock.method(
     predictionsRepository,
     "upsertPrediction",
-    async (userId: string, matchId: string, input: { homeScorePred: number; awayScorePred: number }) => {
+    async (
+      userId: string,
+      matchId: string,
+      input: { homeScorePred: number; awayScorePred: number; advancesTeamPred?: string | null }
+    ) => {
       assert.equal(userId, "usr_1");
       assert.equal(matchId, "m_073");
       assert.deepEqual(input, {
         homeScorePred: 1,
-        awayScorePred: 1
+        awayScorePred: 1,
+        advancesTeamPred: "arg"
       });
 
       return {
@@ -88,6 +93,7 @@ test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and retu
         matchId,
         homeScorePred: input.homeScorePred,
         awayScorePred: input.awayScorePred,
+        advancesTeamPred: input.advancesTeamPred ?? null,
         isLocked: false,
         isScored: false,
         pointsAwarded: 0,
@@ -107,7 +113,8 @@ test("PUT /api/v1/matches/:matchId/prediction saves editable prediction and retu
       },
       body: JSON.stringify({
         homeScorePred: 1,
-        awayScorePred: 1
+        awayScorePred: 1,
+        advancesTeamPred: "arg"
       })
     });
     const payload = (await response.json()) as {
@@ -233,7 +240,7 @@ test("PUT /api/v1/matches/:matchId/prediction returns MATCH_LOCKED when domain r
   }
 });
 
-test("PUT /api/v1/matches/:matchId/prediction accepts knockout draw without qualifier (EPIC 24)", async () => {
+test("PUT /api/v1/matches/:matchId/prediction accepts knockout draw WITH advancer chosen", async () => {
   const kickoffAt = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
   const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
     uid: "usr_1",
@@ -262,12 +269,17 @@ test("PUT /api/v1/matches/:matchId/prediction accepts knockout draw without qual
   const upsertPredictionMock = mock.method(
     predictionsRepository,
     "upsertPrediction",
-    async (userId: string, matchId: string, input: { homeScorePred: number; awayScorePred: number }) => ({
+    async (
+      userId: string,
+      matchId: string,
+      input: { homeScorePred: number; awayScorePred: number; advancesTeamPred?: string | null }
+    ) => ({
       predictionId: "pred_usr_1_m_073",
       userId,
       matchId,
       homeScorePred: input.homeScorePred,
       awayScorePred: input.awayScorePred,
+      advancesTeamPred: input.advancesTeamPred ?? null,
       isLocked: false,
       isScored: false,
       pointsAwarded: 0,
@@ -286,7 +298,8 @@ test("PUT /api/v1/matches/:matchId/prediction accepts knockout draw without qual
       },
       body: JSON.stringify({
         homeScorePred: 1,
-        awayScorePred: 1
+        awayScorePred: 1,
+        advancesTeamPred: "arg"
       })
     });
     const payload = (await response.json()) as { ok: boolean };
@@ -298,6 +311,57 @@ test("PUT /api/v1/matches/:matchId/prediction accepts knockout draw without qual
     listMatchesMock.mock.restore();
     getMatchByIdMock.mock.restore();
     upsertPredictionMock.mock.restore();
+  }
+});
+
+test("PUT /api/v1/matches/:matchId/prediction rejects knockout draw WITHOUT advancer (ADVANCER_REQUIRED)", async () => {
+  const kickoffAt = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
+  const verifyIdTokenMock = mock.method(firebaseAdminAuth, "verifyIdToken", async () => ({
+    uid: "usr_1",
+    email: "tomas@example.com",
+    name: "Tomas"
+  }));
+  const listMatchesMock = mock.method(matchesRepository, "listMatches", async () => []);
+  const getMatchByIdMock = mock.method(matchesRepository, "getMatchById", async () => ({
+    matchId: "m_073",
+    stage: "R32",
+    groupId: null,
+    homeTeamId: "arg",
+    awayTeamId: "ned",
+    homeSlot: null,
+    awaySlot: null,
+    kickoffAt,
+    status: "scheduled",
+    homeScore90: null,
+    awayScore90: null,
+    winnerTeamId: null,
+    isLocked: false,
+    isScored: false,
+    createdAt: "2026-04-09T00:00:00Z",
+    updatedAt: "2026-04-09T00:00:00Z"
+  }));
+
+  try {
+    const response = await fetch(buildUrl("/api/v1/matches/m_073/prediction"), {
+      method: "PUT",
+      headers: {
+        Authorization: "Bearer valid-token",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        homeScorePred: 1,
+        awayScorePred: 1
+      })
+    });
+    const payload = (await response.json()) as { ok: boolean; error: { code: string } };
+
+    assert.equal(response.status, 400);
+    assert.equal(payload.ok, false);
+    assert.equal(payload.error.code, "ADVANCER_REQUIRED");
+  } finally {
+    verifyIdTokenMock.mock.restore();
+    listMatchesMock.mock.restore();
+    getMatchByIdMock.mock.restore();
   }
 });
 

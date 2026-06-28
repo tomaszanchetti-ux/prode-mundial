@@ -20,6 +20,7 @@ import {
   toStatusLabel,
   toStatusTone
 } from "./match-detail-helpers";
+import { AdvancerSelect, asksAdvancer } from "./advancer-select";
 
 type MatchDetailScreenProps = {
   matchId: string;
@@ -31,6 +32,8 @@ type MatchDetailScreenViewProps = {
   isLoading: boolean;
   isSaving: boolean;
   loadErrorMessage: string | null;
+  advancerError: boolean;
+  onAdvancerChange: (teamId: string) => void;
   onAwayChange: (value: string) => void;
   onHomeChange: (value: string) => void;
   onRetryLoad: () => void;
@@ -44,6 +47,8 @@ export function MatchDetailScreenView({
   isLoading,
   isSaving,
   loadErrorMessage,
+  advancerError,
+  onAdvancerChange,
   onAwayChange,
   onHomeChange,
   onRetryLoad,
@@ -143,11 +148,28 @@ export function MatchDetailScreenView({
           onHomeChange={onHomeChange}
         />
 
+        {asksAdvancer(detail.stage, formState.homeScorePred, formState.awayScorePred) ? (
+          <AdvancerSelect
+            homeTeam={detail.homeTeam}
+            awayTeam={detail.awayTeam}
+            value={formState.advancesTeamPred}
+            disabled={!canEditPrediction(detail) || isSaving}
+            locale={locale}
+            invalid={advancerError && !formState.advancesTeamPred}
+            onChange={onAdvancerChange}
+          />
+        ) : null}
+
         <p className="typo-body m-0 text-text-secondary">{toHelperText(detail, formState, locale)}</p>
 
         <Button
           fullWidth
-          disabled={!canEditPrediction(detail) || formState.homeScorePred === "" || formState.awayScorePred === ""}
+          disabled={
+            !canEditPrediction(detail) ||
+            formState.homeScorePred === "" ||
+            formState.awayScorePred === "" ||
+            (asksAdvancer(detail.stage, formState.homeScorePred, formState.awayScorePred) && !formState.advancesTeamPred)
+          }
           loading={isSaving}
           onClick={onSave}
         >
@@ -170,7 +192,11 @@ export function MatchDetailScreenView({
               </p>
               {detail.userPrediction.scoringBreakdown ? (
                 <p className="typo-body m-0 text-text-secondary">
-                  {t("Desglose", "Breakdown")}: {t("marcador exacto", "exact score")} {detail.userPrediction.scoringBreakdown.pointsExact90} · {t("solo resultado", "outcome only")} {detail.userPrediction.scoringBreakdown.pointsOutcome90}.
+                  {t("Desglose", "Breakdown")}: {t("marcador exacto", "exact score")} {detail.userPrediction.scoringBreakdown.pointsExact90} · {t("solo resultado", "outcome only")} {detail.userPrediction.scoringBreakdown.pointsOutcome90}
+                  {detail.userPrediction.scoringBreakdown.pointsPenalty > 0
+                    ? ` · ${t("acertaste quién pasa", "guessed who advances")} +${detail.userPrediction.scoringBreakdown.pointsPenalty}`
+                    : ""}
+                  .
                 </p>
               ) : null}
             </div>
@@ -195,13 +221,15 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
   const [detail, setDetail] = useState<MatchDetail | null>(null);
   const [formState, setFormState] = useState<FormState>({
     homeScorePred: "",
-    awayScorePred: ""
+    awayScorePred: "",
+    advancesTeamPred: null
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [loadErrorMessage, setLoadErrorMessage] = useState<string | null>(null);
   const [saveNotice, setSaveNotice] = useState<MatchDetailNotice | null>(null);
+  const [advancerError, setAdvancerError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -261,6 +289,12 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
       return;
     }
 
+    const needsAdvancer = asksAdvancer(detail.stage, formState.homeScorePred, formState.awayScorePred);
+    if (needsAdvancer && !formState.advancesTeamPred) {
+      setAdvancerError(true);
+      return;
+    }
+
     setIsSaving(true);
     setSaveNotice(null);
 
@@ -268,7 +302,8 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
       const token = await user.getIdToken();
       const payload: SaveMatchPredictionInput = {
         homeScorePred: Number(formState.homeScorePred),
-        awayScorePred: Number(formState.awayScorePred)
+        awayScorePred: Number(formState.awayScorePred),
+        advancesTeamPred: needsAdvancer ? formState.advancesTeamPred : null
       };
 
       await saveMatchPrediction(token, detail.matchId, payload);
@@ -296,6 +331,11 @@ export function MatchDetailScreen({ matchId }: MatchDetailScreenProps) {
       isLoading={isLoading}
       isSaving={isSaving}
       loadErrorMessage={loadErrorMessage}
+      advancerError={advancerError}
+      onAdvancerChange={(teamId) => {
+        setAdvancerError(false);
+        setFormState((current) => ({ ...current, advancesTeamPred: teamId }));
+      }}
       onAwayChange={(value) => setFormState((current) => ({ ...current, awayScorePred: value }))}
       onHomeChange={(value) => setFormState((current) => ({ ...current, homeScorePred: value }))}
       onRetryLoad={() => setReloadKey((current) => current + 1)}

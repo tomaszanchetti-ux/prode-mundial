@@ -25,12 +25,14 @@ export type SyncStoredPrediction = {
   matchId: string;
   homeScorePred: number;
   awayScorePred: number;
+  advancesTeamPred?: string | null;
   isLocked: boolean;
   isScored: boolean;
   pointsAwarded: number;
   scoringBreakdown: {
     exact90Points: number;
     outcome90Points: number;
+    penaltyBonusPoints: number;
     totalPoints: number;
   } | null;
   scoredAt?: string | null;

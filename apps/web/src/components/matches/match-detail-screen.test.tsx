@@ -46,23 +46,27 @@ function buildMatchDetail(overrides: Partial<MatchDetail> = {}): MatchDetail {
     userPrediction: null,
     scoringRules: {
       exact90Points: 5,
-      correctOutcome90Points: 2
+      correctOutcome90Points: 2,
+      penaltyWinnerPoints: 1
     },
     ...overrides
   };
 }
 
-test("MatchDetailScreenView accepts knockout draws without needing qualifier (EPIC 24)", () => {
+test("MatchDetailScreenView shows the advancer selector on a knockout draw", () => {
   const html = renderToStaticMarkup(
     createElement(MatchDetailScreenView, {
       detail: buildMatchDetail(),
       formState: {
         homeScorePred: "1",
-        awayScorePred: "1"
+        awayScorePred: "1",
+        advancesTeamPred: null
       },
       isLoading: false,
       isSaving: false,
       loadErrorMessage: null,
+      advancerError: false,
+      onAdvancerChange: () => undefined,
       onAwayChange: () => undefined,
       onHomeChange: () => undefined,
       onRetryLoad: () => undefined,
@@ -71,9 +75,34 @@ test("MatchDetailScreenView accepts knockout draws without needing qualifier (EP
     })
   );
 
-  assert.doesNotMatch(html, /Quien clasifica/);
-  assert.doesNotMatch(html, /quien clasifica/);
+  assert.match(html, /Quién pasa a la siguiente ronda/);
+  assert.match(html, /1 punto extra/);
   assert.match(html, /Marcador exacto: 5 pts/);
+});
+
+test("MatchDetailScreenView hides the advancer selector on a knockout non-draw", () => {
+  const html = renderToStaticMarkup(
+    createElement(MatchDetailScreenView, {
+      detail: buildMatchDetail(),
+      formState: {
+        homeScorePred: "2",
+        awayScorePred: "1",
+        advancesTeamPred: null
+      },
+      isLoading: false,
+      isSaving: false,
+      loadErrorMessage: null,
+      advancerError: false,
+      onAdvancerChange: () => undefined,
+      onAwayChange: () => undefined,
+      onHomeChange: () => undefined,
+      onRetryLoad: () => undefined,
+      onSave: () => undefined,
+      saveNotice: null
+    })
+  );
+
+  assert.doesNotMatch(html, /Quién pasa a la siguiente ronda/);
 });
 
 test("MatchDetailScreenView renders save success toast", () => {
@@ -82,11 +111,14 @@ test("MatchDetailScreenView renders save success toast", () => {
       detail: buildMatchDetail(),
       formState: {
         homeScorePred: "2",
-        awayScorePred: "1"
+        awayScorePred: "1",
+        advancesTeamPred: null
       },
       isLoading: false,
       isSaving: false,
       loadErrorMessage: null,
+      advancerError: false,
+      onAdvancerChange: () => undefined,
       onAwayChange: () => undefined,
       onHomeChange: () => undefined,
       onRetryLoad: () => undefined,
@@ -116,11 +148,14 @@ test("MatchDetailScreenView renders locked state copy and disables editing inten
       }),
       formState: {
         homeScorePred: "2",
-        awayScorePred: "1"
+        awayScorePred: "1",
+        advancesTeamPred: null
       },
       isLoading: false,
       isSaving: false,
       loadErrorMessage: null,
+      advancerError: false,
+      onAdvancerChange: () => undefined,
       onAwayChange: () => undefined,
       onHomeChange: () => undefined,
       onRetryLoad: () => undefined,
@@ -139,11 +174,14 @@ test("MatchDetailScreenView renders retry save UI on actionable error", () => {
       detail: buildMatchDetail(),
       formState: {
         homeScorePred: "1",
-        awayScorePred: "1"
+        awayScorePred: "1",
+        advancesTeamPred: "ARG"
       },
       isLoading: false,
       isSaving: false,
       loadErrorMessage: null,
+      advancerError: false,
+      onAdvancerChange: () => undefined,
       onAwayChange: () => undefined,
       onHomeChange: () => undefined,
       onRetryLoad: () => undefined,

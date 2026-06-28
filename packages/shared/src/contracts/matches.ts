@@ -66,8 +66,10 @@ export type MatchOfficialResult = {
 export type MatchPredictionScoringBreakdown = {
   exact90Hit: boolean;
   correctOutcome90Hit: boolean;
+  penaltyHit: boolean;
   pointsExact90: number;
   pointsOutcome90: number;
+  pointsPenalty: number;
   pointsTotal: number;
 };
 
@@ -75,6 +77,8 @@ export type UserMatchPrediction = {
   predictionId: string;
   homeScorePred: number;
   awayScorePred: number;
+  // Equipo elegido para clasificar (solo cruces con empate). Precarga el selector al reabrir.
+  advancesTeamPred?: string | null;
   status: PredictionStatus;
   pointsAwarded: number | null;
   submittedAt: string;
@@ -105,6 +109,7 @@ export type ListMatchesResponse = {
 export type SaveMatchPredictionInput = {
   homeScorePred: number;
   awayScorePred: number;
+  advancesTeamPred?: string | null;
 };
 
 export type SaveMatchPredictionResponse = {

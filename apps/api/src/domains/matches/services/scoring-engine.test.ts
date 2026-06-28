@@ -35,6 +35,7 @@ test("scorePrediction awards exact points on exact marker hit", () => {
   assert.deepEqual(result, {
     exact90Points: 5,
     outcome90Points: 0,
+    penaltyBonusPoints: 0,
     totalPoints: 5
   });
 });
@@ -48,6 +49,7 @@ test("scorePrediction awards outcome points when marker misses but outcome hits"
   assert.deepEqual(result, {
     exact90Points: 0,
     outcome90Points: 2,
+    penaltyBonusPoints: 0,
     totalPoints: 2
   });
 });
@@ -61,13 +63,87 @@ test("scorePrediction awards zero when outcome is missed", () => {
   assert.deepEqual(result, {
     exact90Points: 0,
     outcome90Points: 0,
+    penaltyBonusPoints: 0,
     totalPoints: 0
   });
 });
 
-test("scorePrediction treats knockout draw like any match — only 90' counts", () => {
-  // Partido QF termina 1-1 al 90', Argentina pasa por penales (winnerTeamId=ARG).
-  // El user predijo empate 1-1: gana los 5 pts de exact aunque no elija quién clasifica.
+test("scorePrediction: knockout draw + predicted draw + correct advancer → exact + penalty bonus", () => {
+  // QF termina 1-1 al 90', Argentina pasa por penales (winnerTeamId=ARG).
+  // User predijo 1-1 y eligió ARG: 5 (exact) + 1 (bonus penales) = 6.
+  const result = scorePrediction(
+    buildMatch({
+      stage: "QF",
+      groupId: null,
+      homeScore90: 1,
+      awayScore90: 1,
+      winnerTeamId: "ARG"
+    }),
+    {
+      homeScorePred: 1,
+      awayScorePred: 1,
+      advancesTeamPred: "ARG"
+    }
+  );
+
+  assert.deepEqual(result, {
+    exact90Points: 5,
+    outcome90Points: 0,
+    penaltyBonusPoints: 1,
+    totalPoints: 6
+  });
+});
+
+test("scorePrediction: knockout draw + non-exact draw + correct advancer → outcome + penalty bonus", () => {
+  // QF termina 1-1; user predijo 0-0 (empate, no exacto) y eligió ARG: 2 (outcome) + 1 (bonus) = 3.
+  const result = scorePrediction(
+    buildMatch({
+      stage: "QF",
+      groupId: null,
+      homeScore90: 1,
+      awayScore90: 1,
+      winnerTeamId: "ARG"
+    }),
+    {
+      homeScorePred: 0,
+      awayScorePred: 0,
+      advancesTeamPred: "ARG"
+    }
+  );
+
+  assert.deepEqual(result, {
+    exact90Points: 0,
+    outcome90Points: 2,
+    penaltyBonusPoints: 1,
+    totalPoints: 3
+  });
+});
+
+test("scorePrediction: knockout draw + predicted draw + WRONG advancer → no bonus", () => {
+  const result = scorePrediction(
+    buildMatch({
+      stage: "QF",
+      groupId: null,
+      homeScore90: 1,
+      awayScore90: 1,
+      winnerTeamId: "ARG"
+    }),
+    {
+      homeScorePred: 1,
+      awayScorePred: 1,
+      advancesTeamPred: "BRA"
+    }
+  );
+
+  assert.deepEqual(result, {
+    exact90Points: 5,
+    outcome90Points: 0,
+    penaltyBonusPoints: 0,
+    totalPoints: 5
+  });
+});
+
+test("scorePrediction: knockout draw + predicted draw + no advancer chosen → no bonus", () => {
   const result = scorePrediction(
     buildMatch({
       stage: "QF",
@@ -85,11 +161,38 @@ test("scorePrediction treats knockout draw like any match — only 90' counts", 
   assert.deepEqual(result, {
     exact90Points: 5,
     outcome90Points: 0,
+    penaltyBonusPoints: 0,
+    totalPoints: 5
+  });
+});
+
+test("scorePrediction: group-stage draw never grants penalty bonus", () => {
+  // Empate en grupos no va a penales: aunque mande advancesTeamPred, no hay bonus.
+  const result = scorePrediction(
+    buildMatch({
+      stage: "group",
+      groupId: "A",
+      homeScore90: 1,
+      awayScore90: 1,
+      winnerTeamId: null
+    }),
+    {
+      homeScorePred: 1,
+      awayScorePred: 1,
+      advancesTeamPred: "ARG"
+    }
+  );
+
+  assert.deepEqual(result, {
+    exact90Points: 5,
+    outcome90Points: 0,
+    penaltyBonusPoints: 0,
     totalPoints: 5
   });
 });
 
 test("scorePrediction awards outcome on knockout when user predicts draw but match ends 2-0", () => {
+  // No fue empate al 90' → no hay penales → sin bonus aunque elija un equipo.
   const result = scorePrediction(
     buildMatch({
       stage: "FINAL",
@@ -100,13 +203,15 @@ test("scorePrediction awards outcome on knockout when user predicts draw but mat
     }),
     {
       homeScorePred: 3,
-      awayScorePred: 1
+      awayScorePred: 1,
+      advancesTeamPred: "ARG"
     }
   );
 
   assert.deepEqual(result, {
     exact90Points: 0,
     outcome90Points: 2,
+    penaltyBonusPoints: 0,
     totalPoints: 2
   });
 });

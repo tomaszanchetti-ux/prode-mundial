@@ -80,8 +80,10 @@ export async function getPoints(userId: string): Promise<PointsResponse> {
         breakdown: {
           exact90Hit: scoringBreakdown.exact90Points > 0,
           correctOutcome90Hit: scoringBreakdown.outcome90Points > 0,
+          penaltyHit: (scoringBreakdown.penaltyBonusPoints ?? 0) > 0,
           pointsExact90: scoringBreakdown.exact90Points,
           pointsOutcome90: scoringBreakdown.outcome90Points,
+          pointsPenalty: scoringBreakdown.penaltyBonusPoints ?? 0,
           pointsTotal: scoringBreakdown.totalPoints
         }
       };

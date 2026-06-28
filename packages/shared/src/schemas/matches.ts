@@ -57,8 +57,10 @@ export const matchOfficialResultSchema = z.object({
 export const matchPredictionScoringBreakdownSchema = z.object({
   exact90Hit: z.boolean(),
   correctOutcome90Hit: z.boolean(),
+  penaltyHit: z.boolean(),
   pointsExact90: z.number().int().nonnegative(),
   pointsOutcome90: z.number().int().nonnegative(),
+  pointsPenalty: z.number().int().nonnegative(),
   pointsTotal: z.number().int().nonnegative()
 });
 
@@ -66,6 +68,7 @@ export const userMatchPredictionSchema = z.object({
   predictionId: z.string().min(1),
   homeScorePred: z.number().int().nonnegative(),
   awayScorePred: z.number().int().nonnegative(),
+  advancesTeamPred: z.string().min(1).nullable().optional(),
   status: predictionStatusSchema,
   pointsAwarded: z.number().int().nonnegative().nullable(),
   submittedAt: isoTimestampSchema,
@@ -75,7 +78,8 @@ export const userMatchPredictionSchema = z.object({
 
 export const matchScoringRulesSchema = z.object({
   exact90Points: z.literal(MATCH_SCORING_RULES.exact90Points),
-  correctOutcome90Points: z.literal(MATCH_SCORING_RULES.correctOutcome90Points)
+  correctOutcome90Points: z.literal(MATCH_SCORING_RULES.correctOutcome90Points),
+  penaltyWinnerPoints: z.literal(MATCH_SCORING_RULES.penaltyWinnerPoints)
 });
 
 export const matchDetailSchema = matchSummarySchema.extend({
@@ -98,7 +102,10 @@ export const listMatchesResponseSchema = z.object({
 
 export const saveMatchPredictionInputSchema = z.object({
   homeScorePred: z.number().int().nonnegative(),
-  awayScorePred: z.number().int().nonnegative()
+  awayScorePred: z.number().int().nonnegative(),
+  // Equipo que clasifica cuando se predice empate en un cruce. La regla condicional
+  // (obligatorio solo en knockout + empate) se valida en el dominio, con el match a mano.
+  advancesTeamPred: z.string().min(1).nullable().optional()
 });
 
 export const saveMatchPredictionResponseSchema = z.object({

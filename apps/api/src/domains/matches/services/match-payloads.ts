@@ -177,8 +177,10 @@ export function toUserMatchPrediction(
     ? {
         exact90Hit: prediction.scoringBreakdown.exact90Points > 0,
         correctOutcome90Hit: prediction.scoringBreakdown.outcome90Points > 0,
+        penaltyHit: (prediction.scoringBreakdown.penaltyBonusPoints ?? 0) > 0,
         pointsExact90: prediction.scoringBreakdown.exact90Points,
         pointsOutcome90: prediction.scoringBreakdown.outcome90Points,
+        pointsPenalty: prediction.scoringBreakdown.penaltyBonusPoints ?? 0,
         pointsTotal: prediction.scoringBreakdown.totalPoints
       }
     : undefined;
@@ -187,6 +189,7 @@ export function toUserMatchPrediction(
     predictionId: prediction.predictionId,
     homeScorePred: prediction.homeScorePred,
     awayScorePred: prediction.awayScorePred,
+    advancesTeamPred: prediction.advancesTeamPred ?? null,
     status: state.predictionStatus,
     pointsAwarded: prediction.isScored ? prediction.pointsAwarded : null,
     submittedAt: prediction.createdAt,

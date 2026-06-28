@@ -16,6 +16,7 @@ import { Card, ErrorCard, NextMatchHero, SkeletonCard } from "@prode/ui";
 import { useAuth } from "@/components/auth/auth-provider";
 import { copyForLocale, useLocale } from "@/lib/i18n/locale-provider";
 import { QuickPredictionModal } from "@/components/matches/quick-prediction-modal";
+import { AdvancerChangesBanner } from "@/components/matches/advancer-changes-banner";
 import { ApiClientError, getBestPlayerPick, getChampionPick, getMatches, getPreTournamentSummary, getSubChampionPick, getTournamentProjection } from "@/lib/api/client";
 import { canEditPrediction } from "@/lib/matches/editability";
 import { pickContextualHeroMatch, type ContextualHero } from "@/lib/hero/pick-contextual-hero";
@@ -106,6 +107,7 @@ export function TournamentScreenView({
 
   return (
     <div className="grid gap-4">
+      <AdvancerChangesBanner />
       {heroProps ? (
         <NextMatchHero {...heroProps} />
       ) : (

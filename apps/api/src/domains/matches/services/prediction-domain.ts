@@ -6,6 +6,7 @@ import type { TournamentContext } from "./match-payloads";
 export type ValidatedPredictionInput = {
   homeScorePred: number;
   awayScorePred: number;
+  advancesTeamPred: string | null;
 };
 
 function isFiniteInteger(value: unknown): value is number {
@@ -100,9 +101,57 @@ export function validatePredictionInput(
   const record = input as Record<string, unknown>;
   const homeScorePred = assertValidScore(record.homeScorePred, "homeScorePred");
   const awayScorePred = assertValidScore(record.awayScorePred, "awayScorePred");
+  const advancesTeamPred = resolveAdvancesTeamPred(match, homeScorePred, awayScorePred, record.advancesTeamPred);
 
   return {
     homeScorePred,
-    awayScorePred
+    awayScorePred,
+    advancesTeamPred
   };
+}
+
+/**
+ * "Quién pasa" solo aplica en knockouts cuando la predicción es empate (allí se
+ * define por penales). En cualquier otro caso (grupos, o marcador no empatado)
+ * el campo se ignora y se persiste como null para mantener la data limpia.
+ *
+ * Cuando aplica, es OBLIGATORIO y debe ser uno de los dos equipos del partido.
+ */
+function resolveAdvancesTeamPred(
+  match: StoredMatch,
+  homeScorePred: number,
+  awayScorePred: number,
+  rawValue: unknown
+): string | null {
+  const isKnockout = match.stage !== "group";
+  const isDraw = homeScorePred === awayScorePred;
+
+  if (!isKnockout || !isDraw) {
+    return null;
+  }
+
+  if (typeof rawValue !== "string" || rawValue.length === 0) {
+    throw new ApiError(
+      400,
+      "ADVANCER_REQUIRED",
+      "Predicting a draw in a knock-out requires choosing which team advances.",
+      { matchId: match.matchId, stage: match.stage }
+    );
+  }
+
+  if (rawValue !== match.homeTeamId && rawValue !== match.awayTeamId) {
+    throw new ApiError(
+      400,
+      "INVALID_ADVANCER",
+      "The advancing team must be one of the two teams in this match.",
+      {
+        matchId: match.matchId,
+        advancesTeamPred: rawValue,
+        homeTeamId: match.homeTeamId,
+        awayTeamId: match.awayTeamId
+      }
+    );
+  }
+
+  return rawValue;
 }

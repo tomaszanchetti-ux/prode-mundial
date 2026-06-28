@@ -83,8 +83,10 @@ function buildPoints(overrides: Partial<PointsResponse> = {}): PointsResponse {
         breakdown: {
           exact90Hit: true,
           correctOutcome90Hit: false,
+          penaltyHit: false,
           pointsExact90: 5,
           pointsOutcome90: 0,
+          pointsPenalty: 0,
           pointsTotal: 5
         }
       }
