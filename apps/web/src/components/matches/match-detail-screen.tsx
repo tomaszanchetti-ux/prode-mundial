@@ -192,7 +192,11 @@ export function MatchDetailScreenView({
               </p>
               {detail.userPrediction.scoringBreakdown ? (
                 <p className="typo-body m-0 text-text-secondary">
-                  {t("Desglose", "Breakdown")}: {t("marcador exacto", "exact score")} {detail.userPrediction.scoringBreakdown.pointsExact90} · {t("solo resultado", "outcome only")} {detail.userPrediction.scoringBreakdown.pointsOutcome90}.
+                  {t("Desglose", "Breakdown")}: {t("marcador exacto", "exact score")} {detail.userPrediction.scoringBreakdown.pointsExact90} · {t("solo resultado", "outcome only")} {detail.userPrediction.scoringBreakdown.pointsOutcome90}
+                  {detail.userPrediction.scoringBreakdown.pointsPenalty > 0
+                    ? ` · ${t("acertaste quién pasa", "guessed who advances")} +${detail.userPrediction.scoringBreakdown.pointsPenalty}`
+                    : ""}
+                  .
                 </p>
               ) : null}
             </div>

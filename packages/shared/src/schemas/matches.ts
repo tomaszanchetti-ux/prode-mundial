@@ -57,8 +57,10 @@ export const matchOfficialResultSchema = z.object({
 export const matchPredictionScoringBreakdownSchema = z.object({
   exact90Hit: z.boolean(),
   correctOutcome90Hit: z.boolean(),
+  penaltyHit: z.boolean(),
   pointsExact90: z.number().int().nonnegative(),
   pointsOutcome90: z.number().int().nonnegative(),
+  pointsPenalty: z.number().int().nonnegative(),
   pointsTotal: z.number().int().nonnegative()
 });
 

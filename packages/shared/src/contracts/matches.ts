@@ -66,8 +66,10 @@ export type MatchOfficialResult = {
 export type MatchPredictionScoringBreakdown = {
   exact90Hit: boolean;
   correctOutcome90Hit: boolean;
+  penaltyHit: boolean;
   pointsExact90: number;
   pointsOutcome90: number;
+  pointsPenalty: number;
   pointsTotal: number;
 };
 
