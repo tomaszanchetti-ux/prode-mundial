@@ -54,6 +54,7 @@ export type StoredMatch = {
 export type StoredPredictionScoringBreakdown = {
   exact90Points: number;
   outcome90Points: number;
+  penaltyBonusPoints: number;
   totalPoints: number;
 };
 
@@ -63,6 +64,8 @@ export type StoredPrediction = {
   matchId: string;
   homeScorePred: number;
   awayScorePred: number;
+  // Knockouts: equipo que el user cree que clasifica cuando predice empate. null en grupos / no-empate.
+  advancesTeamPred?: string | null;
   isLocked: boolean;
   isScored: boolean;
   pointsAwarded: number;

@@ -26,10 +26,21 @@ function scorePrediction(match: SyncStoredMatch, prediction: SyncStoredPredictio
   const exact90Points = isExact ? MATCH_SCORING_RULES.exact90Points : 0;
   const outcome90Points = !isExact && isCorrectOutcome ? MATCH_SCORING_RULES.correctOutcome90Points : 0;
 
+  // Bonus penales (solo knockouts): empate real al 90' + el user predijo empate
+  // + acertó qué equipo clasifica (advancesTeamPred === winnerTeamId).
+  const isKnockout = match.stage !== "group";
+  const matchDrew90 = homeScore === awayScore;
+  const predictedDraw = prediction.homeScorePred === prediction.awayScorePred;
+  const advanceHit =
+    Boolean(prediction.advancesTeamPred) && prediction.advancesTeamPred === match.winnerTeamId;
+  const penaltyBonusPoints =
+    isKnockout && matchDrew90 && predictedDraw && advanceHit ? MATCH_SCORING_RULES.penaltyWinnerPoints : 0;
+
   return {
     exact90Points,
     outcome90Points,
-    totalPoints: exact90Points + outcome90Points
+    penaltyBonusPoints,
+    totalPoints: exact90Points + outcome90Points + penaltyBonusPoints
   };
 }
 

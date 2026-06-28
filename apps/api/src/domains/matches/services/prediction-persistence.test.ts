@@ -53,6 +53,7 @@ test("mergeStoredPrediction overwrites editable fields and preserves scoring his
       scoringBreakdown: {
         exact90Points: 5,
         outcome90Points: 0,
+        penaltyBonusPoints: 0,
         totalPoints: 5
       },
       createdAt: "2026-04-01T00:00:00Z",
