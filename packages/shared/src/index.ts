@@ -21,6 +21,7 @@ export * from "./tournament/best-thirds-resolver";
 export * from "./tournament/bracket-halves";
 export * from "./tournament/bracket-hydration";
 export * from "./tournament/bracket-simulator";
+export * from "./tournament/fifa-2026-r32-third-allocation";
 export * from "./tournament/full-hydration-planner";
 export * from "./tournament/knockout-hydration-resolver";
 export * from "./tournament/macro-pick-warnings";
