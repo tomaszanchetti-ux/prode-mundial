@@ -185,6 +185,40 @@ describe("resolveR32Bracket", () => {
     assert.ok(unresolvedSlots.includes("2L"));
   });
 
+  it("matches the official FIFA table for the live combination (thirds from B,D,E,F,I,J,K,L)", () => {
+    // Thirds advancing from B,D,E,F,I,J,K,L (4 pts) over A,C,G,H (1 pt). This is
+    // the real Round-of-32 combination of WC 2026 (USA vs Bosnia, Germany vs
+    // Paraguay, Mexico vs Ecuador, Belgium vs Senegal, …). The previous greedy
+    // matcher left m_081 (USA) without a rival and stranded Paraguay.
+    const advancing = new Set(["B", "D", "E", "F", "I", "J", "K", "L"]);
+    const standings = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"].map((groupId) => {
+      const thirdPoints = advancing.has(groupId) ? 4 : 1;
+      const thirdGd = advancing.has(groupId) ? 0 : -3;
+      return buildStandings(groupId, [
+        [`${groupId}1`, 9, 5, 6],
+        [`${groupId}2`, 6, 1, 3],
+        [`${groupId}3`, thirdPoints, thirdGd, advancing.has(groupId) ? 3 : 1],
+        [`${groupId}4`, 0, -6, 0]
+      ]);
+    });
+
+    const { matches, unresolvedSlots } = resolveR32Bracket(standings, R32_SLOT_DEFINITIONS);
+    const away = (matchId: string) => matches.find((match) => match.matchId === matchId)?.awayTeamId;
+
+    // Official Annex C allocation for {B,D,E,F,I,J,K,L}: 1A-3E, 1B-3J, 1D-3B,
+    // 1E-3D, 1G-3I, 1I-3F, 1K-3L, 1L-3K.
+    assert.equal(away("m_079"), "E3", "1A (Mexico) faces 3E (Ecuador)");
+    assert.equal(away("m_085"), "J3", "1B (Switzerland) faces 3J (Algeria)");
+    assert.equal(away("m_081"), "B3", "1D (USA) faces 3B (Bosnia) — was empty under greedy");
+    assert.equal(away("m_074"), "D3", "1E (Germany) faces 3D (Paraguay) — was stranded under greedy");
+    assert.equal(away("m_082"), "I3", "1G (Belgium) faces 3I (Senegal)");
+    assert.equal(away("m_077"), "F3", "1I (France) faces 3F (Sweden)");
+    assert.equal(away("m_087"), "L3", "1K (Colombia) faces 3L (Ghana)");
+    assert.equal(away("m_080"), "K3", "1L (England) faces 3K (DR Congo)");
+
+    assert.deepEqual(unresolvedSlots, [], "every slot resolves with eight advancing thirds");
+  });
+
   it("is deterministic across calls with identical input", () => {
     const first = resolveR32Bracket(ALL_TWELVE_GROUPS, R32_SLOT_DEFINITIONS);
     const second = resolveR32Bracket(ALL_TWELVE_GROUPS, R32_SLOT_DEFINITIONS);
