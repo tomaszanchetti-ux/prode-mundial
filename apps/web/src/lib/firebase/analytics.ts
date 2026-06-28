@@ -80,7 +80,10 @@ export type TrackEvent =
   | "profile_notif_activated"
   | "profile_install_toggle_clicked"
   | "profile_install_installed"
-  | "profile_install_ios_hint_opened";
+  | "profile_install_ios_hint_opened"
+  // Aviso de la nueva mecánica de cruces (quién pasa + bonus penales)
+  | "advancer_banner_shown"
+  | "advancer_banner_dismissed";
 
 export function track(
   event: TrackEvent,
