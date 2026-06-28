@@ -10,6 +10,7 @@ import { copyForLocale, formatDateTime, useLocale, type AppLocale } from "@/lib/
 import { canEditPrediction } from "@/lib/matches/editability";
 import { toStatusLabel, toStatusTone } from "./match-detail-helpers";
 import { AdvancerSelect, asksAdvancer } from "./advancer-select";
+import { MatchResultDetail } from "./match-result-detail";
 
 type QuickPredictionModalProps = {
   matchId: string | null;
@@ -149,6 +150,9 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
   }, [isOpen, matchId, status, user]);
 
   const isEditable = detail ? canEditPrediction(detail) : false;
+  // Cruce/partido ya jugado: mostramos resultado real vs predicción en vez del
+  // input de marcador (que no tiene sentido sobre un partido terminado).
+  const showResults = Boolean(detail?.officialResult);
 
   async function handleSave() {
     if (!detail || !user) {
@@ -209,18 +213,20 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
       isOpen={isOpen}
       kickoffLabel={detail ? copyForLocale(locale, toKickoffLabel(detail), formatDateTime("en", detail.kickoffAt, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) : ""}
       onClose={onClose}
-      onSubmit={handleSave}
+      onSubmit={showResults ? onClose : handleSave}
       closeLabel={copyForLocale(locale, "Mas tarde", "Later")}
       skipLabel={copyForLocale(locale, "Completar despues", "Complete later")}
-      onSkip={hasNextPending && onSkip ? onSkip : undefined}
+      onSkip={showResults ? undefined : hasNextPending && onSkip ? onSkip : undefined}
       saveLabel={
-        detail?.userPrediction
-          ? hasNextPending
-            ? copyForLocale(locale, "Modificar y seguir", "Update & next")
-            : copyForLocale(locale, "Modificar", "Update")
-          : hasNextPending
-            ? copyForLocale(locale, "Guardar y seguir", "Save & next")
-            : copyForLocale(locale, "Guardar", "Save")
+        showResults
+          ? copyForLocale(locale, "Cerrar", "Close")
+          : detail?.userPrediction
+            ? hasNextPending
+              ? copyForLocale(locale, "Modificar y seguir", "Update & next")
+              : copyForLocale(locale, "Modificar", "Update")
+            : hasNextPending
+              ? copyForLocale(locale, "Guardar y seguir", "Save & next")
+              : copyForLocale(locale, "Guardar", "Save")
       }
       saving={isSaving}
       stageLabel={detail ? toStageLabel(detail, locale) : copyForLocale(locale, "Partido", "Match")}
@@ -228,6 +234,10 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
       statusTone={detail && toStatusTone(detail) !== "saved" ? toStatusTone(detail) : undefined}
       title={detail ? `${detail.homeTeam.name} vs ${detail.awayTeam.name}` : copyForLocale(locale, "Tu proximo pendiente", "Your next pending match")}
     >
+      {showResults && detail ? (
+        <MatchResultDetail detail={detail} locale={locale} />
+      ) : (
+      <>
       <ScoreInput
         awayLabel={detail?.awayTeam.name ?? "Visitante"}
         awayTeam={detail ? { teamName: detail.awayTeam.name, fifaCode: detail.awayTeam.fifaCode, flagAsset: detail.awayTeam.flagAsset, flagUrl: detail.awayTeam.flagUrl } : undefined}
@@ -257,6 +267,8 @@ export function QuickPredictionModal({ matchId, isOpen, hasNextPending = false, 
           />
         </div>
       ) : null}
+      </>
+      )}
     </PredictionModal>
   );
 }

@@ -65,7 +65,15 @@ export const tournamentProjectionMatchSchema = z.object({
   home: tournamentProjectionSideSchema,
   away: tournamentProjectionSideSchema,
   winnerTeamId: z.string().min(1).nullable(),
-  source: tournamentProjectionMatchSourceSchema
+  source: tournamentProjectionMatchSourceSchema,
+  // Overlay de resultado oficial + predicción del usuario (solo lo puebla el
+  // bracket oficial de /world-cup desde MatchSummary). La simulación de
+  // /tournament no los manda → opcionales.
+  homeScore90: z.number().int().nonnegative().nullable().optional(),
+  awayScore90: z.number().int().nonnegative().nullable().optional(),
+  userPredictionSummary: z.string().min(1).nullable().optional(),
+  userPredictionPoints: z.number().int().nonnegative().nullable().optional(),
+  isScored: z.boolean().optional()
 });
 
 export const tournamentProjectionBracketSchema = z.object({
