@@ -108,7 +108,11 @@ test("MatchDetailScreenView renders locked state copy and disables editing inten
         isEditable: false,
         isLocked: true,
         predictionStatus: "locked_unscored",
-        ctaLabel: "Bloqueado"
+        ctaLabel: "Bloqueado",
+        // "Abre pronto" requires the prediction window to still be in the
+        // future. Keep this relative to now so the test does not rot once the
+        // hard-coded fixture dates fall into the past.
+        predictionOpensAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
       }),
       formState: {
         homeScorePred: "2",
