@@ -118,35 +118,34 @@ export async function runMatchSync(
     }
   }
 
-  // Fire hydration whenever any match just finished (group or knock-out).
-  // The planner is idempotent, so a no-op run is harmless and cheap.
-  if (result.matchesScored > 0) {
-    try {
-      const hydration = await runBracketHydration(nowIso);
-      result.bracketHydration = {
-        isR32Ready: hydration.isR32Ready,
-        groupMatchesTotal: hydration.groupMatchesTotal,
-        groupMatchesFinalized: hydration.groupMatchesFinalized,
-        r32PatchesApplied: hydration.r32PatchesApplied,
-        knockoutPatchesApplied: hydration.knockoutPatchesApplied,
-        patchesApplied: hydration.patchesApplied,
-        phaseUnlocks: hydration.phaseUnlocks,
-        unresolvedSlots: hydration.unresolvedSlots,
-        appliedMatchIds: hydration.appliedMatchIds
-      };
-      if (hydration.patchesApplied > 0) {
-        console.log(
-          `Bracket hydration applied ${hydration.patchesApplied} patches ` +
-            `(R32: ${hydration.r32PatchesApplied}, knockout: ${hydration.knockoutPatchesApplied}): ` +
-            hydration.appliedMatchIds.join(", ")
-        );
-      }
-    } catch (err) {
-      result.errors.push({
-        matchId: "bracket-hydration",
-        error: err instanceof Error ? err.message : String(err)
-      });
+  // Always attempt hydration — idempotent and cheap. A prior run may have
+  // failed or been skipped when no new scores landed; without this, R32 stays
+  // blocked even after every group match is finalized.
+  try {
+    const hydration = await runBracketHydration(nowIso);
+    result.bracketHydration = {
+      isR32Ready: hydration.isR32Ready,
+      groupMatchesTotal: hydration.groupMatchesTotal,
+      groupMatchesFinalized: hydration.groupMatchesFinalized,
+      r32PatchesApplied: hydration.r32PatchesApplied,
+      knockoutPatchesApplied: hydration.knockoutPatchesApplied,
+      patchesApplied: hydration.patchesApplied,
+      phaseUnlocks: hydration.phaseUnlocks,
+      unresolvedSlots: hydration.unresolvedSlots,
+      appliedMatchIds: hydration.appliedMatchIds
+    };
+    if (hydration.patchesApplied > 0) {
+      console.log(
+        `Bracket hydration applied ${hydration.patchesApplied} patches ` +
+          `(R32: ${hydration.r32PatchesApplied}, knockout: ${hydration.knockoutPatchesApplied}): ` +
+          hydration.appliedMatchIds.join(", ")
+      );
     }
+  } catch (err) {
+    result.errors.push({
+      matchId: "bracket-hydration",
+      error: err instanceof Error ? err.message : String(err)
+    });
   }
 
   if (affectedUserIds.size > 0) {

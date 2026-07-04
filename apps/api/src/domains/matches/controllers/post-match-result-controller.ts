@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ApiError } from "../../../server/errors/api-error";
 import { ok } from "../../../server/http/respond";
 import { parseBody } from "../../../server/http/validation";
+import { runBracketHydration } from "../../tournament/services/bracket-hydration-service";
 import { matchesRepository } from "../repositories/matches-repository";
 import { scoreMatch } from "../services/score-match";
 
@@ -83,6 +84,8 @@ export async function postMatchResultController(req: Request, res: Response) {
     updatedAt: nowIso
   });
 
+  const bracketHydration = await runBracketHydration(nowIso);
+
   res.json(
     ok({
       matchId,
@@ -94,6 +97,13 @@ export async function postMatchResultController(req: Request, res: Response) {
         predictionsProcessed: scoringResult.predictionsProcessed,
         affectedUsers: scoringResult.affectedUsers,
         affectedLeagues: scoringResult.affectedLeagues
+      },
+      bracketHydration: {
+        isR32Ready: bracketHydration.isR32Ready,
+        groupMatchesFinalized: bracketHydration.groupMatchesFinalized,
+        groupMatchesTotal: bracketHydration.groupMatchesTotal,
+        patchesApplied: bracketHydration.patchesApplied,
+        unresolvedSlots: bracketHydration.unresolvedSlots
       }
     })
   );

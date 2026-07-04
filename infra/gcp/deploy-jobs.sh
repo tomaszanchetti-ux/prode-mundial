@@ -28,6 +28,7 @@ JOBS=(
   "match-lock-enforcement"
   "rebuild-macro"
   "fcm-reminders"
+  "bracket-hydration"
 )
 
 echo "📦 Proyecto: $PROJECT_ID"

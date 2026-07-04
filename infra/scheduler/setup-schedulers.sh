@@ -24,6 +24,7 @@ SCHEDULES=(
   "prode-job-match-result-sync|*/2 * * * *|Sync de resultados desde football-data.org (cada 2 min)"
   "prode-job-match-lock-enforcement|*/5 * * * *|Bloqueo de picks cuando arrancan los matches (cada 5 min)"
   "prode-job-score-macro|*/30 * * * *|Scoring de picks macro (cada 30 min)"
+  "prode-job-bracket-hydration|*/15 * * * *|Hidratacion de cruces R32+ (recovery idempotente cada 15 min)"
 )
 
 echo "📍 Proyecto: $PROJECT_ID · Región: $REGION"
