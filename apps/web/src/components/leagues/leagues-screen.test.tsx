@@ -139,6 +139,7 @@ test("LeaguesScreenView renders synthetic summary and private league list in Glo
       items: [buildLeague()],
       points: buildPoints(),
       standings: null,
+      globalStandings: null,
       selectedLeagueId: GLOBAL_LEAGUE_ID,
       mode: null,
       formState: { leagueName: "", inviteCode: "" },
@@ -175,18 +176,15 @@ test("LeaguesScreenView renders global standings table when Global tab is select
     createElement(LeaguesScreenView, {
       items: [buildLeague()],
       points: buildPoints(),
-      standings: {
-        league: {
-          leagueId: GLOBAL_LEAGUE_ID,
-          name: "Global",
-          memberLimit: 3,
-          membersCount: 3
-        },
+      standings: null,
+      globalStandings: {
+        participantsCount: 3,
         items: [
           {
             position: 1,
             userId: "u_1",
             displayName: "Ana",
+            leagueNames: ["Liga Demo Madrid"],
             totalPoints: 20,
             exactHits: 2,
             correctSigns: 6,
@@ -198,6 +196,7 @@ test("LeaguesScreenView renders global standings table when Global tab is select
             position: 2,
             userId: "u_2",
             displayName: "Tomas",
+            leagueNames: ["Liga Demo Madrid"],
             totalPoints: 14,
             exactHits: 1,
             correctSigns: 5,
@@ -236,6 +235,8 @@ test("LeaguesScreenView renders global standings table when Global tab is select
   );
 
   assert.match(html, /RANKING GLOBAL/);
+  assert.match(html, /Buscar por nombre/);
+  assert.match(html, /Liga Demo Madrid/);
   assert.match(html, /#2/);
   assert.match(html, /3 jugadores en ligas activas/);
   assert.match(html, /Ana/);
@@ -248,6 +249,7 @@ test("LeaguesScreenView renders standings table when a private league is selecte
       items: [buildLeague()],
       points: buildPoints(),
       standings: buildStandings(),
+      globalStandings: null,
       selectedLeagueId: "lg_1",
       mode: null,
       formState: { leagueName: "", inviteCode: "" },
@@ -284,6 +286,7 @@ test("LeaguesScreenView renders create success state", () => {
       items: [buildLeague()],
       points: buildPoints(),
       standings: null,
+      globalStandings: null,
       selectedLeagueId: GLOBAL_LEAGUE_ID,
       mode: null,
       formState: { leagueName: "", inviteCode: "" },

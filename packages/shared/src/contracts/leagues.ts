@@ -37,6 +37,10 @@ export type LeagueStandingEntry = {
   isOwner: boolean;
 };
 
+export type GlobalStandingEntry = LeagueStandingEntry & {
+  leagueNames: string[];
+};
+
 export type LeagueStandingSummary = {
   position: number;
   totalPoints: number;
@@ -82,6 +86,6 @@ export type LeagueStandingsResponse = {
 
 export type GlobalStandingsResponse = {
   participantsCount: number;
-  items: LeagueStandingEntry[];
+  items: GlobalStandingEntry[];
   myStanding: LeagueStandingSummary | null;
 };

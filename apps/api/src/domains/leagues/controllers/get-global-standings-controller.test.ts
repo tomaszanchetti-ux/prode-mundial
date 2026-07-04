@@ -131,7 +131,7 @@ test("GET /api/v1/standings/global returns platform standings for active league 
       ok: boolean;
       data: {
         participantsCount: number;
-        items: Array<{ userId: string; position: number; isMe: boolean }>;
+        items: Array<{ userId: string; position: number; isMe: boolean; leagueNames: string[] }>;
         myStanding: { position: number; totalPoints: number } | null;
       };
     };
@@ -140,11 +140,16 @@ test("GET /api/v1/standings/global returns platform standings for active league 
     assert.equal(payload.ok, true);
     assert.equal(payload.data.participantsCount, 3);
     assert.deepEqual(
-      payload.data.items.map((item) => ({ userId: item.userId, position: item.position, isMe: item.isMe })),
+      payload.data.items.map((item) => ({
+        userId: item.userId,
+        position: item.position,
+        isMe: item.isMe,
+        leagueNames: item.leagueNames
+      })),
       [
-        { userId: "usr_2", position: 1, isMe: false },
-        { userId: "usr_1", position: 2, isMe: true },
-        { userId: "usr_3", position: 3, isMe: false }
+        { userId: "usr_2", position: 1, isMe: false, leagueNames: ["Liga Demo"] },
+        { userId: "usr_1", position: 2, isMe: true, leagueNames: ["Liga Demo"] },
+        { userId: "usr_3", position: 3, isMe: false, leagueNames: ["Liga Cerrada"] }
       ]
     );
     assert.deepEqual(payload.data.myStanding, {

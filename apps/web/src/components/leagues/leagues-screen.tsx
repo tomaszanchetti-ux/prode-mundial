@@ -3,7 +3,7 @@
 import React from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
-import type { LeagueDetail, LeagueStandingsResponse, LeagueSummary, PointsResponse } from "@prode/shared";
+import type { GlobalStandingsResponse, LeagueDetail, LeagueStandingsResponse, LeagueSummary, PointsResponse } from "@prode/shared";
 import { AdSlotCard, Button, Card, ErrorCard, SkeletonCard, SkeletonStandingRow, StatusTag } from "@prode/ui";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -33,6 +33,7 @@ import {
   type LeagueOption
 } from "./leagues-helpers";
 import { ActionResultCard, CreateLeagueForm, JoinLeagueForm } from "./leagues-forms";
+import { GlobalStandingsTable } from "./global-standings-table";
 import { LeagueConfirmModal, type LeagueConfirmAction } from "./league-confirm-modal";
 
 const userLeagueLimitCopy = (locale: AppLocale) =>
@@ -55,6 +56,7 @@ type LeaguesScreenViewProps = {
   items: LeagueSummary[];
   points: PointsResponse | null;
   standings: LeagueStandingsResponse | null;
+  globalStandings: GlobalStandingsResponse | null;
   selectedLeagueId: string;
   mode: "create" | "join" | null;
   formState: {
@@ -82,6 +84,7 @@ export function LeaguesScreenView({
   items,
   points,
   standings,
+  globalStandings,
   selectedLeagueId,
   mode,
   formState,
@@ -112,7 +115,12 @@ export function LeaguesScreenView({
   );
 
   const isGlobal = selectedLeagueId === GLOBAL_LEAGUE_ID;
-  const summary = buildSyntheticSummary(points, standings, isGlobal, locale);
+  const summary = buildSyntheticSummary(
+    points,
+    isGlobal ? toGlobalStandingsView(globalStandings) : standings,
+    isGlobal,
+    locale
+  );
   const selectedLeague = items.find((league) => league.leagueId === selectedLeagueId) ?? null;
 
   return (
@@ -154,9 +162,9 @@ export function LeaguesScreenView({
           ) : null}
         </div>
 
-        {isGlobal && standings ? (
+        {isGlobal && globalStandings ? (
           <span className="typo-meta">
-            {standings.league.membersCount} {t("jugadores en ligas activas", "players in active leagues")}
+            {globalStandings.participantsCount} {t("jugadores en ligas activas", "players in active leagues")}
           </span>
         ) : null}
 
@@ -203,11 +211,8 @@ export function LeaguesScreenView({
         </div>
       ) : null}
 
-      {!isLoading && standings ? (
+      {!isLoading && !isGlobal && standings ? (
         <>
-          {isGlobal ? (
-            <span className="typo-eyebrow">{t("RANKING GLOBAL", "GLOBAL RANKING")}</span>
-          ) : null}
           <div className="grid gap-1">
             {standings.items.map((entry) => (
               <div
@@ -242,6 +247,19 @@ export function LeaguesScreenView({
         </>
       ) : null}
 
+      {!isLoading && isGlobal && globalStandings && globalStandings.items.length > 0 ? (
+        <>
+          <GlobalStandingsTable standings={globalStandings} />
+          <AdSlotCard
+            description={copyForLocale(
+              locale,
+              "Espacio reservado para patrocinio nativo.",
+              "Reserved slot for native sponsorship."
+            )}
+          />
+        </>
+      ) : null}
+
       {!isLoading && !isGlobal && !standings && selectedLeague ? (
         <Card className="surface-inset" style={{ gap: 8, padding: 16 }}>
           <span className="typo-eyebrow">SIN COMPETENCIA ACTIVA</span>
@@ -251,7 +269,7 @@ export function LeaguesScreenView({
         </Card>
       ) : null}
 
-      {!isLoading && isGlobal && standings && standings.items.length === 0 ? (
+      {!isLoading && isGlobal && globalStandings && globalStandings.items.length === 0 ? (
         <Card className="surface-inset" style={{ gap: 8, padding: 16 }}>
           <span className="typo-eyebrow">{t("SIN RANKING TODAVÍA", "NO RANKING YET")}</span>
           <p className="typo-body m-0 text-text-secondary">
@@ -407,7 +425,7 @@ export function LeaguesScreenView({
         </div>
       ) : null}
 
-      {isGlobal && !standings?.items.length ? (
+      {isGlobal && !globalStandings?.items.length ? (
         <AdSlotCard
           description={copyForLocale(
             locale,
@@ -428,6 +446,7 @@ export function LeaguesScreen() {
   const [items, setItems] = useState<LeagueSummary[]>([]);
   const [points, setPoints] = useState<PointsResponse | null>(null);
   const [standings, setStandings] = useState<LeagueStandingsResponse | null>(null);
+  const [globalStandings, setGlobalStandings] = useState<GlobalStandingsResponse | null>(null);
   /*
    * selectedLeagueId is derived from the URL (single source of truth) so
    * that `router.replace` on chip click drives the re-render. Previously
@@ -471,6 +490,7 @@ export function LeaguesScreen() {
         setItems([]);
         setPoints(null);
         setStandings(null);
+        setGlobalStandings(null);
         setIsLoading(status === "loading");
         return;
       }
@@ -484,6 +504,7 @@ export function LeaguesScreen() {
 
         const isPrivateLeague = selectedLeagueId !== GLOBAL_LEAGUE_ID;
         let standingsResponse: LeagueStandingsResponse | null = null;
+        let globalStandingsResponse: GlobalStandingsResponse | null = null;
         let leagueUnavailable = false;
 
         if (isPrivateLeague) {
@@ -503,13 +524,14 @@ export function LeaguesScreen() {
             }
           }
         } else {
-          standingsResponse = toGlobalStandingsView(await getGlobalStandings(token));
+          globalStandingsResponse = await getGlobalStandings(token);
         }
 
         if (!cancelled) {
           setItems(leaguesResponse.items);
           setPoints(pointsResponse);
           setStandings(standingsResponse);
+          setGlobalStandings(globalStandingsResponse);
           if (leagueUnavailable) {
             router.replace("/leagues");
           }
@@ -656,6 +678,7 @@ export function LeaguesScreen() {
         items={items}
         points={points}
         standings={standings}
+        globalStandings={globalStandings}
         selectedLeagueId={selectedLeagueId}
         mode={mode}
         formState={formState}
