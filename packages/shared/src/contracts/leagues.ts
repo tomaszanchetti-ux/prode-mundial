@@ -79,3 +79,9 @@ export type LeagueStandingsResponse = {
   items: LeagueStandingEntry[];
   myStanding: LeagueStandingSummary | null;
 };
+
+export type GlobalStandingsResponse = {
+  participantsCount: number;
+  items: LeagueStandingEntry[];
+  myStanding: LeagueStandingSummary | null;
+};

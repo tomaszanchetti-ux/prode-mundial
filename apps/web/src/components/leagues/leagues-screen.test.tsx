@@ -170,6 +170,78 @@ test("LeaguesScreenView renders synthetic summary and private league list in Glo
   assert.doesNotMatch(html, /DONDE GANASTE VENTAJA/);
 });
 
+test("LeaguesScreenView renders global standings table when Global tab is selected", () => {
+  const html = renderToStaticMarkup(
+    createElement(LeaguesScreenView, {
+      items: [buildLeague()],
+      points: buildPoints(),
+      standings: {
+        league: {
+          leagueId: GLOBAL_LEAGUE_ID,
+          name: "Global",
+          memberLimit: 3,
+          membersCount: 3
+        },
+        items: [
+          {
+            position: 1,
+            userId: "u_1",
+            displayName: "Ana",
+            totalPoints: 20,
+            exactHits: 2,
+            correctSigns: 6,
+            macroPoints: 0,
+            isMe: false,
+            isOwner: false
+          },
+          {
+            position: 2,
+            userId: "u_2",
+            displayName: "Tomas",
+            totalPoints: 14,
+            exactHits: 1,
+            correctSigns: 5,
+            macroPoints: 2,
+            isMe: true,
+            isOwner: false
+          }
+        ],
+        myStanding: {
+          position: 2,
+          totalPoints: 14,
+          exactHits: 1,
+          correctSigns: 5,
+          macroPoints: 2
+        }
+      },
+      selectedLeagueId: GLOBAL_LEAGUE_ID,
+      mode: null,
+      formState: { leagueName: "", inviteCode: "" },
+      actionError: null,
+      actionMessage: null,
+      lastActionLeague: null,
+      isLoading: false,
+      isSubmitting: false,
+      errorMessage: null,
+      onChangeMode: () => undefined,
+      onFieldChange: () => undefined,
+      onCreateLeague: () => undefined,
+      onJoinLeague: () => undefined,
+      onSelectLeague: () => undefined,
+      onRequestLeaveOrDelete: () => undefined,
+      onDismissActionResult: () => undefined,
+      isOwnerOfSelected: false,
+      onRetry: () => undefined
+    })
+  );
+
+  assert.match(html, /RANKING GLOBAL/);
+  assert.match(html, /#2/);
+  assert.match(html, /3 jugadores en ligas activas/);
+  assert.match(html, /Ana/);
+  assert.match(html, /MIS LIGAS PRIVADAS/);
+});
+
 test("LeaguesScreenView renders standings table when a private league is selected", () => {
   const html = renderToStaticMarkup(
     createElement(LeaguesScreenView, {

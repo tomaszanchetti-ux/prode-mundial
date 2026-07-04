@@ -16,6 +16,14 @@ export class LeaguesRepository {
       .map((snapshot) => snapshot.data() as StoredLeague);
   }
 
+  async listActiveLeagues(): Promise<StoredLeague[]> {
+    const snapshot = await leaguesCollection.where("isActive", "==", true).get();
+
+    return snapshot.docs
+      .map((document) => document.data() as StoredLeague)
+      .filter((league) => !league.archivedAt);
+  }
+
   async getLeagueById(leagueId: string): Promise<StoredLeague | null> {
     const snapshot = await leaguesCollection.doc(leagueId).get();
     return snapshot.exists ? (snapshot.data() as StoredLeague) : null;

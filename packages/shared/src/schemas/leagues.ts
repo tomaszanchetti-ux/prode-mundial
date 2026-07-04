@@ -85,3 +85,9 @@ export const leagueStandingsResponseSchema = z.object({
   items: z.array(leagueStandingEntrySchema),
   myStanding: leagueStandingSummarySchema.nullable()
 });
+
+export const globalStandingsResponseSchema = z.object({
+  participantsCount: z.number().int().nonnegative(),
+  items: z.array(leagueStandingEntrySchema),
+  myStanding: leagueStandingSummarySchema.nullable()
+});

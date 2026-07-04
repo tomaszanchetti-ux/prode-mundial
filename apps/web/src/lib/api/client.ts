@@ -11,6 +11,7 @@ import type {
   CreateLeagueInput,
   JoinLeagueInput,
   LeagueDetail,
+  GlobalStandingsResponse,
   LeagueInvitePreview,
   LeagueStandingsResponse,
   ListMyLeaguesResponse,
@@ -45,6 +46,7 @@ import {
   bestPlayerPickResponseSchema,
   championPickResponseSchema,
   createLeagueInputSchema,
+  globalStandingsResponseSchema,
   joinLeagueInputSchema,
   leagueDetailSchema,
   leagueInvitePreviewSchema,
@@ -448,6 +450,19 @@ export async function deleteLeague(token: string, leagueId: string): Promise<voi
   if (!response.ok) {
     throw await buildApiError(response, `Failed to delete league (${response.status}).`);
   }
+}
+
+export async function getGlobalStandings(token: string): Promise<GlobalStandingsResponse> {
+  const response = await fetch(`${webConfig.apiBaseUrl}/api/v1/standings/global`, {
+    cache: "no-store",
+    headers: withBearer(token)
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, `Failed to load global standings (${response.status}).`);
+  }
+
+  return globalStandingsResponseSchema.parse(await parseJson<GlobalStandingsResponse>(response));
 }
 
 export async function getLeagueStandings(token: string, leagueId: string): Promise<LeagueStandingsResponse> {

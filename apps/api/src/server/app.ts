@@ -6,6 +6,7 @@ import { deleteLeagueController } from "../domains/leagues/controllers/delete-le
 import { deleteLeagueMembershipController } from "../domains/leagues/controllers/delete-league-membership-controller";
 import { getLeagueDetailController } from "../domains/leagues/controllers/get-league-detail-controller";
 import { getLeagueInvitePreviewController } from "../domains/leagues/controllers/get-league-invite-preview-controller";
+import { getGlobalStandingsController } from "../domains/leagues/controllers/get-global-standings-controller";
 import { getLeagueStandingsController } from "../domains/leagues/controllers/get-league-standings-controller";
 import { getLeaguesController } from "../domains/leagues/controllers/get-leagues-controller";
 import { postJoinLeagueController } from "../domains/leagues/controllers/post-join-league-controller";
@@ -104,6 +105,7 @@ export function createApp() {
   app.get("/api/v1/leagues", requireAuth, getLeaguesController);
   app.post("/api/v1/leagues", requireAuth, postLeaguesController);
   app.post("/api/v1/leagues/join", requireAuth, postJoinLeagueController);
+  app.get("/api/v1/standings/global", requireAuth, getGlobalStandingsController);
   app.get("/api/v1/leagues/:leagueId", requireAuth, getLeagueDetailController);
   app.get("/api/v1/leagues/:leagueId/standings", requireAuth, getLeagueStandingsController);
   app.delete("/api/v1/leagues/:leagueId", requireAuth, deleteLeagueController);
