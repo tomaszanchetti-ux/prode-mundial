@@ -57,6 +57,7 @@ export async function runMatchSync(
 
     const score90 = resolveScore90(external);
     const winnerTeamId = resolveWinnerTeamId(internal, external, mappedStatus);
+    const winnerChanged = winnerTeamId !== internal.winnerTeamId;
 
     if (hasUpdate) {
       await matchSyncMatchesRepository.updateMatch(internal.matchId, {
@@ -65,6 +66,17 @@ export async function runMatchSync(
         awayScore90: score90.away,
         winnerTeamId,
         isLocked: true,
+        sourceProvider: "football-data.org",
+        sourceLastSyncedAt: nowIso,
+        updatedAt: nowIso
+      });
+
+      result.matchesUpdated++;
+    } else if (mappedStatus === "finished" && winnerChanged) {
+      // Safety net: winner-only correction when needsUpdate and decideSyncAction
+      // diverged (should be rare once needsUpdate covers winnerTeamId).
+      await matchSyncMatchesRepository.updateMatch(internal.matchId, {
+        winnerTeamId,
         sourceProvider: "football-data.org",
         sourceLastSyncedAt: nowIso,
         updatedAt: nowIso

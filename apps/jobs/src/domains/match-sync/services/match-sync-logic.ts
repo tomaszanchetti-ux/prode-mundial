@@ -33,6 +33,14 @@ export function needsUpdate(internal: SyncStoredMatch, external: FootballDataMat
   if (score90.home !== null && score90.home !== internal.homeScore90) return true;
   if (score90.away !== null && score90.away !== internal.awayScore90) return true;
 
+  // Knock-out empates: football-data puede publicar primero el 1-1 a los 90' y
+  // recién después score.winner (penales). Sin esto el sync no persiste
+  // winnerTeamId y la ronda R32 nunca cierra para hidratar 8vos.
+  if (newStatus === "finished") {
+    const nextWinner = resolveWinnerTeamId(internal, external, newStatus);
+    if (nextWinner !== internal.winnerTeamId) return true;
+  }
+
   return false;
 }
 

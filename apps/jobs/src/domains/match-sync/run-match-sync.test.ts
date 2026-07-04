@@ -204,7 +204,12 @@ test("needsUpdate: true when scores change", () => {
 });
 
 test("needsUpdate: false when nothing changed", () => {
-  const internal = buildInternalMatch({ status: "finished", homeScore90: 2, awayScore90: 1 });
+  const internal = buildInternalMatch({
+    status: "finished",
+    homeScore90: 2,
+    awayScore90: 1,
+    winnerTeamId: "ARG"
+  });
   const external = buildExternalMatch({
     status: "FINISHED",
     score: { winner: "HOME_TEAM", fullTime: { home: 2, away: 1 }, halfTime: { home: 1, away: 0 } }
@@ -220,12 +225,40 @@ test("needsUpdate: false for unhandled external status", () => {
   assert.equal(needsUpdate(internal, external), false);
 });
 
-test("needsUpdate: compara contra el 90' (regularTime), no contra fullTime con prórroga", () => {
-  // El match interno ya tiene el 1-1 de los 90' guardado; el fullTime 2-1
-  // de la prórroga no debe gatillar otro update.
-  const internal = buildInternalMatch({ status: "finished", homeScore90: 1, awayScore90: 1 });
+test("needsUpdate: true when penalty winner arrives with unchanged 90' score", () => {
+  const internal = buildInternalMatch({
+    status: "finished",
+    homeScore90: 1,
+    awayScore90: 1,
+    winnerTeamId: null
+  });
   const external = buildExternalMatch({
     status: "FINISHED",
+    score: {
+      winner: "HOME_TEAM",
+      duration: "PENALTY_SHOOTOUT",
+      fullTime: { home: 5, away: 4 },
+      halfTime: { home: 1, away: 0 },
+      regularTime: { home: 1, away: 1 },
+      extraTime: { home: 0, away: 0 },
+      penalties: { home: 4, away: 3 }
+    }
+  });
+
+  assert.equal(needsUpdate(internal, external), true);
+});
+
+test("needsUpdate: false when 90' and winner already match (extra time in feed)", () => {
+  const internal = buildInternalMatch({
+    status: "finished",
+    homeScore90: 1,
+    awayScore90: 1,
+    winnerTeamId: "ARG"
+  });
+  const external = buildExternalMatch({
+    status: "FINISHED",
+    homeTeam: { id: 762, name: "Argentina", shortName: "Argentina", tla: "ARG" },
+    awayTeam: { id: 764, name: "Brazil", shortName: "Brazil", tla: "BRA" },
     score: {
       winner: "HOME_TEAM",
       duration: "EXTRA_TIME",
@@ -237,6 +270,35 @@ test("needsUpdate: compara contra el 90' (regularTime), no contra fullTime con p
   });
 
   assert.equal(needsUpdate(internal, external), false);
+});
+
+test("decideSyncAction: already scored + penalty winner arrives → rescore", () => {
+  const internal = buildInternalMatch({
+    status: "finished",
+    isScored: true,
+    homeScore90: 1,
+    awayScore90: 1,
+    winnerTeamId: null,
+    sourceProvider: "football-data.org"
+  });
+  const external = buildExternalMatch({
+    status: "FINISHED",
+    score: {
+      winner: "AWAY_TEAM",
+      duration: "PENALTY_SHOOTOUT",
+      fullTime: { home: 4, away: 5 },
+      halfTime: { home: 1, away: 1 },
+      regularTime: { home: 1, away: 1 },
+      extraTime: { home: 0, away: 0 },
+      penalties: { home: 3, away: 4 }
+    }
+  });
+
+  assert.deepEqual(decideSyncAction(internal, external), {
+    action: "process",
+    rescore: true,
+    hasUpdate: true
+  });
 });
 
 // ─── decideSyncAction ───────────────────────────────────────────────
@@ -284,6 +346,7 @@ test("decideSyncAction: ya puntuado y el feed no cambió → skip (sin re-trabaj
     isScored: true,
     homeScore90: 2,
     awayScore90: 1,
+    winnerTeamId: "ARG",
     sourceProvider: "football-data.org"
   });
   const external = buildExternalMatch(); // FINISHED 2-1, igual a lo guardado
@@ -325,7 +388,13 @@ test("decideSyncAction: sin puntuar + el feed cambió → process normal (rescor
 });
 
 test("decideSyncAction: finished sin puntuar y sin cambios → retry de scoring (process, rescore false)", () => {
-  const internal = buildInternalMatch({ status: "finished", isScored: false, homeScore90: 2, awayScore90: 1 });
+  const internal = buildInternalMatch({
+    status: "finished",
+    isScored: false,
+    homeScore90: 2,
+    awayScore90: 1,
+    winnerTeamId: "ARG"
+  });
   const external = buildExternalMatch(); // FINISHED 2-1, mismo score
 
   assert.deepEqual(decideSyncAction(internal, external), {
