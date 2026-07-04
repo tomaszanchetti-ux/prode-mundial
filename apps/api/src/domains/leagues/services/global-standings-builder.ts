@@ -1,6 +1,6 @@
-import type { LeagueStandingEntry, UserPointsSummary } from "@prode/shared";
+import type { GlobalStandingEntry, UserPointsSummary } from "@prode/shared";
 
-type GlobalStandingProfile = { userId: string; displayName: string } & Partial<UserPointsSummary>;
+type GlobalStandingProfile = { userId: string; displayName: string; leagueNames: string[] } & Partial<UserPointsSummary>;
 
 function buildPointsSummary(input?: Partial<UserPointsSummary>): UserPointsSummary {
   return {
@@ -34,10 +34,29 @@ function compareProfiles(left: GlobalStandingProfile, right: GlobalStandingProfi
   return left.displayName.localeCompare(right.displayName);
 }
 
+export function collectUserLeagueNames(
+  activeLeagues: Array<{ leagueId: string; name: string }>,
+  membershipLists: Array<Array<{ userId: string }>>
+): Map<string, string[]> {
+  const userLeagueNames = new Map<string, Set<string>>();
+
+  activeLeagues.forEach((league, index) => {
+    for (const membership of membershipLists[index] ?? []) {
+      const names = userLeagueNames.get(membership.userId) ?? new Set<string>();
+      names.add(league.name);
+      userLeagueNames.set(membership.userId, names);
+    }
+  });
+
+  return new Map(
+    [...userLeagueNames.entries()].map(([userId, names]) => [userId, [...names].sort((a, b) => a.localeCompare(b))])
+  );
+}
+
 export function buildGlobalStandingRows(
   profiles: GlobalStandingProfile[],
   requestingUserId: string
-): LeagueStandingEntry[] {
+): GlobalStandingEntry[] {
   return [...profiles]
     .sort(compareProfiles)
     .map((profile, index) => {
@@ -47,6 +66,7 @@ export function buildGlobalStandingRows(
         position: index + 1,
         userId: profile.userId,
         displayName: profile.displayName,
+        leagueNames: profile.leagueNames,
         totalPoints: summary.totalPoints,
         macroPoints: summary.macroPoints,
         exactHits: summary.exactHits,

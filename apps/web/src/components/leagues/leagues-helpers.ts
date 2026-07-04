@@ -1,4 +1,4 @@
-import type { GlobalStandingsResponse, LeagueStandingEntry, LeagueStandingsResponse, PointsResponse } from "@prode/shared";
+import type { GlobalStandingEntry, GlobalStandingsResponse, LeagueStandingEntry, LeagueStandingsResponse, PointsResponse } from "@prode/shared";
 import { copyForLocale, type AppLocale } from "@/lib/i18n/locale-provider";
 
 export const GLOBAL_LEAGUE_ID = "__global__";
@@ -19,7 +19,11 @@ export type SyntheticSummary = {
   hasStanding: boolean;
 };
 
-export function toGlobalStandingsView(global: GlobalStandingsResponse): LeagueStandingsResponse {
+export function toGlobalStandingsView(global: GlobalStandingsResponse | null): LeagueStandingsResponse | null {
+  if (!global) {
+    return null;
+  }
+
   return {
     league: {
       leagueId: GLOBAL_LEAGUE_ID,
@@ -30,6 +34,20 @@ export function toGlobalStandingsView(global: GlobalStandingsResponse): LeagueSt
     items: global.items,
     myStanding: global.myStanding
   };
+}
+
+export function formatGlobalLeagueNames(leagueNames: string[]) {
+  return leagueNames.join(" · ");
+}
+
+export function filterGlobalStandingsByName(items: GlobalStandingEntry[], query: string) {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (!normalizedQuery) {
+    return items;
+  }
+
+  return items.filter((entry) => entry.displayName.toLowerCase().includes(normalizedQuery));
 }
 
 export function buildSyntheticSummary(
