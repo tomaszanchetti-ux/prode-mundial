@@ -1,4 +1,4 @@
-import type { LeagueStandingEntry, LeagueStandingsResponse, PointsResponse } from "@prode/shared";
+import type { GlobalStandingsResponse, LeagueStandingEntry, LeagueStandingsResponse, PointsResponse } from "@prode/shared";
 import { copyForLocale, type AppLocale } from "@/lib/i18n/locale-provider";
 
 export const GLOBAL_LEAGUE_ID = "__global__";
@@ -19,22 +19,46 @@ export type SyntheticSummary = {
   hasStanding: boolean;
 };
 
+export function toGlobalStandingsView(global: GlobalStandingsResponse): LeagueStandingsResponse {
+  return {
+    league: {
+      leagueId: GLOBAL_LEAGUE_ID,
+      name: GLOBAL_LEAGUE_NAME,
+      memberLimit: Math.max(global.participantsCount, 1),
+      membersCount: global.participantsCount
+    },
+    items: global.items,
+    myStanding: global.myStanding
+  };
+}
+
 export function buildSyntheticSummary(
   points: PointsResponse | null,
   standings: LeagueStandingsResponse | null,
   isGlobal: boolean,
   locale: AppLocale
 ): SyntheticSummary {
+  const myStanding = standings?.myStanding;
+
   if (isGlobal) {
+    if (!myStanding) {
+      return {
+        positionLabel: copyForLocale(locale, "Sin puesto", "No rank"),
+        pointsLabel: `${points?.totalPoints ?? 0} pts`,
+        gapLabel: null,
+        hasStanding: false
+      };
+    }
+
+    const gapLabel = buildGapLabel(standings, myStanding.position, locale);
+
     return {
-      positionLabel: "Global",
-      pointsLabel: `${points?.totalPoints ?? 0} pts`,
-      gapLabel: null,
-      hasStanding: false
+      positionLabel: `#${myStanding.position}`,
+      pointsLabel: `${myStanding.totalPoints} pts`,
+      gapLabel,
+      hasStanding: true
     };
   }
-
-  const myStanding = standings?.myStanding;
 
   if (!myStanding) {
     return {

@@ -13,6 +13,7 @@ import {
   ApiClientError,
   createLeague,
   deleteLeague,
+  getGlobalStandings,
   getLeagueStandings,
   getMyLeagues,
   getPoints,
@@ -26,6 +27,7 @@ import {
   GLOBAL_LEAGUE_ID,
   GLOBAL_LEAGUE_NAME,
   buildSyntheticSummary,
+  toGlobalStandingsView,
   toPositionColor,
   toStandingRowClass,
   type LeagueOption
@@ -138,7 +140,7 @@ export function LeaguesScreenView({
           <div className="min-w-0 flex-1">
             <MiScoreSection points={points} compact />
           </div>
-          {!isGlobal && summary.hasStanding ? (
+          {summary.hasStanding ? (
             <div className="grid gap-0.5 text-right shrink-0">
               <span className="text-[28px] leading-none font-black text-primary-600 tabular-nums">
                 {summary.positionLabel}
@@ -151,6 +153,12 @@ export function LeaguesScreenView({
             </div>
           ) : null}
         </div>
+
+        {isGlobal && standings ? (
+          <span className="typo-meta">
+            {standings.league.membersCount} {t("jugadores en ligas activas", "players in active leagues")}
+          </span>
+        ) : null}
 
         {!isGlobal && selectedLeague ? (
           <span className="typo-meta">
@@ -195,8 +203,11 @@ export function LeaguesScreenView({
         </div>
       ) : null}
 
-      {!isLoading && !isGlobal && standings ? (
+      {!isLoading && standings ? (
         <>
+          {isGlobal ? (
+            <span className="typo-eyebrow">{t("RANKING GLOBAL", "GLOBAL RANKING")}</span>
+          ) : null}
           <div className="grid gap-1">
             {standings.items.map((entry) => (
               <div
@@ -236,6 +247,18 @@ export function LeaguesScreenView({
           <span className="typo-eyebrow">SIN COMPETENCIA ACTIVA</span>
           <p className="typo-body m-0 text-text-secondary">
             Cuando la liga tenga predicciones puntuadas vas a ver la tabla aqui.
+          </p>
+        </Card>
+      ) : null}
+
+      {!isLoading && isGlobal && standings && standings.items.length === 0 ? (
+        <Card className="surface-inset" style={{ gap: 8, padding: 16 }}>
+          <span className="typo-eyebrow">{t("SIN RANKING TODAVÍA", "NO RANKING YET")}</span>
+          <p className="typo-body m-0 text-text-secondary">
+            {t(
+              "Cuando haya jugadores en ligas activas vas a ver el ranking global acá.",
+              "When there are players in active leagues you'll see the global ranking here."
+            )}
           </p>
         </Card>
       ) : null}
@@ -384,7 +407,7 @@ export function LeaguesScreenView({
         </div>
       ) : null}
 
-      {isGlobal ? (
+      {isGlobal && !standings?.items.length ? (
         <AdSlotCard
           description={copyForLocale(
             locale,
@@ -479,6 +502,8 @@ export function LeaguesScreen() {
               throw standingsError;
             }
           }
+        } else {
+          standingsResponse = toGlobalStandingsView(await getGlobalStandings(token));
         }
 
         if (!cancelled) {
