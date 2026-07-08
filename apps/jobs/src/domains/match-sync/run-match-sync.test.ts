@@ -468,6 +468,60 @@ test("resolveWinnerTeamId: draw with penalty winner (AWAY_TEAM, shape real v4)",
   assert.equal(resolveWinnerTeamId(internal, external, "finished"), "BRA");
 });
 
+test("resolveWinnerTeamId: knockout FINISHED con score.winner=null → ganador por fullTime agregado (bug COL-SUI)", () => {
+  // Caso real football-data.org: SUI vs COL en octavos, penales. La fuente
+  // publicó el partido FINISHED pero con winner=null y penalties a medio
+  // actualizar (3-3). El desempate real vive en fullTime (4-3 = SUI gana).
+  const internal = buildInternalMatch({ stage: "R16", homeTeamId: "SUI", awayTeamId: "COL" });
+  const external = buildExternalMatch({
+    score: {
+      winner: null,
+      duration: "PENALTY_SHOOTOUT",
+      fullTime: { home: 4, away: 3 },
+      halfTime: { home: 0, away: 0 },
+      regularTime: { home: 0, away: 0 },
+      extraTime: { home: 0, away: 0 },
+      penalties: { home: 3, away: 3 }
+    }
+  });
+
+  assert.equal(resolveWinnerTeamId(internal, external, "finished"), "SUI");
+});
+
+test("resolveWinnerTeamId: knockout winner=null, fullTime empatado → desempata por penales", () => {
+  const internal = buildInternalMatch({ stage: "QF", homeTeamId: "ARG", awayTeamId: "BRA" });
+  const external = buildExternalMatch({
+    score: {
+      winner: null,
+      duration: "PENALTY_SHOOTOUT",
+      fullTime: { home: 1, away: 1 },
+      halfTime: { home: 0, away: 0 },
+      regularTime: { home: 1, away: 1 },
+      extraTime: { home: 0, away: 0 },
+      penalties: { home: 5, away: 4 }
+    }
+  });
+
+  assert.equal(resolveWinnerTeamId(internal, external, "finished"), "ARG");
+});
+
+test("resolveWinnerTeamId: knockout con dato del todo incompleto (todo empatado) → null", () => {
+  const internal = buildInternalMatch({ stage: "R16", homeTeamId: "ARG", awayTeamId: "BRA" });
+  const external = buildExternalMatch({
+    score: {
+      winner: null,
+      duration: "PENALTY_SHOOTOUT",
+      fullTime: { home: 1, away: 1 },
+      halfTime: { home: 0, away: 0 },
+      regularTime: { home: 1, away: 1 },
+      extraTime: { home: 0, away: 0 },
+      penalties: { home: 3, away: 3 }
+    }
+  });
+
+  assert.equal(resolveWinnerTeamId(internal, external, "finished"), null);
+});
+
 test("resolveWinnerTeamId: prórroga sin penales → ganador por score.winner, no por fullTime", () => {
   // 1-1 a los 90', 2-1 tras prórroga: el winnerTeamId sale de score.winner
   // porque el marcador de 90' (regularTime) quedó empatado.

@@ -93,23 +93,58 @@ export function decideSyncAction(
   return { action: "process", rescore: false, hasUpdate };
 }
 
+/**
+ * Marcador que desempata un cruce resuelto fuera de los 90' (prórroga/penales).
+ * football-data.org acumula ese desempate en `fullTime` (reg + prórroga +
+ * penales). A veces publica el partido FINISHED con `score.winner` todavía en
+ * null y el sub-objeto `penalties` a medio actualizar, pero el agregado final
+ * ya rompe el empate — probamos fullTime primero, luego penales/prórroga.
+ */
+function resolveKnockoutDecider(
+  score: FootballDataMatch["score"]
+): { home: number; away: number } | null {
+  for (const side of [score.fullTime, score.penalties, score.extraTime]) {
+    if (side && side.home !== null && side.away !== null && side.home !== side.away) {
+      return { home: side.home, away: side.away };
+    }
+  }
+
+  return null;
+}
+
 export function resolveWinnerTeamId(
   internal: SyncStoredMatch,
   external: FootballDataMatch,
   newStatus: string
 ): string | null {
-  const { home: extHome, away: extAway } = resolveScore90(external);
-
-  if (newStatus !== "finished" || extHome === null || extAway === null) {
+  if (newStatus !== "finished") {
     return internal.winnerTeamId;
   }
 
-  if (extHome > extAway) return internal.homeTeamId;
-  if (extAway > extHome) return internal.awayTeamId;
+  const { score } = external;
 
-  // Empate en 90 min — football-data.org indica ganador por prórroga/penales en score.winner
-  if (external.score.winner === "HOME_TEAM") return internal.homeTeamId;
-  if (external.score.winner === "AWAY_TEAM") return internal.awayTeamId;
+  // 1) Ganador explícito de la fuente: lo más confiable cuando está poblado.
+  if (score.winner === "HOME_TEAM") return internal.homeTeamId;
+  if (score.winner === "AWAY_TEAM") return internal.awayTeamId;
 
+  // 2) Ganador por marcador de los 90'.
+  const { home: extHome, away: extAway } = resolveScore90(external);
+  if (extHome !== null && extAway !== null) {
+    if (extHome > extAway) return internal.homeTeamId;
+    if (extAway > extHome) return internal.awayTeamId;
+  }
+
+  // 3) Empatados a los 90' en un cruce eliminatorio: hubo prórroga/penales.
+  //    football-data suele publicar el partido FINISHED con score.winner en null
+  //    (dato provisional), pero el desempate ya vive en el marcador agregado.
+  //    Sin esto el octavo nunca cierra y la ronda de cuartos no se hidrata.
+  if (internal.stage !== "group") {
+    const decider = resolveKnockoutDecider(score);
+    if (decider) {
+      return decider.home > decider.away ? internal.homeTeamId : internal.awayTeamId;
+    }
+  }
+
+  // 4) Empate real de fase de grupos, o dato aún incompleto → sin ganador.
   return null;
 }
