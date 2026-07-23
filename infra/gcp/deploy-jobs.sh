@@ -19,6 +19,9 @@ AR_REPO="${AR_REPO:-prode}"
 IMAGE_NAME="${IMAGE_NAME:-prode-jobs}"
 IMAGE_TAG="${IMAGE_TAG:-$(date +%Y%m%d-%H%M%S)}"
 IMAGE_URI="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+# Requerido por los jobs score-macro / rebuild-macro (scoring de picks macro).
+# Sin esta var el job aborta con "Missing required environment variable: TOURNAMENT_ID".
+TOURNAMENT_ID="${TOURNAMENT_ID:-wc2026}"
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
@@ -33,6 +36,7 @@ JOBS=(
 
 echo "📦 Proyecto: $PROJECT_ID"
 echo "🏷️  Imagen:   $IMAGE_URI"
+echo "🏆 Torneo:   $TOURNAMENT_ID"
 echo ""
 
 # 1. Build con Cloud Build.
@@ -70,7 +74,7 @@ for job in "${JOBS[@]}"; do
       --project="$PROJECT_ID" \
       --region="$REGION" \
       --image="$IMAGE_URI" \
-      --set-env-vars="NODE_ENV=production,JOB_NAME=${job}" \
+      --set-env-vars="NODE_ENV=production,JOB_NAME=${job},TOURNAMENT_ID=${TOURNAMENT_ID}" \
       --set-secrets="FIREBASE_PROJECT_ID=FIREBASE_PROJECT_ID:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest,FOOTBALL_DATA_API_KEY=FOOTBALL_DATA_API_KEY:latest,PRODE_ADMIN_EMAILS=PRODE_ADMIN_EMAILS:latest" \
       --cpu=1 \
       --memory=512Mi \
@@ -83,7 +87,7 @@ for job in "${JOBS[@]}"; do
       --project="$PROJECT_ID" \
       --region="$REGION" \
       --image="$IMAGE_URI" \
-      --set-env-vars="NODE_ENV=production,JOB_NAME=${job}" \
+      --set-env-vars="NODE_ENV=production,JOB_NAME=${job},TOURNAMENT_ID=${TOURNAMENT_ID}" \
       --set-secrets="FIREBASE_PROJECT_ID=FIREBASE_PROJECT_ID:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest,FOOTBALL_DATA_API_KEY=FOOTBALL_DATA_API_KEY:latest,PRODE_ADMIN_EMAILS=PRODE_ADMIN_EMAILS:latest" \
       --cpu=1 \
       --memory=512Mi \
